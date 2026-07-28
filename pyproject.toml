@@ -1,82 +1,29 @@
 [build-system]
-requires = ["hatchling", "uv-dynamic-versioning"]
+requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "synergy_schema"
-description = "Shared POLARIS / BEAM CORE schemas for the Synergy project"
-authors = [
-  {name = "Zach Needell", email = "zaneedell@lbl.gov"},
-]
-license = "MIT"
-license-files = ["https://raw.githubusercontent.com/LBNL-UCB-STI/PILATES/refs/heads/main/LICENSE"]
+name = "synergy-schema"
+version = "0.0.0"
+description = "Federated LinkML semantic contracts for Synergy workflows"
 readme = "README.md"
 requires-python = ">=3.10"
-dynamic = ["version"]
-
-dependencies = [
-  "linkml-runtime >=1.9.4",
-]
+dependencies = ["linkml-runtime>=1.9.4,<2"]
 
 [dependency-groups]
 dev = [
-    "linkml>=1.9.3",
-    "mkdocs-material>=8.2.8",
-    "mkdocs-mermaid2-plugin>=1.1.1",
-    "mkdocs-pymdownx-material-extras>=2.5.6",
-    "jupyter>=1.0.0",
-    "mknotebooks>= 0.8.0",
+  "linkml>=1.9.4,<2",
+  "pytest>=8,<9",
 ]
 
-# See https://hatch.pypa.io/latest/config/build/#file-selection for how to
-# explicitly include files other than default into the build distributions.
+[tool.hatch.build]
+include = [
+  "src/synergy_schema/**/*.py",
+  "src/synergy_schema/schema/**/*.yaml",
+]
 
-[tool.hatch.version]
-source = "uv-dynamic-versioning"
+[tool.hatch.build.targets.wheel]
+packages = ["src/synergy_schema"]
 
-# Ref.: https://github.com/ninoseki/uv-dynamic-versioning/
-[tool.uv-dynamic-versioning]
-vcs = "git"
-style = "pep440"
-fallback-version = "0.0.0"
-
-# Ref.: https://docs.pytest.org/en/stable/reference/reference.html#configuration-options
 [tool.pytest.ini_options]
 testpaths = ["tests"]
-
-# https://docs.astral.sh/ruff/configuration/
-[tool.ruff]
-exclude = [
-    "src/synergy_schema/_version.py",
-]
-# Set oldest supported Python version
-target-version = "py310"
-
-# Ref.: https://github.com/codespell-project/codespell
-[tool.codespell]
-skip = [
-  "LICENSE",
-  "pyproject.toml",
-  "uv.lock",
-  "project/*",
-  "src/synergy_schema/datamodel/synergy_schema_pydantic.py",
-  "src/synergy_schema/datamodel/synergy_schema.py",
-]
-
-# Reminder: words have to be lowercased for the ignore-words-list
-ignore-words-list = "linke"
-quiet-level = 3
-
-# Ref.: https://github.com/crate-ci/typos (spell checker)
-[tool.typos.default.extend-words]
-linke = "linke"
-
-[tool.typos.files]
-extend-exclude = [
-  "LICENSE",
-  "uv.lock",
-  "pyproject.toml",
-  "project/*",
-  "src/synergy_schema/datamodel/synergy_schema_pydantic.py",
-  "src/synergy_schema/datamodel/synergy_schema.py",
-]

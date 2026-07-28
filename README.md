@@ -1,34 +1,84 @@
-<a href="https://github.com/linkml/linkml-project-copier"><img src="https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/copier-org/copier/master/img/badge/badge-grayscale-inverted-border-teal.json" alt="Copier Badge" style="max-width:100%;"/></a>
+# Synergy Schema
 
-# synergy-schema
+This repository is the shared home for descriptions of the data used by
+Synergy transportation models. It gives us one place to explain what each
+dataset means, how different models represent it, and what PILATES expects at
+the boundaries between models.
 
-Shared POLARIS / BEAM CORE schemas for the Synergy project
+The schemas are written in [LinkML](https://linkml.io/). LinkML lets us describe
+data in readable YAML and later use those descriptions to generate
+documentation and validation tools.
 
-## Documentation Website
+## How the repository is organized
 
-[https://LBNL-UCB-STI.github.io/synergy-schema](https://LBNL-UCB-STI.github.io/synergy-schema)
+The schema is split into a few areas so that shared ideas do not get mixed up
+with model-specific details:
 
-## Repository Structure
+- [`schema/core/`](src/synergy_schema/schema/core/) is for concepts that have
+  the same meaning across multiple models.
+- [`schema/models/`](src/synergy_schema/schema/models/) is for descriptions
+  owned by individual modeling systems, such as ActivitySim, ATLAS, BEAM,
+  POLARIS, and UrbanSim.
+- [`schema/profiles/`](src/synergy_schema/schema/profiles/) describes the
+  collections of data a real workflow uses. PILATES will be the first workflow
+  supported here.
+- [`schema/mappings/`](src/synergy_schema/schema/mappings/) explains how fields
+  and concepts relate across the other areas.
 
-* [docs/](docs/) - mkdocs-managed documentation
-  * [elements/](docs/elements/) - generated schema documentation
-* [examples/](examples/) - Examples of using the schema
-* [project/](project/) - project files (these files are auto-generated, do not edit)
-* [src/](src/) - source files (edit these)
-  * [synergy_schema](src/synergy_schema)
-    * [schema/](src/synergy_schema/schema) -- LinkML schema
-      (edit this)
-    * [datamodel/](src/synergy_schema/datamodel) -- generated
-      Python datamodel
-* [tests/](tests/) - Python tests
-  * [data/](tests/data) - Example data
+In this repository, a *profile* is simply a named collection of schema pieces
+used for a particular purpose. A *mapping* records a relationship such as a
+renamed field, a unit conversion, or a value derived from other fields.
 
-## Developer Tools
+Keeping these areas separate means a model team can describe its own data
+without having to adopt LinkML in its runtime. It also helps us avoid copying
+the same definition into several places.
 
-There are several pre-defined command-recipes available.
-They are written for the command runner [just](https://github.com/casey/just/).
-To list all pre-defined commands, run `just` or `just --list`.
+## Current status
 
-## Credits
+The repository currently contains only the project structure and an empty root
+schema. The first domain definitions, model descriptions, mappings, and
+PILATES validation rules have not been added yet.
 
-This project uses the template [linkml-project-copier](https://github.com/linkml/linkml-project-copier).
+## Getting started
+
+The project uses [uv](https://docs.astral.sh/uv/) to manage Python and its
+dependencies. From the repository root, install the development environment:
+
+```sh
+uv sync --group dev
+```
+
+Check that the LinkML schema is valid:
+
+```sh
+uv run linkml-lint src/synergy_schema/schema/synergy_schema.yaml
+```
+
+Run the tests:
+
+```sh
+uv run pytest -q
+```
+
+Build the Python package and confirm that it includes the root schema:
+
+```sh
+uv build
+unzip -l dist/synergy_schema-*.whl | rg 'synergy_schema/schema/synergy_schema.yaml'
+```
+
+## Contributing a schema
+
+Start by deciding who owns the definition:
+
+1. Put a model's native fields and codes under `schema/models/`.
+2. Move a concept into `schema/core/` only when it has the same agreed meaning
+   across multiple models.
+3. Use `schema/profiles/` to describe what PILATES or another workflow actually
+   requires.
+4. Use `schema/mappings/` to explain how two existing definitions relate
+   instead of copying either definition.
+
+It is fine to begin with questions or incomplete details about meaning. Mark
+what is not yet known clearly so it can be reviewed with the people who own the
+data.
