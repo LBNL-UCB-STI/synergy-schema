@@ -18,7 +18,7 @@ imports:
 
 enums:
   DigestAlgorithm:
-    description: Algorithm used to create an immutable artifact byte identity.
+    description: Algorithm used to calculate a declared digest.
     permissible_values:
       sha256:
         description: SHA-256 digest of an artifact's bytes.
@@ -82,7 +82,11 @@ classes:
         description: Schema language, such as LinkML or JSON Schema.
       schema_digest:
         required: true
-        description: Digest of the selected schema contract source.
+        description: Digest of the selected schema contract source using schema_digest_algorithm.
+      schema_digest_algorithm:
+        range: DigestAlgorithm
+        required: true
+        description: Algorithm used to calculate schema_digest.
       selected_root:
         required: true
         description: Root class, type, or document selected from that contract.

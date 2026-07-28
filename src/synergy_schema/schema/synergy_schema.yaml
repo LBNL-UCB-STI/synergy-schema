@@ -16,4 +16,5 @@ imports:
   - linkml:types
   - core/population_snapshot
   - core/handoff_bundle
+  - models/atlas/atlas_population
   - profiles/pilates_population

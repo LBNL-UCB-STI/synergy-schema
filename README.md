@@ -35,10 +35,11 @@ the same definition into several places.
 
 ## Current status
 
-The first vertical slice defines population-snapshot context and a
-provider-neutral handoff bundle, then composes them into a PILATES yearly
-population profile. Native model row definitions, mappings, and broader
-validation rules are intentionally still to come.
+The first two vertical slices define population-snapshot context and a
+provider-neutral handoff bundle, then compose them into a PILATES yearly
+population profile. The profile now binds its three population artifacts to
+ATLAS-owned household/person input and vehicle-output record contracts. Native
+code vocabularies, mappings, and broader cross-table validation remain to come.
 
 ## Getting started
 

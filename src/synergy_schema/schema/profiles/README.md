@@ -14,5 +14,6 @@ them.
 
 The first workflow profile is `pilates_population.yaml`. It composes a
 post-ATLAS yearly `PopulationSnapshotBundle` from a population snapshot and
-households, persons, and vehicles artifact members; native row definitions
-remain model-owned and out of this profile.
+households, persons, and vehicles artifact members, then documents each role's
+ATLAS-owned native contract root. The native row definitions remain in
+`../models/atlas/`; this profile does not copy their fields.

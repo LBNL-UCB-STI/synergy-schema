@@ -17,6 +17,7 @@ imports:
   - linkml:types
   - ../core/population_snapshot
   - ../core/handoff_bundle
+  - ../models/atlas/atlas_population
 
 enums:
   PopulationMemberRole:
@@ -26,16 +27,23 @@ enums:
       values, but does not prove role uniqueness across members.
     permissible_values:
       households:
-        description: Household artifact for the population snapshot.
+        description: Household artifact using the ATLAS-owned AtlasHouseholdInput contract root.
       persons:
-        description: Person artifact for the population snapshot.
+        description: Person artifact using the ATLAS-owned AtlasPersonInput contract root.
       vehicles:
-        description: Vehicle artifact for the population snapshot.
+        description: Vehicle artifact using the ATLAS-owned AtlasVehicleOutput contract root.
 
 classes:
   PopulationSnapshotBundleMember:
-    description: A population-table member with one of the profile's allowed roles.
+    description: >-
+      A population-table member with one of the profile's allowed roles. The
+      role-to-contract-root binding is documented here; standard LinkML row
+      validation does not enforce that conditional pairing across members.
     is_a: HandoffBundleMember
+    annotations:
+      contract_root_by_role: >-
+        households=AtlasHouseholdInput; persons=AtlasPersonInput;
+        vehicles=AtlasVehicleOutput
     slot_usage:
       semantic_role:
         range: PopulationMemberRole

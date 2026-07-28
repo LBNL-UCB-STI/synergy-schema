@@ -21,7 +21,8 @@ members:
     schema_contract:
       language: linkml
       schema_digest: bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
-      selected_root: AtlasHousehold
+      schema_digest_algorithm: sha256
+      selected_root: AtlasHouseholdInput
       schema_version: "0.1"
     row_count: 120
     observed_columns:
@@ -34,6 +35,12 @@ members:
         content_digest: cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
       locator: years/2025/persons.parquet
       media_type: application/vnd.apache.parquet
+    schema_contract:
+      language: linkml
+      schema_digest: eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
+      schema_digest_algorithm: sha256
+      selected_root: AtlasPersonInput
+      schema_version: "0.1"
     row_count: 280
     observed_columns:
       - person_id
@@ -45,6 +52,12 @@ members:
         content_digest: dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd
       locator: years/2025/vehicles.parquet
       media_type: application/vnd.apache.parquet
+    schema_contract:
+      language: linkml
+      schema_digest: ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
+      schema_digest_algorithm: sha256
+      selected_root: AtlasVehicleOutput
+      schema_version: "0.1"
     row_count: 95
     observed_columns:
       - vehicle_id
