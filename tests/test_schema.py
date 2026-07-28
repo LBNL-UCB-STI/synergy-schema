@@ -20,6 +20,9 @@ FIXTURE_PATH = Path(__file__).parent / "fixtures" / "population_snapshot_bundle.
 ATLAS_RECORDS_FIXTURE_PATH = (
     Path(__file__).parent / "fixtures" / "atlas_population_records.yaml"
 )
+CORE_POPULATION_STATES_FIXTURE_PATH = (
+    Path(__file__).parent / "fixtures" / "core_population_states.yaml"
+)
 
 ATLAS_HOUSEHOLD_FIELDS = {
     "household_id",
@@ -111,6 +114,12 @@ def _load_atlas_records_fixture() -> dict[str, dict[str, object]]:
     return yaml.safe_load(ATLAS_RECORDS_FIXTURE_PATH.read_text(encoding="utf-8"))
 
 
+def _load_core_population_states_fixture() -> dict[str, dict[str, object]]:
+    return yaml.safe_load(
+        CORE_POPULATION_STATES_FIXTURE_PATH.read_text(encoding="utf-8")
+    )
+
+
 def _validation_messages(instance: dict[str, object]) -> list[str]:
     report = Validator(
         SCHEMA_PATH,
@@ -151,6 +160,72 @@ def test_root_schema_has_stable_identity_and_population_bundle_vocabulary() -> N
         "PopulationSnapshotBundleMember",
         "PopulationSnapshotBundle",
     }.issubset(schema_view.all_classes())
+
+
+def test_core_population_states_and_membership_are_snapshot_scoped() -> None:
+    """Core records capture only state identity, snapshot scope, and membership."""
+    schema_view = SchemaView(str(SCHEMA_PATH))
+
+    assert {
+        "HouseholdState",
+        "PersonState",
+        "HouseholdMembership",
+    }.issubset(schema_view.all_classes())
+
+    household = schema_view.induced_class("HouseholdState")
+    person = schema_view.induced_class("PersonState")
+    membership = schema_view.induced_class("HouseholdMembership")
+
+    assert set(household.attributes) == {
+        "household_state_id",
+        "population_snapshot_ref",
+        "longitudinal_household_ref",
+    }
+    assert set(person.attributes) == {
+        "person_state_id",
+        "population_snapshot_ref",
+        "longitudinal_person_ref",
+    }
+    assert set(membership.attributes) == {
+        "household_membership_id",
+        "population_snapshot_ref",
+        "person_state_ref",
+        "household_state_ref",
+    }
+
+    for record, identifier in (
+        (household, "household_state_id"),
+        (person, "person_state_id"),
+        (membership, "household_membership_id"),
+    ):
+        assert record.attributes[identifier].identifier is True
+        assert record.attributes[identifier].required is True
+        assert record.attributes["population_snapshot_ref"].required is True
+
+    assert (
+        membership.attributes["person_state_ref"]
+        .annotations["relationship_target"]
+        .value
+        == "PersonState"
+    )
+    assert (
+        membership.attributes["household_state_ref"]
+        .annotations["relationship_target"]
+        .value
+        == "HouseholdState"
+    )
+
+
+def test_core_population_state_fixture_validates_and_requires_snapshot_scope() -> None:
+    """Population state and membership cannot be modeled outside a snapshot."""
+    records = _load_core_population_states_fixture()
+
+    for target_class in ("HouseholdState", "PersonState", "HouseholdMembership"):
+        assert _native_validation_messages(records[target_class], target_class) == []
+
+    incomplete_membership = deepcopy(records["HouseholdMembership"])
+    del incomplete_membership["population_snapshot_ref"]
+    assert _native_validation_messages(incomplete_membership, "HouseholdMembership")
 
 
 def test_root_schema_resolves_profile_imports_and_required_population_members() -> None:

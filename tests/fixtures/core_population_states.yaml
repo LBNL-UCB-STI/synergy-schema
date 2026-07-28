@@ -1,0 +1,13 @@
+HouseholdState:
+  household_state_id: household-state:synthetic-region-2025-r1:101
+  population_snapshot_ref: population-snapshot:synthetic-region-2025-r1
+  longitudinal_household_ref: household:synthetic-region:101
+PersonState:
+  person_state_id: person-state:synthetic-region-2025-r1:1001
+  population_snapshot_ref: population-snapshot:synthetic-region-2025-r1
+  longitudinal_person_ref: person:synthetic-region:1001
+HouseholdMembership:
+  household_membership_id: household-membership:synthetic-region-2025-r1:1001:101
+  population_snapshot_ref: population-snapshot:synthetic-region-2025-r1
+  person_state_ref: person-state:synthetic-region-2025-r1:1001
+  household_state_ref: household-state:synthetic-region-2025-r1:101
