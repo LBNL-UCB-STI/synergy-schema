@@ -1,0 +1,51 @@
+id: population-snapshot-bundle:synthetic-region-2025-r1
+manifest_version: "0.1"
+completeness_status: complete
+producing_run:
+  provider: pilates
+  run_id: run:synthetic-post-atlas-2025-r1
+  run_locator: runs/synthetic-post-atlas-2025-r1
+population_snapshot:
+  id: population-snapshot:synthetic-region-2025-r1
+  scenario_definition_ref: scenario-definition:synthetic-region-baseline
+  stochastic_realization_id: realization:synthetic-region-r1
+  simulation_year: 2025
+members:
+  - semantic_role: households
+    artifact:
+      artifact_identity:
+        digest_algorithm: sha256
+        content_digest: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+      locator: years/2025/households.parquet
+      media_type: application/vnd.apache.parquet
+    schema_contract:
+      language: linkml
+      schema_digest: bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+      selected_root: AtlasHousehold
+      schema_version: "0.1"
+    row_count: 120
+    observed_columns:
+      - household_id
+      - persons
+  - semantic_role: persons
+    artifact:
+      artifact_identity:
+        digest_algorithm: sha256
+        content_digest: cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+      locator: years/2025/persons.parquet
+      media_type: application/vnd.apache.parquet
+    row_count: 280
+    observed_columns:
+      - person_id
+      - household_id
+  - semantic_role: vehicles
+    artifact:
+      artifact_identity:
+        digest_algorithm: sha256
+        content_digest: dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd
+      locator: years/2025/vehicles.parquet
+      media_type: application/vnd.apache.parquet
+    row_count: 95
+    observed_columns:
+      - vehicle_id
+      - household_id

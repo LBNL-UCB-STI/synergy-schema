@@ -1,0 +1,47 @@
+id: https://w3id.org/LBNL-UCB-STI/synergy-schema/core/population-snapshot
+name: population_snapshot
+title: Population snapshot context
+description: >-
+  Shared context for one population state at a particular simulation time. This
+  context is intentionally separate from model-owned household, person, and
+  vehicle record definitions.
+
+prefixes:
+  synergy_schema: https://w3id.org/LBNL-UCB-STI/synergy-schema/
+  linkml: https://w3id.org/linkml/
+
+default_prefix: synergy_schema
+default_range: string
+
+imports:
+  - linkml:types
+
+classes:
+  PopulationSnapshot:
+    description: >-
+      A scenario-specific population state for one simulation year and one
+      stochastic realization. A parent snapshot reference can later connect
+      this snapshot to a trajectory or derived population bundle.
+    attributes:
+      id:
+        identifier: true
+        required: true
+        description: Stable identifier for this semantic population snapshot.
+      scenario_definition_ref:
+        required: true
+        description: Reference to the scenario definition that produced this snapshot.
+      stochastic_realization_id:
+        required: true
+        description: Identifier for the stochastic realization represented by this snapshot.
+      simulation_year:
+        range: integer
+        required: true
+        description: Simulation year represented by this snapshot.
+      equilibrium_iteration:
+        range: integer
+        description: Optional equilibrium iteration for this population state.
+      parent_snapshot_ref:
+        description: >-
+          Optional reference to an earlier population snapshot. It is a
+          reference, not an assertion that standard LinkML validation can
+          resolve the referenced snapshot.

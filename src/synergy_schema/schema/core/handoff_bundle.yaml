@@ -1,0 +1,146 @@
+id: https://w3id.org/LBNL-UCB-STI/synergy-schema/core/handoff-bundle
+name: handoff_bundle
+title: Provider-neutral handoff bundles
+description: >-
+  Shared references for bundles passed between modeling workflows. These
+  classes describe semantic identities and provenance references without
+  importing a storage provider or its persistence models.
+
+prefixes:
+  synergy_schema: https://w3id.org/LBNL-UCB-STI/synergy-schema/
+  linkml: https://w3id.org/linkml/
+
+default_prefix: synergy_schema
+default_range: string
+
+imports:
+  - linkml:types
+
+enums:
+  DigestAlgorithm:
+    description: Algorithm used to create an immutable artifact byte identity.
+    permissible_values:
+      sha256:
+        description: SHA-256 digest of an artifact's bytes.
+  HandoffCompletenessStatus:
+    description: Declared completeness of a semantic handoff bundle.
+    permissible_values:
+      complete:
+        description: The producer declares all required members present.
+      incomplete:
+        description: The producer declares one or more required members absent.
+
+classes:
+  ProducingRunReference:
+    description: >-
+      Provider-neutral reference to the run that produced a handoff. The
+      provider and run identifier name the producing context; a locator is
+      evidence that may change without changing a semantic bundle identity.
+    attributes:
+      provider:
+        required: true
+        description: Name of the system that issued the producing-run identifier.
+      run_id:
+        required: true
+        description: Identifier assigned to the producing run by that provider.
+      run_locator:
+        description: Optional mutable locator or diagnostic pointer for the producing run.
+  ImmutableArtifactIdentity:
+    description: >-
+      Byte-level immutable identity for one physical artifact. It is distinct
+      from a semantic bundle identity and from any provider directory manifest.
+    attributes:
+      digest_algorithm:
+        range: DigestAlgorithm
+        required: true
+        description: Algorithm used to calculate the content digest.
+      content_digest:
+        required: true
+        description: Full digest of the artifact bytes using the stated algorithm.
+  PhysicalArtifactReference:
+    description: >-
+      Reference to one physical artifact. Its byte identity is normative for
+      that artifact; locators and media metadata are operational evidence.
+    attributes:
+      artifact_identity:
+        range: ImmutableArtifactIdentity
+        required: true
+        inlined: true
+        description: Immutable byte identity of the referenced artifact.
+      locator:
+        description: Optional relative path, URI, or other mutable artifact locator.
+      media_type:
+        description: Optional observed or declared media type for the artifact.
+  SchemaContractReference:
+    description: >-
+      Provider-neutral reference to a schema contract used for an artifact.
+      The language, digest, and selected root identify the contract; URI and
+      version are optional discovery aids rather than the identity itself.
+    attributes:
+      language:
+        required: true
+        description: Schema language, such as LinkML or JSON Schema.
+      schema_digest:
+        required: true
+        description: Digest of the selected schema contract source.
+      selected_root:
+        required: true
+        description: Root class, type, or document selected from that contract.
+      schema_uri:
+        description: Optional URI where the schema contract can be discovered.
+      schema_version:
+        description: Optional version label supplied by the schema publisher.
+  HandoffBundleMember:
+    description: >-
+      One named-semantic member of a handoff bundle. Row counts and observed
+      columns are evidence only; they do not establish semantic identity or
+      prove an artifact conforms to its contract.
+    attributes:
+      semantic_role:
+        required: true
+        description: Role this artifact plays in the enclosing handoff bundle.
+      artifact:
+        range: PhysicalArtifactReference
+        required: true
+        inlined: true
+        description: Physical artifact supplied for this semantic role.
+      schema_contract:
+        range: SchemaContractReference
+        inlined: true
+        description: Optional contract describing the member artifact's structure.
+      row_count:
+        range: integer
+        minimum_value: 0
+        description: Optional observed row count retained as evidence.
+      observed_columns:
+        multivalued: true
+        description: Optional observed column names retained as evidence.
+  HandoffBundle:
+    description: >-
+      A semantic collection of artifact members emitted by one producing run.
+      Its stable bundle identifier is distinct from every member byte digest
+      and from provider-specific packaging identifiers.
+    attributes:
+      id:
+        identifier: true
+        required: true
+        description: Stable identifier for this semantic handoff bundle.
+      manifest_version:
+        required: true
+        description: Version of the manifest vocabulary used to describe this bundle.
+      completeness_status:
+        range: HandoffCompletenessStatus
+        required: true
+        description: Producer-declared completeness status for this bundle.
+      producing_run:
+        range: ProducingRunReference
+        required: true
+        inlined: true
+        description: Provider-neutral reference to the run that produced the bundle.
+      members:
+        range: HandoffBundleMember
+        multivalued: true
+        inlined_as_list: true
+        required: true
+        minimum_cardinality: 1
+        description: Artifact members that make up this handoff bundle.

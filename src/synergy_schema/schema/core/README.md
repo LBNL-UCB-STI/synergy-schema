@@ -13,4 +13,6 @@ Details that belong to only one model should stay in
 [`../models/`](../models/). Relationships between different definitions belong
 in [`../mappings/`](../mappings/).
 
-No shared domain concepts have been added yet.
+The first shared concepts are `PopulationSnapshot` and provider-neutral
+handoff/provenance references. They describe population state and artifact
+context without defining native household, person, or vehicle rows.

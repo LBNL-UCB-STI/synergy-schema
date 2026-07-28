@@ -14,3 +14,6 @@ default_range: string
 
 imports:
   - linkml:types
+  - core/population_snapshot
+  - core/handoff_bundle
+  - profiles/pilates_population

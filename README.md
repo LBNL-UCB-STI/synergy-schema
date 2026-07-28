@@ -35,9 +35,10 @@ the same definition into several places.
 
 ## Current status
 
-The repository currently contains only the project structure and an empty root
-schema. The first domain definitions, model descriptions, mappings, and
-PILATES validation rules have not been added yet.
+The first vertical slice defines population-snapshot context and a
+provider-neutral handoff bundle, then composes them into a PILATES yearly
+population profile. Native model row definitions, mappings, and broader
+validation rules are intentionally still to come.
 
 ## Getting started
 

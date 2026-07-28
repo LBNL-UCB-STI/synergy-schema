@@ -12,4 +12,7 @@ A profile is about practical use, not ownership. Native BEAM or POLARIS
 definitions still belong in [`../models/`](../models/), even when PILATES uses
 them.
 
-No workflow profiles have been added yet.
+The first workflow profile is `pilates_population.yaml`. It composes a
+post-ATLAS yearly `PopulationSnapshotBundle` from a population snapshot and
+households, persons, and vehicles artifact members; native row definitions
+remain model-owned and out of this profile.
