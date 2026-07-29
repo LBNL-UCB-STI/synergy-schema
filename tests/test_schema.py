@@ -3,6 +3,7 @@
 from copy import deepcopy
 from pathlib import Path
 
+import pytest
 import yaml
 from linkml.validator import Validator
 from linkml.validator.plugins import JsonschemaValidationPlugin
@@ -16,12 +17,23 @@ SCHEMA_PATH = (
     / "schema"
     / "synergy_schema.yaml"
 )
-FIXTURE_PATH = Path(__file__).parent / "fixtures" / "population_snapshot_bundle.yaml"
-ATLAS_RECORDS_FIXTURE_PATH = (
-    Path(__file__).parent / "fixtures" / "atlas_population_records.yaml"
+EXAMPLE_PATH = (
+    Path(__file__).parents[1]
+    / "examples"
+    / "post_atlas_population_bundle"
+    / "population_snapshot_bundle.yaml"
 )
-CORE_POPULATION_STATES_FIXTURE_PATH = (
-    Path(__file__).parent / "fixtures" / "core_population_states.yaml"
+ATLAS_RECORDS_EXAMPLE_PATH = (
+    Path(__file__).parents[1]
+    / "examples"
+    / "post_atlas_population_bundle"
+    / "atlas_population_records.yaml"
+)
+CORE_POPULATION_STATES_EXAMPLE_PATH = (
+    Path(__file__).parents[1]
+    / "examples"
+    / "post_atlas_population_bundle"
+    / "core_population_states.yaml"
 )
 
 ATLAS_HOUSEHOLD_FIELDS = {
@@ -107,16 +119,16 @@ ATLAS_VEHICLE_FIELDS = {
 
 
 def _load_fixture() -> dict[str, object]:
-    return yaml.safe_load(FIXTURE_PATH.read_text(encoding="utf-8"))
+    return yaml.safe_load(EXAMPLE_PATH.read_text(encoding="utf-8"))
 
 
 def _load_atlas_records_fixture() -> dict[str, dict[str, object]]:
-    return yaml.safe_load(ATLAS_RECORDS_FIXTURE_PATH.read_text(encoding="utf-8"))
+    return yaml.safe_load(ATLAS_RECORDS_EXAMPLE_PATH.read_text(encoding="utf-8"))
 
 
 def _load_core_population_states_fixture() -> dict[str, dict[str, object]]:
     return yaml.safe_load(
-        CORE_POPULATION_STATES_FIXTURE_PATH.read_text(encoding="utf-8")
+        CORE_POPULATION_STATES_EXAMPLE_PATH.read_text(encoding="utf-8")
     )
 
 
@@ -226,6 +238,83 @@ def test_core_population_state_fixture_validates_and_requires_snapshot_scope() -
     incomplete_membership = deepcopy(records["HouseholdMembership"])
     del incomplete_membership["population_snapshot_ref"]
     assert _native_validation_messages(incomplete_membership, "HouseholdMembership")
+
+
+def _assert_example_cross_file_identity(
+    bundle: dict[str, object],
+    native_records: dict[str, dict[str, object]],
+    population_states: dict[str, dict[str, object]],
+) -> None:
+    snapshot_id = bundle["population_snapshot"]["id"]
+    household_id = native_records["household"]["household_id"]
+    person_id = native_records["person"]["person_id"]
+    region_context = "synthetic-region"
+
+    assert native_records["person"]["household_id"] == household_id
+    assert native_records["vehicle"]["household_id"] == household_id
+    assert population_states["HouseholdState"]["population_snapshot_ref"] == snapshot_id
+    assert population_states["PersonState"]["population_snapshot_ref"] == snapshot_id
+    assert (
+        population_states["HouseholdMembership"]["population_snapshot_ref"]
+        == snapshot_id
+    )
+    assert (
+        population_states["HouseholdMembership"]["household_state_ref"]
+        == population_states["HouseholdState"]["household_state_id"]
+    )
+    assert (
+        population_states["HouseholdMembership"]["person_state_ref"]
+        == population_states["PersonState"]["person_state_id"]
+    )
+    assert population_states["HouseholdState"]["longitudinal_household_ref"] == (
+        f"household:{region_context}:{household_id}"
+    )
+    assert population_states["PersonState"]["longitudinal_person_ref"] == (
+        f"person:{region_context}:{person_id}"
+    )
+    assert population_states["HouseholdMembership"]["household_membership_id"].rsplit(
+        ":", 2
+    )[1:] == [str(person_id), str(household_id)]
+
+
+def test_example_records_share_the_snapshot_and_household_identity() -> None:
+    """The tracked example tells one internally consistent synthetic story."""
+    _assert_example_cross_file_identity(
+        _load_fixture(),
+        _load_atlas_records_fixture(),
+        _load_core_population_states_fixture(),
+    )
+
+
+def test_example_identity_assertions_reject_corrupted_state_copies() -> None:
+    """Longitudinal and membership identities cannot drift from native IDs."""
+    bundle = _load_fixture()
+    native_records = _load_atlas_records_fixture()
+    population_states = _load_core_population_states_fixture()
+
+    corruptions = (
+        (
+            "HouseholdState",
+            "longitudinal_household_ref",
+            "household:synthetic-region:999",
+        ),
+        ("PersonState", "longitudinal_person_ref", "person:synthetic-region:999"),
+        (
+            "HouseholdMembership",
+            "household_membership_id",
+            "household-membership:synthetic-region-2025-r1:999:999",
+        ),
+    )
+    for record_name, field_name, corrupted_value in corruptions:
+        corrupted_states = deepcopy(population_states)
+        corrupted_states[record_name][field_name] = corrupted_value
+
+        with pytest.raises(AssertionError):
+            _assert_example_cross_file_identity(
+                bundle,
+                native_records,
+                corrupted_states,
+            )
 
 
 def test_root_schema_resolves_profile_imports_and_required_population_members() -> None:

@@ -69,6 +69,12 @@ uv build
 unzip -l dist/synergy_schema-*.whl | rg 'synergy_schema/schema/synergy_schema.yaml'
 ```
 
+## See a complete synthetic handoff
+
+The [post-ATLAS population bundle example](examples/post_atlas_population_bundle/)
+walks through native ATLAS rows, their snapshot-scoped population state, and
+the PILATES bundle that composes the three corresponding artifacts.
+
 ## Contributing a schema
 
 Start by deciding who owns the definition:
