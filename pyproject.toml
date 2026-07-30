@@ -19,7 +19,7 @@ dev = [
 [tool.hatch.build]
 include = [
   "src/synergy_schema/**/*.py",
-  "src/synergy_schema/schema/**/*.yaml",
+  "src/synergy_schema/schema/**/*",
 ]
 
 [tool.hatch.build.targets.wheel]

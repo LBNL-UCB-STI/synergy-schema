@@ -16,4 +16,7 @@ The first workflow profile is `pilates_population.yaml`. It composes a
 post-ATLAS yearly `PopulationSnapshotBundle` from a population snapshot and
 households, persons, and vehicles artifact members, then documents each role's
 ATLAS-owned native contract root. The native row definitions remain in
-`../models/atlas/`; this profile does not copy their fields.
+`../models/atlas/`; this profile does not copy their fields. The bundle also
+requires a `ConsistProvenanceDocument` from the pinned module under
+`../vendor/`. This operational provenance stays in the PILATES profile rather
+than leaking into shared population concepts or ATLAS-owned rows.

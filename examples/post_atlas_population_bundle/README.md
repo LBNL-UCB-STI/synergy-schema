@@ -42,6 +42,13 @@ record a synthetic immutable SHA-256 content digest. The small YAML rows in
 the first file illustrate those contracts only; they are not the Parquet
 members and do not produce the displayed digests.
 
+The same bundle carries a Consist provenance document. Its namespace and local
+run or artifact identifier together provide portable Consist identity. The
+document records the producing run, one Consist artifact reference for each
+member, and three output associations. The Consist identities repeat each
+member digest only as a trusted assertion about the same bytes; the focused
+checks reject disagreement between those assertions.
+
 `year` on the vehicle is the ATLAS forecast/output year that participates in
 the vehicle's natural key. `modelyear` is the year the vehicle model was made;
 it is intentionally a different fact.
@@ -51,10 +58,12 @@ it is intentionally a different fact.
 Domain meaning includes the household/person/vehicle roles, each selected
 native contract, and the snapshot's scenario, realization, and simulation
 year. The artifact digest algorithm and content digest identify immutable bytes
-once an artifact is selected. Locators, the producing-run locator, row counts,
-and observed columns are operational evidence: useful for finding and checking
-an artifact, but not portable identity. A canonical digest for the complete
-bundle itself is deliberately not defined yet.
+once an artifact is selected. The Consist ledger namespace participates in run
+and artifact reference identity; the ledger locator does not. Artifact
+locators, the producing-run locator, row counts, and observed columns are
+operational evidence: useful for finding and checking an artifact, but not
+portable identity. A canonical digest for the complete bundle itself is
+deliberately not defined yet.
 
 Ordinary LinkML validation of the bundle checks declaration shape and required
 fields. It does not enforce that a role's `selected_root` is the contract named
@@ -63,8 +72,11 @@ row excerpts validate only when they are separately validated against the
 named native class. LinkML also does not open a Parquet file, verify a digest,
 resolve a locator, prove that a reference exists, or enforce a complete
 cross-table population story. The focused tests add only the identifier and
-snapshot consistency checks needed by this small example; production-level
-bundle completeness and referential validation remain separate work.
+snapshot consistency checks needed by this small example. They also check that
+Consist output associations agree with artifact producers and that trusted
+Consist identities agree with the corresponding Synergy member identities.
+Those are cross-record checks rather than ordinary LinkML shape validation;
+production-level completeness and referential validation remain separate work.
 
 ## Check the example
 

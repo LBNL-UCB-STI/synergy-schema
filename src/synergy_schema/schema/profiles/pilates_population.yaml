@@ -18,6 +18,7 @@ imports:
   - ../core/population_snapshot
   - ../core/handoff_bundle
   - ../models/atlas/atlas_population
+  - ../vendor/consist-provenance/0.1.0/provenance
 
 enums:
   PopulationMemberRole:
@@ -61,6 +62,14 @@ classes:
         required: true
         inlined: true
         description: Population state represented by this handoff bundle.
+      consist_provenance:
+        range: ConsistProvenanceDocument
+        required: true
+        inlined: true
+        description: >-
+          Durable Consist run, artifact, and production facts for this PILATES
+          handoff. Scenario and population meaning remain in the Synergy
+          snapshot and bundle fields rather than this provenance graph.
     slot_usage:
       members:
         range: PopulationSnapshotBundleMember

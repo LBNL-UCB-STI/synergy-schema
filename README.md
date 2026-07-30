@@ -38,8 +38,10 @@ the same definition into several places.
 The first two vertical slices define population-snapshot context and a
 provider-neutral handoff bundle, then compose them into a PILATES yearly
 population profile. The profile now binds its three population artifacts to
-ATLAS-owned household/person input and vehicle-output record contracts. Native
-code vocabularies, mappings, and broader cross-table validation remain to come.
+ATLAS-owned household/person input and vehicle-output record contracts and to a
+pinned Consist provenance graph. Native model records remain independent of
+Consist. Native code vocabularies, mappings, and broader production validation
+remain to come.
 
 ## Getting started
 

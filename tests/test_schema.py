@@ -1,6 +1,7 @@
 """Contract tests for the canonical LinkML population handoff schema."""
 
 from copy import deepcopy
+import hashlib
 from pathlib import Path
 
 import pytest
@@ -34,6 +35,15 @@ CORE_POPULATION_STATES_EXAMPLE_PATH = (
     / "examples"
     / "post_atlas_population_bundle"
     / "core_population_states.yaml"
+)
+VENDORED_CONSIST_RELEASE_PATH = (
+    Path(__file__).parents[1]
+    / "src"
+    / "synergy_schema"
+    / "schema"
+    / "vendor"
+    / "consist-provenance"
+    / "0.1.0"
 )
 
 ATLAS_HOUSEHOLD_FIELDS = {
@@ -171,7 +181,24 @@ def test_root_schema_has_stable_identity_and_population_bundle_vocabulary() -> N
         "HandoffBundle",
         "PopulationSnapshotBundleMember",
         "PopulationSnapshotBundle",
+        "ConsistProvenanceContext",
+        "ConsistProvenanceDocument",
+        "ConsistRunReference",
+        "ConsistArtifactReference",
+        "ConsistRunArtifactAssociation",
     }.issubset(schema_view.all_classes())
+
+
+def test_vendored_consist_release_matches_its_checksum_manifest() -> None:
+    """The imported Consist closure remains byte-for-byte identical to its release."""
+    checksum_path = VENDORED_CONSIST_RELEASE_PATH / "SHA256SUMS"
+    assert checksum_path.is_file()
+
+    for line in checksum_path.read_text(encoding="utf-8").splitlines():
+        expected_digest, relative_path = line.split("  ", maxsplit=1)
+        asset_path = VENDORED_CONSIST_RELEASE_PATH / relative_path
+        assert asset_path.is_file()
+        assert hashlib.sha256(asset_path.read_bytes()).hexdigest() == expected_digest
 
 
 def test_core_population_states_and_membership_are_snapshot_scoped() -> None:
@@ -277,6 +304,64 @@ def _assert_example_cross_file_identity(
     )[1:] == [str(person_id), str(household_id)]
 
 
+def _consist_reference_identity(
+    reference: dict[str, object],
+    enclosing_context: dict[str, object],
+    identifier_field: str,
+) -> tuple[object, object]:
+    context = reference.get("provenance_context", enclosing_context)
+    return context["namespace"], reference[identifier_field]
+
+
+def _assert_example_provenance_consistency(bundle: dict[str, object]) -> None:
+    provenance = bundle["consist_provenance"]
+    enclosing_context = provenance["provenance_context"]
+    producing_run = bundle["producing_run"]
+    assert producing_run["provider"] == "consist"
+
+    run_identity = (
+        enclosing_context["namespace"],
+        producing_run["run_id"],
+    )
+    assert {
+        _consist_reference_identity(run, enclosing_context, "run_id")
+        for run in provenance["runs"]
+    } == {run_identity}
+
+    artifacts_by_id = {
+        artifact["artifact_id"]: artifact for artifact in provenance["artifacts"]
+    }
+    members_by_role = {member["semantic_role"]: member for member in bundle["members"]}
+    output_associations_by_role = {
+        association["role"]: association
+        for association in provenance["associations"]
+        if association["direction"] == "output"
+    }
+    assert set(output_associations_by_role) == set(members_by_role)
+
+    for role, member in members_by_role.items():
+        association = output_associations_by_role[role]
+        artifact = artifacts_by_id[association["artifact"]["artifact_id"]]
+        assert (
+            _consist_reference_identity(association["run"], enclosing_context, "run_id")
+            == run_identity
+        )
+        assert (
+            _consist_reference_identity(
+                artifact["producing_run"], enclosing_context, "run_id"
+            )
+            == run_identity
+        )
+        assert (
+            artifact["immutable_identity"]["algorithm"]
+            == (member["artifact"]["artifact_identity"]["digest_algorithm"])
+        )
+        assert (
+            artifact["immutable_identity"]["digest"]
+            == (member["artifact"]["artifact_identity"]["content_digest"])
+        )
+
+
 def test_example_records_share_the_snapshot_and_household_identity() -> None:
     """The tracked example tells one internally consistent synthetic story."""
     _assert_example_cross_file_identity(
@@ -284,6 +369,69 @@ def test_example_records_share_the_snapshot_and_household_identity() -> None:
         _load_atlas_records_fixture(),
         _load_core_population_states_fixture(),
     )
+
+
+def test_example_consist_provenance_matches_bundle_members_and_producer() -> None:
+    """Consist production edges and identities agree with the semantic handoff."""
+    bundle = _load_fixture()
+    assert "consist_provenance" in bundle
+    _assert_example_provenance_consistency(bundle)
+
+
+def test_example_provenance_identity_uses_namespace_but_not_locator() -> None:
+    """Namespace changes identity while mutable locator changes do not."""
+    bundle = _load_fixture()
+    assert "consist_provenance" in bundle
+    provenance = bundle["consist_provenance"]
+    context = provenance["provenance_context"]
+    run = provenance["runs"][0]
+    original_identity = _consist_reference_identity(run, context, "run_id")
+
+    relocated_bundle = deepcopy(bundle)
+    relocated_provenance = relocated_bundle["consist_provenance"]
+    relocated_provenance["provenance_context"]["locator"] = (
+        "https://ledger.example.org/moved"
+    )
+    relocated_bundle["producing_run"]["run_locator"] = "runs/moved"
+    for member in relocated_bundle["members"]:
+        member["artifact"]["locator"] = f"moved/{member['semantic_role']}.parquet"
+    relocated_identity = _consist_reference_identity(
+        relocated_provenance["runs"][0],
+        relocated_provenance["provenance_context"],
+        "run_id",
+    )
+    assert relocated_identity == original_identity
+    _assert_example_provenance_consistency(relocated_bundle)
+
+    other_namespace_bundle = deepcopy(bundle)
+    other_provenance = other_namespace_bundle["consist_provenance"]
+    other_provenance["provenance_context"]["namespace"] = "urn:consist:other"
+    other_identity = _consist_reference_identity(
+        other_provenance["runs"][0],
+        other_provenance["provenance_context"],
+        "run_id",
+    )
+    assert other_identity != original_identity
+
+
+def test_example_provenance_checks_reject_producer_and_digest_drift() -> None:
+    """Conflicting producers and artifact digests cannot pass the example checks."""
+    bundle = _load_fixture()
+    assert "consist_provenance" in bundle
+
+    wrong_producer = deepcopy(bundle)
+    wrong_producer["consist_provenance"]["artifacts"][0]["producing_run"]["run_id"] = (
+        "run:other"
+    )
+    with pytest.raises(AssertionError):
+        _assert_example_provenance_consistency(wrong_producer)
+
+    wrong_digest = deepcopy(bundle)
+    wrong_digest["consist_provenance"]["artifacts"][0]["immutable_identity"][
+        "digest"
+    ] = "f" * 64
+    with pytest.raises(AssertionError):
+        _assert_example_provenance_consistency(wrong_digest)
 
 
 def test_example_identity_assertions_reject_corrupted_state_copies() -> None:
@@ -324,6 +472,8 @@ def test_root_schema_resolves_profile_imports_and_required_population_members() 
     bundle = schema_view.induced_class("PopulationSnapshotBundle")
     assert bundle.is_a == "HandoffBundle"
     assert bundle.attributes["population_snapshot"].required is True
+    assert bundle.attributes["consist_provenance"].required is True
+    assert bundle.attributes["consist_provenance"].range == "ConsistProvenanceDocument"
     assert bundle.attributes["members"].range == "PopulationSnapshotBundleMember"
     assert bundle.attributes["members"].minimum_cardinality == 3
 

@@ -2,7 +2,7 @@ id: population-snapshot-bundle:synthetic-region-2025-r1
 manifest_version: "0.1"
 completeness_status: complete
 producing_run:
-  provider: pilates
+  provider: consist
   run_id: run:synthetic-post-atlas-2025-r1
   run_locator: runs/synthetic-post-atlas-2025-r1
 population_snapshot:
@@ -10,6 +10,61 @@ population_snapshot:
   scenario_definition_ref: scenario-definition:synthetic-region-baseline
   stochastic_realization_id: realization:synthetic-region-r1
   simulation_year: 2025
+consist_provenance:
+  provenance_context:
+    namespace: urn:consist:ledger:pilates-synthetic
+    locator: runs/consist.duckdb
+  runs:
+    - run_id: run:synthetic-post-atlas-2025-r1
+      model_name: pilates-post-atlas
+      identity_evidence:
+        config_hash: "1111111111111111111111111111111111111111111111111111111111111111"
+        input_hash: "2222222222222222222222222222222222222222222222222222222222222222"
+        git_hash: synthetic-git-revision
+  artifacts:
+    - artifact_id: 11111111-1111-4111-8111-111111111111
+      artifact_key: households
+      immutable_identity:
+        algorithm: sha256
+        kind: file
+        digest: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+      producing_run:
+        run_id: run:synthetic-post-atlas-2025-r1
+    - artifact_id: 22222222-2222-4222-8222-222222222222
+      artifact_key: persons
+      immutable_identity:
+        algorithm: sha256
+        kind: file
+        digest: cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+      producing_run:
+        run_id: run:synthetic-post-atlas-2025-r1
+    - artifact_id: 33333333-3333-4333-8333-333333333333
+      artifact_key: vehicles
+      immutable_identity:
+        algorithm: sha256
+        kind: file
+        digest: dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd
+      producing_run:
+        run_id: run:synthetic-post-atlas-2025-r1
+  associations:
+    - run:
+        run_id: run:synthetic-post-atlas-2025-r1
+      artifact:
+        artifact_id: 11111111-1111-4111-8111-111111111111
+      direction: output
+      role: households
+    - run:
+        run_id: run:synthetic-post-atlas-2025-r1
+      artifact:
+        artifact_id: 22222222-2222-4222-8222-222222222222
+      direction: output
+      role: persons
+    - run:
+        run_id: run:synthetic-post-atlas-2025-r1
+      artifact:
+        artifact_id: 33333333-3333-4333-8333-333333333333
+      direction: output
+      role: vehicles
 members:
   - semantic_role: households
     artifact:
