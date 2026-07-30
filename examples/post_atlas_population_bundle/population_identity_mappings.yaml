@@ -1,0 +1,146 @@
+urbansim_activitysim_population:
+  id: urbansim_activitysim_population
+  source_representation: UrbanSim population identity projections
+  target_representation: ActivitySim population identity projections
+  slot_mappings:
+    - id: urbansim_activitysim_household_identity
+      source_paths:
+        - UrbanSimHouseholdPopulationRecord.household_id
+      target_paths:
+        - ActivitySimHouseholdInputRecord.household_id
+      mapping_status: direct
+      identity_role: entity_identifier
+      value_stability: preserved
+      relationship_cardinality: one-to-one
+      transformation: Preserve the UrbanSim household identifier in the ActivitySim household input.
+      evidence: pilates/activitysim/preprocessor.py:3524
+    - id: urbansim_activitysim_person_identity
+      source_paths:
+        - UrbanSimPersonPopulationRecord.person_id
+      target_paths:
+        - ActivitySimPersonInputRecord.person_id
+      mapping_status: direct
+      identity_role: entity_identifier
+      value_stability: preserved
+      relationship_cardinality: one-to-one
+      transformation: Preserve the UrbanSim person identifier in the ActivitySim person input.
+      evidence: pilates/activitysim/preprocessor.py:3259
+    - id: urbansim_activitysim_person_household_membership
+      source_paths:
+        - UrbanSimPersonPopulationRecord.household_id
+        - UrbanSimHouseholdPopulationRecord.household_id
+      target_paths:
+        - ActivitySimPersonInputRecord.household_id
+        - ActivitySimHouseholdInputRecord.household_id
+      mapping_status: direct
+      identity_role: relationship_foreign_key
+      value_stability: preserved
+      relationship_cardinality: many-to-one
+      transformation: Preserve the person-to-household foreign key through ActivitySim preprocessing.
+      evidence: pilates/activitysim/preprocessor.py:3269
+    - id: urbansim_activitysim_member_ordinal
+      source_paths:
+        - UrbanSimPersonPopulationRecord.member_id
+      target_paths:
+        - ActivitySimPersonInputRecord.member_id
+      mapping_status: derived
+      identity_role: within_parent_ordinal
+      value_stability: regenerated
+      relationship_cardinality: one-to-one
+      transformation: Recalculate one-based household member ordinals after filtering ActivitySim persons.
+      evidence: pilates/activitysim/preprocessor.py:3349
+    - id: urbansim_activitysim_block_to_taz
+      source_paths:
+        - UrbanSimHouseholdPopulationRecord.block_id
+      target_paths:
+        - ActivitySimHouseholdInputRecord.taz
+        - ActivitySimPersonInputRecord.taz
+      mapping_status: derived
+      identity_role: geographic_identifier
+      value_stability: derived
+      relationship_cardinality: many-to-one
+      transformation: Look up each household block identifier in the configured ActivitySim zone column.
+      evidence: pilates/activitysim/preprocessor.py:3526
+    - id: activitysim_work_location_aliases
+      source_paths:
+        - ActivitySimPersonInputRecord.work_zone_id
+      target_paths:
+        - ActivitySimPersonInputRecord.workplace_taz
+      mapping_status: renamed
+      identity_role: geographic_identifier
+      value_stability: alias
+      relationship_cardinality: one-to-one
+      transformation: Keep the two transitional workplace-zone aliases synchronized from the canonical source.
+      evidence: pilates/activitysim/preprocessor.py:3255
+    - id: activitysim_school_location_alias
+      source_paths:
+        - ActivitySimPersonInputRecord.school_zone_id
+      target_paths:
+        - ActivitySimPersonInputRecord.school_taz
+      mapping_status: renamed
+      identity_role: geographic_identifier
+      value_stability: alias
+      relationship_cardinality: one-to-one
+      transformation: Copy the canonical school zone value into the transitional PILATES alias.
+      evidence: pilates/activitysim/preprocessor.py:3257
+
+atlas_polaris_population:
+  id: atlas_polaris_population
+  source_representation: ATLAS population records
+  target_representation: POLARIS population identity projections
+  slot_mappings:
+    - id: atlas_polaris_household_identity
+      source_paths:
+        - AtlasHouseholdInput.household_id
+      target_paths:
+        - PolarisHouseholdRecord.household
+      mapping_status: direct
+      identity_role: entity_identifier
+      value_stability: preserved
+      relationship_cardinality: one-to-one
+      transformation: Carry the source household record index into the POLARIS household identifier.
+      evidence: pilates/polaris/preprocessor.py:458
+    - id: atlas_polaris_household_hhold_identity
+      source_paths:
+        - AtlasHouseholdInput.serialno
+      target_paths:
+        - PolarisHouseholdRecord.hhold
+      mapping_status: renamed
+      identity_role: entity_identifier
+      value_stability: preserved
+      relationship_cardinality: one-to-one
+      transformation: Populate the required POLARIS hhold field from the source household serial number.
+      evidence: pilates/polaris/preprocessor.py:30
+    - id: atlas_polaris_person_identity
+      source_paths:
+        - AtlasPersonInput.person_id
+      target_paths:
+        - PolarisPersonRecord.person
+      mapping_status: direct
+      identity_role: entity_identifier
+      value_stability: preserved
+      relationship_cardinality: one-to-one
+      transformation: Carry the source person record index into the POLARIS person identifier.
+      evidence: pilates/polaris/preprocessor.py:464
+    - id: atlas_polaris_member_ordinal
+      source_paths:
+        - AtlasPersonInput.member_id
+      target_paths:
+        - PolarisPersonRecord.id
+      mapping_status: derived
+      identity_role: within_parent_ordinal
+      value_stability: derived
+      relationship_cardinality: one-to-one
+      transformation: Convert the source one-based household member ordinal to POLARIS's zero-based ordinal.
+      evidence: pilates/polaris/preprocessor.py:116
+    - id: atlas_polaris_vehicle_identity
+      source_paths:
+        - AtlasVehicleOutput.vehicle_id
+      target_paths:
+        - PolarisVehicleRecord.vehicle_id
+      mapping_status: direct
+      identity_role: artifact_scoped_identifier
+      value_stability: artifact_scoped
+      relationship_cardinality: one-to-one
+      transformation: Preserve the vehicle identifier only within the enclosing translated population artifact.
+      evidence: pilates/polaris/preprocessor.py:212

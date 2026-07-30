@@ -21,3 +21,4 @@ imports:
   - models/activitysim/activitysim_population
   - models/polaris/polaris_population
   - profiles/pilates_population
+  - mappings/population_identity

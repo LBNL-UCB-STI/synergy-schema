@@ -15,6 +15,13 @@ SCHEMA_PATH = (
     / "synergy_schema.yaml"
 )
 
+MAPPINGS_PATH = (
+    Path(__file__).parents[1]
+    / "examples"
+    / "post_atlas_population_bundle"
+    / "population_identity_mappings.yaml"
+)
+
 
 def _messages(instance: dict[str, object], target_class: str) -> list[str]:
     report = Validator(
@@ -22,6 +29,42 @@ def _messages(instance: dict[str, object], target_class: str) -> list[str]:
         validation_plugins=[JsonschemaValidationPlugin(closed=True)],
     ).validate(instance, target_class)
     return [result.message for result in report.results]
+
+
+def _mapping_fixture() -> dict[str, dict[str, object]]:
+    import yaml
+
+    return yaml.safe_load(MAPPINGS_PATH.read_text(encoding="utf-8"))
+
+
+def test_mapping_vocabulary_is_imported_with_controlled_classifications() -> None:
+    schema_view = SchemaView(str(SCHEMA_PATH))
+    assert {
+        "PopulationRepresentationMapping",
+        "PopulationSlotMapping",
+    }.issubset(schema_view.all_classes())
+    assert set(schema_view.get_enum("PopulationMappingStatus").permissible_values) == {
+        "direct",
+        "renamed",
+        "unit_or_enum_converted",
+        "derived",
+        "unsupported",
+        "platform_specific",
+    }
+    assert set(schema_view.get_enum("PopulationIdentityRole").permissible_values) == {
+        "entity_identifier",
+        "relationship_foreign_key",
+        "within_parent_ordinal",
+        "geographic_identifier",
+        "artifact_scoped_identifier",
+    }
+    assert set(schema_view.get_enum("PopulationValueStability").permissible_values) == {
+        "preserved",
+        "derived",
+        "regenerated",
+        "alias",
+        "artifact_scoped",
+    }
 
 
 def test_root_exposes_cross_model_population_identity_projections() -> None:
@@ -199,3 +242,31 @@ def test_relationship_targets_are_explicit(
         .value
         == relationship_target
     )
+
+
+def test_population_mapping_manifest_validates_and_is_evidence_complete() -> None:
+    mappings = _mapping_fixture()
+    assert set(mappings) == {
+        "urbansim_activitysim_population",
+        "atlas_polaris_population",
+    }
+    for mapping in mappings.values():
+        assert _messages(mapping, "PopulationRepresentationMapping") == []
+        for slot_mapping in mapping["slot_mappings"]:
+            assert slot_mapping["mapping_status"]
+            assert slot_mapping["identity_role"]
+            assert slot_mapping["value_stability"]
+            assert slot_mapping["transformation"]
+            assert slot_mapping["evidence"].startswith("pilates/")
+
+
+def test_unstable_local_ordinals_are_not_mapped_as_preserved_entity_ids() -> None:
+    slot_mappings = [
+        entry
+        for mapping in _mapping_fixture().values()
+        for entry in mapping["slot_mappings"]
+    ]
+    for entry in slot_mappings:
+        if any(path.endswith((".member_id", ".id")) for path in entry["source_paths"]):
+            assert entry["identity_role"] == "within_parent_ordinal"
+            assert entry["value_stability"] in {"derived", "regenerated"}
