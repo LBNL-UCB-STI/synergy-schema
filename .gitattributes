@@ -1,0 +1,2 @@
+# Preserve checksummed upstream-generated documentation byte for byte.
+src/synergy_schema/schema/vendor/consist-provenance/*/reference/**/*.md -whitespace

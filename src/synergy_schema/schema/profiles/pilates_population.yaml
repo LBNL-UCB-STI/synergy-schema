@@ -1,0 +1,81 @@
+id: https://w3id.org/LBNL-UCB-STI/synergy-schema/profiles/pilates-population
+name: pilates_population
+title: PILATES population handoff profile
+description: >-
+  Operational composition for a post-ATLAS yearly population handoff. It adds
+  population-snapshot context to provider-neutral artifacts without defining
+  or copying ATLAS household, person, or vehicle rows.
+
+prefixes:
+  synergy_schema: https://w3id.org/LBNL-UCB-STI/synergy-schema/
+  linkml: https://w3id.org/linkml/
+
+default_prefix: synergy_schema
+default_range: string
+
+imports:
+  - linkml:types
+  - ../core/population_snapshot
+  - ../core/handoff_bundle
+  - ../models/atlas/atlas_population
+  - ../vendor/consist-provenance/0.1.0/provenance
+
+enums:
+  PopulationMemberRole:
+    description: >-
+      Required semantic roles in a complete yearly population snapshot bundle.
+      Standard LinkML validation checks the declared member count and allowed
+      values, but does not prove role uniqueness across members.
+    permissible_values:
+      households:
+        description: Household artifact using the ATLAS-owned AtlasHouseholdInput contract root.
+      persons:
+        description: Person artifact using the ATLAS-owned AtlasPersonInput contract root.
+      vehicles:
+        description: Vehicle artifact using the ATLAS-owned AtlasVehicleOutput contract root.
+
+classes:
+  PopulationSnapshotBundleMember:
+    description: >-
+      A population-table member with one of the profile's allowed roles. The
+      role-to-contract-root binding is documented here; standard LinkML row
+      validation does not enforce that conditional pairing across members.
+    is_a: HandoffBundleMember
+    annotations:
+      contract_root_by_role: >-
+        households=AtlasHouseholdInput; persons=AtlasPersonInput;
+        vehicles=AtlasVehicleOutput
+    slot_usage:
+      semantic_role:
+        range: PopulationMemberRole
+        required: true
+  PopulationSnapshotBundle:
+    description: >-
+      One complete post-ATLAS yearly population handoff. Its members are the
+      households, persons, and vehicles artifacts for one population snapshot.
+      The profile requires at least three members; a higher-level validation
+      layer must verify one unique member for each role and cross-table links.
+    is_a: HandoffBundle
+    attributes:
+      population_snapshot:
+        range: PopulationSnapshot
+        required: true
+        inlined: true
+        description: Population state represented by this handoff bundle.
+      consist_provenance:
+        range: ConsistProvenanceDocument
+        required: true
+        inlined: true
+        description: >-
+          Durable Consist run, artifact, and production facts for this PILATES
+          handoff. Scenario and population meaning remain in the Synergy
+          snapshot and bundle fields rather than this provenance graph.
+    slot_usage:
+      members:
+        range: PopulationSnapshotBundleMember
+        multivalued: true
+        inlined_as_list: true
+        required: true
+        minimum_cardinality: 3
+        description: >-
+          Required households, persons, and vehicles members for this snapshot.

@@ -35,9 +35,13 @@ the same definition into several places.
 
 ## Current status
 
-The repository currently contains only the project structure and an empty root
-schema. The first domain definitions, model descriptions, mappings, and
-PILATES validation rules have not been added yet.
+The first two vertical slices define population-snapshot context and a
+provider-neutral handoff bundle, then compose them into a PILATES yearly
+population profile. The profile now binds its three population artifacts to
+ATLAS-owned household/person input and vehicle-output record contracts and to a
+pinned Consist provenance graph. Native model records remain independent of
+Consist. Native code vocabularies, mappings, and broader production validation
+remain to come.
 
 ## Getting started
 
@@ -66,6 +70,12 @@ Build the Python package and confirm that it includes the root schema:
 uv build
 unzip -l dist/synergy_schema-*.whl | rg 'synergy_schema/schema/synergy_schema.yaml'
 ```
+
+## See a complete synthetic handoff
+
+The [post-ATLAS population bundle example](examples/post_atlas_population_bundle/)
+walks through native ATLAS rows, their snapshot-scoped population state, and
+the PILATES bundle that composes the three corresponding artifacts.
 
 ## Contributing a schema
 

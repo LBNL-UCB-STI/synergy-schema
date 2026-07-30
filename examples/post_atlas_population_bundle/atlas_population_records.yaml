@@ -1,0 +1,26 @@
+household:
+  household_id: 101
+  block_id: "060750101001001"
+  age_of_head: 42
+  seniors: 0
+  workers: 2
+  cars: 2
+  persons: 3
+  hh_type: 1
+person:
+  person_id: 1001
+  household_id: 101
+  age: 42
+  hours: 40
+  worker: 1
+  school_id: 0
+  race: "synthetic-code"
+  p_hispanic: "synthetic-code"
+vehicle:
+  household_id: 101
+  vehicle_id: 1
+  year: 2025
+  bodytype: "synthetic-body"
+  pred_power: "synthetic-powertrain"
+  modelyear: 2022
+  adopt_fuel: "synthetic-fuel"

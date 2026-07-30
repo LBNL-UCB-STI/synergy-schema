@@ -1,0 +1,287 @@
+id: https://w3id.org/LBNL-UCB-STI/synergy-schema/models/atlas/population
+name: atlas_population
+title: ATLAS native population records
+description: >-
+  ATLAS-owned household and person input rows and vehicle output rows used by
+  the post-ATLAS population export. Each attribute name is an explicit binding
+  to the current physical column spelling, not a proposal for shared-kernel
+  terminology or a claim that legacy codes have a closed vocabulary.
+
+prefixes:
+  synergy_schema: https://w3id.org/LBNL-UCB-STI/synergy-schema/
+  linkml: https://w3id.org/linkml/
+
+default_prefix: synergy_schema
+default_range: string
+
+imports:
+  - linkml:types
+
+classes:
+  AtlasHouseholdInput:
+    description: >-
+      Household row consumed by ATLAS. The post-ATLAS export retains this
+      record but replaces cars and hh_cars from ATLAS household-vehicle output;
+      every other listed field remains sourced from the household input.
+    annotations:
+      owner: ATLAS
+      direction: input
+      physical_binding: current AtlasHousehold column spellings
+      observed_sqlmodel_float_to_integer: >-
+        household_id, gt55, age_of_head, gt2, seniors, workers, race_of_head,
+        hispanic_status_of_head, and cars are semantically integral identifiers,
+        indicators, counts, or codes despite observed Float stubs.
+    attributes:
+      household_id:
+        range: integer
+        identifier: true
+        required: true
+        description: ATLAS household identifier; observed SQLModel stubs expose it as Float, but it is an identifier rather than a measurement.
+      tenure:
+        description: Housing-tenure category code; vocabulary requires ATLAS-owner confirmation.
+      block_id:
+        description: Census block identifier for the household location.
+      hh_age_of_head:
+        description: Household-head age-category code; vocabulary requires ATLAS-owner confirmation.
+      gt55:
+        range: integer
+        minimum_value: 0
+        description: Legacy indicator/code for a household head older than 55.
+      age_of_head:
+        range: integer
+        minimum_value: 0
+        maximum_value: 130
+        description: Age in years of the household head.
+      serialno:
+        range: integer
+        description: ACS or PUF household serial identifier.
+      gt2:
+        range: integer
+        minimum_value: 0
+        description: Legacy indicator/code for a household with more than two people.
+      seniors:
+        range: integer
+        minimum_value: 0
+        description: Count of seniors in the household.
+      hh_children:
+        description: Legacy household-children category code; vocabulary requires ATLAS-owner confirmation.
+      recent_mover:
+        description: Recent-mover category code; vocabulary requires ATLAS-owner confirmation.
+      hh_seniors:
+        description: Legacy household-seniors category code; vocabulary requires ATLAS-owner confirmation.
+      tenure_mover:
+        description: Tenure/mover category code; vocabulary requires ATLAS-owner confirmation.
+      workers:
+        range: integer
+        minimum_value: 0
+        description: Count of workers in the household.
+      race_of_head:
+        range: integer
+        description: Legacy race code for the household head; vocabulary requires ATLAS-owner confirmation.
+      hispanic_status_of_head:
+        range: integer
+        description: Legacy Hispanic-status code for the household head; vocabulary requires ATLAS-owner confirmation.
+      cars:
+        range: integer
+        minimum_value: 0
+        description: Vehicle count, replaced in the post-ATLAS export from household-vehicle output.
+      hh_cars:
+        description: Vehicle-ownership category, replaced in the post-ATLAS export from household-vehicle output.
+      lcm_county_id:
+        description: Land-change-model county identifier.
+      hispanic_head:
+        description: Legacy Hispanic-household-head category code; vocabulary requires ATLAS-owner confirmation.
+      hh_size:
+        description: Household-size category code; distinct from the persons count.
+      income:
+        range: float
+        description: Household income; currency basis and treatment of negative values require ATLAS-owner confirmation.
+      hh_race_of_head:
+        description: Household-head race category code; vocabulary requires ATLAS-owner confirmation.
+      hh_income:
+        description: Household-income category code; vocabulary requires ATLAS-owner confirmation.
+      hh_workers:
+        description: Household-worker category code; vocabulary requires ATLAS-owner confirmation.
+      sf_detached:
+        description: Single-family-detached category code; vocabulary requires ATLAS-owner confirmation.
+      persons:
+        range: integer
+        minimum_value: 0
+        description: Count of people in the household.
+      hh_type:
+        range: integer
+        description: Household-type code; vocabulary requires ATLAS-owner confirmation.
+
+  AtlasPersonInput:
+    description: ATLAS person row consumed as population input.
+    annotations:
+      owner: ATLAS
+      direction: input
+      physical_binding: current AtlasPersons column spellings
+      observed_sqlmodel_float_to_integer: >-
+        household_id, race_id, work_at_home, hours, student, hispanic, worker,
+        sex, hispanic_1, age, and edu are semantically integral identifiers,
+        ages, hours, indicators, or legacy numeric codes despite observed Float
+        stubs.
+    attributes:
+      person_id:
+        range: integer
+        identifier: true
+        required: true
+        description: ATLAS person identifier.
+      p_hispanic:
+        description: Legacy person Hispanic/Latino category code, distinct from hispanic and hispanic_1.
+      person_age:
+        description: Person age-category code, distinct from age in years.
+      race_id:
+        range: integer
+        description: Legacy numeric race identifier; vocabulary requires ATLAS-owner confirmation.
+      school_id:
+        range: integer
+        description: School identifier associated with the person.
+      education_group:
+        description: Education-group category code; vocabulary requires ATLAS-owner confirmation.
+      workplace_taz:
+        range: integer
+        description: Workplace traffic-analysis-zone identifier.
+      school_block_id:
+        range: integer
+        description: School-location block identifier in the observed physical representation.
+      school_zone_id:
+        range: integer
+        description: School-location traffic-analysis-zone identifier.
+      person_sex:
+        description: Person-sex category code, distinct from sex.
+      relate:
+        range: integer
+        description: Relationship-to-household-head code; vocabulary requires ATLAS-owner confirmation.
+      work_at_home:
+        range: integer
+        minimum_value: 0
+        description: Work-at-home indicator/code; vocabulary requires ATLAS-owner confirmation.
+      hours:
+        range: integer
+        minimum_value: 0
+        description: Weekly work hours.
+      earning:
+        range: float
+        description: Earnings measure; unit, period, and treatment of negative values require ATLAS-owner confirmation.
+      student:
+        range: integer
+        minimum_value: 0
+        description: Student-status indicator/code; vocabulary requires ATLAS-owner confirmation.
+      work_block_id:
+        description: Workplace census-block identifier.
+      hispanic:
+        range: integer
+        description: Legacy Hispanic-status code, distinct from p_hispanic and hispanic_1.
+      worker:
+        range: integer
+        minimum_value: 0
+        description: Worker-status indicator/code; vocabulary requires ATLAS-owner confirmation.
+      age_group:
+        description: Age-group category code, distinct from person_age and age.
+      member_id:
+        range: integer
+        description: Household-member identifier within a household.
+      work_zone_id:
+        range: integer
+        description: Workplace zone identifier.
+      sex:
+        range: integer
+        description: Legacy numeric sex code, distinct from person_sex.
+      race:
+        description: Race category code, distinct from race_id.
+      hispanic_1:
+        range: integer
+        description: Alternate legacy Hispanic-status code, distinct from p_hispanic and hispanic.
+      age:
+        range: integer
+        minimum_value: 0
+        maximum_value: 130
+        description: Age in years.
+      household_id:
+        range: integer
+        required: true
+        annotations:
+          relationship_target: AtlasHouseholdInput
+          validation_boundary: LinkML validates this value's shape, not cross-table referential integrity.
+        description: Household identifier referencing AtlasHouseholdInput.household_id.
+      school_taz:
+        range: integer
+        description: School traffic-analysis-zone identifier.
+      mar:
+        range: integer
+        description: Marital-status code; vocabulary requires ATLAS-owner confirmation.
+      edu:
+        range: integer
+        description: Education-attainment code; vocabulary requires ATLAS-owner confirmation.
+
+  AtlasVehicleOutput:
+    description: >-
+      Vehicle row produced by ATLAS. Its natural identity is the composite
+      (household_id, vehicle_id, forecast/output year); no synthetic physical
+      identifier is introduced for this contract.
+    annotations:
+      owner: ATLAS
+      direction: output
+      physical_binding: current VehiclesAtlasOut attribute spellings
+    unique_keys:
+      atlas_vehicle_year:
+        description: Natural composite identity of an ATLAS vehicle record for one forecast/output year.
+        unique_key_slots:
+          - household_id
+          - vehicle_id
+          - year
+    attributes:
+      household_id:
+        range: integer
+        required: true
+        annotations:
+          relationship_target: AtlasHouseholdInput
+          validation_boundary: LinkML validates this value's shape, not cross-table referential integrity.
+        description: Household identifier referencing AtlasHouseholdInput.household_id.
+      vehicle_id:
+        range: integer
+        required: true
+        description: Vehicle identifier within a household.
+      bodytype:
+        description: Vehicle body-type code; vocabulary requires ATLAS-owner confirmation.
+      pred_power:
+        description: Predicted powertrain category code; vocabulary requires ATLAS-owner confirmation.
+      ownlease:
+        description: Ownership/lease category code; vocabulary requires ATLAS-owner confirmation.
+      modelyear:
+        range: integer
+        description: Vehicle model year; no project-wide bound is declared yet.
+      adopt_fuel:
+        description: Adopted fuel-type code; vocabulary requires ATLAS-owner confirmation.
+      adopt_veh:
+        description: Vehicle-technology-adoption code; vocabulary requires ATLAS-owner confirmation.
+      acquire_year:
+        description: Observed acquisition-year representation; format requires ATLAS-owner confirmation.
+      vehicle_tag:
+        description: Vehicle tag or identifier label.
+      year:
+        range: integer
+        required: true
+        description: >-
+          ATLAS forecast/output year in the vehicle record's composite identity,
+          distinct from vehicle model year (modelyear); final terminology awaits
+          ATLAS-owner confirmation.
+      newhhflag:
+        description: New-household indicator/code; vocabulary requires ATLAS-owner confirmation.
+      maindriver_id:
+        range: integer
+        annotations:
+          relationship_target: AtlasPersonInput
+          validation_boundary: LinkML validates this value's shape, not cross-table referential integrity.
+        description: Primary-driver person identifier, when supplied.
+      vintage_category:
+        description: Vehicle-vintage category code; vocabulary requires ATLAS-owner confirmation.
+      vehicletypeid:
+        description: >-
+          Vehicle-type identifier used by the postprocessing path. The observed
+          SQLModel column binding spells the source column vehicleTypeId; this
+          contract retains the exporter-facing attribute spelling vehicletypeid
+          until the ATLAS owner confirms a canonical physical-name policy.

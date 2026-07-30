@@ -15,4 +15,7 @@ When two model-owned definitions are related, record that relationship in
 [`../core/`](../core/) only after the participating teams agree that its
 meaning is genuinely shared.
 
-No model-owned schemas have been added yet.
+The first model-owned slice is [`atlas/`](atlas/). It documents ATLAS-facing
+household and person inputs plus the ATLAS vehicle output used by the
+post-ATLAS population handoff. Those rows remain ATLAS-owned; PILATES binds
+their artifacts to an operational profile without copying their fields.
