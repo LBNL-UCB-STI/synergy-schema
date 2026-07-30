@@ -144,16 +144,25 @@ atlas_polaris_population:
       relationship_cardinality: one-to-one
       transformation: Subtract the detected source member_id offset to normalize the POLARIS ordinal to zero-based.
       evidence: pilates/generated/polaris_population_translation/20_persons.sql:11
-    - id: atlas_polaris_vehicle_identity
+    - id: atlas_polaris_vehicle_household_membership
       source_paths:
         - AtlasVehicleOutput.household_id
-        - AtlasVehicleOutput.vehicle_id
       target_paths:
         - PolarisVehicleRecord.hhold
-        - PolarisVehicleRecord.vehicle_id
       mapping_status: renamed
+      identity_role: relationship_foreign_key
+      value_stability: preserved
+      relationship_cardinality: many-to-one
+      transformation: Cast household_id to bigint and rename it to the POLARIS vehicle household reference.
+      evidence: pilates/generated/polaris_population_translation/40_vehicles.sql:6
+    - id: atlas_polaris_vehicle_identity
+      source_paths:
+        - AtlasVehicleOutput.vehicle_id
+      target_paths:
+        - PolarisVehicleRecord.vehicle_id
+      mapping_status: direct
       identity_role: artifact_scoped_identifier
       value_stability: artifact_scoped
       relationship_cardinality: one-to-one
-      transformation: Cast the household and vehicle identifiers to bigint and preserve the pair only within the translated population artifact.
+      transformation: Cast and preserve vehicle_id only within the translated population artifact.
       evidence: pilates/generated/polaris_population_translation/40_vehicles.sql:5

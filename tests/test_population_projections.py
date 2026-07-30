@@ -272,38 +272,39 @@ def test_unstable_local_ordinals_are_not_mapped_as_preserved_entity_ids() -> Non
             assert entry["value_stability"] in {"derived", "regenerated"}
 
 
-def test_atlas_polaris_evidence_uses_the_generated_translation_for_each_source() -> (
-    None
-):
+def test_atlas_polaris_evidence_is_exact_for_each_translation_path_pair() -> None:
     slot_mappings = _mapping_fixture()["atlas_polaris_population"]["slot_mappings"]
-    assert {entry["id"] for entry in slot_mappings} == {
-        "atlas_polaris_household_identity",
-        "atlas_polaris_household_hhold_identity",
-        "atlas_polaris_person_identity",
-        "atlas_polaris_person_household_membership",
-        "atlas_polaris_member_ordinal",
-        "atlas_polaris_vehicle_identity",
+    assert all(
+        len(entry["source_paths"]) == len(entry["target_paths"]) == 1
+        for entry in slot_mappings
+    )
+    actual = {
+        (entry["source_paths"][0], entry["target_paths"][0]): entry["evidence"]
+        for entry in slot_mappings
     }
-    evidence_by_source_class = {
-        "AtlasHouseholdInput": (
-            "pilates/generated/polaris_population_translation/10_households.sql"
+    assert actual == {
+        ("AtlasHouseholdInput.household_id", "PolarisHouseholdRecord.household"): (
+            "pilates/generated/polaris_population_translation/10_households.sql:7"
         ),
-        "AtlasPersonInput": (
-            "pilates/generated/polaris_population_translation/20_persons.sql"
+        ("AtlasHouseholdInput.household_id", "PolarisHouseholdRecord.hhold"): (
+            "pilates/generated/polaris_population_translation/10_households.sql:8"
         ),
-        "AtlasVehicleOutput": (
-            "pilates/generated/polaris_population_translation/40_vehicles.sql"
+        ("AtlasPersonInput.person_id", "PolarisPersonRecord.person"): (
+            "pilates/generated/polaris_population_translation/20_persons.sql:10"
+        ),
+        ("AtlasPersonInput.household_id", "PolarisPersonRecord.household"): (
+            "pilates/generated/polaris_population_translation/20_persons.sql:79"
+        ),
+        ("AtlasPersonInput.member_id", "PolarisPersonRecord.id"): (
+            "pilates/generated/polaris_population_translation/20_persons.sql:11"
+        ),
+        ("AtlasVehicleOutput.household_id", "PolarisVehicleRecord.hhold"): (
+            "pilates/generated/polaris_population_translation/40_vehicles.sql:6"
+        ),
+        ("AtlasVehicleOutput.vehicle_id", "PolarisVehicleRecord.vehicle_id"): (
+            "pilates/generated/polaris_population_translation/40_vehicles.sql:5"
         ),
     }
-    for entry in slot_mappings:
-        source_classes = {path.partition(".")[0] for path in entry["source_paths"]}
-        assert len(source_classes) == 1
-        source_class = source_classes.pop()
-        assert source_class in evidence_by_source_class
-        evidence_path, separator, line_number = entry["evidence"].rpartition(":")
-        assert evidence_path == evidence_by_source_class[source_class]
-        assert separator == ":"
-        assert line_number.isdigit()
 
 
 def test_atlas_polaris_identity_mappings_match_the_generated_sql_contract() -> None:
@@ -348,10 +349,16 @@ def test_atlas_polaris_identity_mappings_match_the_generated_sql_contract() -> N
             "derived",
             "derived",
         ),
-        "atlas_polaris_vehicle_identity": (
-            ["AtlasVehicleOutput.household_id", "AtlasVehicleOutput.vehicle_id"],
-            ["PolarisVehicleRecord.hhold", "PolarisVehicleRecord.vehicle_id"],
+        "atlas_polaris_vehicle_household_membership": (
+            ["AtlasVehicleOutput.household_id"],
+            ["PolarisVehicleRecord.hhold"],
             "renamed",
+            "preserved",
+        ),
+        "atlas_polaris_vehicle_identity": (
+            ["AtlasVehicleOutput.vehicle_id"],
+            ["PolarisVehicleRecord.vehicle_id"],
+            "direct",
             "artifact_scoped",
         ),
     }
