@@ -15,7 +15,15 @@ When two model-owned definitions are related, record that relationship in
 [`../core/`](../core/) only after the participating teams agree that its
 meaning is genuinely shared.
 
-The first model-owned slice is [`atlas/`](atlas/). It documents ATLAS-facing
-household and person inputs plus the ATLAS vehicle output used by the
-post-ATLAS population handoff. Those rows remain ATLAS-owned; PILATES binds
-their artifacts to an operational profile without copying their fields.
+The model-owned population slices are:
+
+- [`activitysim/`](activitysim/), the ActivitySim household, person, and
+  land-use-zone join projections observed by the current PILATES adapter.
+- [`atlas/`](atlas/), the ATLAS household and person inputs plus vehicle output
+  used by the post-ATLAS population handoff.
+- [`polaris/`](polaris/), the translated POLARIS household, person, and
+  vehicle identity projections.
+- [`urbansim/`](urbansim/), the UrbanSim household and person join projections.
+
+Each remains owned by its model. PILATES binds the relevant artifacts to an
+operational profile without copying model fields into a shared kernel.

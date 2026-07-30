@@ -1,0 +1,67 @@
+id: https://w3id.org/LBNL-UCB-STI/synergy-schema/models/urbansim/population
+name: urbansim_population
+title: UrbanSim population identity projections
+description: >-
+  UrbanSim-owned identity-bearing partial projections used to join household
+  and person population records across the current PILATES workflow.
+
+prefixes:
+  synergy_schema: https://w3id.org/LBNL-UCB-STI/synergy-schema/
+  linkml: https://w3id.org/linkml/
+
+default_prefix: synergy_schema
+default_range: string
+
+imports:
+  - linkml:types
+
+classes:
+  UrbanSimHouseholdPopulationRecord:
+    description: UrbanSim household identity and location projection.
+    annotations:
+      owner: UrbanSim
+      coverage: identity-bearing partial projection
+      enforcement_status: PILATES-observed
+    attributes:
+      household_id:
+        range: integer
+        identifier: true
+        required: true
+        description: UrbanSim household identifier.
+      block_id:
+        range: integer
+        description: Census block identifier for the household location.
+
+  UrbanSimPersonPopulationRecord:
+    description: UrbanSim person identity and household-join projection.
+    annotations:
+      owner: UrbanSim
+      coverage: identity-bearing partial projection
+      enforcement_status: PILATES-observed
+    attributes:
+      person_id:
+        range: integer
+        identifier: true
+        required: true
+        description: UrbanSim person identifier.
+      household_id:
+        range: integer
+        required: true
+        annotations:
+          relationship_target: UrbanSimHouseholdPopulationRecord
+        description: Household identifier referencing UrbanSimHouseholdPopulationRecord.
+      member_id:
+        range: integer
+        annotations:
+          identity_role: within-household ordinal
+        description: Optional ordinal identifying a person within a household.
+      work_zone_id:
+        range: integer
+        annotations:
+          mapping_scope: current PILATES ActivitySim adapter
+        description: Optional workplace zone alias.
+      school_zone_id:
+        range: integer
+        annotations:
+          mapping_scope: current PILATES ActivitySim adapter
+        description: Optional school zone alias.

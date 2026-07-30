@@ -1,0 +1,84 @@
+id: https://w3id.org/LBNL-UCB-STI/synergy-schema/models/polaris/population
+name: polaris_population
+title: POLARIS population identity projections
+description: >-
+  POLARIS-owned identity-bearing partial projections used to join translated
+  household, person, and vehicle population records in the PILATES workflow.
+
+prefixes:
+  synergy_schema: https://w3id.org/LBNL-UCB-STI/synergy-schema/
+  linkml: https://w3id.org/linkml/
+
+default_prefix: synergy_schema
+default_range: string
+
+imports:
+  - linkml:types
+
+classes:
+  PolarisHouseholdRecord:
+    description: POLARIS household identity and location projection.
+    annotations:
+      owner: POLARIS
+      coverage: identity-bearing partial projection
+      enforcement_status: PILATES-observed
+    attributes:
+      household:
+        range: integer
+        identifier: true
+        required: true
+        description: POLARIS household identifier.
+      hhold:
+        range: integer
+        required: true
+        annotations:
+          alias_of: household
+        description: Required physical alias of the household identifier.
+      location:
+        range: integer
+        description: Optional household location identifier.
+
+  PolarisPersonRecord:
+    description: POLARIS person identity and household-join projection.
+    annotations:
+      owner: POLARIS
+      coverage: identity-bearing partial projection
+      enforcement_status: PILATES-observed
+    attributes:
+      person:
+        range: integer
+        identifier: true
+        required: true
+        description: POLARIS person identifier.
+      household:
+        range: integer
+        required: true
+        annotations:
+          relationship_target: PolarisHouseholdRecord
+        description: Household identifier referencing PolarisHouseholdRecord.
+      id:
+        range: integer
+        required: true
+        annotations:
+          identity_role: zero-based within-household ordinal
+        description: Zero-based ordinal identifying the person within a household.
+
+  PolarisVehicleRecord:
+    description: POLARIS vehicle identity and household-join projection.
+    annotations:
+      owner: POLARIS
+      coverage: identity-bearing partial projection
+      enforcement_status: PILATES-observed
+      identity_scope: enclosing translated population snapshot artifact
+    attributes:
+      vehicle_id:
+        range: integer
+        identifier: true
+        required: true
+        description: POLARIS vehicle identifier.
+      hhold:
+        range: integer
+        required: true
+        annotations:
+          relationship_target: PolarisHouseholdRecord
+        description: Household identifier referencing PolarisHouseholdRecord.

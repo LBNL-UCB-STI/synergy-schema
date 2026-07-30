@@ -17,4 +17,7 @@ imports:
   - core/population_snapshot
   - core/handoff_bundle
   - models/atlas/atlas_population
+  - models/urbansim/urbansim_population
+  - models/activitysim/activitysim_population
+  - models/polaris/polaris_population
   - profiles/pilates_population
