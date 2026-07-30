@@ -44,9 +44,9 @@ geographic lookup. Similarly, `vehicle_id` is preserved only as an
 artifact-scoped POLARIS vehicle identifier, not as a cross-artifact vehicle
 identity.
 
-LinkML validates the declared shape of each projection: required fields,
-types, and the named relationship targets. The focused tests add checks for
-the synthetic mapping path and its recorded evidence, but neither layer opens
-model artifacts nor proves cross-artifact referential integrity, full
-population coverage, or runtime enforcement. Those remain separate
-model-owner and workflow-validation work.
+LinkML validates the declared row shape of each projection: required fields
+and types. The schema declares named relationship-target labels as annotations,
+and the focused tests check those labels along with the synthetic mapping path
+and its recorded evidence. Neither layer opens model artifacts nor proves
+cross-artifact referential integrity, full population coverage, or runtime
+enforcement. Those remain separate model-owner and workflow-validation work.
