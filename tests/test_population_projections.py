@@ -1,6 +1,7 @@
 from copy import deepcopy
 from pathlib import Path
 
+import pytest
 from linkml.validator import Validator
 from linkml.validator.plugins import JsonschemaValidationPlugin
 from linkml_runtime.utils.schemaview import SchemaView
@@ -68,7 +69,7 @@ def test_population_projection_shapes_expose_only_identity_join_fields() -> None
         assert set(schema_view.induced_class(class_name).attributes) == fields
 
 
-def test_projection_identifiers_and_relationships_are_explicit() -> None:
+def test_projection_identifiers_and_physical_names_are_explicit() -> None:
     schema_view = SchemaView(str(SCHEMA_PATH))
     cases = {
         "UrbanSimHouseholdPopulationRecord": ({"household_id": 101}, "household_id"),
@@ -106,9 +107,95 @@ def test_projection_identifiers_and_relationships_are_explicit() -> None:
         .value
         == "TAZ"
     )
+
+
+@pytest.mark.parametrize(
+    ("target_class", "record", "required_field"),
+    [
+        (
+            "UrbanSimPersonPopulationRecord",
+            {"person_id": 1001, "household_id": 101},
+            "household_id",
+        ),
+        (
+            "ActivitySimPersonInputRecord",
+            {"person_id": 1001, "household_id": 101, "member_id": 1},
+            "household_id",
+        ),
+        (
+            "ActivitySimPersonInputRecord",
+            {"person_id": 1001, "household_id": 101, "member_id": 1},
+            "member_id",
+        ),
+        (
+            "PolarisHouseholdRecord",
+            {"household": 101, "hhold": 101},
+            "hhold",
+        ),
+        (
+            "PolarisPersonRecord",
+            {"person": 1001, "household": 101, "id": 0},
+            "household",
+        ),
+        (
+            "PolarisPersonRecord",
+            {"person": 1001, "household": 101, "id": 0},
+            "id",
+        ),
+        (
+            "PolarisVehicleRecord",
+            {"vehicle_id": 1, "hhold": 101},
+            "hhold",
+        ),
+    ],
+)
+def test_required_relationship_and_ordinal_fields_are_enforced(
+    target_class: str,
+    record: dict[str, object],
+    required_field: str,
+) -> None:
+    assert _messages(record, target_class) == []
+    missing = deepcopy(record)
+    del missing[required_field]
+    assert _messages(missing, target_class)
+
+
+@pytest.mark.parametrize(
+    ("target_class", "slot_name", "relationship_target"),
+    [
+        (
+            "UrbanSimPersonPopulationRecord",
+            "household_id",
+            "UrbanSimHouseholdPopulationRecord",
+        ),
+        (
+            "ActivitySimHouseholdInputRecord",
+            "taz",
+            "ActivitySimLandUseZoneRecord",
+        ),
+        (
+            "ActivitySimPersonInputRecord",
+            "household_id",
+            "ActivitySimHouseholdInputRecord",
+        ),
+        (
+            "ActivitySimPersonInputRecord",
+            "taz",
+            "ActivitySimLandUseZoneRecord",
+        ),
+        ("PolarisPersonRecord", "household", "PolarisHouseholdRecord"),
+        ("PolarisVehicleRecord", "hhold", "PolarisHouseholdRecord"),
+    ],
+)
+def test_relationship_targets_are_explicit(
+    target_class: str,
+    slot_name: str,
+    relationship_target: str,
+) -> None:
+    schema_view = SchemaView(str(SCHEMA_PATH))
     assert (
-        schema_view.induced_slot("household_id", "ActivitySimPersonInputRecord")
+        schema_view.induced_slot(slot_name, target_class)
         .annotations["relationship_target"]
         .value
-        == "ActivitySimHouseholdInputRecord"
+        == relationship_target
     )
