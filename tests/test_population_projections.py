@@ -37,6 +37,17 @@ def _mapping_fixture() -> dict[str, dict[str, object]]:
     return yaml.safe_load(MAPPINGS_PATH.read_text(encoding="utf-8"))
 
 
+def _evidence_by_path_pair(
+    slot_mappings: list[dict[str, object]],
+) -> dict[tuple[str, str], str]:
+    evidence = {
+        (entry["source_paths"][0], entry["target_paths"][0]): entry["evidence"]
+        for entry in slot_mappings
+    }
+    assert len(evidence) == len(slot_mappings), "duplicate source and target path pair"
+    return evidence
+
+
 def test_mapping_vocabulary_is_imported_with_controlled_classifications() -> None:
     schema_view = SchemaView(str(SCHEMA_PATH))
     assert {
@@ -278,10 +289,7 @@ def test_atlas_polaris_evidence_is_exact_for_each_translation_path_pair() -> Non
         len(entry["source_paths"]) == len(entry["target_paths"]) == 1
         for entry in slot_mappings
     )
-    actual = {
-        (entry["source_paths"][0], entry["target_paths"][0]): entry["evidence"]
-        for entry in slot_mappings
-    }
+    actual = _evidence_by_path_pair(slot_mappings)
     assert actual == {
         ("AtlasHouseholdInput.household_id", "PolarisHouseholdRecord.household"): (
             "pilates/generated/polaris_population_translation/10_households.sql:7"
@@ -305,6 +313,21 @@ def test_atlas_polaris_evidence_is_exact_for_each_translation_path_pair() -> Non
             "pilates/generated/polaris_population_translation/40_vehicles.sql:5"
         ),
     }
+
+
+def test_atlas_polaris_evidence_rejects_duplicate_translation_path_pairs() -> None:
+    slot_mappings = deepcopy(
+        _mapping_fixture()["atlas_polaris_population"]["slot_mappings"]
+    )
+    duplicate = deepcopy(slot_mappings[0])
+    duplicate["id"] = "duplicate_household_identity"
+    duplicate["evidence"] = (
+        "pilates/generated/polaris_population_translation/10_households.sql:999"
+    )
+    slot_mappings.append(duplicate)
+
+    with pytest.raises(AssertionError, match="duplicate source and target path pair"):
+        _evidence_by_path_pair(slot_mappings)
 
 
 def test_atlas_polaris_identity_mappings_match_the_generated_sql_contract() -> None:
