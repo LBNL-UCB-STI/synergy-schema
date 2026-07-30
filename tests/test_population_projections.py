@@ -34,6 +34,12 @@ ATLAS_RECORDS_PATH = (
     / "post_atlas_population_bundle"
     / "atlas_population_records.yaml"
 )
+BUNDLE_PATH = (
+    Path(__file__).parents[1]
+    / "examples"
+    / "post_atlas_population_bundle"
+    / "population_snapshot_bundle.yaml"
+)
 
 
 def _messages(instance: dict[str, object], target_class: str) -> list[str]:
@@ -65,6 +71,41 @@ def _evidence_by_path_pair(
     }
     assert len(evidence) == len(slot_mappings), "duplicate source and target path pair"
     return evidence
+
+
+def _evidence_by_mapping_target(
+    slot_mappings: list[dict[str, object]],
+) -> dict[tuple[str, str], str]:
+    target_count = sum(len(entry["target_paths"]) for entry in slot_mappings)
+    evidence = {
+        (entry["id"], target_path): entry["evidence"]
+        for entry in slot_mappings
+        for target_path in entry["target_paths"]
+    }
+    assert len(evidence) == target_count, "duplicate mapping identifier and target"
+    return evidence
+
+
+def _assert_vehicle_identity_scope(
+    atlas: dict[str, object],
+    records: dict[str, object],
+    bundle: dict[str, object],
+) -> None:
+    atlas_vehicle = atlas["vehicle"]
+    polaris_vehicle = records["polaris_vehicle"]
+    snapshot = bundle["population_snapshot"]
+    vehicle_member = next(
+        member for member in bundle["members"] if member["semantic_role"] == "vehicles"
+    )
+
+    assert set(atlas_vehicle).issuperset({"household_id", "vehicle_id", "year"})
+    assert set(polaris_vehicle) == {"vehicle_id", "hhold"}
+    assert polaris_vehicle["hhold"] == atlas_vehicle["household_id"]
+    assert polaris_vehicle["vehicle_id"] == atlas_vehicle["vehicle_id"]
+    assert vehicle_member["schema_contract"]["selected_root"] == "AtlasVehicleOutput"
+    assert atlas_vehicle["year"] == snapshot["simulation_year"] == 2025, (
+        "ATLAS vehicle year must match the enclosing population snapshot year"
+    )
 
 
 def test_mapping_vocabulary_is_imported_with_controlled_classifications() -> None:
@@ -331,6 +372,9 @@ def test_atlas_polaris_evidence_is_exact_for_each_translation_path_pair() -> Non
         ("AtlasVehicleOutput.vehicle_id", "PolarisVehicleRecord.vehicle_id"): (
             "pilates/generated/polaris_population_translation/40_vehicles.sql:5"
         ),
+        ("AtlasVehicleOutput.year", "PopulationSnapshot.simulation_year"): (
+            "pilates/generated/polaris_population_translation/40_vehicles.sql:3-6"
+        ),
     }
 
 
@@ -403,7 +447,96 @@ def test_atlas_polaris_identity_mappings_match_the_generated_sql_contract() -> N
             "direct",
             "artifact_scoped",
         ),
+        "atlas_polaris_vehicle_year_scope": (
+            ["AtlasVehicleOutput.year"],
+            ["PopulationSnapshot.simulation_year"],
+            "direct",
+            "artifact_scoped",
+        ),
     }
+
+
+def test_each_population_mapping_target_has_exact_implementation_evidence() -> None:
+    slot_mappings = [
+        entry
+        for mapping in _mapping_fixture().values()
+        for entry in mapping["slot_mappings"]
+    ]
+    assert _evidence_by_mapping_target(slot_mappings) == {
+        (
+            "urbansim_activitysim_household_identity",
+            "ActivitySimHouseholdInputRecord.household_id",
+        ): ("pilates/activitysim/preprocessor.py:3524"),
+        (
+            "urbansim_activitysim_person_identity",
+            "ActivitySimPersonInputRecord.person_id",
+        ): ("pilates/activitysim/preprocessor.py:3259"),
+        (
+            "urbansim_activitysim_person_household_membership",
+            "ActivitySimPersonInputRecord.household_id",
+        ): ("pilates/activitysim/preprocessor.py:3269"),
+        (
+            "urbansim_activitysim_person_household_membership",
+            "ActivitySimHouseholdInputRecord.household_id",
+        ): ("pilates/activitysim/preprocessor.py:3269"),
+        (
+            "urbansim_activitysim_member_ordinal",
+            "ActivitySimPersonInputRecord.member_id",
+        ): ("pilates/activitysim/preprocessor.py:3349"),
+        (
+            "urbansim_activitysim_household_block_to_taz",
+            "ActivitySimHouseholdInputRecord.taz",
+        ): ("pilates/activitysim/preprocessor.py:3523"),
+        (
+            "urbansim_activitysim_person_block_to_taz",
+            "ActivitySimPersonInputRecord.taz",
+        ): ("pilates/activitysim/preprocessor.py:3268-3271"),
+        (
+            "activitysim_work_location_aliases",
+            "ActivitySimPersonInputRecord.workplace_taz",
+        ): ("pilates/activitysim/preprocessor.py:3255"),
+        (
+            "activitysim_school_location_alias",
+            "ActivitySimPersonInputRecord.school_taz",
+        ): ("pilates/activitysim/preprocessor.py:3257"),
+        ("atlas_polaris_household_identity", "PolarisHouseholdRecord.household"): (
+            "pilates/generated/polaris_population_translation/10_households.sql:7"
+        ),
+        ("atlas_polaris_household_hhold_identity", "PolarisHouseholdRecord.hhold"): (
+            "pilates/generated/polaris_population_translation/10_households.sql:8"
+        ),
+        ("atlas_polaris_person_identity", "PolarisPersonRecord.person"): (
+            "pilates/generated/polaris_population_translation/20_persons.sql:10"
+        ),
+        (
+            "atlas_polaris_person_household_membership",
+            "PolarisPersonRecord.household",
+        ): ("pilates/generated/polaris_population_translation/20_persons.sql:79"),
+        ("atlas_polaris_member_ordinal", "PolarisPersonRecord.id"): (
+            "pilates/generated/polaris_population_translation/20_persons.sql:11"
+        ),
+        ("atlas_polaris_vehicle_household_membership", "PolarisVehicleRecord.hhold"): (
+            "pilates/generated/polaris_population_translation/40_vehicles.sql:6"
+        ),
+        ("atlas_polaris_vehicle_identity", "PolarisVehicleRecord.vehicle_id"): (
+            "pilates/generated/polaris_population_translation/40_vehicles.sql:5"
+        ),
+        ("atlas_polaris_vehicle_year_scope", "PopulationSnapshot.simulation_year"): (
+            "pilates/generated/polaris_population_translation/40_vehicles.sql:3-6"
+        ),
+    }
+
+
+def test_mapping_evidence_rejects_duplicate_declared_targets() -> None:
+    slot_mappings = deepcopy(
+        _mapping_fixture()["urbansim_activitysim_population"]["slot_mappings"]
+    )
+    duplicate = deepcopy(slot_mappings[0])
+    duplicate["evidence"] = "pilates/activitysim/preprocessor.py:999"
+    slot_mappings.append(duplicate)
+
+    with pytest.raises(AssertionError, match="duplicate mapping identifier and target"):
+        _evidence_by_mapping_target(slot_mappings)
 
 
 def test_cross_model_example_records_validate() -> None:
@@ -476,3 +609,23 @@ def test_cross_model_example_preserves_entities_and_exposes_transformations() ->
         == records["activitysim_land_use"]["taz"]
     )
     assert records["polaris_vehicle"]["vehicle_id"] == atlas["vehicle"]["vehicle_id"]
+
+
+def test_cross_model_vehicle_identity_is_scoped_by_atlas_year_and_snapshot() -> None:
+    _assert_vehicle_identity_scope(
+        _yaml(ATLAS_RECORDS_PATH),
+        _yaml(CROSS_MODEL_RECORDS_PATH),
+        _yaml(BUNDLE_PATH),
+    )
+
+
+def test_cross_model_vehicle_identity_rejects_atlas_year_drift() -> None:
+    atlas = _yaml(ATLAS_RECORDS_PATH)
+    atlas["vehicle"]["year"] = 2026
+
+    with pytest.raises(AssertionError, match="ATLAS vehicle year"):
+        _assert_vehicle_identity_scope(
+            atlas,
+            _yaml(CROSS_MODEL_RECORDS_PATH),
+            _yaml(BUNDLE_PATH),
+        )

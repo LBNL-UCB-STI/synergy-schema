@@ -49,18 +49,30 @@ urbansim_activitysim_population:
       relationship_cardinality: one-to-one
       transformation: Recalculate one-based household member ordinals after filtering ActivitySim persons.
       evidence: pilates/activitysim/preprocessor.py:3349
-    - id: urbansim_activitysim_block_to_taz
+    - id: urbansim_activitysim_household_block_to_taz
       source_paths:
         - UrbanSimHouseholdPopulationRecord.block_id
       target_paths:
         - ActivitySimHouseholdInputRecord.taz
-        - ActivitySimPersonInputRecord.taz
       mapping_status: derived
       identity_role: geographic_identifier
       value_stability: derived
       relationship_cardinality: many-to-one
       transformation: Look up each household block identifier in the configured ActivitySim zone column.
-      evidence: pilates/activitysim/preprocessor.py:3526
+      evidence: pilates/activitysim/preprocessor.py:3523
+    - id: urbansim_activitysim_person_block_to_taz
+      source_paths:
+        - UrbanSimHouseholdPopulationRecord.block_id
+      target_paths:
+        - ActivitySimPersonInputRecord.taz
+      mapping_status: derived
+      identity_role: geographic_identifier
+      value_stability: derived
+      relationship_cardinality: many-to-one
+      transformation: >-
+        Derive each person's ActivitySim TAZ by mapping its household through
+        the household block-to-zone lookup.
+      evidence: pilates/activitysim/preprocessor.py:3268-3271
     - id: activitysim_work_location_aliases
       source_paths:
         - ActivitySimPersonInputRecord.work_zone_id
@@ -87,7 +99,9 @@ urbansim_activitysim_population:
 atlas_polaris_population:
   id: atlas_polaris_population
   source_representation: ATLAS population records
-  target_representation: POLARIS population identity projections
+  target_representation: >-
+    POLARIS population identity projections and their enclosing PopulationSnapshot
+    artifact scope
   slot_mappings:
     - id: atlas_polaris_household_identity
       source_paths:
@@ -166,3 +180,17 @@ atlas_polaris_population:
       relationship_cardinality: one-to-one
       transformation: Cast and preserve vehicle_id only within the translated population artifact.
       evidence: pilates/generated/polaris_population_translation/40_vehicles.sql:5
+    - id: atlas_polaris_vehicle_year_scope
+      source_paths:
+        - AtlasVehicleOutput.year
+      target_paths:
+        - PopulationSnapshot.simulation_year
+      mapping_status: direct
+      identity_role: artifact_scoped_identifier
+      value_stability: artifact_scoped
+      relationship_cardinality: one-to-one
+      transformation: >-
+        The POLARIS vehicle row drops the ATLAS forecast/output year; preserve
+        the natural vehicle key only through the enclosing snapshot artifact
+        whose simulation_year agrees with the ATLAS vehicle year.
+      evidence: pilates/generated/polaris_population_translation/40_vehicles.sql:3-6

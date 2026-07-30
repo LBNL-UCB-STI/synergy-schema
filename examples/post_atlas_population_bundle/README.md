@@ -92,7 +92,7 @@ artifact handoff or a claim that these are complete model inputs.
 | Household membership | Person `household_id`; POLARIS person `household` and vehicle `hhold` | Preserved; POLARIS fields are renamed | It does not resolve or verify the referenced household row. |
 | Within-household ordinal | UrbanSim/ActivitySim/ATLAS `member_id`; POLARIS person `id` | Preserved through ATLAS; transformed to POLARIS's zero-based local ordinal | It cannot establish that the two ordinal conventions represent the same member. |
 | Home and destination geography | UrbanSim/ActivitySim `block_id`, `taz`, `work_zone_id`/`workplace_taz`, and `school_zone_id`/`school_taz`; POLARIS `location` | Block identity is preserved into ActivitySim; zone aliases are explicit; POLARIS location is platform-specific | It validates physical fields but does not perform geographic lookup or conversion. |
-| Vehicle identity | ATLAS/POLARIS `vehicle_id` | Preserved as an artifact-scoped identifier | It does not establish vehicle identity outside the selected artifact. |
+| Vehicle identity | ATLAS `(household_id, vehicle_id, year)`; POLARIS `(hhold, vehicle_id)`; enclosing snapshot `simulation_year` | The translation drops ATLAS `year`; the remaining POLARIS pair is meaningful only inside the matching snapshot artifact | It does not establish vehicle identity outside the selected artifact. |
 
 The ordinary LinkML boundary ends at validating each excerpt against its named
 row class. The focused tests additionally make this single synthetic path
@@ -107,5 +107,6 @@ From the repository root, run:
 ```sh
 /Users/zaneedell/miniforge3/bin/uv run linkml-lint \
   src/synergy_schema/schema/synergy_schema.yaml
-/Users/zaneedell/miniforge3/bin/uv run pytest -q tests/test_schema.py
+/Users/zaneedell/miniforge3/bin/uv run pytest -q \
+  tests/test_schema.py tests/test_population_projections.py
 ```

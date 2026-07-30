@@ -64,7 +64,10 @@ classes:
         description: Zero-based ordinal identifying the person within a household.
 
   PolarisVehicleRecord:
-    description: POLARIS vehicle identity and household-join projection.
+    description: >-
+      POLARIS vehicle identity and household-join projection. The translation
+      drops the ATLAS forecast/output year, so its (hhold, vehicle_id) pair is
+      identifiable only within the enclosing PopulationSnapshot artifact scope.
     annotations:
       owner: POLARIS
       coverage: identity-bearing partial projection
@@ -75,7 +78,10 @@ classes:
         range: integer
         identifier: true
         required: true
-        description: POLARIS vehicle identifier.
+        description: >-
+          POLARIS vehicle-key component; it is not a globally stable vehicle
+          identifier and must be paired with hhold and the enclosing snapshot
+          artifact scope.
       hhold:
         range: integer
         required: true

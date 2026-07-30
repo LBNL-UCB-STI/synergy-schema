@@ -40,9 +40,11 @@ person identity.
 Zones remain model-specific relationships. For example, the ActivitySim
 projection explicitly records its `taz` relationship and its current work and
 school zone aliases; it does not declare a universal zone domain or perform a
-geographic lookup. Similarly, `vehicle_id` is preserved only as an
-artifact-scoped POLARIS vehicle identifier, not as a cross-artifact vehicle
-identity.
+geographic lookup. Similarly, ATLAS vehicle identity includes household,
+vehicle, and forecast/output year, while the POLARIS row carries only `hhold`
+and `vehicle_id`. The pair is meaningful only through the enclosing
+`PopulationSnapshot` artifact and its matching `simulation_year`; `vehicle_id`
+is not a cross-artifact vehicle identity.
 
 LinkML validates the declared row shape of each projection: required fields
 and types. The schema declares named relationship-target labels as annotations,
