@@ -1,0 +1,37 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+schema_path="$repo_root/src/synergy_schema/schema/synergy_schema.yaml"
+generated_docs="$repo_root/docs/schema"
+mode="${1:-serve}"
+dev_addr="${ZENSICAL_DEV_ADDR:-127.0.0.1:8000}"
+
+case "$mode" in
+  serve | build) ;;
+  *)
+    echo "Usage: scripts/preview-schema-docs [serve|build]" >&2
+    exit 2
+    ;;
+esac
+
+if [[ "$generated_docs" != "$repo_root/docs/schema" ]]; then
+  echo "Refusing to clean unexpected documentation path: $generated_docs" >&2
+  exit 1
+fi
+
+rm -rf "$generated_docs"
+mkdir -p "$generated_docs"
+
+cd "$repo_root"
+uv run gen-doc \
+  --no-render-imports \
+  --directory "$generated_docs" \
+  "$schema_path"
+
+if [[ "$mode" == "build" ]]; then
+  uv run zensical build
+else
+  echo "Open http://$dev_addr/ to view the schema documentation."
+  uv run zensical serve --dev-addr "$dev_addr"
+fi

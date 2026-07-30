@@ -64,6 +64,18 @@ Run the tests:
 uv run pytest -q
 ```
 
+Preview the generated schema documentation:
+
+```sh
+scripts/preview-schema-docs
+```
+
+The command regenerates the ignored `docs/schema/` directory and starts a
+Zensical development server at <http://127.0.0.1:8000/>. To generate the
+reference and verify a static site build without starting a server, run
+`scripts/preview-schema-docs build`. Set `ZENSICAL_DEV_ADDR`, for example to
+`127.0.0.1:8001`, when the default preview port is already in use.
+
 Build the Python package and confirm that it includes the root schema:
 
 ```sh
