@@ -466,6 +466,11 @@ def test_cross_model_example_preserves_entities_and_exposes_transformations() ->
     assert records["activitysim_person"]["member_id"] == 1
     assert atlas["person"]["member_id"] == 1
     assert records["polaris_person"]["id"] == 0
+    assert {
+        records["urbansim_household"]["block_id"],
+        records["activitysim_household"]["block_id"],
+        atlas["household"]["block_id"],
+    } == {"060750101001001"}
     assert (
         records["activitysim_household"]["taz"]
         == records["activitysim_land_use"]["taz"]
