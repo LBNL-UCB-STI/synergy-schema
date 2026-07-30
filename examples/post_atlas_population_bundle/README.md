@@ -78,6 +78,28 @@ Consist identities agree with the corresponding Synergy member identities.
 Those are cross-record checks rather than ordinary LinkML shape validation;
 production-level completeness and referential validation remain separate work.
 
+## Connected UrbanSim to POLARIS identity story
+
+[`cross_model_population_records.yaml`](cross_model_population_records.yaml)
+adds one synthetic path from UrbanSim through ActivitySim and ATLAS to
+POLARIS. It is intentionally a row-level identity illustration, not an
+artifact handoff or a claim that these are complete model inputs.
+
+| Semantic concept | Physical fields in this example | Status | Ordinary LinkML boundary |
+| --- | --- | --- | --- |
+| Household identity | UrbanSim/ActivitySim/ATLAS `household_id`; POLARIS `household` and `hhold` | Preserved; `hhold` is an alias | Each row's required fields and types validate. |
+| Person identity | UrbanSim/ActivitySim/ATLAS `person_id`; POLARIS `person` | Preserved under a renamed field | It does not prove records in different files refer to the same person. |
+| Household membership | Person `household_id`; POLARIS person `household` and vehicle `hhold` | Preserved; POLARIS fields are renamed | It does not resolve or verify the referenced household row. |
+| Within-household ordinal | UrbanSim/ActivitySim/ATLAS `member_id`; POLARIS person `id` | Preserved through ATLAS; transformed to POLARIS's zero-based local ordinal | It cannot establish that the two ordinal conventions represent the same member. |
+| Home and destination geography | UrbanSim/ActivitySim `block_id`, `taz`, `work_zone_id`/`workplace_taz`, and `school_zone_id`/`school_taz`; POLARIS `location` | Block identity is preserved into ActivitySim; zone aliases are explicit; POLARIS location is platform-specific | It validates physical fields but does not perform geographic lookup or conversion. |
+| Vehicle identity | ATLAS/POLARIS `vehicle_id` | Preserved as an artifact-scoped identifier | It does not establish vehicle identity outside the selected artifact. |
+
+The ordinary LinkML boundary ends at validating each excerpt against its named
+row class. The focused tests additionally make this single synthetic path
+checkable across files. They do not validate a complete population, open model
+artifacts, execute UrbanSim-to-ActivitySim or ATLAS-to-POLARIS transforms, or
+prove referential completeness in production data.
+
 ## Check the example
 
 From the repository root, run:

@@ -22,6 +22,19 @@ MAPPINGS_PATH = (
     / "population_identity_mappings.yaml"
 )
 
+CROSS_MODEL_RECORDS_PATH = (
+    Path(__file__).parents[1]
+    / "examples"
+    / "post_atlas_population_bundle"
+    / "cross_model_population_records.yaml"
+)
+ATLAS_RECORDS_PATH = (
+    Path(__file__).parents[1]
+    / "examples"
+    / "post_atlas_population_bundle"
+    / "atlas_population_records.yaml"
+)
+
 
 def _messages(instance: dict[str, object], target_class: str) -> list[str]:
     report = Validator(
@@ -35,6 +48,12 @@ def _mapping_fixture() -> dict[str, dict[str, object]]:
     import yaml
 
     return yaml.safe_load(MAPPINGS_PATH.read_text(encoding="utf-8"))
+
+
+def _yaml(path: Path) -> dict[str, object]:
+    import yaml
+
+    return yaml.safe_load(path.read_text(encoding="utf-8"))
 
 
 def _evidence_by_path_pair(
@@ -385,3 +404,70 @@ def test_atlas_polaris_identity_mappings_match_the_generated_sql_contract() -> N
             "artifact_scoped",
         ),
     }
+
+
+def test_cross_model_example_records_validate() -> None:
+    records = _yaml(CROSS_MODEL_RECORDS_PATH)
+    targets = {
+        "urbansim_household": "UrbanSimHouseholdPopulationRecord",
+        "urbansim_person": "UrbanSimPersonPopulationRecord",
+        "activitysim_household": "ActivitySimHouseholdInputRecord",
+        "activitysim_person": "ActivitySimPersonInputRecord",
+        "activitysim_land_use": "ActivitySimLandUseZoneRecord",
+        "polaris_household": "PolarisHouseholdRecord",
+        "polaris_person": "PolarisPersonRecord",
+        "polaris_vehicle": "PolarisVehicleRecord",
+    }
+    for record_name, target_class in targets.items():
+        assert _messages(records[record_name], target_class) == []
+
+
+@pytest.mark.parametrize(
+    ("target_class", "record"),
+    [
+        (
+            "UrbanSimHouseholdPopulationRecord",
+            {"household_id": 101, "block_id": "060750101001001"},
+        ),
+        (
+            "ActivitySimHouseholdInputRecord",
+            {"household_id": 101, "block_id": "060750101001001"},
+        ),
+    ],
+)
+def test_household_projections_preserve_leading_zero_block_identifiers(
+    target_class: str,
+    record: dict[str, object],
+) -> None:
+    assert _messages(record, target_class) == []
+
+
+def test_cross_model_example_preserves_entities_and_exposes_transformations() -> None:
+    records = _yaml(CROSS_MODEL_RECORDS_PATH)
+    atlas = _yaml(ATLAS_RECORDS_PATH)
+
+    assert {
+        records["urbansim_household"]["household_id"],
+        records["activitysim_household"]["household_id"],
+        atlas["household"]["household_id"],
+        records["polaris_household"]["household"],
+        records["polaris_household"]["hhold"],
+        records["polaris_person"]["household"],
+        records["polaris_vehicle"]["hhold"],
+    } == {101}
+    assert {
+        records["urbansim_person"]["person_id"],
+        records["activitysim_person"]["person_id"],
+        atlas["person"]["person_id"],
+        records["polaris_person"]["person"],
+    } == {1001}
+    assert records["activitysim_person"]["household_id"] == 101
+    assert records["urbansim_person"]["member_id"] == 1
+    assert records["activitysim_person"]["member_id"] == 1
+    assert atlas["person"]["member_id"] == 1
+    assert records["polaris_person"]["id"] == 0
+    assert (
+        records["activitysim_household"]["taz"]
+        == records["activitysim_land_use"]["taz"]
+    )
+    assert records["polaris_vehicle"]["vehicle_id"] == atlas["vehicle"]["vehicle_id"]

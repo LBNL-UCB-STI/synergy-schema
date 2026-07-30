@@ -29,8 +29,9 @@ classes:
         required: true
         description: UrbanSim household identifier.
       block_id:
-        range: integer
-        description: Census block identifier for the household location.
+        range: string
+        description: >-
+          Census block identifier for the household location, preserving leading zeros.
 
   UrbanSimPersonPopulationRecord:
     description: UrbanSim person identity and household-join projection.
