@@ -73,10 +73,17 @@ classes:
       coverage: identity-bearing partial projection
       enforcement_status: PILATES-observed
       identity_scope: enclosing translated population snapshot artifact
+    unique_keys:
+      polaris_vehicle_row:
+        description: >-
+          Composite row key within one translated population snapshot artifact;
+          full semantic identity also requires the enclosing snapshot year.
+        unique_key_slots:
+          - hhold
+          - vehicle_id
     attributes:
       vehicle_id:
         range: integer
-        identifier: true
         required: true
         description: >-
           POLARIS vehicle-key component; it is not a globally stable vehicle

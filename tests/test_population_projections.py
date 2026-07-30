@@ -65,46 +65,63 @@ def _yaml(path: Path) -> dict[str, object]:
 def _evidence_by_path_pair(
     slot_mappings: list[dict[str, object]],
 ) -> dict[tuple[str, str], str]:
+    for entry in slot_mappings:
+        assert isinstance(entry["evidence"], list), "mapping evidence must be a list"
+        assert (
+            len(entry["source_paths"])
+            == len(entry["target_paths"])
+            == len(entry["evidence"])
+        ), "mapping legs require aligned evidence"
+    leg_count = sum(len(entry["source_paths"]) for entry in slot_mappings)
     evidence = {
-        (entry["source_paths"][0], entry["target_paths"][0]): entry["evidence"]
+        (source_path, target_path): evidence_path
         for entry in slot_mappings
+        for source_path, target_path, evidence_path in zip(
+            entry["source_paths"], entry["target_paths"], entry["evidence"], strict=True
+        )
     }
-    assert len(evidence) == len(slot_mappings), "duplicate source and target path pair"
+    assert len(evidence) == leg_count, "duplicate source and target path pair"
     return evidence
 
 
 def _evidence_by_mapping_target(
     slot_mappings: list[dict[str, object]],
 ) -> dict[tuple[str, str], str]:
+    for entry in slot_mappings:
+        assert isinstance(entry["evidence"], list), "mapping evidence must be a list"
+        assert len(entry["target_paths"]) == len(entry["evidence"]), (
+            "mapping targets require aligned evidence"
+        )
     target_count = sum(len(entry["target_paths"]) for entry in slot_mappings)
     evidence = {
-        (entry["id"], target_path): entry["evidence"]
+        (entry["id"], target_path): evidence_path
         for entry in slot_mappings
-        for target_path in entry["target_paths"]
+        for target_path, evidence_path in zip(
+            entry["target_paths"], entry["evidence"], strict=True
+        )
     }
     assert len(evidence) == target_count, "duplicate mapping identifier and target"
     return evidence
 
 
-def _assert_vehicle_identity_scope(
-    atlas: dict[str, object],
-    records: dict[str, object],
-    bundle: dict[str, object],
-) -> None:
-    atlas_vehicle = atlas["vehicle"]
-    polaris_vehicle = records["polaris_vehicle"]
-    snapshot = bundle["population_snapshot"]
-    vehicle_member = next(
-        member for member in bundle["members"] if member["semantic_role"] == "vehicles"
-    )
-
+def _scoped_vehicle_identity(
+    atlas_vehicle: dict[str, object],
+    polaris_vehicle: dict[str, object],
+    snapshot: dict[str, object],
+) -> tuple[int, int, int]:
     assert set(atlas_vehicle).issuperset({"household_id", "vehicle_id", "year"})
     assert set(polaris_vehicle) == {"vehicle_id", "hhold"}
     assert polaris_vehicle["hhold"] == atlas_vehicle["household_id"]
     assert polaris_vehicle["vehicle_id"] == atlas_vehicle["vehicle_id"]
-    assert vehicle_member["schema_contract"]["selected_root"] == "AtlasVehicleOutput"
-    assert atlas_vehicle["year"] == snapshot["simulation_year"] == 2025, (
+    snapshot_year = snapshot.get("simulation_year")
+    assert snapshot_year is not None, "enclosing snapshot year is required"
+    assert atlas_vehicle["year"] == snapshot_year, (
         "ATLAS vehicle year must match the enclosing population snapshot year"
+    )
+    return (
+        polaris_vehicle["hhold"],
+        polaris_vehicle["vehicle_id"],
+        snapshot_year,
     )
 
 
@@ -205,7 +222,6 @@ def test_projection_identifiers_and_physical_names_are_explicit() -> None:
             {"person": 1001, "household": 101, "id": 0},
             "person",
         ),
-        "PolarisVehicleRecord": ({"vehicle_id": 1, "hhold": 101}, "vehicle_id"),
     }
     for class_name, (record, identifier) in cases.items():
         assert _messages(record, class_name) == []
@@ -221,6 +237,28 @@ def test_projection_identifiers_and_physical_names_are_explicit() -> None:
         .value
         == "TAZ"
     )
+
+
+def test_polaris_vehicle_uses_a_composite_row_key_with_snapshot_scope() -> None:
+    schema_view = SchemaView(str(SCHEMA_PATH))
+    vehicle = schema_view.induced_class("PolarisVehicleRecord")
+
+    assert vehicle.attributes["vehicle_id"].identifier is not True
+    assert vehicle.unique_keys["polaris_vehicle_row"].unique_key_slots == [
+        "hhold",
+        "vehicle_id",
+    ]
+    assert (
+        vehicle.annotations["identity_scope"].value
+        == "enclosing translated population snapshot artifact"
+    )
+
+    record = {"hhold": 101, "vehicle_id": 1}
+    assert _messages(record, "PolarisVehicleRecord") == []
+    for required_field in ("hhold", "vehicle_id"):
+        missing = deepcopy(record)
+        del missing[required_field]
+        assert _messages(missing, "PolarisVehicleRecord")
 
 
 @pytest.mark.parametrize(
@@ -328,7 +366,14 @@ def test_population_mapping_manifest_validates_and_is_evidence_complete() -> Non
             assert slot_mapping["identity_role"]
             assert slot_mapping["value_stability"]
             assert slot_mapping["transformation"]
-            assert slot_mapping["evidence"].startswith("pilates/")
+            assert (
+                len(slot_mapping["source_paths"])
+                == len(slot_mapping["target_paths"])
+                == len(slot_mapping["evidence"])
+            )
+            assert all(
+                evidence.startswith("pilates/") for evidence in slot_mapping["evidence"]
+            )
 
 
 def test_unstable_local_ordinals_are_not_mapped_as_preserved_entity_ids() -> None:
@@ -345,10 +390,6 @@ def test_unstable_local_ordinals_are_not_mapped_as_preserved_entity_ids() -> Non
 
 def test_atlas_polaris_evidence_is_exact_for_each_translation_path_pair() -> None:
     slot_mappings = _mapping_fixture()["atlas_polaris_population"]["slot_mappings"]
-    assert all(
-        len(entry["source_paths"]) == len(entry["target_paths"]) == 1
-        for entry in slot_mappings
-    )
     actual = _evidence_by_path_pair(slot_mappings)
     assert actual == {
         ("AtlasHouseholdInput.household_id", "PolarisHouseholdRecord.household"): (
@@ -384,9 +425,9 @@ def test_atlas_polaris_evidence_rejects_duplicate_translation_path_pairs() -> No
     )
     duplicate = deepcopy(slot_mappings[0])
     duplicate["id"] = "duplicate_household_identity"
-    duplicate["evidence"] = (
+    duplicate["evidence"] = [
         "pilates/generated/polaris_population_translation/10_households.sql:999"
-    )
+    ]
     slot_mappings.append(duplicate)
 
     with pytest.raises(AssertionError, match="duplicate source and target path pair"):
@@ -435,22 +476,18 @@ def test_atlas_polaris_identity_mappings_match_the_generated_sql_contract() -> N
             "derived",
             "derived",
         ),
-        "atlas_polaris_vehicle_household_membership": (
-            ["AtlasVehicleOutput.household_id"],
-            ["PolarisVehicleRecord.hhold"],
-            "renamed",
-            "preserved",
-        ),
-        "atlas_polaris_vehicle_identity": (
-            ["AtlasVehicleOutput.vehicle_id"],
-            ["PolarisVehicleRecord.vehicle_id"],
-            "direct",
-            "artifact_scoped",
-        ),
-        "atlas_polaris_vehicle_year_scope": (
-            ["AtlasVehicleOutput.year"],
-            ["PopulationSnapshot.simulation_year"],
-            "direct",
+        "atlas_polaris_vehicle_scoped_identity": (
+            [
+                "AtlasVehicleOutput.household_id",
+                "AtlasVehicleOutput.vehicle_id",
+                "AtlasVehicleOutput.year",
+            ],
+            [
+                "PolarisVehicleRecord.hhold",
+                "PolarisVehicleRecord.vehicle_id",
+                "PopulationSnapshot.simulation_year",
+            ],
+            "derived",
             "artifact_scoped",
         ),
     }
@@ -515,15 +552,16 @@ def test_each_population_mapping_target_has_exact_implementation_evidence() -> N
         ("atlas_polaris_member_ordinal", "PolarisPersonRecord.id"): (
             "pilates/generated/polaris_population_translation/20_persons.sql:11"
         ),
-        ("atlas_polaris_vehicle_household_membership", "PolarisVehicleRecord.hhold"): (
+        ("atlas_polaris_vehicle_scoped_identity", "PolarisVehicleRecord.hhold"): (
             "pilates/generated/polaris_population_translation/40_vehicles.sql:6"
         ),
-        ("atlas_polaris_vehicle_identity", "PolarisVehicleRecord.vehicle_id"): (
+        ("atlas_polaris_vehicle_scoped_identity", "PolarisVehicleRecord.vehicle_id"): (
             "pilates/generated/polaris_population_translation/40_vehicles.sql:5"
         ),
-        ("atlas_polaris_vehicle_year_scope", "PopulationSnapshot.simulation_year"): (
-            "pilates/generated/polaris_population_translation/40_vehicles.sql:3-6"
-        ),
+        (
+            "atlas_polaris_vehicle_scoped_identity",
+            "PopulationSnapshot.simulation_year",
+        ): ("pilates/generated/polaris_population_translation/40_vehicles.sql:3-6"),
     }
 
 
@@ -532,7 +570,7 @@ def test_mapping_evidence_rejects_duplicate_declared_targets() -> None:
         _mapping_fixture()["urbansim_activitysim_population"]["slot_mappings"]
     )
     duplicate = deepcopy(slot_mappings[0])
-    duplicate["evidence"] = "pilates/activitysim/preprocessor.py:999"
+    duplicate["evidence"] = ["pilates/activitysim/preprocessor.py:999"]
     slot_mappings.append(duplicate)
 
     with pytest.raises(AssertionError, match="duplicate mapping identifier and target"):
@@ -612,20 +650,56 @@ def test_cross_model_example_preserves_entities_and_exposes_transformations() ->
 
 
 def test_cross_model_vehicle_identity_is_scoped_by_atlas_year_and_snapshot() -> None:
-    _assert_vehicle_identity_scope(
-        _yaml(ATLAS_RECORDS_PATH),
-        _yaml(CROSS_MODEL_RECORDS_PATH),
-        _yaml(BUNDLE_PATH),
-    )
-
-
-def test_cross_model_vehicle_identity_rejects_atlas_year_drift() -> None:
     atlas = _yaml(ATLAS_RECORDS_PATH)
-    atlas["vehicle"]["year"] = 2026
+    records = _yaml(CROSS_MODEL_RECORDS_PATH)
+    bundle = _yaml(BUNDLE_PATH)
+    vehicle_member = next(
+        member for member in bundle["members"] if member["semantic_role"] == "vehicles"
+    )
+    assert vehicle_member["schema_contract"]["selected_root"] == "AtlasVehicleOutput"
+    assert _scoped_vehicle_identity(
+        atlas["vehicle"],
+        records["polaris_vehicle"],
+        bundle["population_snapshot"],
+    ) == (101, 1, 2025)
 
-    with pytest.raises(AssertionError, match="ATLAS vehicle year"):
-        _assert_vehicle_identity_scope(
-            atlas,
-            _yaml(CROSS_MODEL_RECORDS_PATH),
-            _yaml(BUNDLE_PATH),
+
+def test_same_polaris_vehicle_row_is_distinct_across_snapshot_years() -> None:
+    atlas_2025 = _yaml(ATLAS_RECORDS_PATH)["vehicle"]
+    atlas_2026 = deepcopy(atlas_2025)
+    atlas_2026["year"] = 2026
+    polaris_vehicle = _yaml(CROSS_MODEL_RECORDS_PATH)["polaris_vehicle"]
+    snapshot_2025 = _yaml(BUNDLE_PATH)["population_snapshot"]
+    snapshot_2026 = deepcopy(snapshot_2025)
+    snapshot_2026["simulation_year"] = 2026
+
+    assert (
+        (atlas_2025["household_id"], atlas_2025["vehicle_id"])
+        == (
+            atlas_2026["household_id"],
+            atlas_2026["vehicle_id"],
         )
+        == (101, 1)
+    )
+    assert {
+        _scoped_vehicle_identity(atlas_2025, polaris_vehicle, snapshot_2025),
+        _scoped_vehicle_identity(atlas_2026, polaris_vehicle, snapshot_2026),
+    } == {(101, 1, 2025), (101, 1, 2026)}
+
+
+def test_vehicle_identity_rejects_changed_or_missing_snapshot_year() -> None:
+    atlas_vehicle = _yaml(ATLAS_RECORDS_PATH)["vehicle"]
+    polaris_vehicle = _yaml(CROSS_MODEL_RECORDS_PATH)["polaris_vehicle"]
+    changed_snapshot = deepcopy(_yaml(BUNDLE_PATH)["population_snapshot"])
+    changed_snapshot["simulation_year"] = 2026
+
+    for invalid_snapshot in (changed_snapshot, {}):
+        with pytest.raises(
+            AssertionError,
+            match="ATLAS vehicle year|enclosing snapshot year",
+        ):
+            _scoped_vehicle_identity(
+                atlas_vehicle,
+                polaris_vehicle,
+                invalid_snapshot,
+            )
