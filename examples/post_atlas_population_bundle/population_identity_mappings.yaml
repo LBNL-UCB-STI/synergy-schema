@@ -94,34 +94,45 @@ atlas_polaris_population:
         - AtlasHouseholdInput.household_id
       target_paths:
         - PolarisHouseholdRecord.household
-      mapping_status: direct
-      identity_role: entity_identifier
-      value_stability: preserved
-      relationship_cardinality: one-to-one
-      transformation: Carry the source household record index into the POLARIS household identifier.
-      evidence: pilates/polaris/preprocessor.py:458
-    - id: atlas_polaris_household_hhold_identity
-      source_paths:
-        - AtlasHouseholdInput.serialno
-      target_paths:
-        - PolarisHouseholdRecord.hhold
       mapping_status: renamed
       identity_role: entity_identifier
       value_stability: preserved
       relationship_cardinality: one-to-one
-      transformation: Populate the required POLARIS hhold field from the source household serial number.
-      evidence: pilates/polaris/preprocessor.py:30
+      transformation: Cast household_id to bigint and rename it to the POLARIS household identifier.
+      evidence: pilates/generated/polaris_population_translation/10_households.sql:7
+    - id: atlas_polaris_household_hhold_identity
+      source_paths:
+        - AtlasHouseholdInput.household_id
+      target_paths:
+        - PolarisHouseholdRecord.hhold
+      mapping_status: renamed
+      identity_role: entity_identifier
+      value_stability: alias
+      relationship_cardinality: one-to-one
+      transformation: Cast household_id to bigint and expose it through the required POLARIS hhold alias.
+      evidence: pilates/generated/polaris_population_translation/10_households.sql:8
     - id: atlas_polaris_person_identity
       source_paths:
         - AtlasPersonInput.person_id
       target_paths:
         - PolarisPersonRecord.person
-      mapping_status: direct
+      mapping_status: renamed
       identity_role: entity_identifier
       value_stability: preserved
       relationship_cardinality: one-to-one
-      transformation: Carry the source person record index into the POLARIS person identifier.
-      evidence: pilates/polaris/preprocessor.py:464
+      transformation: Cast person_id to bigint and rename it to the POLARIS person identifier.
+      evidence: pilates/generated/polaris_population_translation/20_persons.sql:10
+    - id: atlas_polaris_person_household_membership
+      source_paths:
+        - AtlasPersonInput.household_id
+      target_paths:
+        - PolarisPersonRecord.household
+      mapping_status: renamed
+      identity_role: relationship_foreign_key
+      value_stability: preserved
+      relationship_cardinality: many-to-one
+      transformation: Cast household_id to bigint and rename it to the POLARIS person household reference.
+      evidence: pilates/generated/polaris_population_translation/20_persons.sql:79
     - id: atlas_polaris_member_ordinal
       source_paths:
         - AtlasPersonInput.member_id
@@ -131,16 +142,18 @@ atlas_polaris_population:
       identity_role: within_parent_ordinal
       value_stability: derived
       relationship_cardinality: one-to-one
-      transformation: Convert the source one-based household member ordinal to POLARIS's zero-based ordinal.
-      evidence: pilates/polaris/preprocessor.py:116
+      transformation: Subtract the detected source member_id offset to normalize the POLARIS ordinal to zero-based.
+      evidence: pilates/generated/polaris_population_translation/20_persons.sql:11
     - id: atlas_polaris_vehicle_identity
       source_paths:
+        - AtlasVehicleOutput.household_id
         - AtlasVehicleOutput.vehicle_id
       target_paths:
+        - PolarisVehicleRecord.hhold
         - PolarisVehicleRecord.vehicle_id
-      mapping_status: direct
+      mapping_status: renamed
       identity_role: artifact_scoped_identifier
       value_stability: artifact_scoped
       relationship_cardinality: one-to-one
-      transformation: Preserve the vehicle identifier only within the enclosing translated population artifact.
-      evidence: pilates/polaris/preprocessor.py:212
+      transformation: Cast the household and vehicle identifiers to bigint and preserve the pair only within the translated population artifact.
+      evidence: pilates/generated/polaris_population_translation/40_vehicles.sql:5

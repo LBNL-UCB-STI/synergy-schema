@@ -270,3 +270,88 @@ def test_unstable_local_ordinals_are_not_mapped_as_preserved_entity_ids() -> Non
         if any(path.endswith((".member_id", ".id")) for path in entry["source_paths"]):
             assert entry["identity_role"] == "within_parent_ordinal"
             assert entry["value_stability"] in {"derived", "regenerated"}
+
+
+def test_atlas_polaris_evidence_uses_the_generated_translation_for_each_source() -> (
+    None
+):
+    slot_mappings = _mapping_fixture()["atlas_polaris_population"]["slot_mappings"]
+    assert {entry["id"] for entry in slot_mappings} == {
+        "atlas_polaris_household_identity",
+        "atlas_polaris_household_hhold_identity",
+        "atlas_polaris_person_identity",
+        "atlas_polaris_person_household_membership",
+        "atlas_polaris_member_ordinal",
+        "atlas_polaris_vehicle_identity",
+    }
+    evidence_by_source_class = {
+        "AtlasHouseholdInput": (
+            "pilates/generated/polaris_population_translation/10_households.sql"
+        ),
+        "AtlasPersonInput": (
+            "pilates/generated/polaris_population_translation/20_persons.sql"
+        ),
+        "AtlasVehicleOutput": (
+            "pilates/generated/polaris_population_translation/40_vehicles.sql"
+        ),
+    }
+    for entry in slot_mappings:
+        source_classes = {path.partition(".")[0] for path in entry["source_paths"]}
+        assert len(source_classes) == 1
+        source_class = source_classes.pop()
+        assert source_class in evidence_by_source_class
+        evidence_path, separator, line_number = entry["evidence"].rpartition(":")
+        assert evidence_path == evidence_by_source_class[source_class]
+        assert separator == ":"
+        assert line_number.isdigit()
+
+
+def test_atlas_polaris_identity_mappings_match_the_generated_sql_contract() -> None:
+    slot_mappings = _mapping_fixture()["atlas_polaris_population"]["slot_mappings"]
+    actual = {
+        entry["id"]: (
+            entry["source_paths"],
+            entry["target_paths"],
+            entry["mapping_status"],
+            entry["value_stability"],
+        )
+        for entry in slot_mappings
+    }
+    assert actual == {
+        "atlas_polaris_household_identity": (
+            ["AtlasHouseholdInput.household_id"],
+            ["PolarisHouseholdRecord.household"],
+            "renamed",
+            "preserved",
+        ),
+        "atlas_polaris_household_hhold_identity": (
+            ["AtlasHouseholdInput.household_id"],
+            ["PolarisHouseholdRecord.hhold"],
+            "renamed",
+            "alias",
+        ),
+        "atlas_polaris_person_identity": (
+            ["AtlasPersonInput.person_id"],
+            ["PolarisPersonRecord.person"],
+            "renamed",
+            "preserved",
+        ),
+        "atlas_polaris_person_household_membership": (
+            ["AtlasPersonInput.household_id"],
+            ["PolarisPersonRecord.household"],
+            "renamed",
+            "preserved",
+        ),
+        "atlas_polaris_member_ordinal": (
+            ["AtlasPersonInput.member_id"],
+            ["PolarisPersonRecord.id"],
+            "derived",
+            "derived",
+        ),
+        "atlas_polaris_vehicle_identity": (
+            ["AtlasVehicleOutput.household_id", "AtlasVehicleOutput.vehicle_id"],
+            ["PolarisVehicleRecord.hhold", "PolarisVehicleRecord.vehicle_id"],
+            "renamed",
+            "artifact_scoped",
+        ),
+    }
