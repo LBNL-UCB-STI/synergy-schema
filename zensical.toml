@@ -5,7 +5,15 @@ docs_dir = "docs"
 site_dir = "site"
 nav = [
     { "Overview" = "index.md" },
-    { "Generated schema reference" = "schema/index.md" },
+    { "Concepts and architecture" = [
+        { "Cross-model population identity" = "schema/cross-model-population-identity.md" },
+    ] },
+    { "PILATES handoff" = [
+        { "Post-ATLAS population bundle" = "pilates/post-atlas-population-bundle.md" },
+    ] },
+    { "Schema reference" = [
+        { "Complete generated reference" = "schema/index.md" },
+    ] },
 ]
 
 [project.theme]

@@ -63,6 +63,13 @@ classes:
         required: true
         minimum_cardinality: 1
         description: Identity-bearing slot mappings between the two representations.
+      identity_constructions:
+        range: PopulationIdentityConstruction
+        multivalued: true
+        inlined_as_list: true
+        description: >-
+          Optional composite constructions whose target identifier requires
+          multiple already-mapped semantic inputs.
   PopulationSlotMapping:
     description: Mapping for one identity-bearing slot or related set of slots.
     attributes:
@@ -103,3 +110,42 @@ classes:
         description: >-
           Repository-relative source locations aligned by position with the
           source and target mapping paths.
+  PopulationIdentityConstruction:
+    description: >-
+      Construction of one snapshot- or artifact-scoped identifier from two or
+      more semantic input paths. This records the construction contract; it
+      does not assert that ordinary LinkML validation resolves the inputs.
+    attributes:
+      id:
+        identifier: true
+        required: true
+      source_paths:
+        multivalued: true
+        required: true
+        minimum_cardinality: 2
+        description: Fully qualified semantic paths required by the construction.
+      target_path:
+        required: true
+        description: Fully qualified path of the constructed identifier.
+      mapping_status:
+        range: PopulationMappingStatus
+        required: true
+        description: Classification of the construction transformation.
+      identity_role:
+        range: PopulationIdentityRole
+        required: true
+        description: Semantic identity role of the constructed value.
+      value_stability:
+        range: PopulationValueStability
+        required: true
+        description: Scope within which the constructed value remains stable.
+      relationship_cardinality:
+        description: Cardinality of constructed identifiers relative to input tuples.
+      transformation:
+        required: true
+        description: Plain-language account of the composite construction.
+      evidence:
+        multivalued: true
+        required: true
+        minimum_cardinality: 1
+        description: Repository-relative schema or example evidence for the construction.

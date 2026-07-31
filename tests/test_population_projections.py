@@ -128,9 +128,16 @@ def _scoped_vehicle_identity(
 def test_mapping_vocabulary_is_imported_with_controlled_classifications() -> None:
     schema_view = SchemaView(str(SCHEMA_PATH))
     assert {
+        "PopulationIdentityConstruction",
         "PopulationRepresentationMapping",
         "PopulationSlotMapping",
     }.issubset(schema_view.all_classes())
+    construction_slot = schema_view.induced_slot(
+        "identity_constructions", "PopulationRepresentationMapping"
+    )
+    assert construction_slot.range == "PopulationIdentityConstruction"
+    assert construction_slot.multivalued is True
+    assert construction_slot.inlined_as_list is True
     assert set(schema_view.get_enum("PopulationMappingStatus").permissible_values) == {
         "direct",
         "renamed",
@@ -313,50 +320,153 @@ def test_required_relationship_and_ordinal_fields_are_enforced(
 
 
 @pytest.mark.parametrize(
-    ("target_class", "slot_name", "relationship_target"),
+    ("target_class", "slot_name", "relationship_target", "scalar_record"),
     [
+        (
+            "PopulationSnapshot",
+            "parent_snapshot_ref",
+            "PopulationSnapshot",
+            {
+                "id": "population-snapshot:synthetic-region-2025-r1",
+                "scenario_definition_ref": "scenario:synthetic-region",
+                "stochastic_realization_id": "r1",
+                "simulation_year": 2025,
+                "parent_snapshot_ref": "population-snapshot:synthetic-region-2020-r1",
+            },
+        ),
+        (
+            "HouseholdState",
+            "population_snapshot_ref",
+            "PopulationSnapshot",
+            {
+                "household_state_id": "household-state:synthetic-region-2025-r1:101",
+                "population_snapshot_ref": "population-snapshot:synthetic-region-2025-r1",
+            },
+        ),
+        (
+            "PersonState",
+            "population_snapshot_ref",
+            "PopulationSnapshot",
+            {
+                "person_state_id": "person-state:synthetic-region-2025-r1:1001",
+                "population_snapshot_ref": "population-snapshot:synthetic-region-2025-r1",
+            },
+        ),
+        (
+            "HouseholdMembership",
+            "population_snapshot_ref",
+            "PopulationSnapshot",
+            {
+                "household_membership_id": "household-membership:synthetic-region-2025-r1:1001:101",
+                "population_snapshot_ref": "population-snapshot:synthetic-region-2025-r1",
+                "person_state_ref": "person-state:synthetic-region-2025-r1:1001",
+                "household_state_ref": "household-state:synthetic-region-2025-r1:101",
+            },
+        ),
+        (
+            "HouseholdMembership",
+            "person_state_ref",
+            "PersonState",
+            {
+                "household_membership_id": "household-membership:synthetic-region-2025-r1:1001:101",
+                "population_snapshot_ref": "population-snapshot:synthetic-region-2025-r1",
+                "person_state_ref": "person-state:synthetic-region-2025-r1:1001",
+                "household_state_ref": "household-state:synthetic-region-2025-r1:101",
+            },
+        ),
+        (
+            "HouseholdMembership",
+            "household_state_ref",
+            "HouseholdState",
+            {
+                "household_membership_id": "household-membership:synthetic-region-2025-r1:1001:101",
+                "population_snapshot_ref": "population-snapshot:synthetic-region-2025-r1",
+                "person_state_ref": "person-state:synthetic-region-2025-r1:1001",
+                "household_state_ref": "household-state:synthetic-region-2025-r1:101",
+            },
+        ),
         (
             "UrbanSimPersonPopulationRecord",
             "household_id",
             "UrbanSimHouseholdPopulationRecord",
+            {"person_id": 1001, "household_id": 101},
         ),
         (
             "ActivitySimHouseholdInputRecord",
             "taz",
             "ActivitySimLandUseZoneRecord",
+            {"household_id": 101, "taz": 5001},
         ),
         (
             "ActivitySimPersonInputRecord",
             "household_id",
             "ActivitySimHouseholdInputRecord",
+            {"person_id": 1001, "household_id": 101, "member_id": 1},
         ),
         (
             "ActivitySimPersonInputRecord",
             "taz",
             "ActivitySimLandUseZoneRecord",
+            {"person_id": 1001, "household_id": 101, "member_id": 1, "taz": 5001},
         ),
-        ("PolarisPersonRecord", "household", "PolarisHouseholdRecord"),
-        ("PolarisVehicleRecord", "hhold", "PolarisHouseholdRecord"),
+        (
+            "AtlasPersonInput",
+            "household_id",
+            "AtlasHouseholdInput",
+            {"person_id": 1001, "household_id": 101},
+        ),
+        (
+            "AtlasVehicleOutput",
+            "household_id",
+            "AtlasHouseholdInput",
+            {"household_id": 101, "vehicle_id": 1, "year": 2025},
+        ),
+        (
+            "AtlasVehicleOutput",
+            "maindriver_id",
+            "AtlasPersonInput",
+            {
+                "household_id": 101,
+                "vehicle_id": 1,
+                "year": 2025,
+                "maindriver_id": 1001,
+            },
+        ),
+        (
+            "PolarisPersonRecord",
+            "household",
+            "PolarisHouseholdRecord",
+            {"person": 1001, "household": 101, "id": 0},
+        ),
+        (
+            "PolarisVehicleRecord",
+            "hhold",
+            "PolarisHouseholdRecord",
+            {"vehicle_id": 1, "hhold": 101},
+        ),
     ],
 )
-def test_relationship_targets_are_explicit(
+def test_native_reference_ranges_preserve_scalar_identifier_encodings(
     target_class: str,
     slot_name: str,
     relationship_target: str,
+    scalar_record: dict[str, object],
 ) -> None:
     schema_view = SchemaView(str(SCHEMA_PATH))
-    assert (
-        schema_view.induced_slot(slot_name, target_class)
-        .annotations["relationship_target"]
-        .value
-        == relationship_target
-    )
+    slot = schema_view.induced_slot(slot_name, target_class)
+
+    assert slot.range == relationship_target
+    assert slot.inlined is False
+    assert slot.annotations["relationship_target"].value == relationship_target
+    assert _messages(scalar_record, target_class) == []
 
 
 def test_population_mapping_manifest_validates_and_is_evidence_complete() -> None:
     mappings = _mapping_fixture()
     assert set(mappings) == {
         "urbansim_activitysim_population",
+        "activitysim_atlas_population",
+        "atlas_core_population_state",
         "atlas_polaris_population",
     }
     for mapping in mappings.values():
@@ -372,8 +482,119 @@ def test_population_mapping_manifest_validates_and_is_evidence_complete() -> Non
                 == len(slot_mapping["evidence"])
             )
             assert all(
-                evidence.startswith("pilates/") for evidence in slot_mapping["evidence"]
+                evidence.startswith(("pilates/", "src/", "examples/"))
+                for evidence in slot_mapping["evidence"]
             )
+        for construction in mapping.get("identity_constructions", []):
+            assert construction["mapping_status"] == "derived"
+            assert len(construction["source_paths"]) >= 2
+            assert construction["target_path"]
+            assert construction["identity_role"] == "artifact_scoped_identifier"
+            assert construction["value_stability"] == "artifact_scoped"
+            assert construction["transformation"]
+            assert construction["evidence"]
+
+
+def test_atlas_and_snapshot_context_map_to_core_population_states() -> None:
+    mapping = _mapping_fixture()["atlas_core_population_state"]
+    slots = {
+        entry["id"]: (
+            entry["source_paths"],
+            entry["target_paths"],
+            entry["mapping_status"],
+            entry["identity_role"],
+            entry["value_stability"],
+            entry["relationship_cardinality"],
+        )
+        for entry in mapping["slot_mappings"]
+    }
+    assert slots == {
+        "atlas_core_household_longitudinal_identity": (
+            ["AtlasHouseholdInput.household_id"],
+            ["HouseholdState.longitudinal_household_ref"],
+            "derived",
+            "entity_identifier",
+            "preserved",
+            "one-to-one",
+        ),
+        "atlas_core_household_snapshot_scope": (
+            ["PopulationSnapshot.id"],
+            ["HouseholdState.population_snapshot_ref"],
+            "direct",
+            "relationship_foreign_key",
+            "preserved",
+            "one-to-many",
+        ),
+        "atlas_core_person_longitudinal_identity": (
+            ["AtlasPersonInput.person_id"],
+            ["PersonState.longitudinal_person_ref"],
+            "derived",
+            "entity_identifier",
+            "preserved",
+            "one-to-one",
+        ),
+        "atlas_core_person_snapshot_scope": (
+            ["PopulationSnapshot.id"],
+            ["PersonState.population_snapshot_ref"],
+            "direct",
+            "relationship_foreign_key",
+            "preserved",
+            "one-to-many",
+        ),
+        "atlas_core_membership_person_state": (
+            ["AtlasPersonInput.person_id"],
+            ["HouseholdMembership.person_state_ref"],
+            "derived",
+            "relationship_foreign_key",
+            "artifact_scoped",
+            "one-to-one",
+        ),
+        "atlas_core_membership_household_state": (
+            ["AtlasPersonInput.household_id"],
+            ["HouseholdMembership.household_state_ref"],
+            "derived",
+            "relationship_foreign_key",
+            "artifact_scoped",
+            "many-to-one",
+        ),
+        "atlas_core_membership_snapshot_scope": (
+            ["PopulationSnapshot.id"],
+            ["HouseholdMembership.population_snapshot_ref"],
+            "direct",
+            "relationship_foreign_key",
+            "preserved",
+            "one-to-many",
+        ),
+    }
+
+    constructions = {
+        entry["id"]: (entry["source_paths"], entry["target_path"])
+        for entry in mapping["identity_constructions"]
+    }
+    assert constructions == {
+        "construct_household_state_identity": (
+            [
+                "PopulationSnapshot.id",
+                "HouseholdState.longitudinal_household_ref",
+            ],
+            "HouseholdState.household_state_id",
+        ),
+        "construct_person_state_identity": (
+            [
+                "PopulationSnapshot.id",
+                "PersonState.longitudinal_person_ref",
+            ],
+            "PersonState.person_state_id",
+        ),
+        "construct_household_membership_identity": (
+            [
+                "PopulationSnapshot.id",
+                "HouseholdMembership.person_state_ref",
+                "HouseholdMembership.household_state_ref",
+            ],
+            "HouseholdMembership.household_membership_id",
+        ),
+    }
 
 
 def test_unstable_local_ordinals_are_not_mapped_as_preserved_entity_ids() -> None:
@@ -383,7 +604,7 @@ def test_unstable_local_ordinals_are_not_mapped_as_preserved_entity_ids() -> Non
         for entry in mapping["slot_mappings"]
     ]
     for entry in slot_mappings:
-        if any(path.endswith((".member_id", ".id")) for path in entry["source_paths"]):
+        if any(path.endswith(".member_id") for path in entry["source_paths"]):
             assert entry["identity_role"] == "within_parent_ordinal"
             assert entry["value_stability"] in {"derived", "regenerated"}
 
@@ -493,17 +714,83 @@ def test_atlas_polaris_identity_mappings_match_the_generated_sql_contract() -> N
     }
 
 
+def test_activitysim_atlas_identity_mappings_match_the_population_handoff() -> None:
+    slot_mappings = _mapping_fixture()["activitysim_atlas_population"]["slot_mappings"]
+    actual = {
+        entry["id"]: (
+            entry["source_paths"],
+            entry["target_paths"],
+            entry["mapping_status"],
+            entry["identity_role"],
+            entry["relationship_cardinality"],
+            entry["value_stability"],
+        )
+        for entry in slot_mappings
+    }
+    assert actual == {
+        "activitysim_atlas_household_identity": (
+            ["ActivitySimHouseholdInputRecord.household_id"],
+            ["AtlasHouseholdInput.household_id"],
+            "direct",
+            "entity_identifier",
+            "one-to-one",
+            "preserved",
+        ),
+        "activitysim_atlas_person_identity": (
+            ["ActivitySimPersonInputRecord.person_id"],
+            ["AtlasPersonInput.person_id"],
+            "direct",
+            "entity_identifier",
+            "one-to-one",
+            "preserved",
+        ),
+        "activitysim_atlas_person_household_membership": (
+            ["ActivitySimPersonInputRecord.household_id"],
+            ["AtlasPersonInput.household_id"],
+            "direct",
+            "relationship_foreign_key",
+            "many-to-one",
+            "preserved",
+        ),
+    }
+
+
 def test_each_population_mapping_target_has_exact_implementation_evidence() -> None:
     slot_mappings = [
         entry
         for mapping in _mapping_fixture().values()
         for entry in mapping["slot_mappings"]
+        if all(evidence.startswith("pilates/") for evidence in entry["evidence"])
     ]
     assert _evidence_by_mapping_target(slot_mappings) == {
         (
             "urbansim_activitysim_household_identity",
             "ActivitySimHouseholdInputRecord.household_id",
         ): ("pilates/activitysim/preprocessor.py:3524"),
+        (
+            "activitysim_atlas_household_identity",
+            "AtlasHouseholdInput.household_id",
+        ): (
+            "pilates/activitysim/postprocessor.py:470-488; "
+            "pilates/activitysim/postprocessor.py:715-723; "
+            "pilates/atlas/preprocessor.py:836-844"
+        ),
+        (
+            "activitysim_atlas_person_identity",
+            "AtlasPersonInput.person_id",
+        ): (
+            "pilates/activitysim/postprocessor.py:424-468; "
+            "pilates/activitysim/postprocessor.py:715-723; "
+            "pilates/atlas/preprocessor.py:855-861"
+        ),
+        (
+            "activitysim_atlas_person_household_membership",
+            "AtlasPersonInput.household_id",
+        ): (
+            "pilates/activitysim/postprocessor.py:424-468; "
+            "pilates/activitysim/postprocessor.py:715-723; "
+            "pilates/atlas/preprocessor.py:855-861"
+        ),
         (
             "urbansim_activitysim_person_identity",
             "ActivitySimPersonInputRecord.person_id",
@@ -562,6 +849,52 @@ def test_each_population_mapping_target_has_exact_implementation_evidence() -> N
             "atlas_polaris_vehicle_scoped_identity",
             "PopulationSnapshot.simulation_year",
         ): ("pilates/generated/polaris_population_translation/40_vehicles.sql:3-6"),
+    }
+
+
+def test_core_population_mapping_targets_have_exact_schema_evidence() -> None:
+    slot_mappings = _mapping_fixture()["atlas_core_population_state"]["slot_mappings"]
+    assert _evidence_by_mapping_target(slot_mappings) == {
+        (
+            "atlas_core_household_longitudinal_identity",
+            "HouseholdState.longitudinal_household_ref",
+        ): (
+            "src/synergy_schema/schema/models/atlas/atlas_population.yaml:35-39; "
+            "examples/post_atlas_population_bundle/core_population_states.yaml:1-4"
+        ),
+        (
+            "atlas_core_household_snapshot_scope",
+            "HouseholdState.population_snapshot_ref",
+        ): "src/synergy_schema/schema/core/population_snapshot.yaml:26-29;66-78",
+        (
+            "atlas_core_person_longitudinal_identity",
+            "PersonState.longitudinal_person_ref",
+        ): (
+            "src/synergy_schema/schema/models/atlas/atlas_population.yaml:127-131; "
+            "examples/post_atlas_population_bundle/core_population_states.yaml:5-8"
+        ),
+        (
+            "atlas_core_person_snapshot_scope",
+            "PersonState.population_snapshot_ref",
+        ): "src/synergy_schema/schema/core/population_snapshot.yaml:26-29;95-107",
+        (
+            "atlas_core_membership_person_state",
+            "HouseholdMembership.person_state_ref",
+        ): (
+            "src/synergy_schema/schema/models/atlas/atlas_population.yaml:127-131; "
+            "src/synergy_schema/schema/core/population_snapshot.yaml:137-146"
+        ),
+        (
+            "atlas_core_membership_household_state",
+            "HouseholdMembership.household_state_ref",
+        ): (
+            "src/synergy_schema/schema/models/atlas/atlas_population.yaml:203-210; "
+            "src/synergy_schema/schema/core/population_snapshot.yaml:147-156"
+        ),
+        (
+            "atlas_core_membership_snapshot_scope",
+            "HouseholdMembership.population_snapshot_ref",
+        ): "src/synergy_schema/schema/core/population_snapshot.yaml:26-29;124-136",
     }
 
 

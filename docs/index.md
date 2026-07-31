@@ -1,56 +1,85 @@
 # Synergy Schema
 
-Synergy Schema describes data exchanged between integrated modeling tools. It
-gives model teams a shared place to explain what their records mean without
-requiring them to use LinkML at runtime.
+Synergy Schema describes data exchanged between integrated transportation
+modeling tools. It gives model teams shared semantic contracts for explaining
+what their records mean and how independently owned representations relate,
+without requiring those tools to use LinkML at runtime.
 
-This preview combines a short introduction with reference pages generated
-directly from the current LinkML source. The generated pages are useful for
-exploring the schema, but their organization and wording are still evolving.
+The documentation combines maintained conceptual guides with reference pages
+generated directly from the LinkML source. The guides explain how the pieces
+fit together; the generated pages provide class- and field-level detail.
 
-## Where to start
+## Schema organization
 
-- [PopulationSnapshot](schema/PopulationSnapshot.md) identifies one
-  scenario-specific population state, including its simulation year and
-  stochastic realization.
-- [HandoffBundle](schema/HandoffBundle.md) describes a collection of physical
-  artifacts produced together for a particular purpose.
-- [PopulationSnapshotBundle](schema/PopulationSnapshotBundle.md) specializes
-  that bundle for the PILATES post-ATLAS population handoff.
-- [AtlasHouseholdInput](schema/AtlasHouseholdInput.md),
-  [AtlasPersonInput](schema/AtlasPersonInput.md), and
-  [AtlasVehicleOutput](schema/AtlasVehicleOutput.md) describe the three native
-  ATLAS records currently used by that handoff.
-- [ConsistProvenanceDocument](schema/ConsistProvenanceDocument.md) records the
-  run and artifact lineage attached by the PILATES profile.
+The schema separates definitions according to who owns their meaning and where
+they are used:
 
-## How the schema is organized
+1. **Core concepts** describe ideas whose meaning can remain consistent across
+   modeling tools, such as a [population snapshot](schema/PopulationSnapshot.md)
+   or a [physical artifact](schema/PhysicalArtifactReference.md).
+2. **Model schemas** describe native records owned by individual model teams,
+   including the current UrbanSim, ActivitySim, ATLAS, and POLARIS population
+   projections.
+3. **Workflow profiles** compose core and model-owned definitions into a
+   concrete exchange contract, such as the PILATES post-ATLAS handoff.
+4. **Mappings** state semantic relationships between independently owned
+   representations without copying or redefining either representation.
 
-The source definitions have four layers:
+This separation lets the schema describe shared meaning while preserving model
+ownership and physical field names.
 
-1. **Core concepts** describe ideas that can keep the same meaning across
-   modeling tools, such as a population snapshot or a physical artifact.
-2. **Model schemas** describe records owned by a particular model team. The
-   first example is the ATLAS population schema.
-3. **Workflow profiles** combine core and model-owned definitions for a
-   particular consumer. The current profile describes what PILATES expects
-   after ATLAS.
-4. **Mappings** will explain relationships between independently owned
-   definitions without copying either one.
+## Cross-model population identity
 
-## Browse the complete reference
+The [cross-model population identity map](schema/cross-model-population-identity.md)
+shows how household, person, membership, geography, and vehicle identifiers
+relate across UrbanSim, ActivitySim, ATLAS, POLARIS, and the core
+snapshot-scoped population model. It distinguishes preserved identifiers from
+renamed, derived, composite, and artifact-scoped values.
 
-The [generated schema reference](schema/index.md) lists every class, slot,
-enumeration, and type currently reachable from the root schema. That includes
-the pinned Consist provenance module used by the PILATES profile.
+Semantic population identity answers which household, person, or membership a
+record represents. Physical artifact identity answers which exact file bytes
+carry those records. Provenance records which workflow run produced or consumed
+those artifacts. The schema connects these concerns without treating them as
+the same kind of identity.
 
-Primitive LinkML types and individual slot pages are included for completeness.
-Most readers will find the class pages above more useful as an entry point.
+## Post-ATLAS population handoff
 
-## About validation
+The [post-ATLAS population bundle](pilates/post-atlas-population-bundle.md)
+explains the current PILATES handoff profile: its population snapshot, native
+ATLAS records, snapshot-scoped household and person state, physical artifact
+members, and Consist provenance.
 
-LinkML can validate whether a document has the expected fields and value types.
-Some important bundle checks cross record boundaries—for example, confirming
-that a Consist artifact digest agrees with the corresponding handoff member.
-Those checks are tested by this repository but are not implied by every
-generated reference page.
+The handoff is the most complete worked example of how the core, model,
+profile, mapping, and provenance layers compose into one exchange contract.
+
+## Schema reference
+
+The [complete generated schema reference](schema/index.md) lists every class,
+slot, enumeration, and type reachable from the root schema. Useful class-level
+entry points include:
+
+- [PopulationSnapshot](schema/PopulationSnapshot.md) for scenario, year, and
+  stochastic-realization scope;
+- [HouseholdState](schema/HouseholdState.md),
+  [PersonState](schema/PersonState.md), and
+  [HouseholdMembership](schema/HouseholdMembership.md) for population
+  occurrences within a snapshot;
+- [PopulationSnapshotBundle](schema/PopulationSnapshotBundle.md) for the
+  post-ATLAS PILATES exchange;
+- [PopulationRepresentationMapping](schema/PopulationRepresentationMapping.md)
+  for cross-representation semantics; and
+- [ConsistProvenanceDocument](schema/ConsistProvenanceDocument.md) for portable
+  run and artifact lineage.
+
+Primitive LinkML types and individual slot pages are included for complete
+lookup coverage. Most conceptual questions are better answered by the guides
+above or by class pages.
+
+## Validation boundary
+
+LinkML validates document shape, required fields, value types, and declared
+class relationships. It does not by itself open Parquet files, verify content
+digests, resolve references across separate artifacts, or prove that a complete
+population is referentially consistent. This repository uses focused tests for
+the cross-record invariants demonstrated by its synthetic examples; production
+artifact and population validation remain separate workflow responsibilities.

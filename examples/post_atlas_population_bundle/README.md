@@ -36,6 +36,15 @@ born, die, or move households as a scenario evolves. The optional longitudinal
 references show a producer's link across snapshots without assuming every
 producer can preserve it.
 
+The population identity mapping manifest anchors those core occurrences at the
+post-ATLAS handoff boundary. ATLAS `household_id` and `person_id` values map to
+the optional longitudinal references, while the enclosing `PopulationSnapshot`
+supplies snapshot scope. Snapshot IDs and longitudinal references are then
+composite inputs to the `HouseholdState` and `PersonState` occurrence IDs;
+membership similarly resolves the person and household occurrences within the
+same snapshot. These are semantic construction contracts, not additional
+physical tables in the handoff bundle.
+
 The bundle is the artifact-level handoff. Its members point to the three
 Parquet artifacts, state the native LinkML contract selected for each role, and
 record a synthetic immutable SHA-256 content digest. The small YAML rows in

@@ -46,7 +46,8 @@ classes:
         required: true
         description: UrbanSim person identifier.
       household_id:
-        range: integer
+        range: UrbanSimHouseholdPopulationRecord
+        inlined: false
         required: true
         annotations:
           relationship_target: UrbanSimHouseholdPopulationRecord

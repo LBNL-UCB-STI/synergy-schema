@@ -51,7 +51,8 @@ classes:
         required: true
         description: POLARIS person identifier.
       household:
-        range: integer
+        range: PolarisHouseholdRecord
+        inlined: false
         required: true
         annotations:
           relationship_target: PolarisHouseholdRecord
@@ -90,7 +91,8 @@ classes:
           identifier and must be paired with hhold and the enclosing snapshot
           artifact scope.
       hhold:
-        range: integer
+        range: PolarisHouseholdRecord
+        inlined: false
         required: true
         annotations:
           relationship_target: PolarisHouseholdRecord

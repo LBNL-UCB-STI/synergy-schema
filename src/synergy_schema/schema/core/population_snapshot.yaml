@@ -41,6 +41,13 @@ classes:
         range: integer
         description: Optional equilibrium iteration for this population state.
       parent_snapshot_ref:
+        range: PopulationSnapshot
+        inlined: false
+        annotations:
+          relationship_target: PopulationSnapshot
+          validation_boundary: >-
+            LinkML validates this value's shape, not whether the referenced
+            PopulationSnapshot is co-present.
         description: >-
           Optional reference to an earlier population snapshot. It is a
           reference, not an assertion that standard LinkML validation can
@@ -57,7 +64,14 @@ classes:
         required: true
         description: Typed identifier for this household occurrence in one population snapshot.
       population_snapshot_ref:
+        range: PopulationSnapshot
+        inlined: false
         required: true
+        annotations:
+          relationship_target: PopulationSnapshot
+          validation_boundary: >-
+            LinkML validates this value's shape, not whether the referenced
+            PopulationSnapshot is co-present.
         description: >-
           Reference to the PopulationSnapshot in which this household occurs.
           It is a reference, not an assertion that standard LinkML validation
@@ -79,7 +93,14 @@ classes:
         required: true
         description: Typed identifier for this person occurrence in one population snapshot.
       population_snapshot_ref:
+        range: PopulationSnapshot
+        inlined: false
         required: true
+        annotations:
+          relationship_target: PopulationSnapshot
+          validation_boundary: >-
+            LinkML validates this value's shape, not whether the referenced
+            PopulationSnapshot is co-present.
         description: >-
           Reference to the PopulationSnapshot in which this person occurs. It
           is a reference, not an assertion that standard LinkML validation can
@@ -101,12 +122,21 @@ classes:
         required: true
         description: Typed identifier for this snapshot-scoped membership occurrence.
       population_snapshot_ref:
+        range: PopulationSnapshot
+        inlined: false
         required: true
+        annotations:
+          relationship_target: PopulationSnapshot
+          validation_boundary: >-
+            LinkML validates this value's shape, not whether the referenced
+            PopulationSnapshot is co-present.
         description: >-
           Reference to the PopulationSnapshot in which this membership occurs.
           It is a reference, not an assertion that standard LinkML validation
           can resolve the referenced snapshot.
       person_state_ref:
+        range: PersonState
+        inlined: false
         required: true
         annotations:
           relationship_target: PersonState
@@ -115,6 +145,8 @@ classes:
             PersonState is co-present or belongs to the declared snapshot.
         description: Reference to the member PersonState.
       household_state_ref:
+        range: HouseholdState
+        inlined: false
         required: true
         annotations:
           relationship_target: HouseholdState
