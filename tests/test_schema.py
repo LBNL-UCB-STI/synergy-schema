@@ -173,6 +173,8 @@ def test_root_schema_has_stable_identity_and_population_bundle_vocabulary() -> N
     )
     assert {
         "PopulationSnapshot",
+        "PopulationTrajectory",
+        "SkippedPopulationYear",
         "ProducingRunReference",
         "PhysicalArtifactReference",
         "ImmutableArtifactIdentity",
@@ -226,6 +228,7 @@ def test_core_population_states_and_membership_are_snapshot_scoped() -> None:
         "household_state_id",
         "population_snapshot_ref",
         "longitudinal_household_ref",
+        "predecessor_state_refs",
     }
     assert set(person.attributes) == {
         "person_state_id",
@@ -239,10 +242,27 @@ def test_core_population_states_and_membership_are_snapshot_scoped() -> None:
         "household_state_ref",
     }
 
+    vehicle = schema_view.induced_class("VehicleState")
+    assignment = schema_view.induced_class("HouseholdVehicleAssignment")
+    assert set(vehicle.attributes) == {
+        "vehicle_state_id",
+        "population_snapshot_ref",
+        "longitudinal_vehicle_ref",
+    }
+    assert set(assignment.attributes) == {
+        "household_vehicle_assignment_id",
+        "population_snapshot_ref",
+        "household_state_ref",
+        "vehicle_state_ref",
+        "relationship_kind",
+    }
+
     for record, identifier in (
         (household, "household_state_id"),
         (person, "person_state_id"),
         (membership, "household_membership_id"),
+        (vehicle, "vehicle_state_id"),
+        (assignment, "household_vehicle_assignment_id"),
     ):
         assert record.attributes[identifier].identifier is True
         assert record.attributes[identifier].required is True
@@ -266,7 +286,13 @@ def test_core_population_state_fixture_validates_and_requires_snapshot_scope() -
     """Population state and membership cannot be modeled outside a snapshot."""
     records = _load_core_population_states_fixture()
 
-    for target_class in ("HouseholdState", "PersonState", "HouseholdMembership"):
+    for target_class in (
+        "HouseholdState",
+        "PersonState",
+        "HouseholdMembership",
+        "VehicleState",
+        "HouseholdVehicleAssignment",
+    ):
         assert _native_validation_messages(records[target_class], target_class) == []
 
     incomplete_membership = deepcopy(records["HouseholdMembership"])
