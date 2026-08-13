@@ -1,5 +1,8 @@
 # Post-ATLAS population bundle
 
+This is the detailed current-workflow explanation. For a short newcomer view,
+see [PILATES post-ATLAS population](../workflow-structures/pilates.md).
+
 The post-ATLAS population bundle is the current PILATES workflow profile in
 Synergy Schema. It describes one yearly population handoff after ATLAS has
 updated household vehicle ownership: the population state being represented,

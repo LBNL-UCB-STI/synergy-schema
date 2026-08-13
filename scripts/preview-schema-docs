@@ -34,6 +34,9 @@ uv run python -m synergy_schema.cross_model_identity_diagram \
   "$mapping_path" \
   "$generated_docs/cross-model-population-identity.md"
 
+cp "$repo_root/examples/one_year_mapping_handshake/review/contract-at-a-glance.md" \
+  "$generated_docs/contract-at-a-glance.md"
+
 if [[ "$mode" == "build" ]]; then
   uv run zensical build
 else
