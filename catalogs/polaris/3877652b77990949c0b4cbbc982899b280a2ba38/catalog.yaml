@@ -15,5 +15,143 @@ upstream:
 elements:
   - kind: artifact_key
     path: translation_sql_sha256:36c54f7ba42ead157b25d4f5e6e27addfd72fc3c9ecfbde17a83287a7785088c
+  - kind: sql_column
+    path: polaris_households.Has_Residential_Charging
+  - kind: sql_column
+    path: polaris_households.bikes
+  - kind: sql_column
+    path: polaris_households.delRat
+  - kind: sql_column
+    path: polaris_households.dispose_veh
+  - kind: sql_column
+    path: polaris_households.ecom
+  - kind: sql_column
+    path: polaris_households.hhold
+  - kind: sql_column
+    path: polaris_households.household
+  - kind: sql_column
+    path: polaris_households.housing_unit_type
+  - kind: sql_column
+    path: polaris_households.income
+  - kind: sql_column
+    path: polaris_households.location
+  - kind: sql_column
+    path: polaris_households.num_groceries
+  - kind: sql_column
+    path: polaris_households.num_meals
+  - kind: sql_column
+    path: polaris_households.persons
+  - kind: sql_column
+    path: polaris_households.time_in_home
+  - kind: sql_column
+    path: polaris_households.type
+  - kind: sql_column
+    path: polaris_households.vehicles
+  - kind: sql_column
+    path: polaris_households.workers
+  - kind: sql_column
+    path: polaris_persons.age
+  - kind: sql_column
+    path: polaris_persons.disability
+  - kind: sql_column
+    path: polaris_persons.education
+  - kind: sql_column
+    path: polaris_persons.employment
+  - kind: sql_column
+    path: polaris_persons.escooter_use_level
+  - kind: sql_column
+    path: polaris_persons.gender
+  - kind: sql_column
+    path: polaris_persons.household
+  - kind: sql_column
+    path: polaris_persons.id
+  - kind: sql_column
+    path: polaris_persons.income
+  - kind: sql_column
+    path: polaris_persons.industry
+  - kind: sql_column
+    path: polaris_persons.is_long_term_chooser
+  - kind: sql_column
+    path: polaris_persons.journey_to_work_arrival_time
+  - kind: sql_column
+    path: polaris_persons.journey_to_work_mode
+  - kind: sql_column
+    path: polaris_persons.journey_to_work_travel_time
+  - kind: sql_column
+    path: polaris_persons.journey_to_work_vehicle_occupancy
+  - kind: sql_column
+    path: polaris_persons.marital_status
+  - kind: sql_column
+    path: polaris_persons.person
+  - kind: sql_column
+    path: polaris_persons.race
+  - kind: sql_column
+    path: polaris_persons.school_enrollment
+  - kind: sql_column
+    path: polaris_persons.school_grade_level
+  - kind: sql_column
+    path: polaris_persons.school_location_id
+  - kind: sql_column
+    path: polaris_persons.telecommute_level
+  - kind: sql_column
+    path: polaris_persons.time_in_job
+  - kind: sql_column
+    path: polaris_persons.transit_pass
+  - kind: sql_column
+    path: polaris_persons.work_hours
+  - kind: sql_column
+    path: polaris_persons.work_location_id
+  - kind: sql_column
+    path: polaris_persons.worker_class
+  - kind: sql_column
+    path: polaris_vehicle_class.capacity
+  - kind: sql_column
+    path: polaris_vehicle_class.class_id
+  - kind: sql_column
+    path: polaris_vehicle_class.class_type
+  - kind: sql_column
+    path: polaris_vehicle_class.ev_ml_class
+  - kind: sql_column
+    path: polaris_vehicle_class.length
+  - kind: sql_column
+    path: polaris_vehicle_class.max_accel
+  - kind: sql_column
+    path: polaris_vehicle_class.max_decel
+  - kind: sql_column
+    path: polaris_vehicle_class.max_speed
+  - kind: sql_column
+    path: polaris_vehicle_type.automation_type
+  - kind: sql_column
+    path: polaris_vehicle_type.connectivity_type
+  - kind: sql_column
+    path: polaris_vehicle_type.ev_features_id
+  - kind: sql_column
+    path: polaris_vehicle_type.fuel_type
+  - kind: sql_column
+    path: polaris_vehicle_type.operating_cost_per_mile
+  - kind: sql_column
+    path: polaris_vehicle_type.powertrain_type
+  - kind: sql_column
+    path: polaris_vehicle_type.type_id
+  - kind: sql_column
+    path: polaris_vehicle_type.vehicle_class
+  - kind: sql_column
+    path: polaris_vehicle_type.vintage_type
+  - kind: sql_column
+    path: polaris_vehicles.L3_wtp
+  - kind: sql_column
+    path: polaris_vehicles.L4_wtp
+  - kind: sql_column
+    path: polaris_vehicles.fleet
+  - kind: sql_column
+    path: polaris_vehicles.hhold
+  - kind: sql_column
+    path: polaris_vehicles.parking
+  - kind: sql_column
+    path: polaris_vehicles.subtype
+  - kind: sql_column
+    path: polaris_vehicles.type
+  - kind: sql_column
+    path: polaris_vehicles.vehicle_id
 digest_algorithm: sha256
-content_digest: ef1768f22c76ad30951d655a4fea5f85344ccda63abf389401a445bbdb6c0acf
+content_digest: 1468f80fa42be43ab0e18cf6575eecf5cb765b709e9c062195773d0467332c32

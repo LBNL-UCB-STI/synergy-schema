@@ -97,12 +97,60 @@ def _pilates_elements(checkout: Path) -> tuple[list[dict[str, str]], list[str]]:
 def _polaris_elements(source: Path) -> tuple[list[dict[str, str]], list[str]]:
     sql_paths = sorted(source.glob("*.sql"))
     columns: set[str] = set()
-    pattern = re.compile(r"\\bas\\s+([A-Za-z_][A-Za-z0-9_]*)", re.IGNORECASE)
-    for sql_path in sql_paths:
-        columns.update(
-            match.group(1)
-            for match in pattern.finditer(sql_path.read_text(encoding="utf-8"))
+    view_pattern = re.compile(
+        r"\bcreate\s+(?:or\s+replace\s+)?(?:temp\s+)?view\s+"
+        r"(polaris_[A-Za-z0-9_]+)\s+as(?P<body>.*?);",
+        re.IGNORECASE | re.DOTALL,
+    )
+
+    def aliases(select_body: str) -> set[str]:
+        """Return aliases from the outer SELECT list, excluding nested casts."""
+        depth = 0
+        start = end = None
+        for match in re.finditer(r"\b(select|from)\b", select_body, re.IGNORECASE):
+            depth_at_token = depth
+            for character in select_body[: match.start()][::-1]:
+                if character == ")":
+                    depth_at_token += 1
+                elif character == "(":
+                    depth_at_token -= 1
+            if depth_at_token != 0:
+                continue
+            if match.group(1).lower() == "select":
+                start = match.end()
+            elif start is not None:
+                end = match.start()
+                break
+        if start is None or end is None:
+            return set()
+        expressions: list[str] = []
+        depth = 0
+        expression_start = start
+        for index, character in enumerate(select_body[start:end], start=start):
+            if character == "(":
+                depth += 1
+            elif character == ")":
+                depth -= 1
+            elif character == "," and depth == 0:
+                expressions.append(select_body[expression_start:index])
+                expression_start = index + 1
+        expressions.append(select_body[expression_start:end])
+        alias_pattern = re.compile(
+            r"\bas\s+([A-Za-z_][A-Za-z0-9_]*)\s*$", re.IGNORECASE
         )
+        return {
+            match.group(1)
+            for expression in expressions
+            if (match := alias_pattern.search(expression.strip())) is not None
+        }
+
+    for sql_path in sql_paths:
+        text = sql_path.read_text(encoding="utf-8")
+        for view in view_pattern.finditer(text):
+            view_name = view.group(1)
+            columns.update(
+                f"{view_name}.{alias}" for alias in aliases(view.group("body"))
+            )
     package_digest = sha256(
         "".join(
             path.name + "\\0" + path.read_text(encoding="utf-8") for path in sql_paths

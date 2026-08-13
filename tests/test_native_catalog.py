@@ -118,3 +118,36 @@ def test_refresh_uses_only_a_miniature_checkout(tmp_path: Path) -> None:
     assert catalog.resolve("config_path", "run.region")
     assert catalog.resolve("artifact_key", "post_atlas_population")
     assert json.loads((output / "source.json").read_text())["source_paths"]
+
+
+def test_polaris_refresh_inventories_explicit_output_columns(tmp_path: Path) -> None:
+    source = tmp_path / "translation_sql"
+    source.mkdir()
+    (source / "10_households.sql").write_text(
+        "create or replace temp view polaris_households as\n"
+        "select cast(h.id as bigint) as household, 0 as workers\n"
+        "from input_households h;\n",
+        encoding="utf-8",
+    )
+    output = tmp_path / "out"
+    result = subprocess.run(
+        [
+            sys.executable,
+            str(ROOT / "scripts/refresh-native-contract-catalog"),
+            "--kind",
+            "polaris",
+            "--checkout",
+            str(source),
+            "--out",
+            str(output),
+        ],
+        text=True,
+        capture_output=True,
+        check=False,
+    )
+    assert result.returncode == 0, result.stderr
+    catalog = load_catalog(output / "catalog.yaml")
+    assert catalog.resolve("sql_column", "polaris_households.household")
+    assert catalog.resolve("sql_column", "polaris_households.workers")
+    assert not catalog.resolve("sql_column", "polaris_households.bigint")
+    assert not catalog.resolve("sql_column", "polaris_households.integer")
