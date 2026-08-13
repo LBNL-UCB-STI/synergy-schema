@@ -1,0 +1,94 @@
+id: bundle:synthetic-one-year
+manifest_content_digest_algorithm: sha256
+population_trajectory:
+  id: trajectory:synthetic-one-year
+  scenario_definition_ref: &id001
+    scenario_definition_id: scenario:synthetic-one-year
+    revision: r1
+    content_digest: f4722cd143b351cc25a715d96450402551aeff448963cf1e3529b7f544bd8ccb
+  stochastic_realization_id: realization:synthetic-one
+  requested_years:
+    - 2025
+  skipped_years: []
+  completeness_status: complete
+  snapshots:
+    - &id002
+      id: snapshot:synthetic-2025
+      scenario_definition_ref: *id001
+      stochastic_realization_id: realization:synthetic-one
+      simulation_year: 2025
+      equilibrium_iteration: 1
+population_snapshot_bundles:
+  - population_snapshot: *id002
+    members:
+      - semantic_role: households
+        artifact:
+          artifact_identity:
+            digest_algorithm: sha256
+            content_digest: 617b56d43400d5657e861c5ba1585c8d19e601396d421ec3738d700b8ec537c6
+          locator: artifacts/households.csv
+          media_type: text/plain
+      - semantic_role: persons
+        artifact:
+          artifact_identity:
+            digest_algorithm: sha256
+            content_digest: 06d5bd97ba774be86300c920ce7bd2279b4e5d1538174fd2dfb4c763310cf1c1
+          locator: artifacts/persons.csv
+          media_type: text/plain
+      - semantic_role: vehicles
+        artifact:
+          artifact_identity:
+            digest_algorithm: sha256
+            content_digest: db36e36848b750eb8f1f6f474f51a05391f8f710f1ab18acc71859bdc2b83834
+          locator: artifacts/vehicles.csv
+          media_type: text/plain
+    consist_provenance:
+      runs:
+        - run_id: run:child-2025
+          parent_run:
+            run_id: run:header
+      artifacts:
+        - artifact_id: artifact:households
+          immutable_identity:
+            algorithm: sha256
+            kind: file
+            digest: 617b56d43400d5657e861c5ba1585c8d19e601396d421ec3738d700b8ec537c6
+        - artifact_id: artifact:persons
+          immutable_identity:
+            algorithm: sha256
+            kind: file
+            digest: 06d5bd97ba774be86300c920ce7bd2279b4e5d1538174fd2dfb4c763310cf1c1
+        - artifact_id: artifact:vehicles
+          immutable_identity:
+            algorithm: sha256
+            kind: file
+            digest: db36e36848b750eb8f1f6f474f51a05391f8f710f1ab18acc71859bdc2b83834
+      associations:
+        - run:
+            run_id: run:child-2025
+          artifact:
+            artifact_id: artifact:households
+          direction: output
+        - run:
+            run_id: run:child-2025
+          artifact:
+            artifact_id: artifact:persons
+          direction: output
+        - run:
+            run_id: run:child-2025
+          artifact:
+            artifact_id: artifact:vehicles
+          direction: output
+schedule_evidence:
+  handoff_year_statuses:
+    - simulation_year: 2025
+      status: exported
+consist_trajectory_evidence:
+  scenario_header_run:
+    run_id: run:header
+  child_run_evidence:
+    - child_run:
+        run_id: run:child-2025
+      simulation_year: 2025
+      equilibrium_iteration: 1
+manifest_content_digest: 30a17bae2499e972c8fbe775b340b7f46d5a36caf4b5d6d0439122f21d59f84d

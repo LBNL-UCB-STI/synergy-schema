@@ -1,0 +1,49 @@
+contract:
+  encoding_source:
+    artifact_identity:
+      content_digest: 09c02896a0cfbfcb837dd199d74f0b1faa635d5de825c81c66e4a6d07174b937
+      digest_algorithm: sha256
+    locator: encoding-source/team-mapping.csv
+    media_type: text/plain
+  governance:
+    lifecycle_status: draft
+    maintaining_team: Synergy schema maintainers
+    review_records: []
+  id: mapping:atlas-demo-to-polaris
+  revision: revision-1
+  semantic_content_digest: 77684af5821e1f8bbb6e011b4a2deaa8dc52e3104f0d1897072e34e00be4ad01
+  semantic_content_digest_algorithm: sha256
+  source_catalog:
+    catalog_id: atlas-demo
+    catalog_kind: atlas
+    content_digest: b422659b61fe9df17f336f77c5a5e30c96a00f2a4cb956b0cad2e47f141607f5
+    digest_algorithm: sha256
+    revision: synthetic-r1
+  supporting_sources: []
+  target_catalog:
+    catalog_id: polaris-demo
+    catalog_kind: polaris
+    content_digest: f6c00a5cf5b4cb47ae291b8ee8e5b7d38038ff68f752995cadbc184ed9768f78
+    digest_algorithm: sha256
+    revision: synthetic-r1
+implementations:
+  - id: implementation:synthetic-pilates
+    implementation_artifact:
+      artifact_identity:
+        content_digest: e118afe92cc039c42d2581383127fdc7a3bfcf9060d95a2d8d9c33d65f46d436
+        digest_algorithm: sha256
+      locator: implementation/translation.sql
+      media_type: text/plain
+    implemented_semantic_content_digest: 77684af5821e1f8bbb6e011b4a2deaa8dc52e3104f0d1897072e34e00be4ad01
+    implemented_semantic_content_digest_algorithm: sha256
+    status: conformance_checked
+    validation_evidence:
+      - synthetic draft smoke check
+    workflow_owner: PILATES workflow integrator
+ownership:
+  enforcement: Repository ownership metadata; Git handles intentionally not fabricated.
+  required_semantic_review_roles:
+    - source_owner
+    - target_owner
+  source_owner: ATLAS model team
+  target_owner: POLARIS model team

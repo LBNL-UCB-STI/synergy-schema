@@ -1,0 +1,3 @@
+source,target
+atlas_households.household_id,polaris_households.hhold
+atlas_households.persons,polaris_households.persons

@@ -1,0 +1,14 @@
+catalog_id: atlas-demo
+catalog_kind: atlas
+revision: synthetic-r1
+upstream:
+  revision: synthetic-r1
+  source_paths:
+    - synthetic-atlas.csv
+elements:
+  - kind: sql_column
+    path: atlas_households.household_id
+  - kind: sql_column
+    path: atlas_households.persons
+digest_algorithm: sha256
+content_digest: b422659b61fe9df17f336f77c5a5e30c96a00f2a4cb956b0cad2e47f141607f5

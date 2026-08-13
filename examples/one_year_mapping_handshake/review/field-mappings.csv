@@ -1,0 +1,3 @@
+id,source_kind,source_path,target_kind,target_path,transformation_mode,rule,implementation_evidence
+household_id,sql_column,atlas_households.household_id,sql_column,polaris_households.hhold,renamed,Synthetic draft field correspondence.,"[""implementation/translation.sql""]"
+persons,sql_column,atlas_households.persons,sql_column,polaris_households.persons,renamed,Synthetic draft field correspondence.,"[""implementation/translation.sql""]"

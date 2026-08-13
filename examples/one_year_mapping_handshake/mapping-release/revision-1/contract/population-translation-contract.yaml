@@ -1,0 +1,55 @@
+id: mapping:atlas-demo-to-polaris
+revision: revision-1
+semantic_content_digest_algorithm: sha256
+semantic_content_digest: 77684af5821e1f8bbb6e011b4a2deaa8dc52e3104f0d1897072e34e00be4ad01
+encoding_source:
+  artifact_identity:
+    digest_algorithm: sha256
+    content_digest: 09c02896a0cfbfcb837dd199d74f0b1faa635d5de825c81c66e4a6d07174b937
+  locator: encoding-source/team-mapping.csv
+  media_type: text/plain
+supporting_sources: []
+source_catalog: &id001
+  catalog_id: atlas-demo
+  catalog_kind: atlas
+  revision: synthetic-r1
+  digest_algorithm: sha256
+  content_digest: b422659b61fe9df17f336f77c5a5e30c96a00f2a4cb956b0cad2e47f141607f5
+target_catalog: &id002
+  catalog_id: polaris-demo
+  catalog_kind: polaris
+  revision: synthetic-r1
+  digest_algorithm: sha256
+  content_digest: f6c00a5cf5b4cb47ae291b8ee8e5b7d38038ff68f752995cadbc184ed9768f78
+field_mappings:
+  - id: household_id
+    source_element:
+      catalog: *id001
+      kind: sql_column
+      path: atlas_households.household_id
+    target_element:
+      catalog: *id002
+      kind: sql_column
+      path: polaris_households.hhold
+    transformation_mode: renamed
+    rule: Synthetic draft field correspondence.
+    implementation_evidence:
+      - implementation/translation.sql
+  - id: persons
+    source_element:
+      catalog: *id001
+      kind: sql_column
+      path: atlas_households.persons
+    target_element:
+      catalog: *id002
+      kind: sql_column
+      path: polaris_households.persons
+    transformation_mode: renamed
+    rule: Synthetic draft field correspondence.
+    implementation_evidence:
+      - implementation/translation.sql
+residue_records: []
+governance:
+  maintaining_team: Synergy schema maintainers
+  lifecycle_status: draft
+  review_records: []

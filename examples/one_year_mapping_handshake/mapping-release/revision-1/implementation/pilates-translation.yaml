@@ -1,0 +1,13 @@
+id: implementation:synthetic-pilates
+implementation_artifact:
+  artifact_identity:
+    digest_algorithm: sha256
+    content_digest: e118afe92cc039c42d2581383127fdc7a3bfcf9060d95a2d8d9c33d65f46d436
+  locator: implementation/translation.sql
+  media_type: text/plain
+implemented_semantic_content_digest_algorithm: sha256
+implemented_semantic_content_digest: 77684af5821e1f8bbb6e011b4a2deaa8dc52e3104f0d1897072e34e00be4ad01
+workflow_owner: PILATES workflow integrator
+status: conformance_checked
+validation_evidence:
+  - synthetic draft smoke check
