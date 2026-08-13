@@ -1,0 +1,475 @@
+catalog_id: pilates-native-contract
+catalog_kind: pilates
+revision: 3877652b77990949c0b4cbbc982899b280a2ba38
+upstream:
+  revision: 3877652b77990949c0b4cbbc982899b280a2ba38
+  source_paths:
+    - pilates/config/models.py
+    - pilates/workflows/artifact_keys.py
+elements:
+  - kind: artifact_key
+    path: asim_mutable_data_dir
+  - kind: artifact_key
+    path: asim_output_dir
+  - kind: artifact_key
+    path: asim_sharrow_cache_dir
+  - kind: artifact_key
+    path: atlas_output_dir
+  - kind: artifact_key
+    path: atlas_vehicles2_input
+  - kind: artifact_key
+    path: atlas_vehicles2_output
+  - kind: artifact_key
+    path: beam_config_file
+  - kind: artifact_key
+    path: beam_experienced_plans_xml
+  - kind: artifact_key
+    path: beam_full_skims
+  - kind: artifact_key
+    path: beam_input_config_archived
+  - kind: artifact_key
+    path: beam_input_config_references_archived
+  - kind: artifact_key
+    path: beam_input_experienced_plans_warmstart_archived
+  - kind: artifact_key
+    path: beam_input_households_archived
+  - kind: artifact_key
+    path: beam_input_linkstats_warmstart_archived
+  - kind: artifact_key
+    path: beam_input_persons_archived
+  - kind: artifact_key
+    path: beam_input_plans_archived
+  - kind: artifact_key
+    path: beam_input_plans_warmstart_archived
+  - kind: artifact_key
+    path: beam_input_vehicles_archived
+  - kind: artifact_key
+    path: beam_mutable_data_dir
+  - kind: artifact_key
+    path: beam_network_final
+  - kind: artifact_key
+    path: beam_output_dir
+  - kind: artifact_key
+    path: beam_output_experienced_plans_xml
+  - kind: artifact_key
+    path: beam_output_plans_xml
+  - kind: artifact_key
+    path: beam_plans_out
+  - kind: artifact_key
+    path: beam_r5_osm_file
+  - kind: artifact_key
+    path: final_skims_omx
+  - kind: artifact_key
+    path: households_asim_in
+  - kind: artifact_key
+    path: households_beam_in
+  - kind: artifact_key
+    path: land_use_asim_in
+  - kind: artifact_key
+    path: linkstats
+  - kind: artifact_key
+    path: linkstats_warmstart
+  - kind: artifact_key
+    path: omx_skims
+  - kind: artifact_key
+    path: persons_asim_in
+  - kind: artifact_key
+    path: persons_beam_in
+  - kind: artifact_key
+    path: plans_beam_in
+  - kind: artifact_key
+    path: usim_datastore_base_h5
+  - kind: artifact_key
+    path: usim_datastore_h5
+  - kind: artifact_key
+    path: usim_forecast_output
+  - kind: artifact_key
+    path: usim_h5_updated
+  - kind: artifact_key
+    path: usim_input_archive_
+  - kind: artifact_key
+    path: usim_input_merged_
+  - kind: artifact_key
+    path: usim_input_next
+  - kind: artifact_key
+    path: usim_population_blocks_table
+  - kind: artifact_key
+    path: usim_population_households_table
+  - kind: artifact_key
+    path: usim_population_jobs_table
+  - kind: artifact_key
+    path: usim_population_persons_table
+  - kind: artifact_key
+    path: usim_population_source_h5
+  - kind: artifact_key
+    path: vehicles_beam_in
+  - kind: artifact_key
+    path: zarr_skims
+  - kind: config_path
+    path: _runtime
+  - kind: config_path
+    path: _runtime.flags
+  - kind: config_path
+    path: _runtime.flags.activity_demand_enabled
+  - kind: config_path
+    path: _runtime.flags.land_use_enabled
+  - kind: config_path
+    path: _runtime.flags.replanning_enabled
+  - kind: config_path
+    path: _runtime.flags.traffic_assignment_enabled
+  - kind: config_path
+    path: _runtime.flags.vehicle_ownership_model_enabled
+  - kind: config_path
+    path: _runtime.flags_initialized
+  - kind: config_path
+    path: _runtime.options
+  - kind: config_path
+    path: _runtime.options.allow_rewind_resume
+  - kind: config_path
+    path: _runtime.options.settings_file
+  - kind: config_path
+    path: _runtime.options.state_file_loc
+  - kind: config_path
+    path: activitysim
+  - kind: config_path
+    path: activitysim.chunk_size
+  - kind: config_path
+    path: activitysim.clipped_geoms_path
+  - kind: config_path
+    path: activitysim.command_template
+  - kind: config_path
+    path: activitysim.database
+  - kind: config_path
+    path: activitysim.database.enabled
+  - kind: config_path
+    path: activitysim.database.use_processed_data
+  - kind: config_path
+    path: activitysim.database.year
+  - kind: config_path
+    path: activitysim.file_format
+  - kind: config_path
+    path: activitysim.final_plans_folder
+  - kind: config_path
+    path: activitysim.from_urbansim_col_maps
+  - kind: config_path
+    path: activitysim.household_sample_size
+  - kind: config_path
+    path: activitysim.local_configs_folder
+  - kind: config_path
+    path: activitysim.local_input_folder
+  - kind: config_path
+    path: activitysim.local_mutable_configs_folder
+  - kind: config_path
+    path: activitysim.local_mutable_data_folder
+  - kind: config_path
+    path: activitysim.local_output_folder
+  - kind: config_path
+    path: activitysim.main_configs_dir
+  - kind: config_path
+    path: activitysim.num_processes
+  - kind: config_path
+    path: activitysim.output_tables
+  - kind: config_path
+    path: activitysim.persist_sharrow_cache
+  - kind: config_path
+    path: activitysim.random_seed
+  - kind: config_path
+    path: activitysim.region_mappings
+  - kind: config_path
+    path: activitysim.replan_after
+  - kind: config_path
+    path: activitysim.replan_hh_samp_size
+  - kind: config_path
+    path: activitysim.replan_iters
+  - kind: config_path
+    path: activitysim.school_reassignment_share
+  - kind: config_path
+    path: activitysim.subdir
+  - kind: config_path
+    path: activitysim.to_urbansim_col_maps
+  - kind: config_path
+    path: activitysim.validation_folder
+  - kind: config_path
+    path: activitysim.warm_start_activities
+  - kind: config_path
+    path: activitysim.workplace_reassignment_share
+  - kind: config_path
+    path: atlas
+  - kind: config_path
+    path: atlas.adscen
+  - kind: config_path
+    path: atlas.basedir
+  - kind: config_path
+    path: atlas.beamac
+  - kind: config_path
+    path: atlas.codedir
+  - kind: config_path
+    path: atlas.command_template
+  - kind: config_path
+    path: atlas.container_input_folder
+  - kind: config_path
+    path: atlas.container_output_folder
+  - kind: config_path
+    path: atlas.discIncent
+  - kind: config_path
+    path: atlas.host_input_folder
+  - kind: config_path
+    path: atlas.host_mutable_input_folder
+  - kind: config_path
+    path: atlas.host_output_folder
+  - kind: config_path
+    path: atlas.max_retries
+  - kind: config_path
+    path: atlas.mod
+  - kind: config_path
+    path: atlas.num_processes
+  - kind: config_path
+    path: atlas.rebfactor
+  - kind: config_path
+    path: atlas.sample_size
+  - kind: config_path
+    path: atlas.scenario
+  - kind: config_path
+    path: atlas.taxfactor
+  - kind: config_path
+    path: atlas.warmstart_input_folder
+  - kind: config_path
+    path: beam
+  - kind: config_path
+    path: beam.activitysim_skims_file_base_name
+  - kind: config_path
+    path: beam.admission
+  - kind: config_path
+    path: beam.admission.linkstats
+  - kind: config_path
+    path: beam.admission.linkstats.artifact_key
+  - kind: config_path
+    path: beam.admission.linkstats.expected_bytes_path
+  - kind: config_path
+    path: beam.admission.linkstats.expected_run_id
+  - kind: config_path
+    path: beam.admission.linkstats.mode
+  - kind: config_path
+    path: beam.artifact_formats
+  - kind: config_path
+    path: beam.artifact_formats.activitysim_skims
+  - kind: config_path
+    path: beam.artifact_formats.events
+  - kind: config_path
+    path: beam.artifact_formats.exchange
+  - kind: config_path
+    path: beam.artifact_formats.linkstats
+  - kind: config_path
+    path: beam.asim_hwy_measure_map
+  - kind: config_path
+    path: beam.asim_ridehail_measure_map
+  - kind: config_path
+    path: beam.asim_transit_measure_map
+  - kind: config_path
+    path: beam.config
+  - kind: config_path
+    path: beam.discard_plans_every_year
+  - kind: config_path
+    path: beam.full_skim
+  - kind: config_path
+    path: beam.full_skim.modes_to_build
+  - kind: config_path
+    path: beam.full_skim.parallelism_thread_ratio
+  - kind: config_path
+    path: beam.full_skim.peak_hours
+  - kind: config_path
+    path: beam.full_skim.router_type
+  - kind: config_path
+    path: beam.full_skim.run_schedule
+  - kind: config_path
+    path: beam.full_skim.skims_geo_type
+  - kind: config_path
+    path: beam.full_skim.skims_kind
+  - kind: config_path
+    path: beam.local_input_folder
+  - kind: config_path
+    path: beam.local_mutable_data_folder
+  - kind: config_path
+    path: beam.local_output_folder
+  - kind: config_path
+    path: beam.max_plans_memory
+  - kind: config_path
+    path: beam.memory
+  - kind: config_path
+    path: beam.replanning_portion
+  - kind: config_path
+    path: beam.ridehail_path_map
+  - kind: config_path
+    path: beam.router_directory
+  - kind: config_path
+    path: beam.sample
+  - kind: config_path
+    path: beam.scenario_folder
+  - kind: config_path
+    path: beam.simulated_hwy_paths
+  - kind: config_path
+    path: beam.skim_previous_weight
+  - kind: config_path
+    path: beam.skim_zone_geoid_col
+  - kind: config_path
+    path: beam.skim_zone_source_id_col
+  - kind: config_path
+    path: beam.skims_shapefile
+  - kind: config_path
+    path: beam.warmstart_linkstats_path
+  - kind: config_path
+    path: infrastructure
+  - kind: config_path
+    path: infrastructure.container_manager
+  - kind: config_path
+    path: infrastructure.docker_config
+  - kind: config_path
+    path: infrastructure.docker_config.pull_latest
+  - kind: config_path
+    path: infrastructure.docker_config.stdout
+  - kind: config_path
+    path: infrastructure.docker_images
+  - kind: config_path
+    path: infrastructure.singularity_images
+  - kind: config_path
+    path: postprocessing
+  - kind: config_path
+    path: postprocessing.mep_output_folder
+  - kind: config_path
+    path: postprocessing.output_folder
+  - kind: config_path
+    path: postprocessing.scenario_definitions
+  - kind: config_path
+    path: postprocessing.validation_metrics
+  - kind: config_path
+    path: run
+  - kind: config_path
+    path: run.bootstrap_cache_enabled
+  - kind: config_path
+    path: run.consist_code_identity
+  - kind: config_path
+    path: run.consist_db_filename
+  - kind: config_path
+    path: run.consist_db_local_run
+  - kind: config_path
+    path: run.consist_db_restore_on_start
+  - kind: config_path
+    path: run.consist_db_restore_strict
+  - kind: config_path
+    path: run.consist_db_seed_from_shared_on_start
+  - kind: config_path
+    path: run.consist_db_seed_strict
+  - kind: config_path
+    path: run.consist_db_snapshot_enabled
+  - kind: config_path
+    path: run.consist_db_snapshot_interval_seconds
+  - kind: config_path
+    path: run.consist_db_snapshot_keep_last
+  - kind: config_path
+    path: run.consist_db_snapshot_on_outer_iteration
+  - kind: config_path
+    path: run.consist_hashing_strategy
+  - kind: config_path
+    path: run.enable_archive_copy
+  - kind: config_path
+    path: run.end_year
+  - kind: config_path
+    path: run.land_use_freq
+  - kind: config_path
+    path: run.local_workspace_root
+  - kind: config_path
+    path: run.models
+  - kind: config_path
+    path: run.models.activity_demand
+  - kind: config_path
+    path: run.models.land_use
+  - kind: config_path
+    path: run.models.travel
+  - kind: config_path
+    path: run.models.vehicle_ownership
+  - kind: config_path
+    path: run.output_directory
+  - kind: config_path
+    path: run.output_run_name
+  - kind: config_path
+    path: run.recovery_archive_roots
+  - kind: config_path
+    path: run.region
+  - kind: config_path
+    path: run.restart_strict
+  - kind: config_path
+    path: run.scenario
+  - kind: config_path
+    path: run.start_year
+  - kind: config_path
+    path: run.supply_demand_iters
+  - kind: config_path
+    path: run.travel_model_freq
+  - kind: config_path
+    path: run.use_stubs
+  - kind: config_path
+    path: run.vehicle_ownership_freq
+  - kind: config_path
+    path: shared
+  - kind: config_path
+    path: shared.database
+  - kind: config_path
+    path: shared.database.enabled
+  - kind: config_path
+    path: shared.database.path
+  - kind: config_path
+    path: shared.database.snapshot_path
+  - kind: config_path
+    path: shared.database.snapshot_path
+  - kind: config_path
+    path: shared.database.type
+  - kind: config_path
+    path: shared.database.use_consist
+  - kind: config_path
+    path: shared.geography
+  - kind: config_path
+    path: shared.geography.FIPS
+  - kind: config_path
+    path: shared.geography.alternative_zones
+  - kind: config_path
+    path: shared.geography.local_crs
+  - kind: config_path
+    path: shared.geography.zones
+  - kind: config_path
+    path: shared.skims
+  - kind: config_path
+    path: shared.skims.fname
+  - kind: config_path
+    path: shared.skims.hwy_paths
+  - kind: config_path
+    path: shared.skims.origin_fname
+  - kind: config_path
+    path: shared.skims.periods
+  - kind: config_path
+    path: shared.skims.transit_paths
+  - kind: config_path
+    path: urbansim
+  - kind: config_path
+    path: urbansim.client_base_folder
+  - kind: config_path
+    path: urbansim.client_data_folder
+  - kind: config_path
+    path: urbansim.command_template
+  - kind: config_path
+    path: urbansim.input_file_template
+  - kind: config_path
+    path: urbansim.input_file_template_year
+  - kind: config_path
+    path: urbansim.local_data_input_folder
+  - kind: config_path
+    path: urbansim.local_mutable_data_folder
+  - kind: config_path
+    path: urbansim.output_file_template
+  - kind: config_path
+    path: urbansim.region_id
+  - kind: config_path
+    path: urbansim.region_mappings
+  - kind: config_path
+    path: workflow
+digest_algorithm: sha256
+content_digest: 851dc837dc53bc8d55259211e22bd11170b9501d66e024878315cd0e09c2385e

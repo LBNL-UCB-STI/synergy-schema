@@ -1,0 +1,19 @@
+catalog_id: polaris-native-contract
+catalog_kind: polaris
+revision: 3877652b77990949c0b4cbbc982899b280a2ba38
+upstream:
+  revision: 3877652b77990949c0b4cbbc982899b280a2ba38
+  source_paths:
+    - polaris_population_translation/00_inputs.sql
+    - polaris_population_translation/10_households.sql
+    - polaris_population_translation/20_persons.sql
+    - polaris_population_translation/30_vehicle_dimensions.sql
+    - polaris_population_translation/40_vehicles.sql
+    - polaris_population_translation/50_vehicle_class.sql
+    - polaris_population_translation/60_vehicle_type.sql
+    - polaris_population_translation/99_exports.sql
+elements:
+  - kind: artifact_key
+    path: translation_sql_sha256:36c54f7ba42ead157b25d4f5e6e27addfd72fc3c9ecfbde17a83287a7785088c
+digest_algorithm: sha256
+content_digest: ef1768f22c76ad30951d655a4fea5f85344ccda63abf389401a445bbdb6c0acf

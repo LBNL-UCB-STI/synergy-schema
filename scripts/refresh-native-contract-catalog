@@ -1,0 +1,156 @@
+#!/usr/bin/env python3
+"""Generate an explicit native contract catalog from a local source checkout."""
+
+from __future__ import annotations
+
+import argparse
+import ast
+from hashlib import sha256
+import json
+from pathlib import Path
+import re
+import subprocess
+import sys
+from typing import Iterable
+
+ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT / "src"))
+
+from synergy_schema.native_catalog import write_catalog  # noqa: E402
+
+
+def _revision(checkout: Path) -> str:
+    result = subprocess.run(
+        ["git", "-C", str(checkout), "rev-parse", "HEAD"],
+        text=True,
+        capture_output=True,
+        check=False,
+    )
+    return (
+        result.stdout.strip() if result.returncode == 0 else "unversioned-local-source"
+    )
+
+
+def _annotation_name(node: ast.expr) -> str | None:
+    if isinstance(node, ast.Name):
+        return node.id
+    if isinstance(node, ast.Subscript):
+        return _annotation_name(node.slice)
+    if isinstance(node, ast.BinOp):
+        return _annotation_name(node.left) or _annotation_name(node.right)
+    if isinstance(node, ast.Tuple):
+        return next(
+            (name for child in node.elts if (name := _annotation_name(child))), None
+        )
+    return None
+
+
+def _pilates_elements(checkout: Path) -> tuple[list[dict[str, str]], list[str]]:
+    models_path = checkout / "pilates/config/models.py"
+    keys_path = checkout / "pilates/workflows/artifact_keys.py"
+    tree = ast.parse(models_path.read_text(encoding="utf-8"), filename=str(models_path))
+    classes: dict[str, list[tuple[str, str | None]]] = {}
+    for node in tree.body:
+        if isinstance(node, ast.ClassDef):
+            fields = [
+                (statement.target.id, _annotation_name(statement.annotation))
+                for statement in node.body
+                if isinstance(statement, ast.AnnAssign)
+                and isinstance(statement.target, ast.Name)
+            ]
+            classes[node.name] = fields
+
+    paths: set[str] = set()
+
+    def visit(class_name: str, prefix: str, visited: set[str]) -> None:
+        if class_name in visited:
+            return
+        for name, annotation in classes.get(class_name, []):
+            path = f"{prefix}.{name}" if prefix else name
+            paths.add(path)
+            if annotation in classes:
+                visit(annotation, path, visited | {class_name})
+
+    visit("PilatesConfig", "", set())
+
+    key_tree = ast.parse(keys_path.read_text(encoding="utf-8"), filename=str(keys_path))
+    constants: dict[str, str] = {}
+    for node in key_tree.body:
+        if (
+            isinstance(node, ast.Assign)
+            and len(node.targets) == 1
+            and isinstance(node.targets[0], ast.Name)
+        ):
+            if isinstance(node.value, ast.Constant) and isinstance(
+                node.value.value, str
+            ):
+                constants[node.targets[0].id] = node.value.value
+            elif isinstance(node.value, ast.Name) and node.value.id in constants:
+                constants[node.targets[0].id] = constants[node.value.id]
+    elements = [{"kind": "config_path", "path": path} for path in paths] + [
+        {"kind": "artifact_key", "path": value}
+        for value in sorted(set(constants.values()))
+    ]
+    return elements, ["pilates/config/models.py", "pilates/workflows/artifact_keys.py"]
+
+
+def _polaris_elements(source: Path) -> tuple[list[dict[str, str]], list[str]]:
+    sql_paths = sorted(source.glob("*.sql"))
+    columns: set[str] = set()
+    pattern = re.compile(r"\\bas\\s+([A-Za-z_][A-Za-z0-9_]*)", re.IGNORECASE)
+    for sql_path in sql_paths:
+        columns.update(
+            match.group(1)
+            for match in pattern.finditer(sql_path.read_text(encoding="utf-8"))
+        )
+    package_digest = sha256(
+        "".join(
+            path.name + "\\0" + path.read_text(encoding="utf-8") for path in sql_paths
+        ).encode("utf-8")
+    ).hexdigest()
+    elements = [{"kind": "sql_column", "path": path} for path in columns]
+    elements.append(
+        {"kind": "artifact_key", "path": f"translation_sql_sha256:{package_digest}"}
+    )
+    return elements, [str(path.relative_to(source.parent)) for path in sql_paths]
+
+
+def main(argv: Iterable[str] | None = None) -> int:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--kind", choices=("pilates", "polaris"), required=True)
+    parser.add_argument(
+        "--checkout", required=True, help="Local checkout or POLARIS SQL directory"
+    )
+    parser.add_argument("--out", required=True)
+    args = parser.parse_args(argv)
+    source = Path(args.checkout).resolve()
+    output = Path(args.out).resolve()
+    if args.kind == "pilates":
+        elements, paths = _pilates_elements(source)
+        revision_root = source
+    else:
+        elements, paths = _polaris_elements(source)
+        revision_root = source.parent
+    revision = _revision(revision_root)
+    document = {
+        "catalog_id": f"{args.kind}-native-contract",
+        "catalog_kind": args.kind,
+        "revision": revision,
+        "upstream": {"revision": revision, "source_paths": sorted(paths)},
+        "elements": elements,
+    }
+    write_catalog(document, output / "catalog.yaml")
+    (output / "source.json").write_text(
+        json.dumps(
+            {"kind": args.kind, "revision": revision, "source_paths": sorted(paths)},
+            sort_keys=True,
+            indent=2,
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
