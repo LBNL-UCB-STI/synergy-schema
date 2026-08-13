@@ -1,0 +1,47 @@
+id: bundle:synthetic-evolving-baseline
+manifest_content_digest_algorithm: sha256
+population_trajectory:
+  id: trajectory:synthetic-evolving-baseline
+  scenario_definition_ref: &scenario {scenario_definition_id: scenario:synthetic-evolving-baseline, revision: r1, content_digest: 1e06cb98d859ef9c0339c65846e0a9b69e219996f29afd36d342b787f3dbe8f4}
+  stochastic_realization_id: realization:synthetic-evolving
+  requested_years: [2025, 2030, 2035]
+  skipped_years: []
+  completeness_status: complete
+  snapshots:
+    - &snapshot_2025 {id: snapshot:baseline-2025, scenario_definition_ref: *scenario, stochastic_realization_id: realization:synthetic-evolving, simulation_year: 2025, equilibrium_iteration: 1}
+    - &snapshot_2030 {id: snapshot:baseline-2030, scenario_definition_ref: *scenario, stochastic_realization_id: realization:synthetic-evolving, simulation_year: 2030, equilibrium_iteration: 2, parent_snapshot_ref: snapshot:baseline-2025}
+    - &snapshot_2035 {id: snapshot:baseline-2035, scenario_definition_ref: *scenario, stochastic_realization_id: realization:synthetic-evolving, simulation_year: 2035, equilibrium_iteration: 3, parent_snapshot_ref: snapshot:baseline-2030}
+population_snapshot_bundles:
+  - population_snapshot: *snapshot_2025
+    members:
+      - {semantic_role: households, artifact: {artifact_identity: {digest_algorithm: sha256, content_digest: "4444444444444444444444444444444444444444444444444444444444444444"}, locator: evidence/atlas-2025.yaml}}
+      - {semantic_role: persons, artifact: {artifact_identity: {digest_algorithm: sha256, content_digest: "5555555555555555555555555555555555555555555555555555555555555555"}, locator: evidence/atlas-2025.yaml}}
+      - {semantic_role: vehicles, artifact: {artifact_identity: {digest_algorithm: sha256, content_digest: "6666666666666666666666666666666666666666666666666666666666666666"}, locator: evidence/atlas-2025.yaml}}
+    consist_provenance: &p2025
+      runs: [{run_id: run:baseline-child-2025, parent_run: {run_id: run:baseline-header}}]
+      artifacts: [{artifact_id: artifact:baseline-2025-households, immutable_identity: {algorithm: sha256, kind: file, digest: "4444444444444444444444444444444444444444444444444444444444444444"}}, {artifact_id: artifact:baseline-2025-persons, immutable_identity: {algorithm: sha256, kind: file, digest: "5555555555555555555555555555555555555555555555555555555555555555"}}, {artifact_id: artifact:baseline-2025-vehicles, immutable_identity: {algorithm: sha256, kind: file, digest: "6666666666666666666666666666666666666666666666666666666666666666"}}]
+      associations: [{run: {run_id: run:baseline-child-2025}, artifact: {artifact_id: artifact:baseline-2025-households}, direction: output}, {run: {run_id: run:baseline-child-2025}, artifact: {artifact_id: artifact:baseline-2025-persons}, direction: output}, {run: {run_id: run:baseline-child-2025}, artifact: {artifact_id: artifact:baseline-2025-vehicles}, direction: output}]
+  - population_snapshot: *snapshot_2030
+    members:
+      - {semantic_role: households, artifact: {artifact_identity: {digest_algorithm: sha256, content_digest: "7777777777777777777777777777777777777777777777777777777777777777"}, locator: evidence/atlas-2030.yaml}}
+      - {semantic_role: persons, artifact: {artifact_identity: {digest_algorithm: sha256, content_digest: "8888888888888888888888888888888888888888888888888888888888888888"}, locator: evidence/atlas-2030.yaml}}
+      - {semantic_role: vehicles, artifact: {artifact_identity: {digest_algorithm: sha256, content_digest: "9999999999999999999999999999999999999999999999999999999999999999"}, locator: evidence/atlas-2030.yaml}}
+    consist_provenance: &p2030
+      runs: [{run_id: run:baseline-child-2030, parent_run: {run_id: run:baseline-header}}]
+      artifacts: [{artifact_id: artifact:baseline-2030-households, immutable_identity: {algorithm: sha256, kind: file, digest: "7777777777777777777777777777777777777777777777777777777777777777"}}, {artifact_id: artifact:baseline-2030-persons, immutable_identity: {algorithm: sha256, kind: file, digest: "8888888888888888888888888888888888888888888888888888888888888888"}}, {artifact_id: artifact:baseline-2030-vehicles, immutable_identity: {algorithm: sha256, kind: file, digest: "9999999999999999999999999999999999999999999999999999999999999999"}}]
+      associations: [{run: {run_id: run:baseline-child-2030}, artifact: {artifact_id: artifact:baseline-2030-households}, direction: output}, {run: {run_id: run:baseline-child-2030}, artifact: {artifact_id: artifact:baseline-2030-persons}, direction: output}, {run: {run_id: run:baseline-child-2030}, artifact: {artifact_id: artifact:baseline-2030-vehicles}, direction: output}]
+  - population_snapshot: *snapshot_2035
+    members:
+      - {semantic_role: households, artifact: {artifact_identity: {digest_algorithm: sha256, content_digest: "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa1"}, locator: evidence/atlas-2035.yaml}}
+      - {semantic_role: persons, artifact: {artifact_identity: {digest_algorithm: sha256, content_digest: "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb1"}, locator: evidence/atlas-2035.yaml}}
+      - {semantic_role: vehicles, artifact: {artifact_identity: {digest_algorithm: sha256, content_digest: "ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc1"}, locator: evidence/atlas-2035.yaml}}
+    consist_provenance: &p2035
+      runs: [{run_id: run:baseline-child-2035, parent_run: {run_id: run:baseline-header}}]
+      artifacts: [{artifact_id: artifact:baseline-2035-households, immutable_identity: {algorithm: sha256, kind: file, digest: "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa1"}}, {artifact_id: artifact:baseline-2035-persons, immutable_identity: {algorithm: sha256, kind: file, digest: "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb1"}}, {artifact_id: artifact:baseline-2035-vehicles, immutable_identity: {algorithm: sha256, kind: file, digest: "ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc1"}}]
+      associations: [{run: {run_id: run:baseline-child-2035}, artifact: {artifact_id: artifact:baseline-2035-households}, direction: output}, {run: {run_id: run:baseline-child-2035}, artifact: {artifact_id: artifact:baseline-2035-persons}, direction: output}, {run: {run_id: run:baseline-child-2035}, artifact: {artifact_id: artifact:baseline-2035-vehicles}, direction: output}]
+schedule_evidence:
+  handoff_year_statuses: [{simulation_year: 2025, status: exported}, {simulation_year: 2030, status: exported}, {simulation_year: 2035, status: exported}]
+consist_trajectory_evidence:
+  scenario_header_run: {run_id: run:baseline-header}
+  child_run_evidence: [{child_run: {run_id: run:baseline-child-2025}, simulation_year: 2025, equilibrium_iteration: 1}, {child_run: {run_id: run:baseline-child-2030}, simulation_year: 2030, equilibrium_iteration: 2}, {child_run: {run_id: run:baseline-child-2035}, simulation_year: 2035, equilibrium_iteration: 3}]
+manifest_content_digest: 696b9d7b58b80bdd3d030505c1aa7d9679ed6c9e2d6e0bde04c37a664058c5e1

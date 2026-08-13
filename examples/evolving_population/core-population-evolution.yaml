@@ -1,0 +1,40 @@
+# Core evidence names only identities and relationships. Ages remain model-owned.
+states:
+  2025:
+    households:
+      household:family-a:
+        successors: [household:family-a]
+    persons:
+      person:alex:
+        core_state: {longitudinal_person_id: person:alex}
+        model_owned: {age: 30}
+    vehicles:
+      vehicle:shared-1: {household_assignment: household:family-a}
+  2030:
+    households:
+      household:family-a:
+        successors: [household:family-a-1, household:family-a-2]
+      household:family-a-1: {predecessor: household:family-a}
+      household:family-a-2: {predecessor: household:family-a}
+    persons:
+      person:alex:
+        core_state: {longitudinal_person_id: person:alex}
+        model_owned: {age: 35}
+      person:new-2030:
+        core_state: {longitudinal_person_id: person:new-2030}
+        model_owned: {age: 1}
+    vehicles:
+      vehicle:shared-1: {household_assignment: household:family-a-2}
+  2035:
+    households:
+      household:family-a-1: {predecessor: household:family-a}
+      household:family-a-2: {predecessor: household:family-a}
+    persons:
+      person:alex:
+        core_state: {longitudinal_person_id: person:alex}
+        model_owned: {age: 40}
+      person:new-2030:
+        core_state: {longitudinal_person_id: person:new-2030}
+        model_owned: {age: 6}
+    vehicles:
+      vehicle:shared-1: {household_assignment: household:family-a-2}

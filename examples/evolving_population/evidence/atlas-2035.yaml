@@ -1,0 +1,4 @@
+synthetic_atlas_rows:
+  households: [{household_id: family-a-1, persons: 1}, {household_id: family-a-2, persons: 1}]
+  persons: [{person_id: alex, age: 40}, {person_id: new-2030, age: 6}]
+  vehicles: [{vehicle_id: shared-1, household_id: family-a-2}]

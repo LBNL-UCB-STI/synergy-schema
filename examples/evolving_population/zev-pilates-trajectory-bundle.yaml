@@ -1,0 +1,100 @@
+id: bundle:synthetic-evolving-zev
+manifest_content_digest_algorithm: sha256
+population_trajectory:
+  id: trajectory:synthetic-evolving-zev
+  scenario_definition_ref: &scenario
+    scenario_definition_id: scenario:synthetic-evolving-zev
+    revision: r1
+    content_digest: 9627b9406c54878a203314d2fbe7986d8fa27f2074cefad5cf21a8632a7d2e8c
+  stochastic_realization_id: realization:synthetic-evolving
+  requested_years: [2025, 2030, 2035]
+  skipped_years: []
+  completeness_status: complete
+  snapshots:
+    - &snapshot_2025
+      id: snapshot:zev-2025
+      scenario_definition_ref: *scenario
+      stochastic_realization_id: realization:synthetic-evolving
+      simulation_year: 2025
+      equilibrium_iteration: 1
+    - &snapshot_2030
+      id: snapshot:zev-2030
+      scenario_definition_ref: *scenario
+      stochastic_realization_id: realization:synthetic-evolving
+      simulation_year: 2030
+      equilibrium_iteration: 2
+      parent_snapshot_ref: snapshot:zev-2025
+    - &snapshot_2035
+      id: snapshot:zev-2035
+      scenario_definition_ref: *scenario
+      stochastic_realization_id: realization:synthetic-evolving
+      simulation_year: 2035
+      equilibrium_iteration: 3
+      parent_snapshot_ref: snapshot:zev-2030
+population_snapshot_bundles:
+  - population_snapshot: *snapshot_2025
+    members:
+      - semantic_role: households
+        artifact: {artifact_identity: {digest_algorithm: sha256, content_digest: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa}, locator: evidence/atlas-2025.yaml, media_type: application/yaml}
+      - semantic_role: persons
+        artifact: {artifact_identity: {digest_algorithm: sha256, content_digest: bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb}, locator: evidence/atlas-2025.yaml, media_type: application/yaml}
+      - semantic_role: vehicles
+        artifact: {artifact_identity: {digest_algorithm: sha256, content_digest: cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc}, locator: evidence/atlas-2025.yaml, media_type: application/yaml}
+    consist_provenance: &provenance_2025
+      runs: [{run_id: run:zev-child-2025, parent_run: {run_id: run:zev-header}}]
+      artifacts:
+        - {artifact_id: artifact:zev-2025-households, immutable_identity: {algorithm: sha256, kind: file, digest: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa}}
+        - {artifact_id: artifact:zev-2025-persons, immutable_identity: {algorithm: sha256, kind: file, digest: bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb}}
+        - {artifact_id: artifact:zev-2025-vehicles, immutable_identity: {algorithm: sha256, kind: file, digest: cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc}}
+      associations:
+        - {run: {run_id: run:zev-child-2025}, artifact: {artifact_id: artifact:zev-2025-households}, direction: output}
+        - {run: {run_id: run:zev-child-2025}, artifact: {artifact_id: artifact:zev-2025-persons}, direction: output}
+        - {run: {run_id: run:zev-child-2025}, artifact: {artifact_id: artifact:zev-2025-vehicles}, direction: output}
+  - population_snapshot: *snapshot_2030
+    members:
+      - semantic_role: households
+        artifact: {artifact_identity: {digest_algorithm: sha256, content_digest: dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd}, locator: evidence/atlas-2030.yaml, media_type: application/yaml}
+      - semantic_role: persons
+        artifact: {artifact_identity: {digest_algorithm: sha256, content_digest: eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee}, locator: evidence/atlas-2030.yaml, media_type: application/yaml}
+      - semantic_role: vehicles
+        artifact: {artifact_identity: {digest_algorithm: sha256, content_digest: ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff}, locator: evidence/atlas-2030.yaml, media_type: application/yaml}
+    consist_provenance: &provenance_2030
+      runs: [{run_id: run:zev-child-2030, parent_run: {run_id: run:zev-header}}]
+      artifacts:
+        - {artifact_id: artifact:zev-2030-households, immutable_identity: {algorithm: sha256, kind: file, digest: dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd}}
+        - {artifact_id: artifact:zev-2030-persons, immutable_identity: {algorithm: sha256, kind: file, digest: eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee}}
+        - {artifact_id: artifact:zev-2030-vehicles, immutable_identity: {algorithm: sha256, kind: file, digest: ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff}}
+      associations:
+        - {run: {run_id: run:zev-child-2030}, artifact: {artifact_id: artifact:zev-2030-households}, direction: output}
+        - {run: {run_id: run:zev-child-2030}, artifact: {artifact_id: artifact:zev-2030-persons}, direction: output}
+        - {run: {run_id: run:zev-child-2030}, artifact: {artifact_id: artifact:zev-2030-vehicles}, direction: output}
+  - population_snapshot: *snapshot_2035
+    members:
+      - semantic_role: households
+        artifact: {artifact_identity: {digest_algorithm: sha256, content_digest: "1111111111111111111111111111111111111111111111111111111111111111"}, locator: evidence/atlas-2035.yaml, media_type: application/yaml}
+      - semantic_role: persons
+        artifact: {artifact_identity: {digest_algorithm: sha256, content_digest: "2222222222222222222222222222222222222222222222222222222222222222"}, locator: evidence/atlas-2035.yaml, media_type: application/yaml}
+      - semantic_role: vehicles
+        artifact: {artifact_identity: {digest_algorithm: sha256, content_digest: "3333333333333333333333333333333333333333333333333333333333333333"}, locator: evidence/atlas-2035.yaml, media_type: application/yaml}
+    consist_provenance: &provenance_2035
+      runs: [{run_id: run:zev-child-2035, parent_run: {run_id: run:zev-header}}]
+      artifacts:
+        - {artifact_id: artifact:zev-2035-households, immutable_identity: {algorithm: sha256, kind: file, digest: "1111111111111111111111111111111111111111111111111111111111111111"}}
+        - {artifact_id: artifact:zev-2035-persons, immutable_identity: {algorithm: sha256, kind: file, digest: "2222222222222222222222222222222222222222222222222222222222222222"}}
+        - {artifact_id: artifact:zev-2035-vehicles, immutable_identity: {algorithm: sha256, kind: file, digest: "3333333333333333333333333333333333333333333333333333333333333333"}}
+      associations:
+        - {run: {run_id: run:zev-child-2035}, artifact: {artifact_id: artifact:zev-2035-households}, direction: output}
+        - {run: {run_id: run:zev-child-2035}, artifact: {artifact_id: artifact:zev-2035-persons}, direction: output}
+        - {run: {run_id: run:zev-child-2035}, artifact: {artifact_id: artifact:zev-2035-vehicles}, direction: output}
+schedule_evidence:
+  handoff_year_statuses:
+    - {simulation_year: 2025, status: exported}
+    - {simulation_year: 2030, status: exported}
+    - {simulation_year: 2035, status: exported}
+consist_trajectory_evidence:
+  scenario_header_run: {run_id: run:zev-header}
+  child_run_evidence:
+    - {child_run: {run_id: run:zev-child-2025}, simulation_year: 2025, equilibrium_iteration: 1}
+    - {child_run: {run_id: run:zev-child-2030}, simulation_year: 2030, equilibrium_iteration: 2}
+    - {child_run: {run_id: run:zev-child-2035}, simulation_year: 2035, equilibrium_iteration: 3}
+manifest_content_digest: 9e038cb59dbd6c443120dc86504fe30a1057e234aacf4e62aafcdc1909e02b1c
