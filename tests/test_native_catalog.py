@@ -77,6 +77,13 @@ def test_committed_catalogs_are_checksummed_and_resolvable() -> None:
         assert (path.parent / "source.json").exists()
 
 
+def test_committed_pilates_catalog_preserves_static_legacy_spellings() -> None:
+    catalog = load_catalog(
+        ROOT / "catalogs/pilates/3877652b77990949c0b4cbbc982899b280a2ba38/catalog.yaml"
+    )
+    assert catalog.resolve("config_path", "shared.database.shapshot_path")
+
+
 def test_refresh_uses_only_a_miniature_checkout(tmp_path: Path) -> None:
     checkout = tmp_path / "checkout"
     (checkout / "pilates/config").mkdir(parents=True)

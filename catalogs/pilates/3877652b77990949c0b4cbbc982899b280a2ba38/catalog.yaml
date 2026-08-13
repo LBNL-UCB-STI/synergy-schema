@@ -418,7 +418,7 @@ elements:
   - kind: config_path
     path: shared.database.path
   - kind: config_path
-    path: shared.database.snapshot_path
+    path: shared.database.shapshot_path
   - kind: config_path
     path: shared.database.snapshot_path
   - kind: config_path
