@@ -3,16 +3,21 @@
 from __future__ import annotations
 
 import argparse
+import json
 from pathlib import Path
 import sys
 from typing import Sequence
 
+import yaml
+
 from linkml_runtime.utils.schemaview import SchemaView
 
-from .diagnostics import CheckResult, InputError
 from .bundles import validate_polaris_bundle, validate_population_bundle
+from .day_zero import create_day_zero_manifest, validate_day_zero_manifest
+from .diagnostics import CheckResult, InputError
 from .documents import load_list, load_mapping, load_mapping_release, load_showcase
 from .mappings import validate_mapping_release
+from .review import diff_mappings, import_mapping, render_mapping
 from .scenario import validate_scenario
 
 
@@ -56,10 +61,23 @@ def build_parser() -> argparse.ArgumentParser:
     check_all.add_argument("--dir", required=True)
     check_all.add_argument("--production", action="store_true")
     check_all.add_argument("--require-approved-mapping", action="store_true")
-    for name in _COMMANDS[5:]:
-        command = commands.add_parser(name)
-        command.add_argument("--schema", required=True)
-        command.add_argument("--dir", required=True)
+    day_zero = commands.add_parser("create-day-zero-manifest")
+    day_zero.add_argument("--artifact", required=True)
+    day_zero.add_argument("--producer-artifact", required=True)
+    day_zero.add_argument("--native-scenario-namespace", required=True)
+    day_zero.add_argument("--native-scenario", required=True)
+    day_zero.add_argument("--year", required=True, type=int)
+    day_zero.add_argument("--out", required=True)
+    render = commands.add_parser("render-mapping")
+    render.add_argument("--release", required=True)
+    render.add_argument("--out-dir", required=True)
+    diff = commands.add_parser("diff-mappings")
+    diff.add_argument("--old", required=True)
+    diff.add_argument("--new", required=True)
+    diff.add_argument("--format", choices=("text", "markdown", "json"), default="text")
+    imported = commands.add_parser("import-mapping")
+    imported.add_argument("--review-dir", required=True)
+    imported.add_argument("--out-release", required=True)
     return parser
 
 
@@ -179,6 +197,38 @@ def _dispatch(args: argparse.Namespace) -> CheckResult:
             for item in result.diagnostics
         }
         return CheckResult(tuple(unique.values()))
+    if args.command == "create-day-zero-manifest":
+        manifest = create_day_zero_manifest(
+            args.artifact,
+            args.producer_artifact,
+            args.native_scenario_namespace,
+            args.native_scenario,
+            args.year,
+        )
+        Path(args.out).write_text(
+            yaml.safe_dump(manifest, sort_keys=True), encoding="utf-8"
+        )
+        return validate_day_zero_manifest(manifest)
+    if args.command == "render-mapping":
+        render_mapping(args.release, args.out_dir)
+        return CheckResult()
+    if args.command == "diff-mappings":
+        changes = diff_mappings(args.old, args.new)
+        if args.format == "json":
+            print(json.dumps(changes, sort_keys=True))
+        elif args.format == "markdown":
+            for category, entries in changes.items():
+                print(f"## {category}\n")
+                for entry in entries:
+                    print(f"- {entry}")
+        else:
+            for category, entries in changes.items():
+                for entry in entries:
+                    print(f"{category}: {entry}")
+        return CheckResult()
+    if args.command == "import-mapping":
+        import_mapping(args.review_dir, args.out_release)
+        return CheckResult()
     raise InputError(f"{args.command} is not wired in this conformance foundation")
 
 

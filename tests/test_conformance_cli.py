@@ -85,3 +85,37 @@ def test_bundle_commands_use_explicit_bundle_and_manifest_directory_arguments() 
     assert population.bundle == "bundle.yaml"
     assert polaris.bundle == "bundle.yaml"
     assert check_all.dir == "example"
+
+
+def test_adoption_commands_expose_their_public_arguments() -> None:
+    parser = build_parser()
+    day_zero = parser.parse_args(
+        [
+            "create-day-zero-manifest",
+            "--artifact",
+            "payload.csv",
+            "--producer-artifact",
+            "producer.sql",
+            "--native-scenario-namespace",
+            "atlas",
+            "--native-scenario",
+            "demo",
+            "--year",
+            "2025",
+            "--out",
+            "receipt.yaml",
+        ]
+    )
+    rendered = parser.parse_args(
+        ["render-mapping", "--release", "release", "--out-dir", "review"]
+    )
+    diffed = parser.parse_args(
+        ["diff-mappings", "--old", "old", "--new", "new", "--format", "json"]
+    )
+    imported = parser.parse_args(
+        ["import-mapping", "--review-dir", "review", "--out-release", "release"]
+    )
+    assert day_zero.year == 2025
+    assert rendered.out_dir == "review"
+    assert diffed.format == "json"
+    assert imported.out_release == "release"
