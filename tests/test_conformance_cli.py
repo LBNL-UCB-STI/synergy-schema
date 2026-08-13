@@ -63,3 +63,25 @@ def test_keyboard_interrupt_returns_130(monkeypatch: object) -> None:
 
     monkeypatch.setattr(cli, "_dispatch", interrupted)
     assert cli.main(["check-all", "--dir", ".", "--schema", "schema.yaml"]) == 130
+
+
+def test_bundle_commands_use_explicit_bundle_and_manifest_directory_arguments() -> None:
+    parser = build_parser()
+    population = parser.parse_args(
+        [
+            "check-population-bundle",
+            "--schema",
+            "schema.yaml",
+            "--bundle",
+            "bundle.yaml",
+        ]
+    )
+    polaris = parser.parse_args(
+        ["check-polaris-bundle", "--schema", "schema.yaml", "--bundle", "bundle.yaml"]
+    )
+    check_all = parser.parse_args(
+        ["check-all", "--schema", "schema.yaml", "--dir", "example"]
+    )
+    assert population.bundle == "bundle.yaml"
+    assert polaris.bundle == "bundle.yaml"
+    assert check_all.dir == "example"

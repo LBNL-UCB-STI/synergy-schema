@@ -3,13 +3,15 @@
 from __future__ import annotations
 
 import argparse
+from pathlib import Path
 import sys
 from typing import Sequence
 
 from linkml_runtime.utils.schemaview import SchemaView
 
 from .diagnostics import CheckResult, InputError
-from .documents import load_list, load_mapping
+from .bundles import validate_polaris_bundle, validate_population_bundle
+from .documents import load_list, load_mapping, load_mapping_release, load_showcase
 from .mappings import validate_mapping_release
 from .scenario import validate_scenario
 
@@ -42,7 +44,19 @@ def build_parser() -> argparse.ArgumentParser:
     mappings.add_argument("--require-approved-mapping", action="store_true")
     mappings.add_argument("--new-receipt", action="store_true")
     mappings.add_argument("--catalog-root")
-    for name in _COMMANDS[2:]:
+    population = commands.add_parser("check-population-bundle")
+    population.add_argument("--schema", required=True)
+    population.add_argument("--bundle", required=True)
+    polaris = commands.add_parser("check-polaris-bundle")
+    polaris.add_argument("--schema", required=True)
+    polaris.add_argument("--bundle", required=True)
+    polaris.add_argument("--production", action="store_true")
+    check_all = commands.add_parser("check-all")
+    check_all.add_argument("--schema", required=True)
+    check_all.add_argument("--dir", required=True)
+    check_all.add_argument("--production", action="store_true")
+    check_all.add_argument("--require-approved-mapping", action="store_true")
+    for name in _COMMANDS[5:]:
         command = commands.add_parser(name)
         command.add_argument("--schema", required=True)
         command.add_argument("--dir", required=True)
@@ -80,7 +94,106 @@ def _dispatch(args: argparse.Namespace) -> CheckResult:
             schema_path=args.schema,
             catalog_root=args.catalog_root,
         )
+    if args.command == "check-population-bundle":
+        _require_roots(args.schema, {"PopulationTrajectoryBundle"})
+        return validate_population_bundle(load_mapping(args.bundle))
+    if args.command == "check-polaris-bundle":
+        _require_roots(args.schema, {"PolarisPopulationTranslationBundle"})
+        bundle = load_mapping(args.bundle)
+        source_path = bundle.get("source_population_bundle_path")
+        release_path = bundle.get("mapping_release_path")
+        if not isinstance(source_path, str) or not isinstance(release_path, str):
+            raise InputError(
+                "POLARIS bundle command requires source_population_bundle_path and mapping_release_path"
+            )
+        source = load_mapping(Path(args.bundle).parent / source_path)
+        contract, implementations, ownership = load_mapping_release(
+            Path(args.bundle).parent / release_path
+        )
+        return validate_polaris_bundle(
+            bundle,
+            source,
+            contract,
+            implementations,
+            ownership,
+            production=args.production,
+        )
+    if args.command == "check-all":
+        _require_roots(
+            args.schema,
+            {
+                "ScenarioDefinition",
+                "PopulationTrajectoryBundle",
+                "PolarisPopulationTranslationBundle",
+                "PopulationTranslationContract",
+            },
+        )
+        root = Path(args.dir)
+        manifest = load_showcase(root)
+
+        def document(name: str) -> dict[str, object]:
+            value = manifest.get(name)
+            if not isinstance(value, str):
+                raise InputError(f"showcase.yaml requires relative {name}")
+            return load_mapping(root / value)
+
+        definition = document("scenario_definition")
+        bindings = load_list(root / str(manifest["model_bindings"]))
+        trajectory = document("trajectory")
+        population = document("population_bundle")
+        polaris = document("polaris_bundle")
+        release_value = manifest.get("mapping_release")
+        if not isinstance(release_value, str):
+            raise InputError("showcase.yaml requires relative mapping_release")
+        release = root / release_value
+        contract, implementations, ownership = load_mapping_release(release)
+        catalog_root = (
+            root / str(manifest["catalog_root"])
+            if manifest.get("catalog_root")
+            else None
+        )
+        results = [
+            validate_scenario(
+                definition, bindings, trajectory, catalog_root=catalog_root
+            ),
+            validate_mapping_release(
+                release,
+                require_approved=args.require_approved_mapping or args.production,
+                new_receipt=True,
+                schema_path=args.schema,
+                catalog_root=catalog_root,
+            ),
+            validate_population_bundle(population),
+            validate_polaris_bundle(
+                polaris,
+                population,
+                contract,
+                implementations,
+                ownership,
+                production=args.production,
+            ),
+        ]
+        unique = {
+            (item.code, item.message, item.severity): item
+            for result in results
+            for item in result.diagnostics
+        }
+        return CheckResult(tuple(unique.values()))
     raise InputError(f"{args.command} is not wired in this conformance foundation")
+
+
+def _require_roots(schema_path: str, roots: set[str]) -> None:
+    try:
+        schema = SchemaView(schema_path)
+        missing = sorted(root for root in roots if schema.get_class(root) is None)
+        if missing:
+            raise InputError(
+                f"schema does not define required conformance roots: {', '.join(missing)}"
+            )
+    except InputError:
+        raise
+    except Exception as error:
+        raise InputError(f"cannot load conformance schema: {error}") from error
 
 
 def main(argv: Sequence[str] | None = None) -> int:

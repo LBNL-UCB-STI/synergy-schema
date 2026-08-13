@@ -50,3 +50,8 @@ def load_mapping_release(
         for candidate in sorted(implementation_dir.glob("*.yaml"))
     ]
     return contract, implementations, ownership
+
+
+def load_showcase(path: Path | str) -> dict[str, Any]:
+    """Load the small manifest that binds a conformance showcase together."""
+    return load_mapping(Path(path) / "showcase.yaml")
