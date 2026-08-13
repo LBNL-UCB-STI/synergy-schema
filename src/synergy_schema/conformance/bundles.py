@@ -286,7 +286,9 @@ def validate_polaris_bundle(
     production: bool = False,
 ) -> CheckResult:
     """Validate a POLARIS receipt against source, mapping, and implementation facts."""
-    diagnostics: list[Diagnostic] = []
+    diagnostics: list[Diagnostic] = list(
+        validate_population_bundle(population_bundle).diagnostics
+    )
     trajectory = population_bundle.get("population_trajectory", {})
     requested, successful, skipped = _years(
         trajectory if isinstance(trajectory, Mapping) else {}
@@ -359,6 +361,21 @@ def validate_polaris_bundle(
                     f"year {year} needs all five POLARIS artifact roles",
                 )
             )
+    unexpected_member_years = sorted(set(by_year) - successful)
+    for year in unexpected_member_years:
+        diagnostics.append(
+            _diagnostic(
+                "POLARIS_MEMBER_YEAR_INVALID",
+                f"year {year} is not a successful source trajectory year",
+            )
+        )
+    if bundle.get("completeness_status") != "complete":
+        diagnostics.append(
+            _diagnostic(
+                "POLARIS_RECEIPT_INCOMPLETE",
+                "POLARIS population translation receipts must declare complete",
+            )
+        )
     mapping_ref = bundle.get("population_translation_contract")
     mapping_ok = (
         _reference_equal(
@@ -428,6 +445,13 @@ def validate_polaris_bundle(
             _diagnostic(
                 "PRODUCTION_RECEIPT_REQUIRED",
                 "new receipts cannot use superseded or deprecated mappings",
+            )
+        )
+    if implementation is not None and implementation.get("status") == "retired":
+        diagnostics.append(
+            _diagnostic(
+                "PRODUCTION_RECEIPT_REQUIRED",
+                "new receipts cannot use retired translation implementations",
             )
         )
     if production and (

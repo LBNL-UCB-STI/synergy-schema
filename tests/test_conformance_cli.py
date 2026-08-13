@@ -4,6 +4,8 @@ from pathlib import Path
 import subprocess
 import sys
 
+import yaml
+
 from synergy_schema.conformance.cli import build_parser, main
 from synergy_schema.conformance.diagnostics import CheckResult, Diagnostic, InputError
 
@@ -43,7 +45,7 @@ def test_help_and_error_exit_codes(capsys: object) -> None:
     assert isinstance(InputError("bad input"), Exception)
 
 
-def test_module_help_runs_without_linkml_validator_import() -> None:
+def test_module_help_runs_with_conformance_runtime_dependencies() -> None:
     result = subprocess.run(
         [sys.executable, "-m", "synergy_schema.conformance", "--help"],
         cwd=ROOT,
@@ -97,6 +99,33 @@ def test_bundle_commands_use_explicit_bundle_and_manifest_directory_arguments() 
     assert polaris.source_population_bundle == "source.yaml"
     assert polaris.mapping_release == "release"
     assert check_all.dir == "example"
+
+
+def test_bundle_command_rejects_unknown_closed_profile_field_before_semantics(
+    tmp_path: Path, capsys: object
+) -> None:
+    """Closed LinkML profile validation guards semantic checks from unknown data."""
+    example = ROOT / "examples" / "one_year_mapping_handshake"
+    bundle = yaml.safe_load(
+        (example / "pilates-trajectory-bundle.yaml").read_text(encoding="utf-8")
+    )
+    bundle["not_a_profile_slot"] = "forged"
+    path = tmp_path / "bundle.yaml"
+    path.write_text(yaml.safe_dump(bundle), encoding="utf-8")
+
+    assert (
+        main(
+            [
+                "check-population-bundle",
+                "--schema",
+                str(ROOT / "src/synergy_schema/schema/synergy_schema.yaml"),
+                "--bundle",
+                str(path),
+            ]
+        )
+        == 1
+    )
+    assert "BUNDLE_SHAPE_INVALID" in capsys.readouterr().err
 
 
 def test_adoption_commands_expose_their_public_arguments() -> None:

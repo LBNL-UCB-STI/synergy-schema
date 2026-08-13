@@ -10,7 +10,7 @@ bindings:
       catalog_kind: atlas
       revision: synthetic-r1
       digest_algorithm: sha256
-      content_digest: b422659b61fe9df17f336f77c5a5e30c96a00f2a4cb956b0cad2e47f141607f5
+      content_digest: daa660b27d1514a1be7b031cfa73b2c2f9f4d70136865caef37cb1f183f68465
     assumption_bindings:
       - assumption_key: population_seed
         native_element:

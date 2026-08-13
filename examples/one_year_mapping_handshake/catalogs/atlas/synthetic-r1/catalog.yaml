@@ -7,8 +7,14 @@ upstream:
     - synthetic-atlas.csv
 elements:
   - kind: sql_column
+    path: atlas_households.hh_type
+  - kind: sql_column
     path: atlas_households.household_id
   - kind: sql_column
     path: atlas_households.persons
+  - kind: sql_column
+    path: atlas_households.tenure
+  - kind: sql_column
+    path: atlas_vehicles.modelyear
 digest_algorithm: sha256
-content_digest: b422659b61fe9df17f336f77c5a5e30c96a00f2a4cb956b0cad2e47f141607f5
+content_digest: daa660b27d1514a1be7b031cfa73b2c2f9f4d70136865caef37cb1f183f68465

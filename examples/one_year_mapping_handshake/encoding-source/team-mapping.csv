@@ -1,3 +1,4 @@
 source,target
 atlas_households.household_id,polaris_households.hhold
 atlas_households.persons,polaris_households.persons
+atlas_households.hh_type,polaris_households.household_type

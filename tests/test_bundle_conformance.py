@@ -148,6 +148,10 @@ def _mapping_release() -> tuple[
 def _polaris_bundle(population: dict[str, object]) -> dict[str, object]:
     contract, implementations, _ = _mapping_release()
     return {
+        "id": "bundle:polaris",
+        "manifest_version": "0.1",
+        "completeness_status": "complete",
+        "producing_run": {"provider": "synthetic", "run_id": "polaris:2025"},
         "source_trajectory_bundle": {
             "population_trajectory_bundle_id": population["id"],
             "manifest_content_digest_algorithm": "sha256",
@@ -288,3 +292,64 @@ def test_polaris_schema_contract_comparison_ignores_discovery_locators() -> None
         validate_polaris_bundle(polaris, population, *_mapping_release()).diagnostics
         == ()
     )
+
+
+def test_polaris_bundle_rejects_a_forged_source_manifest_digest() -> None:
+    """A receipt cannot trust a source self-reported digest after source drift."""
+    population = _population_bundle()
+    polaris = _polaris_bundle(population)
+    forged = deepcopy(population)
+    forged["population_trajectory"]["snapshots"][0]["equilibrium_iteration"] = 99
+
+    assert "ARTIFACT_IDENTITY_MISMATCH" in {
+        item.code
+        for item in validate_polaris_bundle(
+            polaris, forged, *_mapping_release()
+        ).diagnostics
+    }
+
+
+def test_polaris_bundle_rejects_retired_implementation_for_every_receipt() -> None:
+    """Retired bindings cannot authorize discovery or production receipts."""
+    population = _population_bundle()
+    polaris = _polaris_bundle(population)
+    contract, implementations, ownership = _mapping_release()
+    implementations[0]["status"] = "retired"
+
+    assert "PRODUCTION_RECEIPT_REQUIRED" in {
+        item.code
+        for item in validate_polaris_bundle(
+            polaris, population, contract, implementations, ownership
+        ).diagnostics
+    }
+
+
+def test_polaris_bundle_requires_complete_receipts_and_successful_member_years() -> (
+    None
+):
+    """A receipt is complete only for source-successful years, with no extras."""
+    population = _population_bundle()
+    polaris = _polaris_bundle(population)
+    incomplete = deepcopy(polaris)
+    incomplete["completeness_status"] = "incomplete"
+    outside_schedule = deepcopy(polaris)
+    outside_schedule["members"].append(
+        {
+            "semantic_role": "households",
+            "simulation_year": 2030,
+            "artifact": _artifact("z" * 64),
+        }
+    )
+
+    assert "POLARIS_RECEIPT_INCOMPLETE" in {
+        item.code
+        for item in validate_polaris_bundle(
+            incomplete, population, *_mapping_release()
+        ).diagnostics
+    }
+    assert "POLARIS_MEMBER_YEAR_INVALID" in {
+        item.code
+        for item in validate_polaris_bundle(
+            outside_schedule, population, *_mapping_release()
+        ).diagnostics
+    }

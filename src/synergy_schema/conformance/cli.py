@@ -19,6 +19,7 @@ from .documents import load_list, load_mapping, load_mapping_release, load_showc
 from .mappings import validate_mapping_release
 from .review import diff_mappings, import_mapping, render_mapping
 from .scenario import validate_scenario
+from .shapes import validate_bundle_shape
 
 
 _COMMANDS = (
@@ -116,7 +117,11 @@ def _dispatch(args: argparse.Namespace) -> CheckResult:
         )
     if args.command == "check-population-bundle":
         _require_roots(args.schema, {"PopulationTrajectoryBundle"})
-        return validate_population_bundle(load_mapping(args.bundle))
+        bundle = load_mapping(args.bundle)
+        return _combine(
+            validate_bundle_shape(args.schema, bundle, "PopulationTrajectoryBundle"),
+            validate_population_bundle(bundle),
+        )
     if args.command == "check-polaris-bundle":
         _require_roots(args.schema, {"PolarisPopulationTranslationBundle"})
         bundle = load_mapping(args.bundle)
@@ -124,13 +129,20 @@ def _dispatch(args: argparse.Namespace) -> CheckResult:
         contract, implementations, ownership = load_mapping_release(
             args.mapping_release
         )
-        return validate_polaris_bundle(
-            bundle,
-            source,
-            contract,
-            implementations,
-            ownership,
-            production=args.production,
+        return _combine(
+            validate_bundle_shape(args.schema, source, "PopulationTrajectoryBundle"),
+            validate_bundle_shape(
+                args.schema, bundle, "PolarisPopulationTranslationBundle"
+            ),
+            validate_population_bundle(source),
+            validate_polaris_bundle(
+                bundle,
+                source,
+                contract,
+                implementations,
+                ownership,
+                production=args.production,
+            ),
         )
     if args.command == "check-all":
         _require_roots(
@@ -177,6 +189,12 @@ def _dispatch(args: argparse.Namespace) -> CheckResult:
                 schema_path=args.schema,
                 catalog_root=catalog_root,
             ),
+            validate_bundle_shape(
+                args.schema, population, "PopulationTrajectoryBundle"
+            ),
+            validate_bundle_shape(
+                args.schema, polaris, "PolarisPopulationTranslationBundle"
+            ),
             validate_population_bundle(population),
             validate_polaris_bundle(
                 polaris,
@@ -187,12 +205,7 @@ def _dispatch(args: argparse.Namespace) -> CheckResult:
                 production=args.production,
             ),
         ]
-        unique = {
-            (item.code, item.message, item.severity): item
-            for result in results
-            for item in result.diagnostics
-        }
-        return CheckResult(tuple(unique.values()))
+        return _combine(*results)
     if args.command == "create-day-zero-manifest":
         manifest = create_day_zero_manifest(
             args.artifact,
@@ -240,6 +253,16 @@ def _require_roots(schema_path: str, roots: set[str]) -> None:
         raise
     except Exception as error:
         raise InputError(f"cannot load conformance schema: {error}") from error
+
+
+def _combine(*results: CheckResult) -> CheckResult:
+    """Return deterministic unique diagnostics from several validation seams."""
+    unique = {
+        (item.code, item.message, item.severity): item
+        for result in results
+        for item in result.diagnostics
+    }
+    return CheckResult(tuple(unique.values()))
 
 
 def main(argv: Sequence[str] | None = None) -> int:

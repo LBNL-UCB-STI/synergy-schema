@@ -1831,22 +1831,24 @@ name = "synergy-schema"
 version = "0.0.0"
 source = { editable = "." }
 dependencies = [
+    { name = "linkml" },
     { name = "linkml-runtime" },
 ]
 
 [package.dev-dependencies]
 dev = [
-    { name = "linkml" },
     { name = "pytest" },
     { name = "zensical" },
 ]
 
 [package.metadata]
-requires-dist = [{ name = "linkml-runtime", specifier = ">=1.9.4,<2" }]
+requires-dist = [
+    { name = "linkml", specifier = ">=1.9.4,<2" },
+    { name = "linkml-runtime", specifier = ">=1.9.4,<2" },
+]
 
 [package.metadata.requires-dev]
 dev = [
-    { name = "linkml", specifier = ">=1.9.4,<2" },
     { name = "pytest", specifier = ">=8,<9" },
     { name = "zensical", specifier = "==0.0.40" },
 ]

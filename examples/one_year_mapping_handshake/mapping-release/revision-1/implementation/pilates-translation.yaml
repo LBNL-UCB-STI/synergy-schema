@@ -2,11 +2,11 @@ id: implementation:synthetic-pilates
 implementation_artifact:
   artifact_identity:
     digest_algorithm: sha256
-    content_digest: e118afe92cc039c42d2581383127fdc7a3bfcf9060d95a2d8d9c33d65f46d436
+    content_digest: 9d87d0b920d3ee7719639bbd80adcaedef58f8b0e496a44dc55a2058a1b19fc2
   locator: implementation/translation.sql
   media_type: text/plain
 implemented_semantic_content_digest_algorithm: sha256
-implemented_semantic_content_digest: a7f7ecafc3b537619c719ea15bbdb857a5d4ef6abf869d42071e94bc351f7124
+implemented_semantic_content_digest: 02ae76d67869ec8cee8ca138288e44907cd86ba31db81b66fa6d2e845e798663
 workflow_owner: PILATES workflow integrator
 status: conformance_checked
 validation_evidence:

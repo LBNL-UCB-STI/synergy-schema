@@ -68,4 +68,19 @@ def test_one_year_handshake_is_an_honest_draft_with_canonical_bundle_identity(
         contract["semantic_content_digest"]
         == polaris["population_translation_contract"]["semantic_content_digest"]
     )
+    assert {item["id"] for item in contract["residue_records"]} == {
+        "household-type-lookup",
+        "out-of-region-households-filtered",
+        "unsupported-source-tenure",
+        "vehicle-year-context-dropped",
+    }
+    assert {item["residue_kind"] for item in contract["residue_records"]} == {
+        "lookup_or_crosswalk",
+        "filtered_rows",
+        "unmapped_source",
+        "dropped_context",
+    }
+    assert {item["residue_record_id"] for item in polaris["residue_observations"]} == {
+        item["id"] for item in contract["residue_records"]
+    }
     assert (ROOT / "mappings/releases/atlas-demos-to-polaris/OWNERS.yaml").exists()

@@ -8,11 +8,10 @@ version = "0.0.0"
 description = "Federated LinkML semantic contracts for Synergy workflows"
 readme = "README.md"
 requires-python = ">=3.10"
-dependencies = ["linkml-runtime>=1.9.4,<2"]
+dependencies = ["linkml-runtime>=1.9.4,<2", "linkml>=1.9.4,<2"]
 
 [dependency-groups]
 dev = [
-  "linkml>=1.9.4,<2",
   "pytest>=8,<9",
   "zensical==0.0.40",
 ]
