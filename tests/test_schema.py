@@ -186,6 +186,13 @@ def test_root_schema_has_stable_identity_and_population_bundle_vocabulary() -> N
         "ConsistRunReference",
         "ConsistArtifactReference",
         "ConsistRunArtifactAssociation",
+        "NativeContractCatalogReference",
+        "NativeContractElementReference",
+        "ScenarioDefinition",
+        "ScenarioDefinitionReference",
+        "ScenarioAssumption",
+        "ScenarioAssumptionBinding",
+        "ModelScenarioBinding",
     }.issubset(schema_view.all_classes())
 
 

@@ -15,6 +15,7 @@ default_range: string
 
 imports:
   - linkml:types
+  - scenario_definition
 
 classes:
   PopulationSnapshot:
@@ -28,8 +29,11 @@ classes:
         required: true
         description: Stable identifier for this semantic population snapshot.
       scenario_definition_ref:
+        range: ScenarioDefinitionReference
         required: true
-        description: Reference to the scenario definition that produced this snapshot.
+        inlined: true
+        description: >-
+          Immutable scenario definition identity that produced this snapshot.
       stochastic_realization_id:
         required: true
         description: Identifier for the stochastic realization represented by this snapshot.

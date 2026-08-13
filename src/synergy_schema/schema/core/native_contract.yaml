@@ -1,0 +1,70 @@
+id: https://w3id.org/LBNL-UCB-STI/synergy-schema/core/native-contract
+name: native_contract
+title: Provider-neutral native contract references
+description: >-
+  Immutable references to model-owned contract inventories. These references
+  identify native surfaces without importing a provider's runtime schemas.
+
+prefixes:
+  synergy_schema: https://w3id.org/LBNL-UCB-STI/synergy-schema/
+  linkml: https://w3id.org/linkml/
+
+default_prefix: synergy_schema
+default_range: string
+
+imports:
+  - linkml:types
+  - handoff_bundle
+
+enums:
+  NativeContractElementKind:
+    description: Kind of native contract element named by a binding.
+    permissible_values:
+      config_path:
+        description: A model configuration path.
+      artifact_key:
+        description: A model-owned artifact key.
+      sql_column:
+        description: A SQL output column.
+
+classes:
+  NativeContractCatalogReference:
+    description: >-
+      Immutable identity for one provider-owned native contract catalog. The
+      catalog ID, kind, revision, digest algorithm, and content digest identify
+      the catalog; a conformance layer resolves element references against it.
+    attributes:
+      catalog_id:
+        identifier: true
+        required: true
+        description: Stable identifier for the native contract catalog.
+      catalog_kind:
+        required: true
+        description: Kind of upstream contract inventory represented by this catalog.
+      revision:
+        required: true
+        description: Immutable upstream revision or release label for this catalog.
+      digest_algorithm:
+        range: DigestAlgorithm
+        required: true
+        description: Algorithm used to calculate content_digest.
+      content_digest:
+        required: true
+        description: Full digest of the catalog bytes using digest_algorithm.
+  NativeContractElementReference:
+    description: >-
+      Reference to one model-owned configuration path, artifact key, or SQL
+      column in an immutable native contract catalog.
+    attributes:
+      catalog:
+        range: NativeContractCatalogReference
+        required: true
+        inlined: true
+        description: Immutable catalog against which this element is resolved.
+      kind:
+        range: NativeContractElementKind
+        required: true
+        description: Kind of native element identified by path.
+      path:
+        required: true
+        description: Exact provider-owned path, key, or column spelling.

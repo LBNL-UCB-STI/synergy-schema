@@ -16,6 +16,8 @@ imports:
   - linkml:types
   - core/population_snapshot
   - core/handoff_bundle
+  - core/native_contract
+  - core/scenario_definition
   - models/atlas/atlas_population
   - models/urbansim/urbansim_population
   - models/activitysim/activitysim_population

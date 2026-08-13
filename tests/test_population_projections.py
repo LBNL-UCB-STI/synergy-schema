@@ -328,7 +328,11 @@ def test_required_relationship_and_ordinal_fields_are_enforced(
             "PopulationSnapshot",
             {
                 "id": "population-snapshot:synthetic-region-2025-r1",
-                "scenario_definition_ref": "scenario:synthetic-region",
+                "scenario_definition_ref": {
+                    "scenario_definition_id": "scenario:synthetic-region",
+                    "revision": "synthetic-r1",
+                    "content_digest": "a" * 64,
+                },
                 "stochastic_realization_id": "r1",
                 "simulation_year": 2025,
                 "parent_snapshot_ref": "population-snapshot:synthetic-region-2020-r1",
