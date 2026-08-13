@@ -56,12 +56,27 @@ def semantic_mapping_projection(contract: Mapping[str, Any]) -> dict[str, Any]:
         }
         for item in contract.get("residue_records", [])
     ]
-    return {
+    projection = {
         "source_catalog": _catalog_identity(contract["source_catalog"]),
         "target_catalog": _catalog_identity(contract["target_catalog"]),
         "field_mappings": sorted(mappings, key=lambda item: item["id"]),
         "residue_records": sorted(residues, key=lambda item: item["id"]),
     }
+    for name in ("source_schema_contract", "target_schema_contract"):
+        if name in contract:
+            schema_contract = contract[name]
+            if not isinstance(schema_contract, Mapping):
+                raise TypeError(f"{name} must be a mapping")
+            projection[name] = {
+                key: str(schema_contract[key])
+                for key in (
+                    "language",
+                    "schema_digest_algorithm",
+                    "schema_digest",
+                    "selected_root",
+                )
+            }
+    return projection
 
 
 def mapping_digest(contract: Mapping[str, Any]) -> str:

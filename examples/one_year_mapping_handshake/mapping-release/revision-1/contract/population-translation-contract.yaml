@@ -1,7 +1,7 @@
 id: mapping:atlas-demo-to-polaris
 revision: revision-1
 semantic_content_digest_algorithm: sha256
-semantic_content_digest: 77684af5821e1f8bbb6e011b4a2deaa8dc52e3104f0d1897072e34e00be4ad01
+semantic_content_digest: a7f7ecafc3b537619c719ea15bbdb857a5d4ef6abf869d42071e94bc351f7124
 encoding_source:
   artifact_identity:
     digest_algorithm: sha256
@@ -21,6 +21,18 @@ target_catalog: &id002
   revision: synthetic-r1
   digest_algorithm: sha256
   content_digest: f6c00a5cf5b4cb47ae291b8ee8e5b7d38038ff68f752995cadbc184ed9768f78
+source_schema_contract:
+  language: linkml
+  schema_digest_algorithm: sha256
+  schema_digest: 67f877d114b704bc414f687941fabd39ca3d68fca00b47461e3ce848626a0166
+  selected_root: AtlasHouseholdInput
+  schema_uri: src/synergy_schema/schema/synergy_schema.yaml
+target_schema_contract:
+  language: linkml
+  schema_digest_algorithm: sha256
+  schema_digest: 67f877d114b704bc414f687941fabd39ca3d68fca00b47461e3ce848626a0166
+  selected_root: PolarisHouseholdRecord
+  schema_uri: src/synergy_schema/schema/synergy_schema.yaml
 field_mappings:
   - id: household_id
     source_element:

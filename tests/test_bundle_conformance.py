@@ -115,6 +115,18 @@ def _mapping_release() -> tuple[
         "semantic_content_digest_algorithm": "sha256",
         "semantic_content_digest": "m" * 64,
         "governance": {"lifecycle_status": "approved"},
+        "source_schema_contract": {
+            "language": "linkml",
+            "schema_digest_algorithm": "sha256",
+            "schema_digest": "q" * 64,
+            "selected_root": "AtlasHouseholdInput",
+        },
+        "target_schema_contract": {
+            "language": "linkml",
+            "schema_digest_algorithm": "sha256",
+            "schema_digest": "r" * 64,
+            "selected_root": "PolarisHouseholdRecord",
+        },
         "residue_records": [{"id": "residue:one"}],
     }
     implementation = {
@@ -122,6 +134,8 @@ def _mapping_release() -> tuple[
         "implemented_semantic_content_digest_algorithm": "sha256",
         "implemented_semantic_content_digest": "m" * 64,
         "implementation_artifact": _artifact("i" * 64),
+        "source_schema_contract": contract["source_schema_contract"],
+        "target_schema_contract": contract["target_schema_contract"],
         "status": "conformance_checked",
     }
     return (
@@ -155,6 +169,8 @@ def _polaris_bundle(population: dict[str, object]) -> dict[str, object]:
             "implementation_content_digest": "i" * 64,
         },
         "implementation_artifact": _artifact("i" * 64),
+        "source_schema_contract": contract["source_schema_contract"],
+        "target_schema_contract": contract["target_schema_contract"],
         "requested_years": [2025],
         "successful_years": [2025],
         "skipped_years": [],
@@ -222,4 +238,42 @@ def test_polaris_bundle_requires_all_yearly_roles_and_production_evidence() -> N
     } == {
         "POLARIS_YEAR_ROLE_MISSING",
         "PRODUCTION_RECEIPT_REQUIRED",
+    }
+
+
+def test_population_bundle_rejects_duplicate_year_and_foreign_output_run() -> None:
+    bundle = _population_bundle()
+    duplicate = deepcopy(bundle)
+    duplicate["population_snapshot_bundles"].append(
+        deepcopy(duplicate["population_snapshot_bundles"][0])
+    )
+    foreign_run = deepcopy(bundle)
+    foreign_run["population_snapshot_bundles"][0]["consist_provenance"]["associations"][
+        0
+    ]["run"]["run_id"] = "run:unrelated"
+    assert "BUNDLE_ROLE_CARDINALITY" in {
+        item.code for item in validate_population_bundle(duplicate).diagnostics
+    }
+    assert "CONSIST_PARENT_MISMATCH" in {
+        item.code for item in validate_population_bundle(foreign_run).diagnostics
+    }
+
+
+def test_polaris_bundle_requires_registered_source_and_target_schema_contracts() -> (
+    None
+):
+    population = _population_bundle()
+    polaris = _polaris_bundle(population)
+    release = _mapping_release()
+    missing = deepcopy(polaris)
+    missing.pop("source_schema_contract")
+    mismatch = deepcopy(polaris)
+    mismatch["target_schema_contract"]["selected_root"] = "WrongRoot"
+    assert "SCHEMA_CONTRACT_MISMATCH" in {
+        item.code
+        for item in validate_polaris_bundle(missing, population, *release).diagnostics
+    }
+    assert "SCHEMA_CONTRACT_MISMATCH" in {
+        item.code
+        for item in validate_polaris_bundle(mismatch, population, *release).diagnostics
     }

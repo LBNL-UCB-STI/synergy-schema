@@ -55,6 +55,8 @@ def build_parser() -> argparse.ArgumentParser:
     polaris = commands.add_parser("check-polaris-bundle")
     polaris.add_argument("--schema", required=True)
     polaris.add_argument("--bundle", required=True)
+    polaris.add_argument("--source-population-bundle", required=True)
+    polaris.add_argument("--mapping-release", required=True)
     polaris.add_argument("--production", action="store_true")
     check_all = commands.add_parser("check-all")
     check_all.add_argument("--schema", required=True)
@@ -118,15 +120,9 @@ def _dispatch(args: argparse.Namespace) -> CheckResult:
     if args.command == "check-polaris-bundle":
         _require_roots(args.schema, {"PolarisPopulationTranslationBundle"})
         bundle = load_mapping(args.bundle)
-        source_path = bundle.get("source_population_bundle_path")
-        release_path = bundle.get("mapping_release_path")
-        if not isinstance(source_path, str) or not isinstance(release_path, str):
-            raise InputError(
-                "POLARIS bundle command requires source_population_bundle_path and mapping_release_path"
-            )
-        source = load_mapping(Path(args.bundle).parent / source_path)
+        source = load_mapping(args.source_population_bundle)
         contract, implementations, ownership = load_mapping_release(
-            Path(args.bundle).parent / release_path
+            args.mapping_release
         )
         return validate_polaris_bundle(
             bundle,

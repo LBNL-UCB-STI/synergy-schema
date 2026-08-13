@@ -112,6 +112,8 @@ def render_mapping(release: Path | str, out_dir: Path | str) -> None:
                 "semantic_content_digest",
                 "source_catalog",
                 "target_catalog",
+                "source_schema_contract",
+                "target_schema_contract",
                 "encoding_source",
                 "supporting_sources",
                 "governance",
@@ -125,7 +127,23 @@ def render_mapping(release: Path | str, out_dir: Path | str) -> None:
         yaml.safe_dump(metadata, sort_keys=True), encoding="utf-8"
     )
     governance = contract.get("governance", {})
-    (output / "contract-at-a-glance.md").write_text(
+    review_stamps = sorted(
+        (
+            str(item.get("review_date", "")),
+            str(item.get("reviewer_role", "")),
+            str(item.get("reviewing_team", "")),
+            str(item.get("decision", "")),
+        )
+        for item in governance.get("review_records", [])
+        if isinstance(item, dict)
+    )
+    review_summary = (
+        "Review stamps: no reviews recorded."
+        if not review_stamps
+        else "Review stamps:\n"
+        + "\n".join(f"- {' | '.join(stamp)}" for stamp in review_stamps)
+    )
+    rendered_summary = (
         "# Contract at a glance\n\n"
         f"- Contract: `{contract.get('id')}` revision `{contract.get('revision')}`\n"
         f"- Semantic identity: `{contract.get('semantic_content_digest_algorithm')}:{contract.get('semantic_content_digest')}`\n"
@@ -133,9 +151,9 @@ def render_mapping(release: Path | str, out_dir: Path | str) -> None:
         f"- Teams: source `{ownership.get('source_owner')}`, target `{ownership.get('target_owner')}`\n"
         f"- Encoding source: `{(contract.get('encoding_source') or {}).get('locator', '')}`\n"
         f"- Coverage: {len(fields)} mappings; {len(residues)} residues\n"
-        f"- Implementations: {len(implementations)}\n",
-        encoding="utf-8",
+        f"- Implementations: {len(implementations)}\n\n" + review_summary + "\n"
     )
+    (output / "contract-at-a-glance.md").write_text(rendered_summary, encoding="utf-8")
 
 
 def import_mapping(review_dir: Path | str, out_release: Path | str) -> None:
@@ -176,8 +194,12 @@ def import_mapping(review_dir: Path | str, out_release: Path | str) -> None:
             }
             for row in csv.DictReader(handle)
         ]
-    # Review edits must describe their assessed digest; they never approve a release by import alone.
-    contract.setdefault("governance", {})["review_records"] = []
+    with (review / "reviews.csv").open(encoding="utf-8", newline="") as handle:
+        contract.setdefault("governance", {})["review_records"] = [
+            {key: value for key, value in row.items() if value}
+            for row in csv.DictReader(handle)
+        ]
+    # CSV evidence does not choose or promote the lifecycle; metadata remains authoritative.
     contract["semantic_content_digest"] = mapping_digest(contract)
     output = Path(out_release)
     (output / "contract").mkdir(parents=True, exist_ok=True)

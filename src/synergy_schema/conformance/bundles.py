@@ -72,7 +72,7 @@ def validate_population_bundle(bundle: Mapping[str, Any]) -> CheckResult:
         )
     requested, successful, skipped = _years(trajectory)
     snapshot_bundles = bundle.get("population_snapshot_bundles", [])
-    by_year: dict[int, Mapping[str, Any]] = {}
+    by_year: dict[int, list[Mapping[str, Any]]] = {}
     for snapshot_bundle in (
         snapshot_bundles if isinstance(snapshot_bundles, list) else []
     ):
@@ -81,8 +81,10 @@ def validate_population_bundle(bundle: Mapping[str, Any]) -> CheckResult:
         ):
             snapshot = snapshot_bundle["population_snapshot"]
             if snapshot.get("simulation_year") is not None:
-                by_year[int(snapshot["simulation_year"])] = snapshot_bundle
-    if set(by_year) != successful:
+                by_year.setdefault(int(snapshot["simulation_year"]), []).append(
+                    snapshot_bundle
+                )
+    if set(by_year) != successful or any(len(items) != 1 for items in by_year.values()):
         diagnostics.append(
             _diagnostic(
                 "BUNDLE_ROLE_CARDINALITY",
@@ -99,7 +101,8 @@ def validate_population_bundle(bundle: Mapping[str, Any]) -> CheckResult:
         )
         if isinstance(item, Mapping) and _run_id(item.get("child_run")) is not None
     }
-    for year, snapshot_bundle in by_year.items():
+    for year, snapshot_bundles_for_year in by_year.items():
+        snapshot_bundle = snapshot_bundles_for_year[0]
         members = snapshot_bundle.get("members", [])
         roles = (
             [item.get("semantic_role") for item in members if isinstance(item, Mapping)]
@@ -122,7 +125,7 @@ def validate_population_bundle(bundle: Mapping[str, Any]) -> CheckResult:
             for item in artifacts
             if isinstance(item, Mapping) and item.get("artifact_id")
         }
-        association_ids = set()
+        association_runs: dict[str, set[str | None]] = {}
         child_ids = set()
         runs = provenance.get("runs", []) if isinstance(provenance, Mapping) else []
         for run in runs if isinstance(runs, list) else []:
@@ -147,7 +150,22 @@ def validate_population_bundle(bundle: Mapping[str, Any]) -> CheckResult:
             ):
                 artifact = association.get("artifact")
                 if isinstance(artifact, Mapping) and artifact.get("artifact_id"):
-                    association_ids.add(str(artifact["artifact_id"]))
+                    association_runs.setdefault(
+                        str(artifact["artifact_id"]), set()
+                    ).add(_run_id(association.get("run")))
+        expected_child = next(
+            (
+                item
+                for item in children.values()
+                if int(item.get("simulation_year", -1)) == year
+            ),
+            None,
+        )
+        expected_child_run = (
+            _run_id(expected_child.get("child_run"))
+            if expected_child is not None
+            else None
+        )
         for member in members if isinstance(members, list) else []:
             member_digest = (
                 _artifact_digest(member.get("artifact"))
@@ -163,25 +181,22 @@ def validate_population_bundle(bundle: Mapping[str, Any]) -> CheckResult:
                 ),
                 None,
             )
-            if (
-                member_digest is None
-                or match is None
-                or str(match.get("artifact_id")) not in association_ids
-            ):
+            if member_digest is None or match is None:
                 diagnostics.append(
                     _diagnostic(
                         "ARTIFACT_IDENTITY_MISMATCH",
                         f"year {year} member artifact is not the recorded Consist artifact",
                     )
                 )
-        expected_child = next(
-            (
-                item
-                for item in children.values()
-                if int(item.get("simulation_year", -1)) == year
-            ),
-            None,
-        )
+            elif expected_child_run not in association_runs.get(
+                str(match.get("artifact_id")), set()
+            ):
+                diagnostics.append(
+                    _diagnostic(
+                        "CONSIST_PARENT_MISMATCH",
+                        f"year {year} member output association uses a foreign run",
+                    )
+                )
         snapshot = snapshot_bundle.get("population_snapshot", {})
         if expected_child is None or (
             header and _run_id(expected_child.get("child_run")) not in child_ids
@@ -379,6 +394,18 @@ def validate_polaris_bundle(
                 "receipt mapping, implementation, or residue identity is not registered",
             )
         )
+    for name in ("source_schema_contract", "target_schema_contract"):
+        expected_contract = contract.get(name)
+        if (
+            not isinstance(expected_contract, Mapping)
+            or bundle.get(name) != expected_contract
+        ):
+            diagnostics.append(
+                _diagnostic(
+                    "SCHEMA_CONTRACT_MISMATCH",
+                    f"receipt {name} does not match the registered mapping release",
+                )
+            )
     lifecycle = (contract.get("governance") or {}).get("lifecycle_status")
     if lifecycle in {"superseded", "deprecated"}:
         diagnostics.append(

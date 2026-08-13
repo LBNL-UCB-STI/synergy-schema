@@ -77,13 +77,25 @@ def test_bundle_commands_use_explicit_bundle_and_manifest_directory_arguments() 
         ]
     )
     polaris = parser.parse_args(
-        ["check-polaris-bundle", "--schema", "schema.yaml", "--bundle", "bundle.yaml"]
+        [
+            "check-polaris-bundle",
+            "--schema",
+            "schema.yaml",
+            "--bundle",
+            "bundle.yaml",
+            "--source-population-bundle",
+            "source.yaml",
+            "--mapping-release",
+            "release",
+        ]
     )
     check_all = parser.parse_args(
         ["check-all", "--schema", "schema.yaml", "--dir", "example"]
     )
     assert population.bundle == "bundle.yaml"
     assert polaris.bundle == "bundle.yaml"
+    assert polaris.source_population_bundle == "source.yaml"
+    assert polaris.mapping_release == "release"
     assert check_all.dir == "example"
 
 

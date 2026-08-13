@@ -11,11 +11,11 @@ population_translation_contract:
   population_translation_contract_id: mapping:atlas-demo-to-polaris
   revision: revision-1
   semantic_content_digest_algorithm: sha256
-  semantic_content_digest: 77684af5821e1f8bbb6e011b4a2deaa8dc52e3104f0d1897072e34e00be4ad01
+  semantic_content_digest: a7f7ecafc3b537619c719ea15bbdb857a5d4ef6abf869d42071e94bc351f7124
 translation_implementation_binding:
   translation_implementation_binding_id: implementation:synthetic-pilates
   implemented_semantic_content_digest_algorithm: sha256
-  implemented_semantic_content_digest: 77684af5821e1f8bbb6e011b4a2deaa8dc52e3104f0d1897072e34e00be4ad01
+  implemented_semantic_content_digest: a7f7ecafc3b537619c719ea15bbdb857a5d4ef6abf869d42071e94bc351f7124
   implementation_content_digest_algorithm: sha256
   implementation_content_digest: e118afe92cc039c42d2581383127fdc7a3bfcf9060d95a2d8d9c33d65f46d436
 implementation_artifact:
@@ -24,6 +24,18 @@ implementation_artifact:
     content_digest: e118afe92cc039c42d2581383127fdc7a3bfcf9060d95a2d8d9c33d65f46d436
   locator: implementation/translation.sql
   media_type: text/plain
+source_schema_contract:
+  language: linkml
+  schema_digest_algorithm: sha256
+  schema_digest: 67f877d114b704bc414f687941fabd39ca3d68fca00b47461e3ce848626a0166
+  selected_root: AtlasHouseholdInput
+  schema_uri: src/synergy_schema/schema/synergy_schema.yaml
+target_schema_contract:
+  language: linkml
+  schema_digest_algorithm: sha256
+  schema_digest: 67f877d114b704bc414f687941fabd39ca3d68fca00b47461e3ce848626a0166
+  selected_root: PolarisHouseholdRecord
+  schema_uri: src/synergy_schema/schema/synergy_schema.yaml
 requested_years:
   - 2025
 successful_years:

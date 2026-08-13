@@ -6,7 +6,7 @@ implementation_artifact:
   locator: implementation/translation.sql
   media_type: text/plain
 implemented_semantic_content_digest_algorithm: sha256
-implemented_semantic_content_digest: 77684af5821e1f8bbb6e011b4a2deaa8dc52e3104f0d1897072e34e00be4ad01
+implemented_semantic_content_digest: a7f7ecafc3b537619c719ea15bbdb857a5d4ef6abf869d42071e94bc351f7124
 workflow_owner: PILATES workflow integrator
 status: conformance_checked
 validation_evidence:

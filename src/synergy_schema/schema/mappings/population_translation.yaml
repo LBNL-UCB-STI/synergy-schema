@@ -300,6 +300,16 @@ classes:
         required: true
         inlined: true
         description: Immutable target native contract catalog for this translation.
+      source_schema_contract:
+        range: SchemaContractReference
+        required: true
+        inlined: true
+        description: Source schema contract expected by every receipt of this release.
+      target_schema_contract:
+        range: SchemaContractReference
+        required: true
+        inlined: true
+        description: Target schema contract expected by every receipt of this release.
       field_mappings:
         range: PopulationFieldMapping
         multivalued: true
