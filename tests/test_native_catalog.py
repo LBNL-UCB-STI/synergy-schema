@@ -91,6 +91,7 @@ def test_refresh_uses_only_a_miniature_checkout(tmp_path: Path) -> None:
     (checkout / "pilates/config/models.py").write_text(
         "from pydantic import BaseModel\n"
         "class RunConfig(BaseModel):\n    region: str\n"
+        "class ChildConfig(BaseModel):\n    enabled: bool\n"
         "class PilatesConfig(BaseModel):\n    run: RunConfig\n",
         encoding="utf-8",
     )
@@ -118,6 +119,38 @@ def test_refresh_uses_only_a_miniature_checkout(tmp_path: Path) -> None:
     assert catalog.resolve("config_path", "run.region")
     assert catalog.resolve("artifact_key", "post_atlas_population")
     assert json.loads((output / "source.json").read_text())["source_paths"]
+
+
+def test_refresh_traverses_quoted_forward_references(tmp_path: Path) -> None:
+    checkout = tmp_path / "checkout"
+    (checkout / "pilates/config").mkdir(parents=True)
+    (checkout / "pilates/workflows").mkdir(parents=True)
+    (checkout / "pilates/config/models.py").write_text(
+        "from typing import Optional\n"
+        "from pydantic import BaseModel\n"
+        "class ChildConfig(BaseModel):\n    enabled: bool\n"
+        'class PilatesConfig(BaseModel):\n    child: Optional["ChildConfig"]\n',
+        encoding="utf-8",
+    )
+    (checkout / "pilates/workflows/artifact_keys.py").write_text("", encoding="utf-8")
+    output = tmp_path / "out"
+    result = subprocess.run(
+        [
+            sys.executable,
+            str(ROOT / "scripts/refresh-native-contract-catalog"),
+            "--kind",
+            "pilates",
+            "--checkout",
+            str(checkout),
+            "--out",
+            str(output),
+        ],
+        text=True,
+        capture_output=True,
+        check=False,
+    )
+    assert result.returncode == 0, result.stderr
+    assert load_catalog(output / "catalog.yaml").resolve("config_path", "child.enabled")
 
 
 def test_polaris_refresh_inventories_explicit_output_columns(tmp_path: Path) -> None:

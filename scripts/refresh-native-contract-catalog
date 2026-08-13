@@ -32,6 +32,8 @@ def _revision(checkout: Path) -> str:
 
 
 def _annotation_name(node: ast.expr) -> str | None:
+    if isinstance(node, ast.Constant) and isinstance(node.value, str):
+        return node.value
     if isinstance(node, ast.Name):
         return node.id
     if isinstance(node, ast.Subscript):

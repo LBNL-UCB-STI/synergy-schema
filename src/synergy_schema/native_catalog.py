@@ -16,6 +16,14 @@ class CatalogValidationError(ValueError):
 
 
 _KINDS = frozenset({"config_path", "artifact_key", "sql_column"})
+_IDENTITY_FIELDS = (
+    "catalog_id",
+    "catalog_kind",
+    "revision",
+    "digest_algorithm",
+    "content_digest",
+)
+DEFAULT_CATALOG_ROOT = Path(__file__).resolve().parents[2] / "catalogs"
 
 
 class _CatalogDumper(yaml.SafeDumper):
@@ -66,11 +74,25 @@ def catalog_digest(document: Mapping[str, Any]) -> str:
     return sha256(canonical_catalog_json(document).encode("utf-8")).hexdigest()
 
 
+def catalog_identity(document: Mapping[str, Any]) -> dict[str, str]:
+    """Return the typed immutable identity used in LinkML catalog references."""
+    try:
+        return {field: str(document[field]) for field in _IDENTITY_FIELDS}
+    except KeyError as error:
+        raise CatalogValidationError(
+            f"catalog identity is missing {error.args[0]}"
+        ) from error
+
+
 @dataclass(frozen=True)
 class NativeCatalog:
     """A validated catalog that resolves native references without runtime imports."""
 
     document: Mapping[str, Any]
+
+    @property
+    def identity(self) -> dict[str, str]:
+        return catalog_identity(self.document)
 
     def resolve(self, kind: str, path: str) -> bool:
         return (kind, path) in {
@@ -124,6 +146,25 @@ def load_catalog(path: Path | str) -> NativeCatalog:
         raise CatalogValidationError("catalog document root must be a mapping")
     _validate(document)
     return NativeCatalog(document=document)
+
+
+def resolve_catalog_reference(
+    reference: Mapping[str, Any], catalog_root: Path | str | None = None
+) -> NativeCatalog:
+    """Resolve one typed LinkML catalog reference from a committed catalog root."""
+    expected = catalog_identity(reference)
+    root = Path(catalog_root) if catalog_root is not None else DEFAULT_CATALOG_ROOT
+    candidates = [root] if root.is_file() else sorted(root.glob("*/*/catalog.yaml"))
+    matches = [
+        catalog
+        for path in candidates
+        if (catalog := load_catalog(path)).identity == expected
+    ]
+    if len(matches) != 1:
+        raise CatalogValidationError(
+            f"catalog identity resolves to {len(matches)} committed catalogs under {root}"
+        )
+    return matches[0]
 
 
 def write_catalog(document: Mapping[str, Any], path: Path | str) -> None:

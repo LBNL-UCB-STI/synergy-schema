@@ -8,7 +8,10 @@ import json
 from pathlib import Path
 from typing import Any, Mapping, Sequence
 
-from synergy_schema.native_catalog import CatalogValidationError, load_catalog
+from synergy_schema.native_catalog import (
+    CatalogValidationError,
+    resolve_catalog_reference,
+)
 
 from .diagnostics import CheckResult, Diagnostic
 
@@ -86,20 +89,19 @@ def _reference_matches(reference: object, definition: Mapping[str, Any]) -> bool
     )
 
 
-def _catalog_for(binding: Mapping[str, Any]):
+def _catalog_for(binding: Mapping[str, Any], catalog_root: Path | str | None):
     catalog_ref = binding.get("native_contract_catalog")
     if not isinstance(catalog_ref, Mapping):
         raise CatalogValidationError(
             "binding native_contract_catalog must be a mapping"
         )
-    path = catalog_ref.get("catalog_path")
-    if path is None:
-        raise CatalogValidationError("binding must identify a catalog_path")
-    return load_catalog(Path(str(path)))
+    return resolve_catalog_reference(catalog_ref, catalog_root)
 
 
 def _validate_bindings(
-    definition: Mapping[str, Any], bindings: Sequence[Mapping[str, Any]]
+    definition: Mapping[str, Any],
+    bindings: Sequence[Mapping[str, Any]],
+    catalog_root: Path | str | None,
 ) -> list[Diagnostic]:
     diagnostics: list[Diagnostic] = []
     assumptions = {
@@ -115,7 +117,7 @@ def _validate_bindings(
                 )
             )
         try:
-            catalog = _catalog_for(binding)
+            catalog = _catalog_for(binding, catalog_root)
         except CatalogValidationError as error:
             diagnostics.append(
                 Diagnostic("NATIVE_ELEMENT_UNRESOLVED", str(error), "error")
@@ -143,8 +145,22 @@ def _validate_bindings(
                 )
                 continue
             native = item.get("native_element")
-            if not isinstance(native, Mapping) or not catalog.resolve(
-                str(native.get("kind", "")), str(native.get("path", ""))
+            try:
+                native_catalog = (
+                    resolve_catalog_reference(native["catalog"], catalog_root)
+                    if isinstance(native, Mapping)
+                    and isinstance(native.get("catalog"), Mapping)
+                    else None
+                )
+            except CatalogValidationError:
+                native_catalog = None
+            if (
+                not isinstance(native, Mapping)
+                or native_catalog is None
+                or native_catalog.identity != catalog.identity
+                or not native_catalog.resolve(
+                    str(native.get("kind", "")), str(native.get("path", ""))
+                )
             ):
                 diagnostics.append(
                     Diagnostic(
@@ -252,11 +268,38 @@ def _validate_trajectory(
             )
         )
     snapshots = trajectory.get("snapshots", [])
+    if not isinstance(snapshots, list):
+        return [
+            Diagnostic(
+                "SCENARIO_DOCUMENT_INVALID",
+                "trajectory snapshots must be a list",
+                "error",
+            )
+        ]
     years: list[int] = []
     known_ids: set[str] = set()
     realization = trajectory.get("stochastic_realization_id")
-    for snapshot in snapshots if isinstance(snapshots, list) else []:
-        year = int(snapshot.get("simulation_year"))
+    for snapshot in snapshots:
+        if not isinstance(snapshot, Mapping):
+            diagnostics.append(
+                Diagnostic(
+                    "SCENARIO_DOCUMENT_INVALID",
+                    "trajectory snapshots must be mappings",
+                    "error",
+                )
+            )
+            continue
+        try:
+            year = int(snapshot.get("simulation_year"))
+        except (TypeError, ValueError):
+            diagnostics.append(
+                Diagnostic(
+                    "SCENARIO_DOCUMENT_INVALID",
+                    "snapshot simulation_year must be an integer",
+                    "error",
+                )
+            )
+            continue
         years.append(year)
         parent = snapshot.get("parent_snapshot_ref")
         if parent is not None and str(parent) not in known_ids:
@@ -287,10 +330,49 @@ def _validate_trajectory(
                 "error",
             )
         )
-    requested = set(trajectory.get("requested_years", []))
+    requested_years = trajectory.get("requested_years", [])
     skipped = trajectory.get("skipped_years", [])
-    skipped_years = {item.get("year") for item in skipped if isinstance(item, Mapping)}
-    if requested != set(years) | skipped_years or set(years) & skipped_years:
+    if not isinstance(requested_years, list) or not isinstance(skipped, list):
+        return diagnostics + [
+            Diagnostic(
+                "SCENARIO_DOCUMENT_INVALID",
+                "trajectory year declarations must be lists",
+                "error",
+            )
+        ]
+    try:
+        requested = {int(year) for year in requested_years}
+    except (TypeError, ValueError):
+        return diagnostics + [
+            Diagnostic(
+                "SCENARIO_DOCUMENT_INVALID", "requested years must be integers", "error"
+            )
+        ]
+    try:
+        skipped_years = {
+            int(item["year"])
+            for item in skipped
+            if isinstance(item, Mapping) and item.get("reason") is not None
+        }
+    except (KeyError, TypeError, ValueError):
+        return diagnostics + [
+            Diagnostic(
+                "SCENARIO_DOCUMENT_INVALID",
+                "skipped years require integer year and reason",
+                "error",
+            )
+        ]
+    sets_agree = (
+        requested == set(years) | skipped_years and not set(years) & skipped_years
+    )
+    expected_status = (
+        "complete"
+        if not skipped_years and requested == set(years)
+        else "incomplete"
+        if sets_agree
+        else None
+    )
+    if not sets_agree or trajectory.get("completeness_status") != expected_status:
         diagnostics.append(
             Diagnostic(
                 "TRAJECTORY_COMPLETENESS_MISMATCH",
@@ -305,6 +387,8 @@ def validate_scenario(
     definition: Mapping[str, Any],
     bindings: Sequence[Mapping[str, Any]],
     trajectory: Mapping[str, Any],
+    *,
+    catalog_root: Path | str | None = None,
 ) -> CheckResult:
     diagnostics: list[Diagnostic] = []
     try:
@@ -322,6 +406,13 @@ def validate_scenario(
             )
         )
         return CheckResult(tuple(diagnostics))
-    diagnostics.extend(_validate_bindings(definition, bindings))
-    diagnostics.extend(_validate_trajectory(definition, trajectory))
+    diagnostics.extend(_validate_bindings(definition, bindings, catalog_root))
+    if not isinstance(trajectory, Mapping):
+        diagnostics.append(
+            Diagnostic(
+                "SCENARIO_DOCUMENT_INVALID", "trajectory must be a mapping", "error"
+            )
+        )
+    else:
+        diagnostics.extend(_validate_trajectory(definition, trajectory))
     return CheckResult(tuple(diagnostics))

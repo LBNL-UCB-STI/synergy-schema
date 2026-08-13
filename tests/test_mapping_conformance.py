@@ -10,10 +10,10 @@ from synergy_schema.conformance.mappings import (
     semantic_mapping_projection,
     validate_mapping_release,
 )
-from synergy_schema.native_catalog import write_catalog
+from synergy_schema.native_catalog import load_catalog, write_catalog
 
 
-def _catalog(path: Path, catalog_id: str, columns: list[str]) -> Path:
+def _catalog(path: Path, catalog_id: str, columns: list[str]) -> dict[str, object]:
     write_catalog(
         {
             "catalog_id": catalog_id,
@@ -24,12 +24,26 @@ def _catalog(path: Path, catalog_id: str, columns: list[str]) -> Path:
         },
         path,
     )
-    return path
+    document = load_catalog(path).document
+    return {
+        key: document[key]
+        for key in (
+            "catalog_id",
+            "catalog_kind",
+            "revision",
+            "digest_algorithm",
+            "content_digest",
+        )
+    }
 
 
 def _release(tmp_path: Path, lifecycle: str = "draft") -> Path:
-    source = _catalog(tmp_path / "source.yaml", "source", ["household", "persons"])
-    target = _catalog(tmp_path / "target.yaml", "target", ["hhold", "workers"])
+    source = _catalog(
+        tmp_path / "catalogs/source/r1/catalog.yaml", "source", ["household", "persons"]
+    )
+    target = _catalog(
+        tmp_path / "catalogs/target/r1/catalog.yaml", "target", ["hhold", "workers"]
+    )
     contract: dict[str, object] = {
         "id": "mapping:demo",
         "revision": "r1",
@@ -37,13 +51,21 @@ def _release(tmp_path: Path, lifecycle: str = "draft") -> Path:
         "semantic_content_digest": "",
         "encoding_source": {"locator": "team.csv"},
         "supporting_sources": [{"locator": "notes.md"}],
-        "source_catalog": {"catalog_path": str(source)},
-        "target_catalog": {"catalog_path": str(target)},
+        "source_catalog": source,
+        "target_catalog": target,
         "field_mappings": [
             {
                 "id": "household",
-                "source_element": {"kind": "sql_column", "path": "household"},
-                "target_element": {"kind": "sql_column", "path": "hhold"},
+                "source_element": {
+                    "catalog": source,
+                    "kind": "sql_column",
+                    "path": "household",
+                },
+                "target_element": {
+                    "catalog": target,
+                    "kind": "sql_column",
+                    "path": "hhold",
+                },
                 "transformation_mode": "renamed",
                 "rule": "rename",
                 "implementation_evidence": ["sql"],
@@ -53,7 +75,9 @@ def _release(tmp_path: Path, lifecycle: str = "draft") -> Path:
             {
                 "id": "persons",
                 "residue_kind": "unmapped_source",
-                "affected_elements": [{"kind": "sql_column", "path": "persons"}],
+                "affected_elements": [
+                    {"catalog": source, "kind": "sql_column", "path": "persons"}
+                ],
                 "rationale": "not exchanged",
                 "disposition": "dropped",
                 "implementation_evidence": ["sql"],
@@ -61,7 +85,9 @@ def _release(tmp_path: Path, lifecycle: str = "draft") -> Path:
             {
                 "id": "workers",
                 "residue_kind": "required_target_default",
-                "affected_elements": [{"kind": "sql_column", "path": "workers"}],
+                "affected_elements": [
+                    {"catalog": target, "kind": "sql_column", "path": "workers"}
+                ],
                 "rationale": "default",
                 "disposition": "zero",
                 "implementation_evidence": ["sql"],
@@ -110,14 +136,22 @@ def test_semantic_digest_excludes_lineage_implementation_and_governance(
 def test_mapping_checks_catalogs_coverage_and_digest(tmp_path: Path) -> None:
     release = _release(tmp_path)
     assert (
-        validate_mapping_release(release).diagnostics[0].code == "MAPPING_NOT_APPROVED"
+        validate_mapping_release(release, catalog_root=tmp_path / "catalogs")
+        .diagnostics[0]
+        .code
+        == "MAPPING_NOT_APPROVED"
     )
     contract_path = release / "contract/population-translation-contract.yaml"
     contract = yaml.safe_load(contract_path.read_text())
     contract["semantic_content_digest"] = "0" * 64
     contract["residue_records"] = []
     contract_path.write_text(yaml.safe_dump(contract), encoding="utf-8")
-    codes = [item.code for item in validate_mapping_release(release).diagnostics]
+    codes = [
+        item.code
+        for item in validate_mapping_release(
+            release, catalog_root=tmp_path / "catalogs"
+        ).diagnostics
+    ]
     assert codes == [
         "MAPPING_COVERAGE_MISSING",
         "MAPPING_DIGEST_MISMATCH",
@@ -150,7 +184,9 @@ def test_approval_and_implementation_are_independent(tmp_path: Path) -> None:
     )
     codes = [
         item.code
-        for item in validate_mapping_release(release, require_approved=True).diagnostics
+        for item in validate_mapping_release(
+            release, require_approved=True, catalog_root=tmp_path / "catalogs"
+        ).diagnostics
     ]
     assert codes == ["MAPPING_FALSE_APPROVAL", "MAPPING_IMPLEMENTATION_NOT_CHECKED"]
 
@@ -170,10 +206,72 @@ def test_unregistered_and_ineligible_new_receipts_are_errors(tmp_path: Path) -> 
     )
     codes = [
         item.code
-        for item in validate_mapping_release(release, new_receipt=True).diagnostics
+        for item in validate_mapping_release(
+            release, new_receipt=True, catalog_root=tmp_path / "catalogs"
+        ).diagnostics
     ]
     assert codes == [
         "MAPPING_IMPLEMENTATION_UNREGISTERED",
         "MAPPING_NOT_APPROVED",
         "MAPPING_NOT_RECEIPT_ELIGIBLE",
+    ]
+
+
+def test_approval_requires_named_owners_not_spoofed_roles(tmp_path: Path) -> None:
+    release = _release(tmp_path, lifecycle="approved")
+    contract_path = release / "contract/population-translation-contract.yaml"
+    contract = yaml.safe_load(contract_path.read_text())
+    digest = contract["semantic_content_digest"]
+    contract["governance"]["review_records"] = [
+        {
+            "reviewer_role": "source_owner",
+            "reviewing_team": "Synergy",
+            "decision": "accept",
+            "assessed_semantic_content_digest": digest,
+            "assessed_semantic_content_digest_algorithm": "sha256",
+        },
+        {
+            "reviewer_role": "target_owner",
+            "reviewing_team": "POLARIS",
+            "decision": "accept",
+            "assessed_semantic_content_digest": digest,
+            "assessed_semantic_content_digest_algorithm": "sha256",
+        },
+    ]
+    contract_path.write_text(yaml.safe_dump(contract), encoding="utf-8")
+    assert [
+        item.code
+        for item in validate_mapping_release(
+            release, catalog_root=tmp_path / "catalogs"
+        ).diagnostics
+    ] == ["MAPPING_FALSE_APPROVAL"]
+    contract["governance"]["review_records"][0]["reviewing_team"] = "ATLAS"
+    contract_path.write_text(yaml.safe_dump(contract), encoding="utf-8")
+    assert (
+        validate_mapping_release(
+            release, catalog_root=tmp_path / "catalogs"
+        ).diagnostics
+        == ()
+    )
+
+
+def test_native_element_catalog_identity_must_match_its_contract_side(
+    tmp_path: Path,
+) -> None:
+    release = _release(tmp_path)
+    contract_path = release / "contract/population-translation-contract.yaml"
+    contract = yaml.safe_load(contract_path.read_text())
+    contract["field_mappings"][0]["source_element"]["catalog"]["content_digest"] = (
+        "0" * 64
+    )
+    contract_path.write_text(yaml.safe_dump(contract), encoding="utf-8")
+    assert [
+        item.code
+        for item in validate_mapping_release(
+            release, catalog_root=tmp_path / "catalogs"
+        ).diagnostics
+    ] == [
+        "MAPPING_DIGEST_MISMATCH",
+        "MAPPING_NOT_APPROVED",
+        "NATIVE_ELEMENT_UNRESOLVED",
     ]
