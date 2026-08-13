@@ -1,0 +1,14 @@
+generation_mode: manual_discovery
+native_scenario_label: day-zero-demo
+native_scenario_namespace: synthetic.atlas
+payload_artifact:
+  artifact_identity:
+    content_digest: 87c3dab1ea051d75cbb27a76a6ddde4ad5241d4876c736581caa43bc8588c29f
+    digest_algorithm: sha256
+  locator: examples/day_zero_exchange/payload.csv
+producer_artifact:
+  artifact_identity:
+    content_digest: e25bfd1c399ebc5d23ab65bee25383963d6edd8e8c09ceede5826fbf04f3010f
+    digest_algorithm: sha256
+  locator: examples/day_zero_exchange/producer.sql
+simulation_year: 2025
