@@ -9,6 +9,7 @@ from synergy_schema.conformance.bundles import canonical_bundle_digest
 from synergy_schema.conformance.cli import main
 from synergy_schema.conformance.day_zero import validate_day_zero_manifest
 from synergy_schema.conformance.documents import load_mapping
+from synergy_schema.conformance.mappings import mapping_digest
 
 
 ROOT = Path(__file__).parents[1]
@@ -64,6 +65,16 @@ def test_one_year_handshake_is_an_honest_draft_with_canonical_bundle_identity(
         / "mapping-release/revision-1/contract/population-translation-contract.yaml"
     )
     assert contract["governance"]["lifecycle_status"] == "draft"
+    encoding_source = contract["encoding_source"]
+    encoding_path = example / encoding_source["locator"]
+    assert (
+        encoding_source["artifact_identity"]["content_digest"]
+        == sha256(encoding_path.read_bytes()).hexdigest()
+    )
+    assert contract["semantic_content_digest"] == (
+        "02ae76d67869ec8cee8ca138288e44907cd86ba31db81b66fa6d2e845e798663"
+    )
+    assert mapping_digest(contract) == contract["semantic_content_digest"]
     assert (
         contract["semantic_content_digest"]
         == polaris["population_translation_contract"]["semantic_content_digest"]

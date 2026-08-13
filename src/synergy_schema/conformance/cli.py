@@ -118,10 +118,7 @@ def _dispatch(args: argparse.Namespace) -> CheckResult:
     if args.command == "check-population-bundle":
         _require_roots(args.schema, {"PopulationTrajectoryBundle"})
         bundle = load_mapping(args.bundle)
-        return _combine(
-            validate_bundle_shape(args.schema, bundle, "PopulationTrajectoryBundle"),
-            validate_population_bundle(bundle),
-        )
+        return _check_population_bundle(args.schema, bundle)
     if args.command == "check-polaris-bundle":
         _require_roots(args.schema, {"PolarisPopulationTranslationBundle"})
         bundle = load_mapping(args.bundle)
@@ -129,20 +126,14 @@ def _dispatch(args: argparse.Namespace) -> CheckResult:
         contract, implementations, ownership = load_mapping_release(
             args.mapping_release
         )
-        return _combine(
-            validate_bundle_shape(args.schema, source, "PopulationTrajectoryBundle"),
-            validate_bundle_shape(
-                args.schema, bundle, "PolarisPopulationTranslationBundle"
-            ),
-            validate_population_bundle(source),
-            validate_polaris_bundle(
-                bundle,
-                source,
-                contract,
-                implementations,
-                ownership,
-                production=args.production,
-            ),
+        return _check_polaris_bundle(
+            args.schema,
+            bundle,
+            source,
+            contract,
+            implementations,
+            ownership,
+            production=args.production,
         )
     if args.command == "check-all":
         _require_roots(
@@ -189,14 +180,8 @@ def _dispatch(args: argparse.Namespace) -> CheckResult:
                 schema_path=args.schema,
                 catalog_root=catalog_root,
             ),
-            validate_bundle_shape(
-                args.schema, population, "PopulationTrajectoryBundle"
-            ),
-            validate_bundle_shape(
-                args.schema, polaris, "PolarisPopulationTranslationBundle"
-            ),
-            validate_population_bundle(population),
-            validate_polaris_bundle(
+            _check_polaris_bundle(
+                args.schema,
                 polaris,
                 population,
                 contract,
@@ -263,6 +248,41 @@ def _combine(*results: CheckResult) -> CheckResult:
         for item in result.diagnostics
     }
     return CheckResult(tuple(unique.values()))
+
+
+def _check_population_bundle(
+    schema_path: str, bundle: dict[str, object]
+) -> CheckResult:
+    shape = validate_bundle_shape(schema_path, bundle, "PopulationTrajectoryBundle")
+    return shape if shape.exit_code else validate_population_bundle(bundle)
+
+
+def _check_polaris_bundle(
+    schema_path: str,
+    bundle: dict[str, object],
+    source: dict[str, object],
+    contract: dict[str, object],
+    implementations: list[dict[str, object]],
+    ownership: dict[str, object],
+    *,
+    production: bool,
+) -> CheckResult:
+    shapes = _combine(
+        validate_bundle_shape(schema_path, source, "PopulationTrajectoryBundle"),
+        validate_bundle_shape(
+            schema_path, bundle, "PolarisPopulationTranslationBundle"
+        ),
+    )
+    if shapes.exit_code:
+        return shapes
+    return validate_polaris_bundle(
+        bundle,
+        source,
+        contract,
+        implementations,
+        ownership,
+        production=production,
+    )
 
 
 def main(argv: Sequence[str] | None = None) -> int:

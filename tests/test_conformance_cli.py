@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from pathlib import Path
+import shutil
 import subprocess
 import sys
 
@@ -126,6 +127,75 @@ def test_bundle_command_rejects_unknown_closed_profile_field_before_semantics(
         == 1
     )
     assert "BUNDLE_SHAPE_INVALID" in capsys.readouterr().err
+
+
+def test_granular_bundle_commands_gate_semantics_on_invalid_population_shape(
+    tmp_path: Path, capsys: object
+) -> None:
+    """Malformed years stop both granular paths before integer coercion."""
+    example = ROOT / "examples" / "one_year_mapping_handshake"
+    schema = ROOT / "src/synergy_schema/schema/synergy_schema.yaml"
+    bundle = yaml.safe_load(
+        (example / "pilates-trajectory-bundle.yaml").read_text(encoding="utf-8")
+    )
+    bundle["population_trajectory"]["requested_years"] = ["not-a-year"]
+    path = tmp_path / "bundle.yaml"
+    path.write_text(yaml.safe_dump(bundle), encoding="utf-8")
+
+    commands = (
+        [
+            "check-population-bundle",
+            "--schema",
+            str(schema),
+            "--bundle",
+            str(path),
+        ],
+        [
+            "check-polaris-bundle",
+            "--schema",
+            str(schema),
+            "--bundle",
+            str(example / "polaris-translation-bundle.yaml"),
+            "--source-population-bundle",
+            str(path),
+            "--mapping-release",
+            str(example / "mapping-release/revision-1"),
+        ],
+    )
+    for command in commands:
+        assert main(command) == 1
+        error = capsys.readouterr().err
+        assert error.count("BUNDLE_SHAPE_INVALID") == 1
+        assert "Traceback" not in error
+
+
+def test_check_all_gates_semantics_on_invalid_population_shape(
+    tmp_path: Path, capsys: object
+) -> None:
+    """The aggregate path reports shape once without running bundle semantics."""
+    source = ROOT / "examples" / "one_year_mapping_handshake"
+    example = tmp_path / "one_year_mapping_handshake"
+    shutil.copytree(source, example)
+    bundle_path = example / "pilates-trajectory-bundle.yaml"
+    bundle = yaml.safe_load(bundle_path.read_text(encoding="utf-8"))
+    bundle["population_trajectory"]["requested_years"] = ["not-a-year"]
+    bundle_path.write_text(yaml.safe_dump(bundle), encoding="utf-8")
+
+    assert (
+        main(
+            [
+                "check-all",
+                "--schema",
+                str(ROOT / "src/synergy_schema/schema/synergy_schema.yaml"),
+                "--dir",
+                str(example),
+            ]
+        )
+        == 1
+    )
+    error = capsys.readouterr().err
+    assert error.count("BUNDLE_SHAPE_INVALID") == 1
+    assert "Traceback" not in error
 
 
 def test_adoption_commands_expose_their_public_arguments() -> None:

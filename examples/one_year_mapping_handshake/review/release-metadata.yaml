@@ -1,7 +1,7 @@
 contract:
   encoding_source:
     artifact_identity:
-      content_digest: 09c02896a0cfbfcb837dd199d74f0b1faa635d5de825c81c66e4a6d07174b937
+      content_digest: f27c1e616556ab77eb27cfe62ed0a25d37d5be442f18fd816990eebe718f387b
       digest_algorithm: sha256
     locator: encoding-source/team-mapping.csv
     media_type: text/plain
