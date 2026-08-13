@@ -27,6 +27,29 @@ def _element_projection(element: Mapping[str, Any]) -> dict[str, str]:
     return {"kind": str(element["kind"]), "path": str(element["path"])}
 
 
+_SCHEMA_IDENTITY_FIELDS = (
+    "language",
+    "schema_digest_algorithm",
+    "schema_digest",
+    "selected_root",
+)
+
+
+def _schema_contract_identity(contract: Mapping[str, Any], name: str) -> dict[str, str]:
+    value = contract.get(name)
+    if not isinstance(value, Mapping):
+        raise ValueError(f"{name} must be a mapping")
+    identity = {
+        field: str(value.get(field, "")).strip() for field in _SCHEMA_IDENTITY_FIELDS
+    }
+    missing = [field for field, item in identity.items() if not item]
+    if missing:
+        raise ValueError(
+            f"{name} is missing required identity fields: {', '.join(missing)}"
+        )
+    return identity
+
+
 def semantic_mapping_projection(contract: Mapping[str, Any]) -> dict[str, Any]:
     """The release content that model-owner approvals attest to."""
     mappings = [
@@ -63,19 +86,7 @@ def semantic_mapping_projection(contract: Mapping[str, Any]) -> dict[str, Any]:
         "residue_records": sorted(residues, key=lambda item: item["id"]),
     }
     for name in ("source_schema_contract", "target_schema_contract"):
-        if name in contract:
-            schema_contract = contract[name]
-            if not isinstance(schema_contract, Mapping):
-                raise TypeError(f"{name} must be a mapping")
-            projection[name] = {
-                key: str(schema_contract[key])
-                for key in (
-                    "language",
-                    "schema_digest_algorithm",
-                    "schema_digest",
-                    "selected_root",
-                )
-            }
+        projection[name] = _schema_contract_identity(contract, name)
     return projection
 
 
@@ -293,7 +304,10 @@ def validate_mapping_release(
     diagnostics: list[Diagnostic] = []
     try:
         expected = mapping_digest(contract)
-    except (CatalogValidationError, KeyError, TypeError) as error:
+    except (KeyError, TypeError, ValueError) as error:
+        diagnostics.append(Diagnostic("MAPPING_DOCUMENT_INVALID", str(error), "error"))
+        return CheckResult(tuple(diagnostics))
+    except CatalogValidationError as error:
         diagnostics.append(Diagnostic("MAPPING_DIGEST_MISMATCH", str(error), "error"))
         return CheckResult(tuple(diagnostics))
     if (

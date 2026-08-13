@@ -277,3 +277,14 @@ def test_polaris_bundle_requires_registered_source_and_target_schema_contracts()
         item.code
         for item in validate_polaris_bundle(mismatch, population, *release).diagnostics
     }
+
+
+def test_polaris_schema_contract_comparison_ignores_discovery_locators() -> None:
+    population = _population_bundle()
+    polaris = _polaris_bundle(population)
+    polaris["source_schema_contract"]["schema_uri"] = "https://example.invalid/schema"
+    polaris["target_schema_contract"]["schema_version"] = "discovery-only"
+    assert (
+        validate_polaris_bundle(polaris, population, *_mapping_release()).diagnostics
+        == ()
+    )

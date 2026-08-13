@@ -257,6 +257,25 @@ def _reference_equal(
     )
 
 
+_SCHEMA_IDENTITY_FIELDS = (
+    "language",
+    "schema_digest_algorithm",
+    "schema_digest",
+    "selected_root",
+)
+
+
+def _schema_identity_matches(receipt: object, expected: object) -> bool:
+    return (
+        isinstance(receipt, Mapping)
+        and isinstance(expected, Mapping)
+        and all(
+            receipt.get(field) == expected.get(field) and receipt.get(field)
+            for field in _SCHEMA_IDENTITY_FIELDS
+        )
+    )
+
+
 def validate_polaris_bundle(
     bundle: Mapping[str, Any],
     population_bundle: Mapping[str, Any],
@@ -396,10 +415,7 @@ def validate_polaris_bundle(
         )
     for name in ("source_schema_contract", "target_schema_contract"):
         expected_contract = contract.get(name)
-        if (
-            not isinstance(expected_contract, Mapping)
-            or bundle.get(name) != expected_contract
-        ):
+        if not _schema_identity_matches(bundle.get(name), expected_contract):
             diagnostics.append(
                 _diagnostic(
                     "SCHEMA_CONTRACT_MISMATCH",

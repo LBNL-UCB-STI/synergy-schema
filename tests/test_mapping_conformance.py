@@ -53,6 +53,18 @@ def _release(tmp_path: Path, lifecycle: str = "draft") -> Path:
         "supporting_sources": [{"locator": "notes.md"}],
         "source_catalog": source,
         "target_catalog": target,
+        "source_schema_contract": {
+            "language": "linkml",
+            "schema_digest_algorithm": "sha256",
+            "schema_digest": "a" * 64,
+            "selected_root": "AtlasHouseholdInput",
+        },
+        "target_schema_contract": {
+            "language": "linkml",
+            "schema_digest_algorithm": "sha256",
+            "schema_digest": "b" * 64,
+            "selected_root": "PolarisHouseholdRecord",
+        },
         "field_mappings": [
             {
                 "id": "household",
@@ -123,6 +135,8 @@ def test_semantic_digest_excludes_lineage_implementation_and_governance(
     assert set(projection) == {
         "source_catalog",
         "target_catalog",
+        "source_schema_contract",
+        "target_schema_contract",
         "field_mappings",
         "residue_records",
     }
@@ -131,6 +145,21 @@ def test_semantic_digest_excludes_lineage_implementation_and_governance(
     changed["governance"]["lifecycle_status"] = "approved"
     changed["field_mappings"][0]["implementation_evidence"] = ["different.sql"]
     assert mapping_digest(changed) == contract["semantic_content_digest"]
+
+
+def test_mapping_release_requires_schema_contract_identities(tmp_path: Path) -> None:
+    release = _release(tmp_path)
+    contract_path = release / "contract/population-translation-contract.yaml"
+    contract = yaml.safe_load(contract_path.read_text())
+    contract.pop("source_schema_contract")
+    contract["target_schema_contract"] = "not-a-mapping"
+    contract_path.write_text(yaml.safe_dump(contract), encoding="utf-8")
+    assert [
+        item.code
+        for item in validate_mapping_release(
+            release, catalog_root=tmp_path / "catalogs"
+        ).diagnostics
+    ] == ["MAPPING_DOCUMENT_INVALID"]
 
 
 def test_mapping_checks_catalogs_coverage_and_digest(tmp_path: Path) -> None:
