@@ -4,6 +4,7 @@ from copy import deepcopy
 from pathlib import Path
 
 import yaml
+import pytest
 
 from synergy_schema.conformance.cli import main
 from synergy_schema.conformance.scenario import (
@@ -390,6 +391,73 @@ def test_cli_handles_malformed_trajectory_members_and_checks_schema(
         )
         == 2
     )
+
+
+def test_cli_rejects_malformed_skipped_year_members(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    definition = _definition()
+    _path, catalog = _catalog(tmp_path)
+    binding = {
+        "bindings": [
+            {
+                "scenario_definition_ref": {
+                    "scenario_definition_id": definition["id"],
+                    "revision": "r1",
+                    "content_digest": definition["content_digest"],
+                },
+                "native_contract_catalog": catalog,
+                "assumption_bindings": [
+                    {
+                        "assumption_key": "tax",
+                        "native_element": {
+                            "catalog": catalog,
+                            "kind": "config_path",
+                            "path": "run.tax",
+                        },
+                        "resolved_native_value": "1",
+                        "binding_mode": "direct",
+                        "compatibility_state": "compatible",
+                    }
+                ],
+            }
+        ]
+    }
+    definition_path, bindings_path, trajectory_path = (
+        tmp_path / "definition.yaml",
+        tmp_path / "bindings.yaml",
+        tmp_path / "trajectory.yaml",
+    )
+    definition_path.write_text(yaml.safe_dump(definition), encoding="utf-8")
+    bindings_path.write_text(yaml.safe_dump(binding), encoding="utf-8")
+    schema_path = (
+        Path(__file__).parents[1] / "src/synergy_schema/schema/synergy_schema.yaml"
+    )
+    for skipped_years in ([{}], [{"year": 2030, "reason": None}], ["scalar"]):
+        trajectory = _trajectory(definition)
+        trajectory["snapshots"] = trajectory["snapshots"][:1]
+        trajectory["skipped_years"] = skipped_years
+        trajectory["completeness_status"] = "incomplete"
+        trajectory_path.write_text(yaml.safe_dump(trajectory), encoding="utf-8")
+        assert (
+            main(
+                [
+                    "check-scenario",
+                    "--schema",
+                    str(schema_path),
+                    "--definition",
+                    str(definition_path),
+                    "--bindings",
+                    str(bindings_path),
+                    "--trajectory",
+                    str(trajectory_path),
+                    "--catalog-root",
+                    str(tmp_path / "catalogs"),
+                ]
+            )
+            == 1
+        )
+        assert "SCENARIO_DOCUMENT_INVALID" in capsys.readouterr().err
     incompatible_schema = tmp_path / "incompatible.yaml"
     incompatible_schema.write_text(
         "id: https://example.org/test\nname: test\n", encoding="utf-8"

@@ -348,20 +348,26 @@ def _validate_trajectory(
                 "SCENARIO_DOCUMENT_INVALID", "requested years must be integers", "error"
             )
         ]
-    try:
-        skipped_years = {
-            int(item["year"])
-            for item in skipped
-            if isinstance(item, Mapping) and item.get("reason") is not None
-        }
-    except (KeyError, TypeError, ValueError):
-        return diagnostics + [
-            Diagnostic(
-                "SCENARIO_DOCUMENT_INVALID",
-                "skipped years require integer year and reason",
-                "error",
-            )
-        ]
+    skipped_years: set[int] = set()
+    for skipped_year in skipped:
+        if not isinstance(skipped_year, Mapping) or not skipped_year.get("reason"):
+            return diagnostics + [
+                Diagnostic(
+                    "SCENARIO_DOCUMENT_INVALID",
+                    "skipped years require an integer year and non-empty reason",
+                    "error",
+                )
+            ]
+        try:
+            skipped_years.add(int(skipped_year["year"]))
+        except (KeyError, TypeError, ValueError):
+            return diagnostics + [
+                Diagnostic(
+                    "SCENARIO_DOCUMENT_INVALID",
+                    "skipped years require an integer year and non-empty reason",
+                    "error",
+                )
+            ]
     sets_agree = (
         requested == set(years) | skipped_years and not set(years) & skipped_years
     )
