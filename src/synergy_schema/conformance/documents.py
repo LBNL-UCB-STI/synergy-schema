@@ -29,3 +29,24 @@ def load_list(path: Path | str) -> list[dict[str, Any]]:
     ):
         raise InputError(f"document must contain a bindings list: {path}")
     return [dict(item) for item in bindings]
+
+
+def load_mapping_release(
+    path: Path | str,
+) -> tuple[dict[str, Any], list[dict[str, Any]], dict[str, Any]]:
+    """Load the one canonical mapping-release directory topology."""
+    release = Path(path)
+    contract = load_mapping(
+        release / "contract" / "population-translation-contract.yaml"
+    )
+    ownership = load_mapping(release / "ownership.yaml")
+    implementation_dir = release / "implementation"
+    if not implementation_dir.is_dir():
+        raise InputError(
+            f"mapping release implementation directory is missing: {implementation_dir}"
+        )
+    implementations = [
+        load_mapping(candidate)
+        for candidate in sorted(implementation_dir.glob("*.yaml"))
+    ]
+    return contract, implementations, ownership

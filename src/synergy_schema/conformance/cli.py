@@ -8,6 +8,7 @@ from typing import Sequence
 
 from .diagnostics import CheckResult, InputError
 from .documents import load_list, load_mapping
+from .mappings import validate_mapping_release
 from .scenario import validate_scenario
 
 
@@ -35,6 +36,8 @@ def build_parser() -> argparse.ArgumentParser:
     mappings = commands.add_parser("check-mappings")
     mappings.add_argument("--schema", required=True)
     mappings.add_argument("--mappings", required=True)
+    mappings.add_argument("--require-approved-mapping", action="store_true")
+    mappings.add_argument("--new-receipt", action="store_true")
     for name in _COMMANDS[2:]:
         command = commands.add_parser(name)
         command.add_argument("--schema", required=True)
@@ -48,6 +51,13 @@ def _dispatch(args: argparse.Namespace) -> CheckResult:
             load_mapping(args.definition),
             load_list(args.bindings),
             load_mapping(args.trajectory),
+        )
+    if args.command == "check-mappings":
+        return validate_mapping_release(
+            args.mappings,
+            require_approved=args.require_approved_mapping,
+            new_receipt=args.new_receipt,
+            schema_path=args.schema,
         )
     raise InputError(f"{args.command} is not wired in this conformance foundation")
 
