@@ -73,14 +73,22 @@ classes:
       revision:
         required: true
         description: Immutable revision or release label of the referenced contract.
+      semantic_content_digest_algorithm:
+        range: DigestAlgorithm
+        required: true
+        description: Algorithm paired with semantic_content_digest for this identity.
       semantic_content_digest:
         required: true
-        description: Digest of the referenced contract's canonical semantic projection.
+        description: Digest paired with semantic_content_digest_algorithm for this identity.
   PopulationFieldMapping:
     description: >-
       One reviewed mapping between catalog-resolved source and target exchange
       fields. This general field vocabulary does not replace the narrower
       identity-bearing PopulationSlotMapping vocabulary.
+    annotations:
+      semantic_digest_projection: >-
+        Includes id, source_element, target_element, transformation_mode, and
+        rule. Excludes implementation_evidence.
     attributes:
       id:
         identifier: true
@@ -113,6 +121,9 @@ classes:
       One declared intentional translation behavior that is not a clean
       source-to-target field mapping.
     annotations:
+      semantic_digest_projection: >-
+        Includes id, residue_kind, affected_elements, deterministic_rule,
+        rationale, and disposition. Excludes implementation_evidence.
       conformance_requirements: >-
         Every source exchange column has one primary disposition: a field
         mapping or an unmapped_source/dropped_context residue; every required
@@ -157,9 +168,13 @@ classes:
       residue_record_id:
         required: true
         description: Stable identifier of the declared MappingResidueRecord observed.
+      semantic_content_digest_algorithm:
+        range: DigestAlgorithm
+        required: true
+        description: Algorithm paired with semantic_content_digest for this identity.
       semantic_content_digest:
         required: true
-        description: Semantic contract digest against which the residue was observed.
+        description: Digest paired with semantic_content_digest_algorithm for this identity.
       simulation_year:
         range: integer
         required: true
@@ -196,9 +211,13 @@ classes:
         range: MappingReviewDecision
         required: true
         description: Recorded review decision.
+      assessed_semantic_content_digest_algorithm:
+        range: DigestAlgorithm
+        required: true
+        description: Algorithm paired with the semantic digest assessed by this reviewer.
       assessed_semantic_content_digest:
         required: true
-        description: Exact semantic contract digest assessed by this reviewer.
+        description: Digest paired with its algorithm assessed by this reviewer.
       team_contact:
         description: Optional contact for the reviewing team.
       rationale:
@@ -211,8 +230,9 @@ classes:
     annotations:
       conformance_requirements: >-
         approved requires accept decisions from both the source_owner and
-        target_owner roles for the contract's current semantic_content_digest;
-        standard LinkML validation does not resolve this cross-record rule.
+        target_owner roles for the contract's current semantic_content_digest
+        with its semantic_content_digest_algorithm; standard LinkML validation
+        does not resolve this cross-record rule.
     attributes:
       maintaining_team:
         required: true
@@ -238,9 +258,11 @@ classes:
       semantic_digest_projection: >-
         Includes source_catalog, target_catalog, field_mappings, and
         residue_records. Excludes encoding_source, supporting_sources,
-        governance, review records, lifecycle status, and implementation
-        bindings; cross-document digest checks are enforced by the conformance
-        layer rather than standard LinkML validation.
+        PopulationFieldMapping.implementation_evidence,
+        MappingResidueRecord.implementation_evidence, governance, review
+        records, lifecycle status, and implementation bindings; cross-document
+        digest checks are enforced by the conformance layer rather than
+        standard LinkML validation.
     attributes:
       id:
         identifier: true
@@ -249,9 +271,13 @@ classes:
       revision:
         required: true
         description: Immutable revision or release label.
+      semantic_content_digest_algorithm:
+        range: DigestAlgorithm
+        required: true
+        description: Algorithm paired with semantic_content_digest for this identity.
       semantic_content_digest:
         required: true
-        description: Digest of this contract's documented canonical semantic projection.
+        description: Digest paired with semantic_content_digest_algorithm for this identity.
       encoding_source:
         range: PhysicalArtifactReference
         required: true
@@ -302,12 +328,20 @@ classes:
       translation_implementation_binding_id:
         required: true
         description: Stable identifier of the referenced implementation binding.
+      implemented_semantic_content_digest_algorithm:
+        range: DigestAlgorithm
+        required: true
+        description: Algorithm paired with the implemented semantic contract digest.
       implemented_semantic_content_digest:
         required: true
-        description: Semantic contract digest implemented by the referenced binding.
+        description: Digest paired with its algorithm for the implemented contract.
+      implementation_content_digest_algorithm:
+        range: DigestAlgorithm
+        required: true
+        description: Algorithm paired with implementation_content_digest for this identity.
       implementation_content_digest:
         required: true
-        description: Digest of the referenced implementation artifact bytes.
+        description: Digest paired with implementation_content_digest_algorithm.
   TranslationImplementationBinding:
     description: >-
       Workflow-owned registration of an implementation artifact for one
@@ -315,10 +349,12 @@ classes:
       in PopulationTranslationContract.
     annotations:
       conformance_requirements: >-
-        implemented_semantic_content_digest must identify a registered
-        PopulationTranslationContract revision; production acceptance requires
-        conformance_checked status. These cross-document checks are enforced by
-        the conformance layer rather than standard LinkML validation.
+        implemented_semantic_content_digest with
+        implemented_semantic_content_digest_algorithm must identify a
+        registered PopulationTranslationContract revision; production
+        acceptance requires conformance_checked status. These cross-document
+        checks are enforced by the conformance layer rather than standard
+        LinkML validation.
     attributes:
       id:
         identifier: true
@@ -329,9 +365,13 @@ classes:
         required: true
         inlined: true
         description: Immutable byte-identified translation executable, script, or SQL artifact.
+      implemented_semantic_content_digest_algorithm:
+        range: DigestAlgorithm
+        required: true
+        description: Algorithm paired with the implemented semantic contract digest.
       implemented_semantic_content_digest:
         required: true
-        description: Semantic contract digest this implementation claims to implement.
+        description: Digest paired with its algorithm for the implemented contract.
       workflow_owner:
         required: true
         description: Workflow team accountable for this translation implementation.

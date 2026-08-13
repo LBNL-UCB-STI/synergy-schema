@@ -17,6 +17,28 @@ def _annotation_value(schema_view: SchemaView, class_name: str, key: str) -> str
     return str(annotation.value)
 
 
+def _assert_required_slots(
+    schema_view: SchemaView, class_name: str, *slot_names: str
+) -> None:
+    class_definition = schema_view.get_class(class_name)
+    for slot_name in slot_names:
+        assert class_definition.attributes[slot_name].required is True
+
+
+def _assert_digest_pair(
+    schema_view: SchemaView,
+    class_name: str,
+    algorithm_slot_name: str,
+    digest_slot_name: str,
+) -> None:
+    class_definition = schema_view.get_class(class_name)
+    algorithm_slot = class_definition.attributes[algorithm_slot_name]
+    digest_slot = class_definition.attributes[digest_slot_name]
+    assert algorithm_slot.required is True
+    assert algorithm_slot.range == "DigestAlgorithm"
+    assert digest_slot.required is True
+
+
 def test_population_translation_contract_exposes_semantic_release_shape() -> None:
     schema_view = SchemaView(str(SCHEMA_PATH))
 
@@ -34,6 +56,35 @@ def test_population_translation_contract_exposes_semantic_release_shape() -> Non
 
     contract = schema_view.get_class("PopulationTranslationContract")
     assert "implementation_bindings" not in contract.attributes
+    _assert_required_slots(
+        schema_view,
+        "PopulationTranslationContract",
+        "id",
+        "revision",
+        "encoding_source",
+        "source_catalog",
+        "target_catalog",
+        "field_mappings",
+        "governance",
+    )
+    _assert_digest_pair(
+        schema_view,
+        "PopulationTranslationContract",
+        "semantic_content_digest_algorithm",
+        "semantic_content_digest",
+    )
+    _assert_required_slots(
+        schema_view,
+        "PopulationTranslationContractReference",
+        "population_translation_contract_id",
+        "revision",
+    )
+    _assert_digest_pair(
+        schema_view,
+        "PopulationTranslationContractReference",
+        "semantic_content_digest_algorithm",
+        "semantic_content_digest",
+    )
 
     encoding_source = schema_view.induced_slot(
         "encoding_source", "PopulationTranslationContract"
@@ -50,15 +101,16 @@ def test_population_translation_contract_exposes_semantic_release_shape() -> Non
     assert supporting_sources.required is not True
     assert supporting_sources.inlined_as_list is True
 
-    field_mapping = schema_view.get_class("PopulationFieldMapping")
-    for slot_name in (
+    _assert_required_slots(
+        schema_view,
+        "PopulationFieldMapping",
         "source_element",
         "target_element",
         "transformation_mode",
         "rule",
         "implementation_evidence",
-    ):
-        assert field_mapping.attributes[slot_name].required is True
+    )
+    field_mapping = schema_view.get_class("PopulationFieldMapping")
     assert (
         field_mapping.attributes["source_element"].range
         == "NativeContractElementReference"
@@ -85,7 +137,28 @@ def test_population_translation_contract_exposes_semantic_release_shape() -> Non
     }
     assert _annotation_value(
         schema_view, "MappingResidueRecord", "conformance_requirements"
-    ).startswith("Every source exchange column")
+    ) == (
+        "Every source exchange column has one primary disposition: a field "
+        "mapping or an unmapped_source/dropped_context residue; every required "
+        "target column has one primary disposition: a field mapping or a "
+        "required_target_default residue. lookup_or_crosswalk, filtered_rows, "
+        "and aggregated_or_split residues may attach to that primary disposition "
+        "and do not establish another one."
+    )
+    _assert_required_slots(
+        schema_view,
+        "MappingResidueObservation",
+        "residue_record_id",
+        "simulation_year",
+        "affected_artifact_roles",
+        "resulting_disposition",
+    )
+    _assert_digest_pair(
+        schema_view,
+        "MappingResidueObservation",
+        "semantic_content_digest_algorithm",
+        "semantic_content_digest",
+    )
 
     assert set(schema_view.get_enum("MappingLifecycleStatus").permissible_values) == {
         "draft",
@@ -100,17 +173,61 @@ def test_population_translation_contract_exposes_semantic_release_shape() -> Non
     }
     assert _annotation_value(
         schema_view, "MappingGovernance", "conformance_requirements"
-    ).startswith("approved requires accept decisions")
+    ) == (
+        "approved requires accept decisions from both the source_owner and "
+        "target_owner roles for the contract's current semantic_content_digest "
+        "with its semantic_content_digest_algorithm; standard LinkML validation "
+        "does not resolve this cross-record rule."
+    )
+    _assert_required_slots(
+        schema_view,
+        "MappingReviewRecord",
+        "reviewer_role",
+        "reviewing_team",
+        "review_date",
+        "decision",
+        "rationale",
+    )
+    _assert_digest_pair(
+        schema_view,
+        "MappingReviewRecord",
+        "assessed_semantic_content_digest_algorithm",
+        "assessed_semantic_content_digest",
+    )
 
     assert set(
         schema_view.get_enum("TranslationImplementationStatus").permissible_values
     ) == {"declared", "conformance_checked", "retired"}
-    implementation_binding = schema_view.get_class("TranslationImplementationBinding")
-    assert (
-        implementation_binding.attributes[
-            "implemented_semantic_content_digest"
-        ].required
-        is True
+    _assert_required_slots(
+        schema_view,
+        "TranslationImplementationBinding",
+        "id",
+        "implementation_artifact",
+        "workflow_owner",
+        "status",
+    )
+    _assert_digest_pair(
+        schema_view,
+        "TranslationImplementationBinding",
+        "implemented_semantic_content_digest_algorithm",
+        "implemented_semantic_content_digest",
+    )
+    _assert_required_slots(
+        schema_view,
+        "TranslationImplementationBindingReference",
+        "translation_implementation_binding_id",
+    )
+    _assert_digest_pair(
+        schema_view,
+        "TranslationImplementationBindingReference",
+        "implemented_semantic_content_digest_algorithm",
+        "implemented_semantic_content_digest",
+    )
+    _assert_digest_pair(
+        schema_view,
+        "TranslationImplementationBindingReference",
+        "implementation_content_digest_algorithm",
+        "implementation_content_digest",
     )
 
 
@@ -120,11 +237,24 @@ def test_semantic_digest_projection_excludes_provenance_and_governance() -> None
     projection = _annotation_value(
         schema_view, "PopulationTranslationContract", "semantic_digest_projection"
     )
-    assert "source_catalog" in projection
-    assert "target_catalog" in projection
-    assert "field_mappings" in projection
-    assert "residue_records" in projection
-    assert "encoding_source" in projection
-    assert "supporting_sources" in projection
-    assert "governance" in projection
-    assert "implementation bindings" in projection
+    assert projection == (
+        "Includes source_catalog, target_catalog, field_mappings, and "
+        "residue_records. Excludes encoding_source, supporting_sources, "
+        "PopulationFieldMapping.implementation_evidence, "
+        "MappingResidueRecord.implementation_evidence, governance, review "
+        "records, lifecycle status, and implementation bindings; cross-document "
+        "digest checks are enforced by the conformance layer rather than standard "
+        "LinkML validation."
+    )
+    assert _annotation_value(
+        schema_view, "PopulationFieldMapping", "semantic_digest_projection"
+    ) == (
+        "Includes id, source_element, target_element, transformation_mode, and "
+        "rule. Excludes implementation_evidence."
+    )
+    assert _annotation_value(
+        schema_view, "MappingResidueRecord", "semantic_digest_projection"
+    ) == (
+        "Includes id, residue_kind, affected_elements, deterministic_rule, "
+        "rationale, and disposition. Excludes implementation_evidence."
+    )
