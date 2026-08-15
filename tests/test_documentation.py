@@ -49,6 +49,7 @@ def test_navigation_has_the_approved_eight_sections_and_existing_leaves() -> Non
         "Schema organization",
         "Scenario definitions and trajectories",
         "Population snapshots and artifact identity",
+        "Glossary",
         "PILATES post-ATLAS population",
         "POLARIS translated population",
         "Population identity",
@@ -62,6 +63,63 @@ def test_navigation_has_the_approved_eight_sections_and_existing_leaves() -> Non
         if target.startswith("schema/"):
             continue
         assert (DOCS / target).is_file()
+
+
+def test_glossary_explains_core_terms_and_common_distinctions() -> None:
+    overview = (DOCS / "index.md").read_text()
+    organization = (DOCS / "shared-structure/index.md").read_text()
+    assert "[Glossary](shared-structure/glossary.md)" in overview
+    assert "[Glossary](glossary.md)" in organization
+
+    glossary = (DOCS / "shared-structure/glossary.md").read_text()
+    for heading in (
+        "## Shared scenarios and changing populations",
+        "## Schemas, contracts, profiles, and native records",
+        "## Files, bundles, manifests, receipts, and provenance",
+        "## Mappings, implementations, and residue",
+        "## Digests, review states, and compatibility",
+    ):
+        assert heading in glossary
+    for term in (
+        "### Scenario definition",
+        "### Population trajectory",
+        "### Population snapshot",
+        "### Workflow profile",
+        "### Native record",
+        "### Artifact",
+        "### Receipt",
+        "### Translation contract",
+        "### Mapping residue",
+        "### Semantic digest",
+        "### Compatible with gaps",
+    ):
+        assert term in glossary
+    assert "| Often confused | How they differ |" in glossary
+
+
+def test_concept_heavy_guides_link_selected_first_uses_to_the_glossary() -> None:
+    expected_links = {
+        "shared-structure/scenario-definitions-and-trajectories.md": (
+            "[scenario definition](glossary.md#scenario-definition)",
+            "[population trajectory](glossary.md#population-trajectory)",
+        ),
+        "workflow-structures/index.md": (
+            "[workflow profiles](../shared-structure/glossary.md#workflow-profile)",
+            "[model-native records](../shared-structure/glossary.md#native-record)",
+        ),
+        "cross-model-mappings/mapping-lineage.md": (
+            "[translation contract](../shared-structure/glossary.md#translation-contract)",
+            "[mapping residue](../shared-structure/glossary.md#mapping-residue)",
+        ),
+        "bring-an-existing-mapping/one-year-mapping-handshake.md": (
+            "[receipt](../shared-structure/glossary.md#receipt)",
+            "[draft](../shared-structure/glossary.md#draft)",
+        ),
+    }
+    for relative_path, links in expected_links.items():
+        page = (DOCS / relative_path).read_text()
+        for link in links:
+            assert link in page
 
 
 def test_overview_and_proof_make_the_two_newcomer_actions_clear() -> None:

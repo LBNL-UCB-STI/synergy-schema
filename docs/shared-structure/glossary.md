@@ -1,0 +1,263 @@
+# Glossary
+
+This glossary explains the project’s recurring terms in plain language. It is
+the best place to start when two words sound similar. The
+[generated schema reference](../schema/index.md) remains authoritative for
+exact fields, types, requiredness, and cardinality.
+
+## Shared scenarios and changing populations
+
+### Scenario definition
+
+The versioned set of shared assumptions that multiple modeling workflows
+intend to represent. Its digest distinguishes one exact revision from
+another; it does not contain every model-specific setting.
+
+### Scenario binding
+
+A statement of how a model’s native configuration represents one shared
+scenario assumption. A binding can be direct, an alias, transformed,
+intentionally overridden, or unsupported.
+
+### Population trajectory
+
+An ordered sequence of population snapshots for one scenario definition and
+stochastic realization. It also records which years were requested,
+completed, or deliberately skipped.
+
+### Population snapshot
+
+The population state at one simulation year for one scenario and
+realization. It is an occurrence in time, not a timeless master population.
+
+### Stochastic realization
+
+One repeat of a model run whose random choices may produce different results
+even under the same scenario definition. The realization identifier keeps
+those parallel outcomes separate.
+
+### Core population state
+
+A shared, snapshot-scoped identity for a household, person, vehicle, or
+relationship. Core state records intentionally omit model-specific
+demographics, technologies, and predicted behavior.
+
+## Schemas, contracts, profiles, and native records
+
+### Schema
+
+A formal description of data structure: allowed fields, types, required
+values, and relationships. LinkML is the source language used for schemas in
+this repository.
+
+### Contract
+
+A schema or agreement selected for a particular exchange. A contract says
+what a producer and consumer are agreeing to, while a schema can describe a
+broader reusable vocabulary.
+
+### Schema contract reference
+
+The language, immutable schema digest, and selected root class used to
+interpret an artifact. Optional URI and version labels help people find the
+schema but are not its identity.
+
+### Profile
+
+A composition of shared and model-owned definitions for a particular
+workflow or exchange. A profile selects what that workflow requires without
+taking ownership of every imported definition.
+
+### Workflow profile
+
+A profile owned at a workflow boundary—for example, the PILATES post-ATLAS
+population handoff or the proposed POLARIS translation package. It is not
+automatically proof that the workflow already enforces the profile at
+runtime.
+
+### Native record
+
+A row or data structure whose fields and meanings remain owned by its source
+model, such as an ATLAS household row or a POLARIS person row. Shared
+contracts refer to native records rather than replacing them with one
+universal table.
+
+### Native contract catalog
+
+A pinned inventory of model-owned configuration paths, artifact keys, or SQL
+columns. It makes references checkable without importing or running the
+model’s code.
+
+### Shared semantic kernel
+
+The deliberately small set of concepts whose meaning can be shared across
+tools, such as scenario revision, simulation year, population occurrence,
+and artifact identity. It does not contain every attribute produced by every
+model.
+
+## Files, bundles, manifests, receipts, and provenance
+
+### Artifact
+
+A physical output or input, usually a file, identified by its bytes. A CSV
+of households and the SQL script that created it are different artifacts.
+
+### Artifact identity
+
+An algorithm plus content digest that identifies exact bytes. A path or URI
+can change while the artifact identity remains the same.
+
+### Handoff
+
+The act and boundary of passing artifacts from one workflow step or model to
+another.
+
+### Bundle
+
+A named collection of related artifact members delivered together. A bundle
+describes the members and their roles; it does not copy all rows into the
+manifest.
+
+### Manifest
+
+A document listing a bundle or exchange and its declared metadata, members,
+identities, and completeness. The payload files remain separate.
+
+### Receipt
+
+A per-application record of what was actually used or produced: scenario,
+year, mapping contract, translation implementation, artifacts, and observed
+residue. It is evidence of one application, not the reusable mapping
+agreement itself.
+
+### Day-zero manifest
+
+A discovery-only receipt for one existing payload and its producer artifact.
+It records identity and context before a full field mapping exists; it is not
+accepted as production provenance.
+
+### Provenance
+
+Evidence about where data came from and how it was produced or consumed,
+including runs, artifacts, and their associations. Provenance does not by
+itself define the semantic meaning of a scenario or model field.
+
+### Lineage
+
+The connected history from source artifacts and runs through mappings,
+transformations, and derived artifacts. Provenance records are evidence used
+to reconstruct lineage.
+
+## Mappings, implementations, and residue
+
+### Mapping
+
+A declared relationship between independently owned representations, such as
+a renamed identifier, code conversion, derived value, or unsupported field.
+
+### Translation contract
+
+The versioned semantic agreement describing how source exchange columns map
+to target columns, including explicit residue. It is distinct from the code
+that performs the translation.
+
+### Field mapping
+
+One rule within a translation contract connecting source and target native
+elements. It states the transformation mode and meaning of the rule.
+
+### Mapping residue
+
+An intentional case that is not a clean source-to-target field mapping—for
+example, a required default, lookup table, filtered row, unsupported source
+field, or context dropped from each output row. Residue is not automatically
+an error; it makes accepted translation loss or extra behavior reviewable.
+
+### Residue observation
+
+Evidence about one application of a declared residue, such as the number of
+rows filtered or the lookup digest used in a particular simulation year.
+
+### Implementation binding
+
+A workflow-owned registration connecting a translation script or SQL
+artifact to the semantic digest it claims to implement. Script identity and
+semantic mapping identity remain separate.
+
+### Encoding source
+
+The team-maintained spreadsheet, SQL, script, or other artifact from which a
+typed translation contract was transcribed. Its digest preserves attribution
+and lets reviewers resolve transcription disputes against the original work.
+
+## Digests, review states, and compatibility
+
+### Content digest
+
+A deterministic fingerprint calculated from content, usually with SHA-256.
+The relevant contract specifies which content is included.
+
+### Semantic digest
+
+A digest calculated from meaning-bearing parts of a scenario or mapping
+contract. Locations, review metadata, and implementation-only evidence are
+excluded so those changes do not masquerade as semantic changes.
+
+### Draft
+
+Structurally usable for discovery and review, but not accepted by all
+required semantic owners.
+
+### Approved
+
+Accepted by the required source- and target-model owner roles for the same
+semantic digest. Synergy cannot supply those approvals on their behalf.
+
+### Production-ready
+
+Approved semantic contract, conformance-checked implementation binding, and
+automatically emitted receipt. “Approved” and “production-ready” are not
+synonyms.
+
+### Compatible
+
+The model binding represents the relevant shared assumptions without a
+known contradiction.
+
+### Compatible with gaps
+
+The model does not represent one or more shared assumptions but also does not
+contradict them. The missing coverage remains visible.
+
+### Override
+
+An intentional native value that differs from the shared assumption. It is
+documented, but it is not agreement with the shared scenario.
+
+### Conflict
+
+Two authoritative declarations make incompatible claims about the same
+shared concept at the same revision, scope, and authority.
+
+## Terms that are easy to confuse
+
+| Often confused | How they differ |
+| --- | --- |
+| Scenario definition / trajectory / snapshot | A definition states assumptions; a trajectory organizes change across years; a snapshot is one population state in one year. |
+| Schema / contract / profile | A schema defines reusable structure; a contract selects an agreement for an exchange; a profile composes definitions for one workflow boundary. |
+| Native record / core population state | A native record carries model-owned attributes; core state carries only shared snapshot-scoped identity and relationships. |
+| Artifact / manifest / bundle / receipt | An artifact is physical content; a manifest describes an exchange; a bundle groups artifact roles; a receipt records one application of scenario, mapping, implementation, and artifacts. |
+| Artifact digest / semantic digest | An artifact digest identifies exact bytes; a semantic digest identifies normalized meaning-bearing content. |
+| Translation contract / implementation binding | The contract is the model-owner-reviewed meaning; the binding identifies workflow code that implements it. |
+| Mapping residue / validation error | Residue is declared and reviewable translation behavior; an error is an undeclared or inconsistent violation. |
+| Provenance / scenario definition | Provenance describes execution and artifact history; the scenario definition states shared assumptions. |
+| Draft / approved / production-ready | Draft supports review; approved has required semantic owner acceptance; production-ready additionally requires checked code and automatic receipts. |
+| Compatible with gaps / conflict | A gap means unsupported but non-contradictory; a conflict is an incompatible assertion about the same shared concept. |
+
+## Where to go next
+
+- [Scenario definitions and trajectories](scenario-definitions-and-trajectories.md)
+- [Population snapshots and artifact identity](population-snapshots-and-artifact-identity.md)
+- [Translation contract, residue, and lineage](../cross-model-mappings/mapping-lineage.md)
+- [Workflow structures](../workflow-structures/index.md)
+- [Complete generated reference](../schema/index.md)

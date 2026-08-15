@@ -26,6 +26,7 @@ nav = [
         { "Schema organization" = "shared-structure/index.md" },
         { "Scenario definitions and trajectories" = "shared-structure/scenario-definitions-and-trajectories.md" },
         { "Population snapshots and artifact identity" = "shared-structure/population-snapshots-and-artifact-identity.md" },
+        { "Glossary" = "shared-structure/glossary.md" },
     ] },
     { "Workflow structures" = [
         { "Workflow structures" = "workflow-structures/index.md" },

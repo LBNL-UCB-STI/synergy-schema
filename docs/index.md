@@ -6,4 +6,6 @@ workflows without asking either model to adopt LinkML at runtime. Start with a
 [three-year proof](proof-of-concept/index.md); both are primary ways in.
 
 The maintained guides explain what a proposed exchange means. The
-[generated reference](schema/index.md) is the field-level lookup source.
+[Glossary](shared-structure/glossary.md) defines recurring terms in plain
+language, while the [generated reference](schema/index.md) is the field-level
+lookup source.

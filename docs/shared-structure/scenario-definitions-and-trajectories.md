@@ -5,3 +5,7 @@ content digest. A [PopulationTrajectory](../schema/PopulationTrajectory.md)
 names requested years and ordered snapshots for one scenario and realization.
 Bindings can say a native implementation is compatible, has a documented gap,
 or needs resolution.
+
+The glossary explains the plain-language distinction between a
+[scenario definition](glossary.md#scenario-definition) and a
+[population trajectory](glossary.md#population-trajectory).
