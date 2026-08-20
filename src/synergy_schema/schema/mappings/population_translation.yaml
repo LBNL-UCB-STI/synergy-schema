@@ -252,8 +252,11 @@ classes:
         description: Recorded review decisions from accountable roles.
   PopulationTranslationContract:
     description: >-
-      Immutable semantic release contract for one population translation between
-      source and target native contract catalogs.
+      Frozen statement of how one source population representation maps to one
+      target representation. It pins both native catalogs, every field rule,
+      and every declared default, omission, filter, lookup, or other residue.
+      The semantic content digest fingerprints those meaning-bearing parts so
+      reviewers and implementations can identify the exact same agreement.
     annotations:
       semantic_digest_projection: >-
         Includes source_catalog, target_catalog, field_mappings, and
@@ -270,7 +273,7 @@ classes:
         description: Stable semantic identifier for this population translation contract.
       revision:
         required: true
-        description: Immutable revision or release label.
+        description: Human-readable immutable label for this version of the agreement.
       semantic_content_digest_algorithm:
         range: DigestAlgorithm
         required: true

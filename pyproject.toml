@@ -12,7 +12,9 @@ dependencies = ["linkml-runtime>=1.9.4,<2", "linkml>=1.9.4,<2"]
 
 [dependency-groups]
 dev = [
+  "pandas>=2,<3",
   "pytest>=8,<9",
+  "tabulate>=0.9,<1",
   "zensical==0.0.40",
 ]
 

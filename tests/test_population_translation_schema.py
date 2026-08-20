@@ -39,7 +39,7 @@ def _assert_digest_pair(
     assert digest_slot.required is True
 
 
-def test_population_translation_contract_exposes_semantic_release_shape() -> None:
+def test_population_translation_contract_exposes_contract_revision_shape() -> None:
     schema_view = SchemaView(str(SCHEMA_PATH))
 
     assert {

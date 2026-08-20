@@ -4,6 +4,7 @@ model_bindings: zev-model-bindings.yaml
 trajectory: zev-trajectory.yaml
 population_bundle: zev-pilates-trajectory-bundle.yaml
 polaris_bundle: zev-polaris-translation-bundle.yaml
-# Reuse the reviewed one-year semantic release; do not copy its contract or residue catalog.
+# Use the one-year example's reviewed field rules and declared translation
+# losses by reference instead of copying them here.
 mapping_release: ../one_year_mapping_handshake/mapping-release/revision-1
 catalog_root: ../one_year_mapping_handshake/catalogs

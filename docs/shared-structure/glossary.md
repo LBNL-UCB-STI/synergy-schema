@@ -19,6 +19,27 @@ A statement of how a model’s native configuration represents one shared
 scenario assumption. A binding can be direct, an alias, transformed,
 intentionally overridden, or unsupported.
 
+## What a binding means here
+
+A **binding** is a declared, checkable connection between something shared
+and the model-specific representation that is meant to stand for it. It
+answers “where and how does this shared meaning show up in this model?” A
+binding does not copy the underlying data, require identical model outputs,
+or transfer control of a model-owned field to Synergy. It also does not prove
+compatibility by itself: the binding records enough information for a checker
+and the relevant owners to make that decision.
+
+| Binding or relationship | Connects | Maintained by | What it establishes |
+| --- | --- | --- | --- |
+| Scenario binding | A shared scenario assumption to a native setting or value | The model or workflow team that configures the model | How that model represents, omits, or overrides the assumption |
+| Field mapping | A source native element to a target native element | Source and target semantic owners | The reviewed meaning of one translation rule |
+| Schema contract reference | An artifact to an immutable schema and root class | The exchange producer | Which exact structure interprets the artifact |
+| Implementation binding | An approved translation contract to executable SQL or code | The workflow team that runs the translation | Which implementation claims to realize that semantic contract |
+
+“Binding” is therefore more specific than “related to.” It names both sides
+of a boundary and the nature of their connection. A scenario binding concerns
+shared assumptions; an implementation binding concerns executable code.
+
 ### Population trajectory
 
 An ordered sequence of population snapshots for one scenario definition and
@@ -82,11 +103,39 @@ model, such as an ATLAS household row or a POLARIS person row. Shared
 contracts refer to native records rather than replacing them with one
 universal table.
 
+### Native contract
+
+A model-owned description of the interface surfaces that another workflow may
+refer to: configuration paths, artifact keys, or table columns and their exact
+spellings. In Synergy, “contract” means that these surfaces are deliberately
+named and versioned for exchange. It is not a Synergy-owned replacement for the
+model's schema, runtime objects, or payload files.
+
 ### Native contract catalog
 
-A pinned inventory of model-owned configuration paths, artifact keys, or SQL
-columns. It makes references checkable without importing or running the
-model’s code.
+A pinned inventory of elements from one
+[native contract](#native-contract). The catalog reference records the model's
+catalog identifier, kind, revision, and content digest. Those values answer
+“which exact version of the model-owned inventory are we using?” without
+copying the full model schema into Synergy.
+
+### Native contract element reference
+
+One typed address inside a pinned native contract catalog. It combines the
+catalog identity with an element kind—such as `config_path`, `artifact_key`, or
+`sql_column`—and the model-owned path itself. For example, a scenario binding
+may point to the `polaris_households.persons` SQL column in a particular
+POLARIS catalog revision.
+
+The structural chain is **catalog → element → binding**:
+
+1. The catalog reference pins the version of the model-owned inventory.
+2. The element reference identifies one address within that inventory.
+3. A scenario or translation binding explains how that element relates to a
+   shared concept.
+
+Synergy can check that the address exists in the pinned catalog. The model team
+still owns what the address means and how its runtime produces or consumes it.
 
 ### Shared semantic kernel
 
@@ -190,6 +239,37 @@ The team-maintained spreadsheet, SQL, script, or other artifact from which a
 typed translation contract was transcribed. Its digest preserves attribution
 and lets reviewers resolve transcription disputes against the original work.
 
+## Ownership and authority
+
+In this project, **ownership** means responsibility and decision authority for
+meaning or behavior. It does not necessarily mean exclusive custody of a file.
+Synergy can encode, validate, and document a model team's definitions, but
+referencing or transcribing them does not transfer semantic ownership.
+
+| Responsibility | Decision authority |
+| --- | --- |
+| Meaning of ATLAS/DEMOS or POLARIS native fields and codes | The corresponding model team |
+| Meaning of shared scenario assumptions and identity concepts | The participating teams through the shared contract and its named authorities |
+| Meaning of an ATLAS-to-POLARIS translation rule | The named source- and target-model semantic owners |
+| PILATES orchestration, translation code, and automatic receipt emission | The PILATES workflow maintainers |
+| Synergy vocabulary, schema composition, conformance rules, and generated documentation | The Synergy maintainers, within the limits of model-owner approval |
+| Run and artifact evidence recorded through Consist | The producing workflow; Consist supplies the provenance mechanism |
+
+Several roles may apply to the same artifact:
+
+- A **semantic owner** decides what a field, code, assumption, or mapping means.
+- An **implementation owner** maintains the code that applies that meaning.
+- A **producer** creates the payload and records its receipt.
+- A **custodian** stores or publishes the physical files.
+- A **reviewer or approver** accepts a particular semantic digest in a named
+  role.
+
+These roles are deliberately separate. For example, PILATES may maintain the
+SQL that implements an ATLAS-to-POLARIS mapping, while ATLAS and POLARIS retain
+authority over their native meanings and approve the semantic mapping. Synergy
+can reject a malformed or unapproved contract, but it cannot approve that
+contract on either model team's behalf.
+
 ## Digests, review states, and compatibility
 
 ### Content digest
@@ -246,9 +326,12 @@ shared concept at the same revision, scope, and authority.
 | Scenario definition / trajectory / snapshot | A definition states assumptions; a trajectory organizes change across years; a snapshot is one population state in one year. |
 | Schema / contract / profile | A schema defines reusable structure; a contract selects an agreement for an exchange; a profile composes definitions for one workflow boundary. |
 | Native record / core population state | A native record carries model-owned attributes; core state carries only shared snapshot-scoped identity and relationships. |
+| Native contract / Synergy schema | A native contract inventories a model-owned interface; the Synergy schema defines shared references and exchange structure around it. |
+| Catalog / element / binding | A catalog pins an interface inventory; an element identifies one address in it; a binding connects that address to shared meaning. |
 | Artifact / manifest / bundle / receipt | An artifact is physical content; a manifest describes an exchange; a bundle groups artifact roles; a receipt records one application of scenario, mapping, implementation, and artifacts. |
 | Artifact digest / semantic digest | An artifact digest identifies exact bytes; a semantic digest identifies normalized meaning-bearing content. |
 | Translation contract / implementation binding | The contract is the model-owner-reviewed meaning; the binding identifies workflow code that implements it. |
+| Ownership / file custody | Ownership is authority over meaning or behavior; custody is possession or publication of the bytes. |
 | Mapping residue / validation error | Residue is declared and reviewable translation behavior; an error is an undeclared or inconsistent violation. |
 | Provenance / scenario definition | Provenance describes execution and artifact history; the scenario definition states shared assumptions. |
 | Draft / approved / production-ready | Draft supports review; approved has required semantic owner acceptance; production-ready additionally requires checked code and automatic receipts. |

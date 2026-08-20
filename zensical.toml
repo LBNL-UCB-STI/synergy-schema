@@ -26,6 +26,7 @@ nav = [
         { "Schema organization" = "shared-structure/index.md" },
         { "Scenario definitions and trajectories" = "shared-structure/scenario-definitions-and-trajectories.md" },
         { "Population snapshots and artifact identity" = "shared-structure/population-snapshots-and-artifact-identity.md" },
+        { "Core schema UML" = "schema/core-schema-uml.md" },
         { "Glossary" = "shared-structure/glossary.md" },
     ] },
     { "Workflow structures" = [
@@ -47,6 +48,19 @@ nav = [
 [project.theme]
 language = "en"
 features = ["content.code.copy", "navigation.indexes", "navigation.top", "search.highlight", "toc.follow"]
+
+[project.markdown_extensions.pymdownx.superfences]
+custom_fences = [
+  { name = "mermaid", class = "mermaid", format = "pymdownx.superfences.fence_code_format" },
+]
+
+[project.markdown_extensions.pymdownx.tabbed]
+alternate_style = true
+
+[project.markdown_extensions.zensical.extensions.macros]
+module_name = "docs_macros"
+on_error_fail = true
+on_undefined = "strict"
 
 [[project.theme.palette]]
 media = "(prefers-color-scheme)"

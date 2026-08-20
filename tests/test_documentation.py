@@ -4,6 +4,8 @@ from pathlib import Path
 
 import tomllib
 
+import docs_macros
+
 
 ROOT = Path(__file__).parents[1]
 DOCS = ROOT / "docs"
@@ -49,6 +51,7 @@ def test_navigation_has_the_approved_eight_sections_and_existing_leaves() -> Non
         "Schema organization",
         "Scenario definitions and trajectories",
         "Population snapshots and artifact identity",
+        "Core schema UML",
         "Glossary",
         "PILATES post-ATLAS population",
         "POLARIS translated population",
@@ -77,6 +80,7 @@ def test_glossary_explains_core_terms_and_common_distinctions() -> None:
         "## Schemas, contracts, profiles, and native records",
         "## Files, bundles, manifests, receipts, and provenance",
         "## Mappings, implementations, and residue",
+        "## Ownership and authority",
         "## Digests, review states, and compatibility",
     ):
         assert heading in glossary
@@ -86,6 +90,8 @@ def test_glossary_explains_core_terms_and_common_distinctions() -> None:
         "### Population snapshot",
         "### Workflow profile",
         "### Native record",
+        "### Native contract",
+        "### Native contract element reference",
         "### Artifact",
         "### Receipt",
         "### Translation contract",
@@ -95,6 +101,16 @@ def test_glossary_explains_core_terms_and_common_distinctions() -> None:
     ):
         assert term in glossary
     assert "| Often confused | How they differ |" in glossary
+    assert "## What a binding means here" in glossary
+    assert (
+        "| Binding or relationship | Connects | Maintained by | What it establishes |"
+        in glossary
+    )
+    assert "| Responsibility | Decision authority |" in glossary
+    assert "does not transfer semantic ownership" in glossary
+    assert "not a Synergy-owned replacement for the" in glossary
+    assert "model's schema" in glossary
+    assert "catalog → element → binding" in glossary
 
 
 def test_concept_heavy_guides_link_selected_first_uses_to_the_glossary() -> None:
@@ -124,7 +140,21 @@ def test_concept_heavy_guides_link_selected_first_uses_to_the_glossary() -> None
 
 def test_overview_and_proof_make_the_two_newcomer_actions_clear() -> None:
     overview = (DOCS / "index.md").read_text()
-    assert overview.startswith("# Synergy Schema\n\nShare a scenario")
+    assert overview.startswith("# Synergy Schema\n\nTransportation modeling studies")
+    for heading in (
+        "## Why this project exists",
+        "## What Synergy adds",
+        "## What it does not replace",
+        "## What is in these docs",
+        "## Where to start",
+    ):
+        assert heading in overview
+    assert "PILATES modeling pipeline" in overview
+    assert "and POLARIS" in overview
+    assert "keep their own schemas" in overview
+    assert "legitimately produce different" in overview
+    assert "model-specific results" in overview
+    assert "| Documentation area | What you will find |" in overview
     assert "Bring an existing mapping" in overview
     assert "three-year proof" in overview
 
@@ -146,6 +176,65 @@ def test_overview_and_proof_make_the_two_newcomer_actions_clear() -> None:
     assert "exit 1" in commands
     assert "SCENARIO_DIGEST_MISMATCH" in commands
     assert "ARTIFACT_IDENTITY_MISMATCH" in commands
+
+
+def test_checker_page_displays_tables_from_the_showcase_fixtures() -> None:
+    page = (DOCS / "proof-of-concept/check-the-showcase.md").read_text()
+    for tab in (
+        '=== "Population evolution"',
+        '=== "Scenario bindings"',
+        '=== "Broken checks"',
+    ):
+        assert tab in page
+    rendered = "\n".join(
+        (
+            docs_macros.showcase_snapshot_summary_table(),
+            docs_macros.showcase_person_history_table(),
+            docs_macros.showcase_household_lineage_table(),
+            docs_macros.showcase_vehicle_history_table(),
+            docs_macros.showcase_scenario_assumptions_table(),
+            docs_macros.showcase_bindings_table(),
+            docs_macros.showcase_broken_scenario_table(),
+            docs_macros.showcase_broken_artifact_table(),
+        )
+    )
+    for macro in (
+        "{{ showcase_snapshot_summary_table(4) }}",
+        "{{ showcase_person_history_table(4) }}",
+        "{{ showcase_household_lineage_table(4) }}",
+        "{{ showcase_vehicle_history_table(4) }}",
+        "{{ showcase_scenario_assumptions_table(4) }}",
+        "{{ showcase_bindings_table(4) }}",
+        "{{ showcase_broken_scenario_table(4) }}",
+        "{{ showcase_broken_artifact_table(4) }}",
+    ):
+        assert macro in page
+    for value in (
+        "person:new-2030",
+        "household:family-a-2",
+        "compatible_with_gaps",
+        "zev_policy",
+        "SCENARIO_DIGEST_MISMATCH",
+        "ARTIFACT_IDENTITY_MISMATCH",
+    ):
+        assert value in rendered
+    assert "core-population-evolution.yaml" in page
+    assert "zev-model-bindings.yaml" in page
+    assert "Every person record in this synthetic fixture is shown" in page
+    assert "does not declare person-to-household membership" in page
+    assert "Household state records" in rendered
+    assert "Not declared in this fixture" in rendered
+    assert "Every assumption binding declared" in page
+    assert "synthetic fixture is shown as well" in page
+    assert (
+        "All digest values below come directly from the valid and broken fixtures"
+        in page
+    )
+    assert "Shared value" in rendered
+    assert "Valid declaration" in rendered
+    assert "Broken declaration" in rendered
+    assert "broken-scenario-definition.yaml" in page
+    assert "broken-polaris-bundle.yaml" in page
 
 
 def test_adoption_guides_are_honest_about_scope_cost_and_exit() -> None:
@@ -184,9 +273,45 @@ def test_workflow_and_compatibility_guides_state_boundaries_and_decisions() -> N
 def test_docs_build_generates_identity_diagram_and_contract_review_copy() -> None:
     script = (ROOT / "scripts/preview-schema-docs").read_text()
     assert "cross_model_identity_diagram" in script
+    assert "core_schema_diagram" in script
     assert "contract-at-a-glance.md" in script
     ci = (ROOT / ".github/workflows/ci.yml").read_text()
     assert (
         "UV_CACHE_DIR=/tmp/synergy-schema-uv-cache scripts/preview-schema-docs build"
         in ci
     )
+
+
+def test_shared_structure_explains_core_agreement_boundary() -> None:
+    page = (DOCS / "shared-structure/index.md").read_text()
+    assert "Core classes hold shared assertions" in page
+    assert "allowed to be absent but not" in page
+    assert "contradictory when two implementations" in page
+    assert "does not make disagreement impossible" in page
+    assert "core-schema-uml.md" in page
+    snapshot_page = (
+        DOCS / "shared-structure/population-snapshots-and-artifact-identity.md"
+    ).read_text()
+    assert "#population-relationship-overview" in snapshot_page
+
+
+def test_maintained_surfaces_avoid_ambiguous_release_jargon() -> None:
+    forbidden = "semantic" + " release"
+    roots = (DOCS, ROOT / "src", ROOT / "examples")
+    for root in roots:
+        for path in root.rglob("*"):
+            if not path.is_file() or "superpowers" in path.parts:
+                continue
+            if path.is_relative_to(DOCS / "schema"):
+                continue
+            assert forbidden not in path.read_text(errors="ignore").lower(), path
+
+    handshake = (
+        DOCS / "bring-an-existing-mapping/one-year-mapping-handshake.md"
+    ).read_text()
+    assert "exact same mapping content" in handshake
+    assert "pinned source and target catalogs" in handshake
+    assert "This approval concerns what the translation means" in handshake
+    lineage = (DOCS / "cross-model-mappings/mapping-lineage.md").read_text()
+    assert "| Document | Question it answers |" in lineage
+    assert "approved rules, wrong script" in lineage
