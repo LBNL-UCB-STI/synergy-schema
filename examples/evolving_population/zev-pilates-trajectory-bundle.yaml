@@ -44,6 +44,11 @@ population_snapshot_bundles:
             content_digest: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
           locator: evidence/atlas-2025.yaml
           media_type: application/yaml
+        schema_contract:
+          language: LinkML
+          schema_digest_algorithm: sha256
+          schema_digest: fff2ead9ae00a315d0a83ae557b364d6ce448a5005e6183df294e9d04c4b6409
+          selected_root: AtlasHouseholdInput
       - semantic_role: persons
         artifact:
           artifact_identity:
@@ -51,6 +56,11 @@ population_snapshot_bundles:
             content_digest: bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
           locator: evidence/atlas-2025.yaml
           media_type: application/yaml
+        schema_contract:
+          language: LinkML
+          schema_digest_algorithm: sha256
+          schema_digest: fff2ead9ae00a315d0a83ae557b364d6ce448a5005e6183df294e9d04c4b6409
+          selected_root: AtlasPersonInput
       - semantic_role: vehicles
         artifact:
           artifact_identity:
@@ -58,6 +68,11 @@ population_snapshot_bundles:
             content_digest: cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
           locator: evidence/atlas-2025.yaml
           media_type: application/yaml
+        schema_contract:
+          language: LinkML
+          schema_digest_algorithm: sha256
+          schema_digest: fff2ead9ae00a315d0a83ae557b364d6ce448a5005e6183df294e9d04c4b6409
+          selected_root: AtlasVehicleOutput
     consist_provenance:
       runs:
         - run_id: run:zev-child-2025
@@ -116,6 +131,11 @@ population_snapshot_bundles:
             content_digest: dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd
           locator: evidence/atlas-2030.yaml
           media_type: application/yaml
+        schema_contract:
+          language: LinkML
+          schema_digest_algorithm: sha256
+          schema_digest: fff2ead9ae00a315d0a83ae557b364d6ce448a5005e6183df294e9d04c4b6409
+          selected_root: AtlasHouseholdInput
       - semantic_role: persons
         artifact:
           artifact_identity:
@@ -123,6 +143,11 @@ population_snapshot_bundles:
             content_digest: eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
           locator: evidence/atlas-2030.yaml
           media_type: application/yaml
+        schema_contract:
+          language: LinkML
+          schema_digest_algorithm: sha256
+          schema_digest: fff2ead9ae00a315d0a83ae557b364d6ce448a5005e6183df294e9d04c4b6409
+          selected_root: AtlasPersonInput
       - semantic_role: vehicles
         artifact:
           artifact_identity:
@@ -130,6 +155,11 @@ population_snapshot_bundles:
             content_digest: ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
           locator: evidence/atlas-2030.yaml
           media_type: application/yaml
+        schema_contract:
+          language: LinkML
+          schema_digest_algorithm: sha256
+          schema_digest: fff2ead9ae00a315d0a83ae557b364d6ce448a5005e6183df294e9d04c4b6409
+          selected_root: AtlasVehicleOutput
     consist_provenance:
       runs:
         - run_id: run:zev-child-2030
@@ -188,6 +218,11 @@ population_snapshot_bundles:
             content_digest: '1111111111111111111111111111111111111111111111111111111111111111'
           locator: evidence/atlas-2035.yaml
           media_type: application/yaml
+        schema_contract:
+          language: LinkML
+          schema_digest_algorithm: sha256
+          schema_digest: fff2ead9ae00a315d0a83ae557b364d6ce448a5005e6183df294e9d04c4b6409
+          selected_root: AtlasHouseholdInput
       - semantic_role: persons
         artifact:
           artifact_identity:
@@ -195,6 +230,11 @@ population_snapshot_bundles:
             content_digest: '2222222222222222222222222222222222222222222222222222222222222222'
           locator: evidence/atlas-2035.yaml
           media_type: application/yaml
+        schema_contract:
+          language: LinkML
+          schema_digest_algorithm: sha256
+          schema_digest: fff2ead9ae00a315d0a83ae557b364d6ce448a5005e6183df294e9d04c4b6409
+          selected_root: AtlasPersonInput
       - semantic_role: vehicles
         artifact:
           artifact_identity:
@@ -202,6 +242,11 @@ population_snapshot_bundles:
             content_digest: '3333333333333333333333333333333333333333333333333333333333333333'
           locator: evidence/atlas-2035.yaml
           media_type: application/yaml
+        schema_contract:
+          language: LinkML
+          schema_digest_algorithm: sha256
+          schema_digest: fff2ead9ae00a315d0a83ae557b364d6ce448a5005e6183df294e9d04c4b6409
+          selected_root: AtlasVehicleOutput
     consist_provenance:
       runs:
         - run_id: run:zev-child-2035
@@ -288,7 +333,19 @@ consist_trajectory_evidence:
         run_id: run:zev-child-2035
       simulation_year: 2035
       equilibrium_iteration: 3
-manifest_content_digest: 3a84ffd7bcfd5d0aaa69aa3c26d33d4d4207248e903882650310a267b9f5fd7b
+manifest_content_digest: c477f363135f63d0aa19e1676bca590e23d269da8575bea39a6a6820825714c3
+realization_identity:
+  kind: synergy:scenario-realization:population-trajectory-v1
+  projection_version: "1"
+  digest_algorithm: sha256
+  content_digest: f832e147aba423df3c0c0e28377149400b25be47f0fa64fca7cbee2a853bf249
+realization_receipt:
+  receipt_version: "1"
+  realization_identity:
+    kind: synergy:scenario-realization:population-trajectory-v1
+    projection_version: "1"
+    digest_algorithm: sha256
+    content_digest: f832e147aba423df3c0c0e28377149400b25be47f0fa64fca7cbee2a853bf249
 manifest_version: '0.1'
 completeness_status: complete
 producing_run:

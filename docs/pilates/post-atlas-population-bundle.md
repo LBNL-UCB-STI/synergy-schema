@@ -53,6 +53,35 @@ Artifact locators help consumers find files. Immutable digests identify the
 selected bytes. These artifact identities are separate from household and
 person identities carried by rows inside the artifacts.
 
+## Realization identity and receipt
+
+A population-trajectory realization has a separate identity from both those
+member-byte digests and the enclosing manifest. The
+`synergy:scenario-realization:population-trajectory-v1` identity selects the
+scenario revision, stochastic realization, ordered snapshots, required member
+roles, member byte digests, and the schema contract that interprets each
+member. Moving a file or refreshing validation evidence therefore does not
+change the selected realization.
+
+`manifest_content_digest` remains available for compatibility as a logical
+digest of the full parsed exchange envelope. It changes when any included
+envelope evidence changes, and it is not a checksum of the original YAML or
+JSON bytes. The `ScenarioRealizationReceipt` envelope is separately versioned
+and points back to the realization identity; it is where location, validation,
+admission, and execution evidence belongs.
+
+The synthetic three-year ZEV trajectory in
+[`examples/evolving_population/zev-pilates-trajectory-bundle.yaml`](https://github.com/LBNL-UCB-STI/synergy-schema/blob/main/examples/evolving_population/zev-pilates-trajectory-bundle.yaml)
+is the portable example. It has three successful years, pins the LinkML
+contract for each household, person, and vehicle member, and carries the
+minimum receipt envelope without requiring a registry, Tracker, or network
+lookup.
+
+The [population trajectory realization identity contract](../shared-structure/realization-identity.md)
+is the public normative definition for independent consumers. It identifies
+the projection, canonical bytes, test vector, and trust boundary; this guide
+only introduces the concept.
+
 ## Provenance
 
 The bundle carries a

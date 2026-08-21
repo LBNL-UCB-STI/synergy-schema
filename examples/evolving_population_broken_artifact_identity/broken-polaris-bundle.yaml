@@ -1,7 +1,7 @@
 source_trajectory_bundle:
   population_trajectory_bundle_id: bundle:synthetic-evolving-zev
   manifest_content_digest_algorithm: sha256
-  manifest_content_digest: 3a84ffd7bcfd5d0aaa69aa3c26d33d4d4207248e903882650310a267b9f5fd7b
+  manifest_content_digest: c477f363135f63d0aa19e1676bca590e23d269da8575bea39a6a6820825714c3
 scenario_definition_ref:
   scenario_definition_id: scenario:synthetic-evolving-zev
   revision: r1

@@ -51,6 +51,7 @@ def test_navigation_has_the_approved_eight_sections_and_existing_leaves() -> Non
         "Schema organization",
         "Scenario definitions and trajectories",
         "Population snapshots and artifact identity",
+        "Population trajectory realization identity",
         "Core schema UML",
         "Glossary",
         "PILATES post-ATLAS population",
@@ -66,6 +67,21 @@ def test_navigation_has_the_approved_eight_sections_and_existing_leaves() -> Non
         if target.startswith("schema/"):
             continue
         assert (DOCS / target).is_file()
+
+
+def test_realization_identity_contract_is_public_and_release_ready() -> None:
+    """Downstream consumers have a stable, non-internal contract to cite."""
+    contract = (DOCS / "shared-structure/realization-identity.md").read_text()
+    for text in (
+        "synergy:scenario-realization:population-trajectory-v1",
+        "RFC 8785 JSON Canonicalization Scheme (JCS)",
+        "population_trajectory_v1.jcs.json",
+        "4651ff4cb5471f36c9632df1e3d3ec37a9ff81352cc2d1990cac6a3b2fd919b5",
+        "independently supplied expected identity",
+        "2**53 - 1",
+        "Unicode scalar values",
+    ):
+        assert text in contract
 
 
 def test_glossary_explains_core_terms_and_common_distinctions() -> None:

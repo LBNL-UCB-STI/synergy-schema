@@ -4,17 +4,504 @@ from __future__ import annotations
 
 from hashlib import sha256
 import json
+from pathlib import Path
 from typing import Any, Mapping, Sequence
 
 from .diagnostics import CheckResult, Diagnostic
+from .shapes import validate_bundle_shape
 
 
 def canonical_bundle_digest(bundle: Mapping[str, Any]) -> str:
-    """Hash a trajectory manifest without its self-referential digest field."""
+    """Return the legacy logical full-bundle digest, excluding only itself.
+
+    This digest hashes the parsed mapping, not the original serialized document
+    bytes.  It is retained for existing manifests and is neither a realization
+    identity nor a registry identity.
+    """
     projection = dict(bundle)
     projection.pop("manifest_content_digest", None)
     encoded = json.dumps(projection, sort_keys=True, separators=(",", ":"))
     return sha256(encoded.encode("utf-8")).hexdigest()
+
+
+_REALIZATION_KIND = "synergy:scenario-realization:population-trajectory-v1"
+_REALIZATION_VERSION = "1"
+_REQUIRED_POPULATION_ROLES = ("households", "persons", "vehicles")
+_SHA256_HEX_LENGTH = 64
+_MAX_SAFE_JCS_INTEGER = 2**53 - 1
+
+
+def _is_sha256_digest(value: object) -> bool:
+    return (
+        isinstance(value, str)
+        and len(value) == _SHA256_HEX_LENGTH
+        and all(character in "0123456789abcdef" for character in value)
+    )
+
+
+def _required_string(value: object) -> bool:
+    return isinstance(value, str) and bool(value)
+
+
+def _realization_diagnostic(message: str) -> Diagnostic:
+    return _diagnostic("REALIZATION_PROJECTION_INVALID", message)
+
+
+def _is_v1_realization_bundle(bundle: Mapping[str, Any]) -> bool:
+    """Identify bundles that opt into identity verification without breaking migration."""
+    return "realization_identity" in bundle or "realization_receipt" in bundle
+
+
+def _snapshot_parent_id(value: object) -> str | None:
+    if isinstance(value, str) and value:
+        return value
+    if isinstance(value, Mapping) and _required_string(value.get("id")):
+        return str(value["id"])
+    return None
+
+
+def _validate_realization_projection(bundle: Mapping[str, Any]) -> list[Diagnostic]:
+    """Return v1 projection diagnostics without inspecting the supplied result."""
+    diagnostics: list[Diagnostic] = []
+    trajectory = bundle.get("population_trajectory")
+    if not isinstance(trajectory, Mapping):
+        return [_realization_diagnostic("population trajectory is required")]
+
+    root_version = bundle.get("manifest_version")
+    if not _required_string(root_version):
+        diagnostics.append(_realization_diagnostic("root manifest_version is required"))
+    root_status = bundle.get("completeness_status")
+    if root_status not in {"complete", "incomplete"}:
+        diagnostics.append(
+            _realization_diagnostic("root completeness_status is invalid")
+        )
+    trajectory_status = trajectory.get("completeness_status")
+    if trajectory_status not in {"complete", "incomplete"}:
+        diagnostics.append(
+            _realization_diagnostic("trajectory completeness_status is invalid")
+        )
+    elif root_status != trajectory_status:
+        diagnostics.append(
+            _realization_diagnostic(
+                "root and trajectory completeness_status must agree"
+            )
+        )
+
+    scenario = trajectory.get("scenario_definition_ref")
+    if (
+        not isinstance(scenario, Mapping)
+        or not all(
+            _required_string(scenario.get(field))
+            for field in ("scenario_definition_id", "revision")
+        )
+        or not _is_sha256_digest(scenario.get("content_digest"))
+    ):
+        diagnostics.append(_realization_diagnostic("scenario definition is invalid"))
+    if not _required_string(trajectory.get("id")):
+        diagnostics.append(_realization_diagnostic("trajectory id is required"))
+    if not _required_string(trajectory.get("stochastic_realization_id")):
+        diagnostics.append(
+            _realization_diagnostic("stochastic_realization_id is required")
+        )
+
+    requested_raw = trajectory.get("requested_years")
+    requested = requested_raw if isinstance(requested_raw, list) else []
+    if (
+        not requested
+        or any(
+            isinstance(year, bool) or not isinstance(year, int) for year in requested
+        )
+        or requested != sorted(set(requested))
+    ):
+        diagnostics.append(
+            _realization_diagnostic("requested_years must be unique ascending integers")
+        )
+
+    skipped_raw = trajectory.get("skipped_years", [])
+    skipped_records = skipped_raw if isinstance(skipped_raw, list) else []
+    skipped: list[int] = []
+    for item in skipped_records:
+        year = item.get("year") if isinstance(item, Mapping) else None
+        if isinstance(year, bool) or not isinstance(year, int):
+            diagnostics.append(_realization_diagnostic("skipped year is invalid"))
+            continue
+        skipped.append(year)
+    if (
+        not isinstance(skipped_raw, list)
+        or skipped != sorted(set(skipped))
+        or any(year not in requested for year in skipped)
+    ):
+        diagnostics.append(
+            _realization_diagnostic(
+                "skipped_years must be unique ascending requested years"
+            )
+        )
+
+    snapshots_raw = trajectory.get("snapshots")
+    snapshots = snapshots_raw if isinstance(snapshots_raw, list) else []
+    if not snapshots:
+        diagnostics.append(_realization_diagnostic("at least one snapshot is required"))
+    snapshot_ids: set[str] = set()
+    snapshot_years: list[int] = []
+    snapshot_by_id: dict[str, Mapping[str, Any]] = {}
+    for snapshot in snapshots:
+        if not isinstance(snapshot, Mapping):
+            diagnostics.append(_realization_diagnostic("snapshot is invalid"))
+            continue
+        snapshot_id = snapshot.get("id")
+        year = snapshot.get("simulation_year")
+        if not _required_string(snapshot_id) or (
+            isinstance(year, bool) or not isinstance(year, int)
+        ):
+            diagnostics.append(
+                _realization_diagnostic("snapshot id and simulation_year are required")
+            )
+            continue
+        if snapshot_id in snapshot_ids:
+            diagnostics.append(_realization_diagnostic("snapshot ids must be unique"))
+        snapshot_ids.add(snapshot_id)
+        snapshot_by_id[snapshot_id] = snapshot
+        snapshot_years.append(year)
+        if snapshot.get("scenario_definition_ref") != scenario:
+            diagnostics.append(
+                _realization_diagnostic(
+                    "snapshot scenario reference differs from trajectory"
+                )
+            )
+        if snapshot.get("stochastic_realization_id") != trajectory.get(
+            "stochastic_realization_id"
+        ):
+            diagnostics.append(
+                _realization_diagnostic(
+                    "snapshot stochastic realization differs from trajectory"
+                )
+            )
+        if "equilibrium_iteration" in snapshot and (
+            snapshot["equilibrium_iteration"] is None
+            or isinstance(snapshot["equilibrium_iteration"], bool)
+            or not isinstance(snapshot["equilibrium_iteration"], int)
+        ):
+            diagnostics.append(
+                _realization_diagnostic(
+                    "equilibrium_iteration must be an integer when present"
+                )
+            )
+    if snapshot_years != sorted(snapshot_years) or len(snapshot_years) != len(
+        set(snapshot_years)
+    ):
+        diagnostics.append(
+            _realization_diagnostic("snapshot years must be strictly increasing")
+        )
+    successful = set(snapshot_years)
+    if successful.intersection(skipped) or successful.union(skipped) != set(requested):
+        diagnostics.append(
+            _realization_diagnostic(
+                "requested, successful, and skipped years must form one closure"
+            )
+        )
+    expected_status = (
+        "complete" if not skipped and successful == set(requested) else "incomplete"
+    )
+    if (
+        trajectory_status in {"complete", "incomplete"}
+        and trajectory_status != expected_status
+    ):
+        diagnostics.append(
+            _realization_diagnostic("trajectory completeness_status is inconsistent")
+        )
+    for snapshot_id, snapshot in snapshot_by_id.items():
+        if "parent_snapshot_ref" not in snapshot:
+            continue
+        parent = snapshot["parent_snapshot_ref"]
+        parent_id = _snapshot_parent_id(parent)
+        if parent_id is None or parent_id not in snapshot_by_id:
+            diagnostics.append(
+                _realization_diagnostic("parent snapshot must be in this trajectory")
+            )
+        elif snapshot_by_id[parent_id].get("simulation_year") >= snapshot.get(
+            "simulation_year"
+        ):
+            diagnostics.append(
+                _realization_diagnostic("parent snapshot must precede its child")
+            )
+
+    bundles_raw = bundle.get("population_snapshot_bundles")
+    snapshot_bundles = bundles_raw if isinstance(bundles_raw, list) else []
+    by_snapshot_id: dict[str, list[Mapping[str, Any]]] = {}
+    for snapshot_bundle in snapshot_bundles:
+        snapshot = (
+            snapshot_bundle.get("population_snapshot")
+            if isinstance(snapshot_bundle, Mapping)
+            else None
+        )
+        snapshot_id = snapshot.get("id") if isinstance(snapshot, Mapping) else None
+        if _required_string(snapshot_id):
+            by_snapshot_id.setdefault(snapshot_id, []).append(snapshot_bundle)
+        else:
+            diagnostics.append(
+                _realization_diagnostic("snapshot bundle must name a snapshot")
+            )
+    if set(by_snapshot_id) != snapshot_ids or any(
+        len(items) != 1 for items in by_snapshot_id.values()
+    ):
+        diagnostics.append(
+            _realization_diagnostic(
+                "one snapshot bundle is required for every trajectory snapshot"
+            )
+        )
+
+    for snapshot_id, snapshot in snapshot_by_id.items():
+        matches = by_snapshot_id.get(snapshot_id, [])
+        if len(matches) != 1:
+            continue
+        snapshot_bundle = matches[0]
+        if snapshot_bundle.get("population_snapshot") != snapshot:
+            diagnostics.append(
+                _realization_diagnostic(
+                    "snapshot bundle context differs from trajectory"
+                )
+            )
+        if not _required_string(snapshot_bundle.get("manifest_version")):
+            diagnostics.append(
+                _realization_diagnostic("snapshot manifest_version is required")
+            )
+        if snapshot_bundle.get("completeness_status") != "complete":
+            diagnostics.append(
+                _realization_diagnostic("successful snapshot bundles must be complete")
+            )
+        members_raw = snapshot_bundle.get("members")
+        members = members_raw if isinstance(members_raw, list) else []
+        roles = [
+            member.get("semantic_role") if isinstance(member, Mapping) else None
+            for member in members
+        ]
+        if sorted(roles, key=lambda value: str(value)) != list(
+            _REQUIRED_POPULATION_ROLES
+        ):
+            diagnostics.append(
+                _realization_diagnostic(
+                    f"snapshot {snapshot_id} needs each required semantic role once"
+                )
+            )
+        for member in members:
+            if not isinstance(member, Mapping):
+                continue
+            artifact = member.get("artifact")
+            identity = (
+                artifact.get("artifact_identity")
+                if isinstance(artifact, Mapping)
+                else None
+            )
+            if (
+                not isinstance(identity, Mapping)
+                or identity.get("digest_algorithm") != "sha256"
+                or not _is_sha256_digest(identity.get("content_digest"))
+            ):
+                diagnostics.append(
+                    _realization_diagnostic("member artifact digest is invalid")
+                )
+            contract = member.get("schema_contract")
+            if (
+                not isinstance(contract, Mapping)
+                or not _required_string(contract.get("language"))
+                or contract.get("schema_digest_algorithm") != "sha256"
+                or not _is_sha256_digest(contract.get("schema_digest"))
+                or not _required_string(contract.get("selected_root"))
+            ):
+                diagnostics.append(
+                    _realization_diagnostic("member schema contract is invalid")
+                )
+    return diagnostics
+
+
+def _jcs_json_bytes(value: object) -> bytes:
+    """Encode the v1 restricted JSON value set with RFC 8785 key ordering."""
+
+    def encode(item: object) -> str:
+        if item is None:
+            raise ValueError("REALIZATION_PROJECTION_INVALID: null is not permitted")
+        if isinstance(item, bool):
+            return "true" if item else "false"
+        if isinstance(item, int):
+            if abs(item) > _MAX_SAFE_JCS_INTEGER:
+                raise ValueError(
+                    "REALIZATION_PROJECTION_INVALID: integer is outside JCS range"
+                )
+            return str(item)
+        if isinstance(item, str):
+            if any(0xD800 <= ord(character) <= 0xDFFF for character in item):
+                raise ValueError(
+                    "REALIZATION_PROJECTION_INVALID: strings cannot contain surrogates"
+                )
+            return json.dumps(item, ensure_ascii=False, separators=(",", ":"))
+        if isinstance(item, list):
+            return "[" + ",".join(encode(child) for child in item) + "]"
+        if isinstance(item, Mapping):
+            if not all(isinstance(key, str) for key in item):
+                raise ValueError(
+                    "REALIZATION_PROJECTION_INVALID: object keys must be strings"
+                )
+            ordered_keys = sorted(item, key=lambda key: key.encode("utf-16be"))
+            return (
+                "{"
+                + ",".join(f"{encode(key)}:{encode(item[key])}" for key in ordered_keys)
+                + "}"
+            )
+        raise ValueError(
+            "REALIZATION_PROJECTION_INVALID: only objects, arrays, strings, integers, and booleans are permitted"
+        )
+
+    return encode(value).encode("utf-8")
+
+
+def _realization_projection_unchecked(bundle: Mapping[str, Any]) -> dict[str, Any]:
+    trajectory = bundle["population_trajectory"]
+    assert isinstance(trajectory, Mapping)
+    scenario = trajectory["scenario_definition_ref"]
+    assert isinstance(scenario, Mapping)
+    bundles_by_snapshot = {
+        item["population_snapshot"]["id"]: item
+        for item in bundle["population_snapshot_bundles"]
+        if isinstance(item, Mapping)
+        and isinstance(item.get("population_snapshot"), Mapping)
+    }
+    snapshots: list[dict[str, Any]] = []
+    for snapshot in trajectory["snapshots"]:
+        assert isinstance(snapshot, Mapping)
+        snapshot_bundle = bundles_by_snapshot[snapshot["id"]]
+        members: list[dict[str, Any]] = []
+        for member in sorted(
+            snapshot_bundle["members"], key=lambda candidate: candidate["semantic_role"]
+        ):
+            assert isinstance(member, Mapping)
+            artifact = member["artifact"]
+            contract = member["schema_contract"]
+            assert isinstance(artifact, Mapping) and isinstance(contract, Mapping)
+            identity = artifact["artifact_identity"]
+            assert isinstance(identity, Mapping)
+            members.append(
+                {
+                    "semantic_role": member["semantic_role"],
+                    "artifact_identity": {
+                        "digest_algorithm": identity["digest_algorithm"],
+                        "content_digest": identity["content_digest"],
+                    },
+                    "schema_contract": {
+                        "language": contract["language"],
+                        "schema_digest_algorithm": contract["schema_digest_algorithm"],
+                        "schema_digest": contract["schema_digest"],
+                        "selected_root": contract["selected_root"],
+                    },
+                }
+            )
+        result: dict[str, Any] = {
+            "snapshot_id": snapshot["id"],
+            "manifest_version": snapshot_bundle["manifest_version"],
+            "simulation_year": snapshot["simulation_year"],
+            "completeness_status": snapshot_bundle["completeness_status"],
+            "members": members,
+        }
+        if "equilibrium_iteration" in snapshot:
+            result["equilibrium_iteration"] = snapshot["equilibrium_iteration"]
+        if "parent_snapshot_ref" in snapshot:
+            result["parent_snapshot_ref"] = _snapshot_parent_id(
+                snapshot["parent_snapshot_ref"]
+            )
+        snapshots.append(result)
+    return {
+        "kind": _REALIZATION_KIND,
+        "projection_version": _REALIZATION_VERSION,
+        "digest_algorithm": "sha256",
+        "manifest_version": bundle["manifest_version"],
+        "scenario_definition": {
+            "scenario_definition_id": scenario["scenario_definition_id"],
+            "revision": scenario["revision"],
+            "digest_algorithm": "sha256",
+            "content_digest": scenario["content_digest"],
+        },
+        "stochastic_realization_id": trajectory["stochastic_realization_id"],
+        "trajectory": {
+            "trajectory_id": trajectory["id"],
+            "requested_years": trajectory["requested_years"],
+            "skipped_years": [item["year"] for item in trajectory["skipped_years"]],
+            "completeness_status": trajectory["completeness_status"],
+            "membership_rule": {
+                "profile": "pilates-population-snapshot-v1",
+                "required_roles": list(_REQUIRED_POPULATION_ROLES),
+                "optional_roles": [],
+            },
+            "snapshots": snapshots,
+        },
+    }
+
+
+def _validate_supplied_realization_identity(
+    bundle: Mapping[str, Any], diagnostics: list[Diagnostic]
+) -> None:
+    """Validate top-level and receipt identities only after a valid envelope."""
+    if diagnostics:
+        return
+    supplied: list[tuple[str, object]] = []
+    if "realization_identity" in bundle:
+        supplied.append(("realization identity", bundle["realization_identity"]))
+    if "realization_receipt" in bundle:
+        receipt = bundle["realization_receipt"]
+        if not isinstance(receipt, Mapping) or receipt.get("receipt_version") != "1":
+            diagnostics.append(
+                _diagnostic(
+                    "REALIZATION_IDENTITY_MISMATCH", "realization receipt is invalid"
+                )
+            )
+            return
+        supplied.append(
+            ("receipt realization identity", receipt.get("realization_identity"))
+        )
+    if not supplied:
+        return
+    expected = sha256(
+        _jcs_json_bytes(_realization_projection_unchecked(bundle))
+    ).hexdigest()
+    canonical_identity = {
+        "kind": _REALIZATION_KIND,
+        "projection_version": _REALIZATION_VERSION,
+        "digest_algorithm": "sha256",
+        "content_digest": expected,
+    }
+    for label, identity in supplied:
+        if identity != canonical_identity:
+            diagnostics.append(
+                _diagnostic(
+                    "REALIZATION_IDENTITY_MISMATCH",
+                    f"{label} does not match the v1 projection",
+                )
+            )
+
+
+def canonical_realization_projection(bundle: Mapping[str, Any]) -> Mapping[str, Any]:
+    """Validate and return the closed population-trajectory v1 projection."""
+    schema_path = Path(__file__).parents[1] / "schema" / "synergy_schema.yaml"
+    diagnostics = list(
+        validate_bundle_shape(
+            schema_path, bundle, "PopulationTrajectoryBundle"
+        ).diagnostics
+    )
+    if diagnostics:
+        raise ValueError(
+            "; ".join(f"{item.code}: {item.message}" for item in diagnostics)
+        )
+    diagnostics = list(validate_population_bundle(bundle).diagnostics)
+    if not _is_v1_realization_bundle(bundle):
+        diagnostics.extend(_validate_realization_projection(bundle))
+    if diagnostics:
+        raise ValueError(
+            "; ".join(f"{item.code}: {item.message}" for item in diagnostics)
+        )
+    return _realization_projection_unchecked(bundle)
+
+
+def canonical_realization_digest(bundle: Mapping[str, Any]) -> str:
+    """Return SHA-256 of the RFC 8785 population-trajectory v1 projection."""
+    return sha256(_jcs_json_bytes(canonical_realization_projection(bundle))).hexdigest()
 
 
 def _artifact_digest(reference: object) -> str | None:
@@ -38,18 +525,33 @@ def _run_id(reference: object) -> str | None:
     )
 
 
+def _integer(value: object) -> int | None:
+    """Return an already-typed integer without coercing malformed input."""
+    return value if isinstance(value, int) and not isinstance(value, bool) else None
+
+
 def _years(trajectory: Mapping[str, Any]) -> tuple[set[int], set[int], set[int]]:
-    requested = {int(year) for year in trajectory.get("requested_years", [])}
+    requested_values = trajectory.get("requested_years", [])
+    requested = {
+        year
+        for value in requested_values
+        if isinstance(requested_values, list)
+        if (year := _integer(value)) is not None
+    }
     snapshots = trajectory.get("snapshots", [])
     successful = {
-        int(item["simulation_year"])
+        year
         for item in snapshots
-        if isinstance(item, Mapping) and item.get("simulation_year") is not None
+        if isinstance(item, Mapping)
+        and (year := _integer(item.get("simulation_year"))) is not None
     }
+    skipped_values = trajectory.get("skipped_years", [])
     skipped = {
-        int(item["year"])
-        for item in trajectory.get("skipped_years", [])
-        if isinstance(item, Mapping) and item.get("year") is not None
+        year
+        for item in skipped_values
+        if isinstance(skipped_values, list)
+        if isinstance(item, Mapping)
+        and (year := _integer(item.get("year"))) is not None
     }
     return requested, successful, skipped
 
@@ -80,10 +582,9 @@ def validate_population_bundle(bundle: Mapping[str, Any]) -> CheckResult:
             snapshot_bundle.get("population_snapshot"), Mapping
         ):
             snapshot = snapshot_bundle["population_snapshot"]
-            if snapshot.get("simulation_year") is not None:
-                by_year.setdefault(int(snapshot["simulation_year"]), []).append(
-                    snapshot_bundle
-                )
+            year = _integer(snapshot.get("simulation_year"))
+            if year is not None:
+                by_year.setdefault(year, []).append(snapshot_bundle)
     if set(by_year) != successful or any(len(items) != 1 for items in by_year.values()):
         diagnostics.append(
             _diagnostic(
@@ -157,7 +658,7 @@ def validate_population_bundle(bundle: Mapping[str, Any]) -> CheckResult:
             (
                 item
                 for item in children.values()
-                if int(item.get("simulation_year", -1)) == year
+                if _integer(item.get("simulation_year")) == year
             ),
             None,
         )
@@ -217,15 +718,13 @@ def validate_population_bundle(bundle: Mapping[str, Any]) -> CheckResult:
                 )
             )
     statuses = (bundle.get("schedule_evidence") or {}).get("handoff_year_statuses", [])
-    actual = (
-        {
-            int(item["simulation_year"]): item.get("status")
-            for item in statuses
-            if isinstance(item, Mapping) and item.get("simulation_year") is not None
-        }
+    actual = {
+        year: item.get("status")
+        for item in statuses
         if isinstance(statuses, list)
-        else {}
-    )
+        if isinstance(item, Mapping)
+        and (year := _integer(item.get("simulation_year"))) is not None
+    }
     expected = {year: "exported" for year in successful} | {
         year: "skipped" for year in skipped
     }
@@ -245,6 +744,9 @@ def validate_population_bundle(bundle: Mapping[str, Any]) -> CheckResult:
                 "trajectory manifest digest does not match canonical content",
             )
         )
+    if _is_v1_realization_bundle(bundle):
+        diagnostics.extend(_validate_realization_projection(bundle))
+        _validate_supplied_realization_identity(bundle, diagnostics)
     return CheckResult(tuple(diagnostics))
 
 

@@ -95,3 +95,37 @@ def test_one_year_handshake_is_an_honest_draft_with_canonical_bundle_identity(
         item["id"] for item in contract["residue_records"]
     }
     assert (ROOT / "mappings/releases/atlas-demos-to-polaris/OWNERS.yaml").exists()
+
+
+def test_published_zev_trajectory_carries_a_realization_identity_and_contracts() -> (
+    None
+):
+    """The public multi-year example pins its selection separately from receipts."""
+    bundle = load_mapping(
+        ROOT / "examples/evolving_population/zev-pilates-trajectory-bundle.yaml"
+    )
+
+    identity = bundle["realization_identity"]
+    assert identity["kind"] == "synergy:scenario-realization:population-trajectory-v1"
+    assert identity["projection_version"] == "1"
+    assert identity["digest_algorithm"] == "sha256"
+    assert len(identity["content_digest"]) == 64
+    assert identity["content_digest"].islower()
+
+    receipt = bundle["realization_receipt"]
+    assert receipt["receipt_version"] == "1"
+    assert receipt["realization_identity"] == identity
+
+    snapshots = bundle["population_snapshot_bundles"]
+    assert len(snapshots) >= 2
+    for snapshot_bundle in snapshots:
+        for member in snapshot_bundle["members"]:
+            contract = member["schema_contract"]
+            assert contract["language"] == "LinkML"
+            assert contract["schema_digest_algorithm"] == "sha256"
+            assert len(contract["schema_digest"]) == 64
+            assert contract["selected_root"] in {
+                "AtlasHouseholdInput",
+                "AtlasPersonInput",
+                "AtlasVehicleOutput",
+            }

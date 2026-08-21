@@ -114,6 +114,18 @@ def test_pilates_profile_composes_operational_trajectory_evidence() -> None:
     assert "manifest_content_digest itself" in str(
         trajectory_bundle.annotations["manifest_digest_projection"].value
     )
+    assert "legacy deterministic logical full-bundle" in str(
+        trajectory_bundle.annotations["manifest_digest_projection"].value
+    )
+    assert "not a realization identity" in str(
+        trajectory_bundle.annotations["manifest_digest_projection"].value
+    )
+    assert (
+        "legacy logical full-bundle"
+        in str(
+            trajectory_bundle.attributes["manifest_content_digest"].description
+        ).lower()
+    )
 
     _required_slots(
         schema_view,
@@ -122,6 +134,56 @@ def test_pilates_profile_composes_operational_trajectory_evidence() -> None:
         "manifest_content_digest_algorithm",
         "manifest_content_digest",
     )
+
+
+def test_population_trajectory_realization_identity_has_a_separate_receipt() -> None:
+    """A portable realization digest must not absorb mutable receipt evidence."""
+    schema_view = SchemaView(str(SCHEMA_PATH))
+
+    assert {
+        "ScenarioRealizationIdentity",
+        "ScenarioRealizationReceipt",
+    }.issubset(schema_view.all_classes())
+
+    identity = schema_view.induced_class("ScenarioRealizationIdentity")
+    assert set(identity.attributes) == {
+        "kind",
+        "projection_version",
+        "digest_algorithm",
+        "content_digest",
+    }
+    _required_slots(
+        schema_view,
+        "ScenarioRealizationIdentity",
+        "kind",
+        "projection_version",
+        "digest_algorithm",
+        "content_digest",
+    )
+    assert identity.attributes["digest_algorithm"].range == "DigestAlgorithm"
+
+    receipt = schema_view.induced_class("ScenarioRealizationReceipt")
+    assert set(receipt.attributes) == {"receipt_version", "realization_identity"}
+    _required_slots(
+        schema_view,
+        "ScenarioRealizationReceipt",
+        "receipt_version",
+        "realization_identity",
+    )
+    assert receipt.attributes["realization_identity"].range == (
+        "ScenarioRealizationIdentity"
+    )
+    assert receipt.attributes["realization_identity"].inlined is True
+
+    trajectory_bundle = schema_view.induced_class("PopulationTrajectoryBundle")
+    assert trajectory_bundle.attributes["realization_identity"].range == (
+        "ScenarioRealizationIdentity"
+    )
+    assert trajectory_bundle.attributes["realization_identity"].inlined is True
+    assert trajectory_bundle.attributes["realization_receipt"].range == (
+        "ScenarioRealizationReceipt"
+    )
+    assert trajectory_bundle.attributes["realization_receipt"].inlined is True
 
 
 def test_polaris_profile_packages_yearly_translation_receipts() -> None:

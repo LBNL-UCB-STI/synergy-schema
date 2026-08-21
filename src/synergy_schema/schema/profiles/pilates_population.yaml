@@ -244,16 +244,22 @@ classes:
     description: >-
       PILATES operational composition of one core population trajectory with
       its successfully exported yearly PopulationSnapshotBundle manifests and
-      evidence for the schedule and Consist runs that produced them.
+      evidence for the schedule and Consist runs that produced them. A
+      realization identity is a separately defined semantic projection; an
+      optional receipt envelope carries mutable operational evidence outside
+      that projection.
     is_a: HandoffBundle
     annotations:
       manifest_digest_projection: >-
-        The deterministic immutable manifest_content_digest is calculated from
-        a canonical content projection of this bundle, including inherited
-        HandoffBundle content and all profile attributes, but excluding
-        manifest_content_digest itself. The paired digest algorithm remains in
-        the projection. Conditional cross-document completeness and
-        year-alignment checks are enforced by later conformance code.
+        The legacy deterministic logical full-bundle manifest_content_digest
+        is calculated from a canonical content projection of this bundle,
+        including inherited HandoffBundle content and all profile attributes,
+        but excluding manifest_content_digest itself. It covers mutable
+        schedule and Consist evidence, so it is not a realization identity or
+        a checksum of serialized YAML or JSON bytes. The paired digest
+        algorithm remains in the projection. Conditional cross-document
+        completeness and year-alignment checks are enforced by later
+        conformance code.
     attributes:
       population_trajectory:
         range: PopulationTrajectory
@@ -280,7 +286,22 @@ classes:
       manifest_content_digest_algorithm:
         range: DigestAlgorithm
         required: true
-        description: Algorithm paired with this immutable manifest content digest.
+        description: Algorithm paired with this legacy logical full-bundle content digest.
       manifest_content_digest:
         required: true
-        description: Digest of the canonical manifest content projection.
+        description: >-
+          Legacy logical full-bundle content digest of the parsed manifest,
+          excluding this self-referential field. It is not the realization
+          identity and not a checksum of serialized YAML or JSON bytes.
+      realization_identity:
+        range: ScenarioRealizationIdentity
+        inlined: true
+        description: >-
+          Optional portable semantic identity calculated from the closed
+          population-trajectory realization projection.
+      realization_receipt:
+        range: ScenarioRealizationReceipt
+        inlined: true
+        description: >-
+          Optional separately versioned receipt for mutable location,
+          validation, admission, or execution evidence about this realization.
