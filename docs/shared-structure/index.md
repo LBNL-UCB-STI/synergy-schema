@@ -1,30 +1,34 @@
-# Schema organization
+# How Synergy is organized
 
-Shared structure separates scenario definitions, population snapshots,
-workflow bundles, model-native records, and mappings. The split keeps a shared
-meaning without pretending that all tools own the same physical fields.
+Synergy separates the facts needed to describe a shared universe from the
+details that remain inside each modeling system. The boundary is intentionally
+small. Shared structure covers scenario identity, time, population occurrences,
+declared relationships, and exact file identity. Native settings, detailed
+attributes, and model predictions stay with their owning systems.
 
-## What belongs in core
+## The agreement boundary
 
-Core classes hold shared assertions that are allowed to be absent but not
-contradictory when two implementations make them for the same scenario
-revision, year, realization, and authority. Examples include the selected
-scenario identity, the simulation year, a snapshot-scoped person identity, and
-a declared household-membership relationship.
+A core record is comparable when two workflows make the same kind of claim for
+the same scenario revision, year, realization, and authority. The claim may be
+absent when a model does not represent it, but two authoritative claims cannot
+contradict each other and still count as the same shared universe.
 
-Putting an assertion in core does not make disagreement impossible. It makes
-the assertion comparable and gives conformance code a place to report a
-conflict. Attributes that may legitimately differ between PILATES and POLARIS,
-such as a predicted age, vehicle technology, or travel behavior, remain in
-model-owned records instead of being promoted to core.
+Examples include the selected scenario, the simulation year, a person identity
+within one snapshot, and a declared household-membership relationship. Age,
+vehicle technology, and predicted travel behavior remain model-owned because
+different models may legitimately represent or calculate them differently.
 
-Core also contains provider-neutral exchange machinery—artifact identities,
-schema references, native-contract references, and handoff bundles. Those
-classes make shared claims traceable; they do not transfer ownership of native
-schemas or payloads.
+Shared structure does not prevent disagreement. It makes disagreement visible
+and gives conformance code a precise comparison to perform.
 
-See the generated [core schema UML](../schema/core-schema-uml.md) for every core
-class and typed relationship on one page.
+## Exchange structure
 
-Use the [Glossary](glossary.md) for plain-language definitions and comparisons
-of terms such as scenario, trajectory, profile, receipt, residue, and digest.
+Core classes also identify files, the schemas that interpret them, model-owned
+interface elements, and groups of files passed together. These records answer
+which content moved across a boundary and how it should be read. They do not
+transfer ownership of native schemas or payloads.
+
+The generated [core schema UML](../schema/core-schema-uml.md) shows the classes
+and typed relationships. The [Glossary](glossary.md) defines recurring terms
+and contrasts similar concepts such as scenario, trajectory, snapshot, receipt,
+residue, and digest.

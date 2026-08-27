@@ -29,7 +29,7 @@ snapshot-scoped identifiers used for individual state occurrences.
 
 ## Native ATLAS records
 
-The profile selects three model-owned record contracts:
+The profile selects three model-owned record definitions:
 
 - [AtlasHouseholdInput](../schema/AtlasHouseholdInput.md) describes a household
   row consumed by ATLAS;
@@ -39,15 +39,15 @@ The profile selects three model-owned record contracts:
   row produced by ATLAS.
 
 ATLAS retains ownership of these physical fields and code systems. The PILATES
-profile composes the contracts into a handoff without redefining their native
+profile composes the definitions into a handoff without redefining their native
 representations.
 
 ## Physical handoff
 
 A [PopulationSnapshotBundle](../schema/PopulationSnapshotBundle.md) specializes
 the general [HandoffBundle](../schema/HandoffBundle.md) for this exchange. Its
-members identify the household, person, and vehicle artifacts, the semantic
-role of each artifact, and the native schema contract selected for its rows.
+members identify the household, person, and vehicle artifacts, the role of each
+artifact, and the native schema reference selected for its rows.
 
 Artifact locators help consumers find files. Immutable digests identify the
 selected bytes. These artifact identities are separate from household and
@@ -59,7 +59,7 @@ A population-trajectory realization has a separate identity from both those
 member-byte digests and the enclosing manifest. The
 `synergy:scenario-realization:population-trajectory-v1` identity selects the
 scenario revision, stochastic realization, ordered snapshots, required member
-roles, member byte digests, and the schema contract that interprets each
+roles, member byte digests, and the schema reference that interprets each
 member. Moving a file or refreshing validation evidence therefore does not
 change the selected realization.
 
@@ -72,12 +72,12 @@ admission, and execution evidence belongs.
 
 The synthetic three-year ZEV trajectory in
 [`examples/evolving_population/zev-pilates-trajectory-bundle.yaml`](https://github.com/LBNL-UCB-STI/synergy-schema/blob/main/examples/evolving_population/zev-pilates-trajectory-bundle.yaml)
-is the portable example. It has three successful years, pins the LinkML
-contract for each household, person, and vehicle member, and carries the
+is the portable example. It has three successful years, pins the LinkML schema
+for each household, person, and vehicle member, and carries the
 minimum receipt envelope without requiring a registry, Tracker, or network
 lookup.
 
-The [population trajectory realization identity contract](../shared-structure/realization-identity.md)
+The [population trajectory realization identity definition](../shared-structure/realization-identity.md)
 is the public normative definition for independent consumers. It identifies
 the projection, canonical bytes, test vector, and trust boundary; this guide
 only introduces the concept.
@@ -100,8 +100,8 @@ snapshot supplies temporal scope. Composite constructions then describe the
 snapshot-scoped `HouseholdState`, `PersonState`, and `HouseholdMembership`
 identifiers.
 
-These are semantic construction contracts, not additional physical tables in
-the handoff. The [cross-model population identity map](../schema/cross-model-population-identity.md)
+These are identity construction rules, not additional physical tables in the
+handoff. The [cross-model population identity map](../schema/cross-model-population-identity.md)
 shows the preserved, renamed, derived, and composite relationships.
 
 ## Example and detailed reference
@@ -110,7 +110,8 @@ The repository contains a
 [complete synthetic bundle example](https://github.com/LBNL-UCB-STI/synergy-schema/tree/main/examples/post_atlas_population_bundle)
 with representative ATLAS rows, core population states, the bundle manifest,
 Consist provenance, and the cross-model mapping manifest. It illustrates the
-contracts but is not a production dataset or a complete population validator.
+exchange structures but is not a production dataset or a complete population
+validator.
 
 For field-level lookup, use the
 [complete generated schema reference](../schema/index.md). The generated class

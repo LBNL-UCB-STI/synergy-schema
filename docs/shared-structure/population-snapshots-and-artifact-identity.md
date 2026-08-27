@@ -1,13 +1,21 @@
 # Population snapshots and artifact identity
 
-Snapshot-scoped household and person states describe who and what relationships
-exist at a time. Artifact identity names exact delivered bytes. Provenance says
-which workflow run produced those bytes. These are deliberately different
-questions.
+A population snapshot describes households, people, vehicles, and declared
+relationships at one simulation year. The records are occurrences in time, not
+timeless master entities. Longitudinal references can connect occurrences
+across years without assuming that every identifier or relationship persists.
 
 The focused [population relationship
 overview](../schema/core-schema-uml.md#population-relationship-overview) shows
-how household, person, and vehicle state occurrences connect through explicit
-membership and vehicle-assignment records. Those relationship records prevent
-the documentation from inferring household membership merely because person
-and household rows happen to appear in the same snapshot.
+household, person, and vehicle occurrences connected through explicit
+membership and vehicle-assignment records. Co-location in a file is not treated
+as proof of a relationship.
+
+Artifact identity answers a different question: which exact file bytes carried
+the records? A content digest stays stable when a file moves and changes when
+its contents change. Provenance then records which workflow run produced or
+consumed those bytes.
+
+Separating population identity, artifact identity, and provenance prevents a
+shared row identifier, a filename, or a run record from being asked to prove
+more than it can.

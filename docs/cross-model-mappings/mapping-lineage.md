@@ -1,25 +1,29 @@
-# Translation contract, residue, and lineage
+# Mapping meaning, implementation, and lineage
 
-The handoff keeps four questions separate:
+A mapping can be reviewed correctly and still be applied by the wrong script.
+A correct script can also be run against the wrong scenario or year. Synergy
+keeps four questions separate so those failures do not collapse into one vague
+notion of validity.
 
-| Document | Question it answers | What makes it a different version? |
+| Record | Question it answers | What makes it a different version? |
 | --- | --- | --- |
-| Translation contract | What does the ATLAS-to-POLARIS translation mean? | A source or target catalog, field rule, default, unsupported field, filter, or other declared residue changes. |
-| Review record | Who accepted that exact meaning? | A reviewer, decision, rationale, or accepted semantic digest changes. |
-| [Implementation binding](../shared-structure/glossary.md#implementation-binding) | Which SQL or code claims to carry out that meaning? | The executable artifact or the contract digest it claims to implement changes. |
-| Receipt | What was actually applied for this scenario and year? | The run, input, output, year, implementation, or observed residue changes. |
+| Mapping description (`PopulationTranslationContract`) | What does the ATLAS-to-POLARIS translation mean? | A source or target interface, field rule, default, unsupported field, filter, or other declared loss changes. |
+| Review record | Who accepted that exact meaning, in which role? | A reviewer, decision, rationale, or accepted mapping-content digest changes. |
+| [Implementation binding](../shared-structure/glossary.md#implementation-binding) | Which SQL or code claims to carry out the reviewed rules? | The executable artifact or the mapping version it claims to implement changes. |
+| Receipt | What was actually applied for this scenario and year? | The run, input, output, year, implementation, or observed loss changes. |
 
-The semantic digest is the contract's fingerprint: it is calculated from the
-pinned source and target catalogs, field rules, and declared residue. Reviewers
-accept that fingerprint. The implementation binding names the SQL or code that
-claims to implement it, and the receipt records one actual use. This chain lets
-the checker detect “approved rules, wrong script” and “right script, wrong
-year” without treating those as the same problem.
+The formal [translation contract](../shared-structure/glossary.md#translation-contract)
+contains the first row of that table. Its mapping-content fingerprint is the
+`semantic_content_digest` field in the schema. Reviewers accept that exact
+fingerprint; the implementation binding names the SQL or code associated with
+it; and the receipt records one actual use.
 
-The workflow team owns the executable. The source and target model teams retain
-authority over the mapping's meaning. Synergy records and checks their decisions
-but cannot manufacture their approval.
+This chain lets the checker distinguish “approved rules, wrong script” from
+“right script, wrong year.” It also preserves authority. The workflow team owns
+the executable, while the source and target model teams decide what their
+fields mean and whether the cross-model rule is acceptable. Synergy records and
+checks those decisions but cannot create approval on either team's behalf.
 
-See the glossary for the difference between the reviewed
-[translation contract](../shared-structure/glossary.md#translation-contract)
-and its explicit [mapping residue](../shared-structure/glossary.md#mapping-residue).
+Known defaults, filtered rows, unsupported fields, and dropped context are
+recorded as [mapping residue](../shared-structure/glossary.md#mapping-residue).
+Residue is visible translation behavior, not automatically an error.

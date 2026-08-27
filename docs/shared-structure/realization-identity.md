@@ -1,10 +1,15 @@
 # Population trajectory realization identity
 
-This page is the public interoperability contract for
-`synergy:scenario-realization:population-trajectory-v1`. It defines one
-portable semantic identity for a selected PILATES population trajectory. It
-does not define a registry, a Tracker protocol, an artifact locator policy, or
-runtime admission behavior.
+This page is the public interoperability definition for
+`synergy:scenario-realization:population-trajectory-v1`. It gives a selected
+PILATES population trajectory one portable content identity. That identity
+allows independent systems to determine whether they selected the same
+scenario revision, realization, ordered snapshots, and member files even when
+the surrounding manifests or storage locations differ.
+
+The definition does not create a registry, a Tracker protocol, an artifact
+locator policy, or runtime admission behavior. Those concerns sit outside the
+identity being compared.
 
 ## Identity envelope
 
@@ -75,7 +80,7 @@ trajectory:
 
 The projection includes the declared scenario, realization, trajectory, and
 snapshot context; requested/successful/skipped year closure; completeness;
-semantic roles; selected artifact byte identities; and interpretation-contract
+member roles; selected artifact byte identities; and schema interpretation
 identities. It excludes the outer exchange `id`, locators, storage paths,
 schema URI and version labels, media observations, row counts, diagnostics,
 timestamps, validation/admission/execution evidence, Consist or Tracker run

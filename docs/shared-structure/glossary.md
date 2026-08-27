@@ -1,9 +1,24 @@
 # Glossary
 
-This glossary explains the project’s recurring terms in plain language. It is
-the best place to start when two words sound similar. The
-[generated schema reference](../schema/index.md) remains authoritative for
-exact fields, types, requiredness, and cardinality.
+This glossary explains the project’s recurring terms in plain language. Formal
+names are retained where they appear in schema classes or fields, even when the
+guides use a shorter phrase. The [generated schema
+reference](../schema/index.md) remains authoritative for exact fields, types,
+requiredness, and cardinality.
+
+## Why these records exist
+
+No single file can establish that several workflows simulated the same shared
+universe. A scenario definition states the common assumptions. An interface
+reference locates those assumptions in a model-owned system. A mapping states
+how representations relate. A review record records a named role's decision on
+one exact mapping version. An implementation binding names the code associated
+with that version, and a receipt records one actual use of the code and files.
+
+These records are separate because the underlying facts change independently.
+The separation also limits each claim: evidence that a file came from a named
+run is not proof that the mapping was approved, and an approved mapping is not
+proof that the expected code ran.
 
 ## Shared scenarios and changing populations
 
@@ -32,9 +47,9 @@ and the relevant owners to make that decision.
 | Binding or relationship | Connects | Maintained by | What it establishes |
 | --- | --- | --- | --- |
 | Scenario binding | A shared scenario assumption to a native setting or value | The model or workflow team that configures the model | How that model represents, omits, or overrides the assumption |
-| Field mapping | A source native element to a target native element | Source and target semantic owners | The reviewed meaning of one translation rule |
+| Field mapping | A source native element to a target native element | Source and target meaning owners | The reviewed meaning of one translation rule |
 | Schema contract reference | An artifact to an immutable schema and root class | The exchange producer | Which exact structure interprets the artifact |
-| Implementation binding | An approved translation contract to executable SQL or code | The workflow team that runs the translation | Which implementation claims to realize that semantic contract |
+| Implementation binding | A reviewed mapping description to executable SQL or code | The workflow team that runs the translation | Which implementation claims to carry out that mapping version |
 
 “Binding” is therefore more specific than “related to.” It names both sides
 of a boundary and the nature of their connection. A scenario binding concerns
@@ -73,9 +88,12 @@ this repository.
 
 ### Contract
 
-A schema or agreement selected for a particular exchange. A contract says
-what a producer and consumer are agreeing to, while a schema can describe a
-broader reusable vocabulary.
+A formal schema name for a versioned agreement selected for an exchange. The
+repository uses this word in classes such as `PopulationTranslationContract`
+and `SchemaContractReference`; the maintained guides otherwise prefer the more
+specific phrases “mapping description” or “schema reference.” A schema can
+describe a broad reusable vocabulary, while the selected agreement identifies
+the part used at one boundary.
 
 ### Schema contract reference
 
@@ -96,11 +114,18 @@ population handoff or the proposed POLARIS translation package. It is not
 automatically proof that the workflow already enforces the profile at
 runtime.
 
+### Interface
+
+The deliberately exposed part of a model or workflow that another system can
+name or use, such as a configuration path, artifact key, table column, or file
+role. An interface description identifies this boundary without claiming to
+describe the model's full internal schema or behavior.
+
 ### Native record
 
 A row or data structure whose fields and meanings remain owned by its source
 model, such as an ATLAS household row or a POLARIS person row. Shared
-contracts refer to native records rather than replacing them with one
+definitions refer to native records rather than replacing them with one
 universal table.
 
 ### Native contract
@@ -137,7 +162,7 @@ The structural chain is **catalog → element → binding**:
 Synergy can check that the address exists in the pinned catalog. The model team
 still owns what the address means and how its runtime produces or consumes it.
 
-### Shared semantic kernel
+### Shared core
 
 The deliberately small set of concepts whose meaning can be shared across
 tools, such as scenario revision, simulation year, population occurrence,
@@ -155,6 +180,14 @@ of households and the SQL script that created it are different artifacts.
 
 An algorithm plus content digest that identifies exact bytes. A path or URI
 can change while the artifact identity remains the same.
+
+### Evidence
+
+A record that supports a limited factual claim. A file digest can support a
+claim about exact bytes; provenance can support a claim about which run
+produced them; a receipt can support a claim about one exchange. Evidence
+supports a bounded claim. It does not, by itself, establish scientific
+validity, mapping approval, or authority over a model-owned definition.
 
 ### Handoff
 
@@ -175,7 +208,7 @@ identities, and completeness. The payload files remain separate.
 ### Receipt
 
 A per-application record of what was actually used or produced: scenario,
-year, mapping contract, translation implementation, artifacts, and observed
+year, mapping description, translation implementation, artifacts, and observed
 residue. It is evidence of one application, not the reusable mapping
 agreement itself.
 
@@ -189,7 +222,7 @@ accepted as production provenance.
 
 Evidence about where data came from and how it was produced or consumed,
 including runs, artifacts, and their associations. Provenance does not by
-itself define the semantic meaning of a scenario or model field.
+itself define the meaning of a scenario or model field.
 
 ### Lineage
 
@@ -206,9 +239,9 @@ a renamed identifier, code conversion, derived value, or unsupported field.
 
 ### Translation contract
 
-The versioned semantic agreement describing how source exchange columns map
-to target columns, including explicit residue. It is distinct from the code
-that performs the translation.
+The formal schema name for the versioned mapping description. It records how
+source exchange columns map to target columns, including explicit residue. It
+is distinct from the code that performs the translation.
 
 ### Field mapping
 
@@ -222,6 +255,14 @@ example, a required default, lookup table, filtered row, unsupported source
 field, or context dropped from each output row. Residue is not automatically
 an error; it makes accepted translation loss or extra behavior reviewable.
 
+### Review record
+
+A decision made by a named team and accountable role about one exact
+mapping-content digest. The decision may accept, request changes, or reject.
+The formal source and target roles are `source_owner` and `target_owner`; the
+workflow integrator has a separate role and cannot substitute for either model
+owner's acceptance.
+
 ### Residue observation
 
 Evidence about one application of a declared residue, such as the number of
@@ -229,14 +270,14 @@ rows filtered or the lookup digest used in a particular simulation year.
 
 ### Implementation binding
 
-A workflow-owned registration connecting a translation script or SQL
-artifact to the semantic digest it claims to implement. Script identity and
-semantic mapping identity remain separate.
+A workflow-owned registration connecting a translation script or SQL artifact
+to the mapping-content digest it claims to implement. Script identity and
+mapping meaning remain separate.
 
 ### Encoding source
 
 The team-maintained spreadsheet, SQL, script, or other artifact from which a
-typed translation contract was transcribed. Its digest preserves attribution
+typed mapping description was transcribed. Its digest preserves attribution
 and lets reviewers resolve transcription disputes against the original work.
 
 ## Ownership and authority
@@ -244,58 +285,62 @@ and lets reviewers resolve transcription disputes against the original work.
 In this project, **ownership** means responsibility and decision authority for
 meaning or behavior. It does not necessarily mean exclusive custody of a file.
 Synergy can encode, validate, and document a model team's definitions, but
-referencing or transcribing them does not transfer semantic ownership.
+referencing or transcribing them does not transfer authority over meaning.
 
 | Responsibility | Decision authority |
 | --- | --- |
 | Meaning of ATLAS/DEMOS or POLARIS native fields and codes | The corresponding model team |
-| Meaning of shared scenario assumptions and identity concepts | The participating teams through the shared contract and its named authorities |
-| Meaning of an ATLAS-to-POLARIS translation rule | The named source- and target-model semantic owners |
+| Meaning of shared scenario assumptions and identity concepts | The participating teams through the shared definition and its named authorities |
+| Meaning of an ATLAS-to-POLARIS translation rule | The named source- and target-model meaning owners |
 | PILATES orchestration, translation code, and automatic receipt emission | The PILATES workflow maintainers |
 | Synergy vocabulary, schema composition, conformance rules, and generated documentation | The Synergy maintainers, within the limits of model-owner approval |
 | Run and artifact evidence recorded through Consist | The producing workflow; Consist supplies the provenance mechanism |
 
 Several roles may apply to the same artifact:
 
-- A **semantic owner** decides what a field, code, assumption, or mapping means.
+- A **meaning owner** decides what a field, code, assumption, or mapping means.
+  Mapping review records represent this authority with the `source_owner` and
+  `target_owner` roles.
 - An **implementation owner** maintains the code that applies that meaning.
 - A **producer** creates the payload and records its receipt.
 - A **custodian** stores or publishes the physical files.
-- A **reviewer or approver** accepts a particular semantic digest in a named
+- A **reviewer or approver** accepts a particular mapping-content digest in a named
   role.
 
 These roles are deliberately separate. For example, PILATES may maintain the
 SQL that implements an ATLAS-to-POLARIS mapping, while ATLAS and POLARIS retain
-authority over their native meanings and approve the semantic mapping. Synergy
-can reject a malformed or unapproved contract, but it cannot approve that
-contract on either model team's behalf.
+authority over their native meanings and approve the cross-model mapping.
+Synergy can reject a malformed or unapproved mapping description, but it cannot
+approve that mapping on either model team's behalf.
 
 ## Digests, review states, and compatibility
 
 ### Content digest
 
 A deterministic fingerprint calculated from content, usually with SHA-256.
-The relevant contract specifies which content is included.
+The relevant schema definition specifies which content is included.
 
 ### Semantic digest
 
-A digest calculated from meaning-bearing parts of a scenario or mapping
-contract. Locations, review metadata, and implementation-only evidence are
-excluded so those changes do not masquerade as semantic changes.
+The formal term for a digest calculated from the meaning-bearing parts of a
+scenario or mapping. The mapping field is `semantic_content_digest`; the guides
+call it a **mapping-content digest**. Locations, review metadata, and
+implementation-only evidence are excluded, so changes to them do not appear to
+change the reviewed rules.
 
 ### Draft
 
-Structurally usable for discovery and review, but not accepted by all
-required semantic owners.
+Structurally usable for discovery and review, but not accepted by all required
+meaning owners.
 
 ### Approved
 
 Accepted by the required source- and target-model owner roles for the same
-semantic digest. Synergy cannot supply those approvals on their behalf.
+mapping-content digest. Synergy cannot supply those approvals on their behalf.
 
 ### Production-ready
 
-Approved semantic contract, conformance-checked implementation binding, and
+Approved mapping description, conformance-checked implementation binding, and
 automatically emitted receipt. “Approved” and “production-ready” are not
 synonyms.
 
@@ -329,18 +374,18 @@ shared concept at the same revision, scope, and authority.
 | Native contract / Synergy schema | A native contract inventories a model-owned interface; the Synergy schema defines shared references and exchange structure around it. |
 | Catalog / element / binding | A catalog pins an interface inventory; an element identifies one address in it; a binding connects that address to shared meaning. |
 | Artifact / manifest / bundle / receipt | An artifact is physical content; a manifest describes an exchange; a bundle groups artifact roles; a receipt records one application of scenario, mapping, implementation, and artifacts. |
-| Artifact digest / semantic digest | An artifact digest identifies exact bytes; a semantic digest identifies normalized meaning-bearing content. |
-| Translation contract / implementation binding | The contract is the model-owner-reviewed meaning; the binding identifies workflow code that implements it. |
+| Artifact digest / semantic digest | An artifact digest identifies exact bytes; the formally named semantic digest identifies normalized meaning-bearing content. |
+| Translation contract / implementation binding | The translation contract is the formally named, model-owner-reviewed mapping description; the binding identifies workflow code that implements it. |
 | Ownership / file custody | Ownership is authority over meaning or behavior; custody is possession or publication of the bytes. |
 | Mapping residue / validation error | Residue is declared and reviewable translation behavior; an error is an undeclared or inconsistent violation. |
 | Provenance / scenario definition | Provenance describes execution and artifact history; the scenario definition states shared assumptions. |
-| Draft / approved / production-ready | Draft supports review; approved has required semantic owner acceptance; production-ready additionally requires checked code and automatic receipts. |
+| Draft / approved / production-ready | Draft supports review; approved has required meaning-owner acceptance; production-ready additionally requires checked code and automatic receipts. |
 | Compatible with gaps / conflict | A gap means unsupported but non-contradictory; a conflict is an incompatible assertion about the same shared concept. |
 
 ## Where to go next
 
 - [Scenario definitions and trajectories](scenario-definitions-and-trajectories.md)
 - [Population snapshots and artifact identity](population-snapshots-and-artifact-identity.md)
-- [Translation contract, residue, and lineage](../cross-model-mappings/mapping-lineage.md)
+- [Mapping meaning, implementation, and lineage](../cross-model-mappings/mapping-lineage.md)
 - [Workflow structures](../workflow-structures/index.md)
 - [Complete generated reference](../schema/index.md)

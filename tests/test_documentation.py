@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import re
 from pathlib import Path
 
 import tomllib
@@ -30,12 +31,12 @@ def test_navigation_has_the_approved_eight_sections_and_existing_leaves() -> Non
     nav = _nav()
     assert [next(iter(item)) for item in nav] == [
         "Overview",
+        "Shared structure",
         "Proof of concept",
+        "Cross-model mappings",
+        "Workflow structures",
         "Bring an existing mapping",
         "Design rationale",
-        "Shared structure",
-        "Workflow structures",
-        "Cross-model mappings",
         "Schema reference",
     ]
     expected = {
@@ -43,12 +44,12 @@ def test_navigation_has_the_approved_eight_sections_and_existing_leaves() -> Non
         "What the checker catches",
         "Day-zero manifest",
         "One-year mapping handshake",
-        "Contract at a glance",
+        "Mapping at a glance",
         "Costs and exit",
         "Why LinkML",
         "Why not one big table?",
         "Are flat files enough?",
-        "Schema organization",
+        "How Synergy is organized",
         "Scenario definitions and trajectories",
         "Population snapshots and artifact identity",
         "Population trajectory realization identity",
@@ -57,7 +58,7 @@ def test_navigation_has_the_approved_eight_sections_and_existing_leaves() -> Non
         "PILATES post-ATLAS population",
         "POLARIS translated population",
         "Population identity",
-        "Translation contract, residue, and lineage",
+        "Mapping meaning, implementation, and lineage",
         "Scenario compatibility",
         "Complete generated reference",
     }
@@ -104,14 +105,17 @@ def test_glossary_explains_core_terms_and_common_distinctions() -> None:
         "### Scenario definition",
         "### Population trajectory",
         "### Population snapshot",
+        "### Interface",
         "### Workflow profile",
         "### Native record",
         "### Native contract",
         "### Native contract element reference",
         "### Artifact",
+        "### Evidence",
         "### Receipt",
         "### Translation contract",
         "### Mapping residue",
+        "### Review record",
         "### Semantic digest",
         "### Compatible with gaps",
     ):
@@ -123,10 +127,15 @@ def test_glossary_explains_core_terms_and_common_distinctions() -> None:
         in glossary
     )
     assert "| Responsibility | Decision authority |" in glossary
-    assert "does not transfer semantic ownership" in glossary
+    assert "does not transfer authority over meaning" in glossary
     assert "not a Synergy-owned replacement for the" in glossary
     assert "model's schema" in glossary
     assert "catalog → element → binding" in glossary
+    assert "supports a bounded claim" in glossary
+    assert "source_owner" in glossary
+    assert "target_owner" in glossary
+    assert "semantic_content_digest" in glossary
+    assert "`semantic_owner`" not in glossary
 
 
 def test_concept_heavy_guides_link_selected_first_uses_to_the_glossary() -> None:
@@ -136,7 +145,7 @@ def test_concept_heavy_guides_link_selected_first_uses_to_the_glossary() -> None
             "[population trajectory](glossary.md#population-trajectory)",
         ),
         "workflow-structures/index.md": (
-            "[workflow profiles](../shared-structure/glossary.md#workflow-profile)",
+            "[workflow profile](../shared-structure/glossary.md#workflow-profile)",
             "[model-native records](../shared-structure/glossary.md#native-record)",
         ),
         "cross-model-mappings/mapping-lineage.md": (
@@ -154,26 +163,50 @@ def test_concept_heavy_guides_link_selected_first_uses_to_the_glossary() -> None
             assert link in page
 
 
-def test_overview_and_proof_make_the_two_newcomer_actions_clear() -> None:
+def test_overview_explains_the_shared_universe_and_why_records_matter() -> None:
     overview = (DOCS / "index.md").read_text()
-    assert overview.startswith("# Synergy Schema\n\nTransportation modeling studies")
+    assert overview.startswith("# Synergy Schema\n\nA transportation modeling workflow")
     for heading in (
-        "## Why this project exists",
-        "## What Synergy adds",
-        "## What it does not replace",
-        "## What is in these docs",
-        "## Where to start",
+        "## The coordination problem",
+        "## One shared universe, several modeling systems",
+        "## Why the difficult records matter",
+        "## How Synergy organizes the answer",
+        "## Scope and limits",
+        "## How the documentation builds",
     ):
         assert heading in overview
+    assert "same shared universe" in overview
+    assert "Interface descriptions" in overview
+    assert "Review records" in overview
+    assert "Evidence" in overview
+    assert "this claim checkable" in overview
     assert "PILATES modeling pipeline" in overview
     assert "and POLARIS" in overview
     assert "keep their own schemas" in overview
     assert "legitimately produce different" in overview
     assert "model-specific results" in overview
-    assert "| Documentation area | What you will find |" in overview
+    assert "| Documentation area | Question it answers |" in overview
     assert "Bring an existing mapping" in overview
-    assert "three-year proof" in overview
+    assert "Three-year proof" in overview
 
+
+def test_public_guides_avoid_second_person_and_attestation_language() -> None:
+    maintained_pages = {
+        target
+        for _label, target in _leaf_targets(_nav())
+        if not target.startswith("schema/")
+    }
+    maintained_pages.add("pilates/post-atlas-population-bundle.md")
+    second_person = re.compile(r"\b(?:you|your|yours|yourself)\b", re.IGNORECASE)
+    attestation = re.compile(r"\battest\w*\b", re.IGNORECASE)
+
+    for relative_path in maintained_pages:
+        page = (DOCS / relative_path).read_text()
+        assert second_person.search(page) is None, relative_path
+        assert attestation.search(page) is None, relative_path
+
+
+def test_proof_uses_the_executable_showcase_and_preserves_scope() -> None:
     proof = (DOCS / "proof-of-concept/index.md").read_text()
     for reference in (
         "ScenarioDefinition",
@@ -257,17 +290,17 @@ def test_adoption_guides_are_honest_about_scope_cost_and_exit() -> None:
     adoption = "\n".join(
         path.read_text() for path in (DOCS / "bring-an-existing-mapping").glob("*.md")
     )
-    for heading in ("What we ask", "What we do not ask", "What you get", "Timeline"):
+    for heading in ("Inputs", "What stays unchanged", "Outputs", "Typical timing"):
         assert heading in adoption
     assert "contract-at-a-glance" in adoption
-    assert "discovery-only" in adoption
-    assert "automatic-emission" in adoption
-    assert "kill criterion" in adoption
+    assert "discovery evidence" in adoption
+    assert "Automatic receipt emission" in adoption
+    assert "Work stops" in adoption
     assert "minutes, not hours" in adoption
     assert "five business days" in adoption
-    assert "payloads, readable tables, and inert manifests" in adoption
+    assert "payloads, readable review tables, and" in adoption
     assert "historical incidents" in adoption
-    assert "flat files plus a README can be enough" in adoption
+    assert "Flat files plus a README can be enough" in adoption
 
 
 def test_workflow_and_compatibility_guides_state_boundaries_and_decisions() -> None:
@@ -283,7 +316,7 @@ def test_workflow_and_compatibility_guides_state_boundaries_and_decisions() -> N
     ).read_text()
     for term in ("No conflict", "Gap", "Override", "Conflict"):
         assert term in compatibility
-    assert "| Situation | Decision |" in compatibility
+    assert "| Situation | Recorded decision | Consequence |" in compatibility
 
 
 def test_docs_build_generates_identity_diagram_and_contract_review_copy() -> None:
@@ -300,10 +333,10 @@ def test_docs_build_generates_identity_diagram_and_contract_review_copy() -> Non
 
 def test_shared_structure_explains_core_agreement_boundary() -> None:
     page = (DOCS / "shared-structure/index.md").read_text()
-    assert "Core classes hold shared assertions" in page
-    assert "allowed to be absent but not" in page
-    assert "contradictory when two implementations" in page
-    assert "does not make disagreement impossible" in page
+    assert "## The agreement boundary" in page
+    assert "claim may be" in page
+    assert "two authoritative claims cannot" in page
+    assert "does not prevent disagreement" in page
     assert "core-schema-uml.md" in page
     snapshot_page = (
         DOCS / "shared-structure/population-snapshots-and-artifact-identity.md"
@@ -326,8 +359,8 @@ def test_maintained_surfaces_avoid_ambiguous_release_jargon() -> None:
         DOCS / "bring-an-existing-mapping/one-year-mapping-handshake.md"
     ).read_text()
     assert "exact same mapping content" in handshake
-    assert "pinned source and target catalogs" in handshake
-    assert "This approval concerns what the translation means" in handshake
+    assert "pinned source and target interface catalogs" in handshake
+    assert "Review of the mapping meaning" in handshake
     lineage = (DOCS / "cross-model-mappings/mapping-lineage.md").read_text()
-    assert "| Document | Question it answers |" in lineage
+    assert "| Record | Question it answers |" in lineage
     assert "approved rules, wrong script" in lineage

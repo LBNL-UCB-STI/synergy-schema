@@ -1,9 +1,9 @@
 # What the checker catches
 
-The checker compares declarations across the scenario, trajectory, bindings,
-bundles, mapping release, and artifact receipts. The tables below display the
-important rows from the actual synthetic fixtures; the source filename above
-each table links to the complete executable document.
+The checker compares declarations across the scenario, trajectory, model
+bindings, bundles, mapping description, and exchange receipts. The tables
+below display the important rows from the actual synthetic fixtures; the
+source filename above each table links to the complete executable document.
 
 === "Population evolution"
 
@@ -90,7 +90,7 @@ each table links to the complete executable document.
 
 The population ages in the first table are deliberately labeled model-owned:
 different workflows may produce different attributes without conflicting. The
-checker focuses on shared assertions, declared relationships, contract
+checker focuses on shared assertions, declared relationships, mapping
 coverage, and immutable identities.
 
 ## Run the checks

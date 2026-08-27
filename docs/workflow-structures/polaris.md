@@ -2,15 +2,19 @@
 
 ## Current
 
-POLARIS native records are partial in this schema: they support a translation
-receipt example, not a claim of complete model coverage.
+POLARIS native records are partial in this schema. They support a synthetic
+translation-receipt example and focused interface checks, not a claim of
+complete model coverage.
 
 ## Proposed
 
-The receipt records five yearly roles, source bundle identity, the one-year
-mapping release, and documented compatibility gaps.
+The receipt records five yearly artifact roles, the source population bundle,
+the reviewed one-year mapping, the registered translation implementation, and
+any documented scenario gaps. These links allow a checker to compare the
+translation with the source scenario and year.
 
 ## Out of scope
 
 POLARIS runtime adapter enforcement is future work. This repository does not
-claim a deployed POLARIS runtime or model-team approval.
+claim a deployed POLARIS runtime, automatic receipt emission, or model-team
+approval.
