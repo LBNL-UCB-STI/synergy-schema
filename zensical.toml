@@ -15,7 +15,7 @@ nav = [
     ] },
     { "Proof of concept" = [
         { "A population that changes over three years" = "proof-of-concept/index.md" },
-        { "What the checker catches" = "proof-of-concept/check-the-showcase.md" },
+        { "Following the proof from claim to file" = "proof-of-concept/check-the-showcase.md" },
     ] },
     { "Cross-model mappings" = [
         { "Cross-model mappings" = "cross-model-mappings/index.md" },

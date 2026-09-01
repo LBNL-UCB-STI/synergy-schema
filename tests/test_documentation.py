@@ -41,7 +41,7 @@ def test_navigation_has_the_approved_eight_sections_and_existing_leaves() -> Non
     ]
     expected = {
         "A population that changes over three years",
-        "What the checker catches",
+        "Following the proof from claim to file",
         "Day-zero manifest",
         "One-year mapping handshake",
         "Mapping at a glance",
@@ -208,6 +208,7 @@ def test_public_guides_avoid_second_person_and_attestation_language() -> None:
 
 def test_proof_uses_the_executable_showcase_and_preserves_scope() -> None:
     proof = (DOCS / "proof-of-concept/index.md").read_text()
+    normalized_proof = " ".join(proof.split())
     for reference in (
         "ScenarioDefinition",
         "PopulationTrajectory",
@@ -217,8 +218,17 @@ def test_proof_uses_the_executable_showcase_and_preserves_scope() -> None:
         "ConsistProvenanceDocument",
     ):
         assert reference in proof
+    for idea in (
+        "same shared universe",
+        "Evidence",
+        "interfaces",
+        "review records",
+        "not a deployed PILATES or POLARIS runtime",
+    ):
+        assert idea in normalized_proof
     commands = (DOCS / "proof-of-concept/check-the-showcase.md").read_text()
-    assert "examples/evolving_population" in commands
+    assert "examples/evolving_population/baseline" in commands
+    assert "examples/evolving_population/zev" in commands
     assert "exit 0" in commands
     assert "evolving_population_broken_scenario" in commands
     assert "evolving_population_broken_artifact_identity" in commands
@@ -229,38 +239,40 @@ def test_proof_uses_the_executable_showcase_and_preserves_scope() -> None:
 
 def test_checker_page_displays_tables_from_the_showcase_fixtures() -> None:
     page = (DOCS / "proof-of-concept/check-the-showcase.md").read_text()
-    for tab in (
-        '=== "Population evolution"',
-        '=== "Scenario bindings"',
-        '=== "Broken checks"',
+    for heading in (
+        "## The population over time",
+        "## Shared identity and model-owned results",
+        "## From a shared assumption to an exact file",
+        "## What the proof establishes",
+        "## Deliberately broken exchanges",
     ):
-        assert tab in page
+        assert heading in page
     rendered = "\n".join(
         (
-            docs_macros.showcase_snapshot_summary_table(),
-            docs_macros.showcase_person_history_table(),
-            docs_macros.showcase_household_lineage_table(),
-            docs_macros.showcase_vehicle_history_table(),
+            docs_macros.showcase_population_timeline_table(),
+            docs_macros.showcase_branch_comparison_table(),
             docs_macros.showcase_scenario_assumptions_table(),
             docs_macros.showcase_bindings_table(),
+            docs_macros.showcase_evidence_trace_table(),
+            docs_macros.showcase_status_ladder_table(),
             docs_macros.showcase_broken_scenario_table(),
             docs_macros.showcase_broken_artifact_table(),
         )
     )
     for macro in (
-        "{{ showcase_snapshot_summary_table(4) }}",
-        "{{ showcase_person_history_table(4) }}",
-        "{{ showcase_household_lineage_table(4) }}",
-        "{{ showcase_vehicle_history_table(4) }}",
+        "{{ showcase_population_timeline_table() }}",
+        "{{ showcase_branch_comparison_table() }}",
         "{{ showcase_scenario_assumptions_table(4) }}",
         "{{ showcase_bindings_table(4) }}",
+        "{{ showcase_evidence_trace_table() }}",
+        "{{ showcase_status_ladder_table() }}",
         "{{ showcase_broken_scenario_table(4) }}",
         "{{ showcase_broken_artifact_table(4) }}",
     ):
         assert macro in page
     for value in (
-        "person:new-2030",
-        "household:family-a-2",
+        "person:synthetic-evolving:new-2030",
+        "household-state:synthetic-evolving-2030:family-a-2",
         "compatible_with_gaps",
         "zev_policy",
         "SCENARIO_DIGEST_MISMATCH",
@@ -269,12 +281,11 @@ def test_checker_page_displays_tables_from_the_showcase_fixtures() -> None:
         assert value in rendered
     assert "core-population-evolution.yaml" in page
     assert "zev-model-bindings.yaml" in page
-    assert "Every person record in this synthetic fixture is shown" in page
-    assert "does not declare person-to-household membership" in page
-    assert "Household state records" in rendered
-    assert "Not declared in this fixture" in rendered
-    assert "Every assumption binding declared" in page
-    assert "synthetic fixture is shown as well" in page
+    assert "Every person state has an explicit household membership" in page
+    assert "does not declare person-to-household membership" not in page
+    assert "Not declared in this fixture" not in rendered
+    assert "review records" in page
+    assert "Evidence" in page
     assert (
         "All digest values below come directly from the valid and broken fixtures"
         in page
@@ -284,6 +295,44 @@ def test_checker_page_displays_tables_from_the_showcase_fixtures() -> None:
     assert "Broken declaration" in rendered
     assert "broken-scenario-definition.yaml" in page
     assert "broken-polaris-bundle.yaml" in page
+    assert "blob/expand-schema" not in page
+    assert "blob/main" in page
+
+
+def test_evolving_population_views_are_registered_and_fixture_backed() -> None:
+    registered: dict[str, object] = {}
+
+    class Environment:
+        def macro(self, function: object) -> None:
+            registered[function.__name__] = function  # type: ignore[attr-defined]
+
+    docs_macros.define_env(Environment())
+    names = {
+        "showcase_population_timeline_table",
+        "showcase_branch_comparison_table",
+        "showcase_evidence_trace_table",
+        "showcase_status_ladder_table",
+    }
+    assert names <= registered.keys()
+    rendered = "\n".join(
+        registered[name]()
+        for name in sorted(names)  # type: ignore[operator]
+    )
+    for value in (
+        "person:synthetic-evolving:alex",
+        "battery_electric",
+        "vehicle_adoption.zev_policy",
+        "manual_discovery",
+        "Schema-valid structure",
+        "6 collections",
+        "Cross-document checker boundary",
+        "complete / complete",
+        "Draft mapping review",
+        "review_records=0",
+        "Compatibility gap",
+        "Production evidence not claimed",
+    ):
+        assert value in rendered
 
 
 def test_adoption_guides_are_honest_about_scope_cost_and_exit() -> None:

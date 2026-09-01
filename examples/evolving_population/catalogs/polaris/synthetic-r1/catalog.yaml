@@ -1,0 +1,19 @@
+catalog_id: polaris-demo
+catalog_kind: polaris
+revision: synthetic-r1
+upstream:
+  revision: synthetic-r1
+  source_paths: [synthetic-polaris.yaml]
+elements:
+  - kind: config_path
+    path: population.seed_id
+  - kind: config_path
+    path: vehicle_adoption.zev_policy
+  - kind: sql_column
+    path: polaris_households.hhold
+  - kind: sql_column
+    path: polaris_households.persons
+  - kind: sql_column
+    path: polaris_households.household_type
+digest_algorithm: sha256
+content_digest: 3a776059d2fe0c868d007db877f45a42e8dd07ec1ab6decae49b182c45852728

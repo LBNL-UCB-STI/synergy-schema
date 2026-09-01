@@ -10,13 +10,13 @@ bindings:
       catalog_kind: atlas
       revision: synthetic-r1
       digest_algorithm: sha256
-      content_digest: daa660b27d1514a1be7b031cfa73b2c2f9f4d70136865caef37cb1f183f68465
+      content_digest: d753331d36b8577e5e567550bab10f5c3ff9defcfa2361c7e1ac4ca223157ae9
     assumption_bindings:
       - assumption_key: population_seed
         native_element:
           catalog: *atlas_catalog
-          kind: sql_column
-          path: atlas_households.household_id
+          kind: config_path
+          path: population.seed_id
         resolved_native_value: synthetic-evolving
         binding_mode: direct
         compatibility_state: compatible
@@ -28,12 +28,12 @@ bindings:
       catalog_kind: polaris
       revision: synthetic-r1
       digest_algorithm: sha256
-      content_digest: eb66e339871181fcd0a55dd1c1ea20d7100490a3beb36454193195cf2766f626
+      content_digest: 3a776059d2fe0c868d007db877f45a42e8dd07ec1ab6decae49b182c45852728
     assumption_bindings:
       - assumption_key: zev_policy
         native_element:
           catalog: *polaris_catalog
-          kind: sql_column
-          path: polaris_households.persons
+          kind: config_path
+          path: vehicle_adoption.zev_policy
         binding_mode: unsupported
         compatibility_state: compatible_with_gaps

@@ -6,5 +6,5 @@ population_bundle: zev-pilates-trajectory-bundle.yaml
 polaris_bundle: zev-polaris-translation-bundle.yaml
 # Use the one-year example's reviewed field rules and declared translation
 # losses by reference instead of copying them here.
-mapping_release: ../one_year_mapping_handshake/mapping-release/revision-1
-catalog_root: ../one_year_mapping_handshake/catalogs
+mapping_release: mapping-release/revision-1
+catalog_root: catalogs

@@ -1,5 +1,0 @@
-synthetic_polaris_rows:
-  households: [{hhold: family-a, persons: 1}]
-  person_count: 1
-  vehicle_classes: [light]
-  vehicle_types: [battery_electric]
