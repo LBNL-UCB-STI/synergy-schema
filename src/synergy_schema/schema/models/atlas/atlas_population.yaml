@@ -201,7 +201,8 @@ classes:
         maximum_value: 130
         description: Age in years.
       household_id:
-        range: integer
+        range: AtlasHouseholdInput
+        inlined: false
         required: true
         annotations:
           relationship_target: AtlasHouseholdInput
@@ -235,7 +236,8 @@ classes:
           - year
     attributes:
       household_id:
-        range: integer
+        range: AtlasHouseholdInput
+        inlined: false
         required: true
         annotations:
           relationship_target: AtlasHouseholdInput
@@ -272,7 +274,8 @@ classes:
       newhhflag:
         description: New-household indicator/code; vocabulary requires ATLAS-owner confirmation.
       maindriver_id:
-        range: integer
+        range: AtlasPersonInput
+        inlined: false
         annotations:
           relationship_target: AtlasPersonInput
           validation_boundary: LinkML validates this value's shape, not cross-table referential integrity.

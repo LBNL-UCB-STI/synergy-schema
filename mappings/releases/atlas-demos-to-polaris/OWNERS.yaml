@@ -1,0 +1,7 @@
+source_owner: ATLAS model team
+target_owner: POLARIS model team
+required_semantic_review_roles:
+  - source_owner
+  - target_owner
+enforcement: Repository metadata is the dual-owner substitute until maintainers provide
+  Git handles.

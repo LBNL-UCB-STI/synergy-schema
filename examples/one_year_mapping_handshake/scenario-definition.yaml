@@ -1,0 +1,11 @@
+id: scenario:synthetic-one-year
+revision: r1
+region_ref: synthetic-region
+start_year: 2025
+end_year: 2025
+assumptions:
+  - assumption_key: population_seed
+    value: synthetic
+    value_type: string
+    authority: synthetic-demo
+content_digest: f4722cd143b351cc25a715d96450402551aeff448963cf1e3529b7f544bd8ccb

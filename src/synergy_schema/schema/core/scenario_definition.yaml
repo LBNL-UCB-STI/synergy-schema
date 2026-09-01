@@ -1,0 +1,190 @@
+id: https://w3id.org/LBNL-UCB-STI/synergy-schema/core/scenario-definition
+name: scenario_definition
+title: Shared scenario definitions
+description: >-
+  Provider-neutral policy and assumption definitions that model workflows can
+  bind to without replacing their native configuration or output structures.
+
+prefixes:
+  synergy_schema: https://w3id.org/LBNL-UCB-STI/synergy-schema/
+  linkml: https://w3id.org/linkml/
+
+default_prefix: synergy_schema
+default_range: string
+
+imports:
+  - linkml:types
+  - native_contract
+
+enums:
+  ScenarioScalarValueType:
+    description: Declared type used by the conformance layer to normalize a scalar value.
+    permissible_values:
+      integer: {}
+      number: {}
+      boolean: {}
+      string: {}
+      code: {}
+      reference: {}
+  ScenarioAssumptionBindingMode:
+    description: How a native model surface relates to a canonical assumption.
+    permissible_values:
+      direct: {}
+      alias: {}
+      transformed: {}
+      override: {}
+      unsupported: {}
+  ScenarioCompatibilityState:
+    description: Declared compatibility of a native binding with the shared scenario.
+    permissible_values:
+      compatible: {}
+      compatible_with_gaps: {}
+      incompatible: {}
+      pending_review: {}
+
+classes:
+  ScenarioDefinitionReference:
+    description: >-
+      Portable immutable reference to a ScenarioDefinition. The revision and
+      content digest prevent a shared identifier from silently selecting a
+      different scenario revision.
+    attributes:
+      scenario_definition_id:
+        required: true
+        description: Stable identifier of the referenced scenario definition.
+      revision:
+        required: true
+        description: Immutable revision or release label of the referenced definition.
+      content_digest:
+        required: true
+        description: SHA-256 digest of the referenced canonical scenario definition.
+  ScenarioAssumption:
+    description: >-
+      One typed scalar policy or assumption in a canonical scenario definition.
+      The stored value is a string; the conformance layer normalizes it by type.
+    attributes:
+      assumption_key:
+        identifier: true
+        required: true
+        description: Stable semantic key for this shared scenario assumption.
+      value:
+        range: string
+        required: true
+        description: Scalar string representation of the declared assumption value.
+      value_type:
+        range: ScenarioScalarValueType
+        required: true
+        description: Declared type used to interpret value.
+      unit:
+        description: Optional unit for the assumption value.
+      authority:
+        required: true
+        description: Team or authority accountable for the assumption meaning.
+  ScenarioDefinition:
+    description: >-
+      Immutable shared policy and assumption definition for one modeled region
+      and inclusive scenario horizon.
+    annotations:
+      conformance_requirements: >-
+        start_year and end_year define an inclusive horizon with start_year <= end_year.
+    attributes:
+      id:
+        identifier: true
+        required: true
+        description: Stable semantic identifier for this scenario definition.
+      revision:
+        required: true
+        description: Immutable revision or release label.
+      content_digest:
+        required: true
+        description: SHA-256 digest of the canonical scenario-definition document.
+      region_ref:
+        required: true
+        description: Identifier for the modeled region or domain.
+      start_year:
+        range: integer
+        required: true
+        description: First year in the inclusive scenario horizon.
+      end_year:
+        range: integer
+        required: true
+        description: Last year in the inclusive scenario horizon.
+      parent_definition_ref:
+        range: ScenarioDefinitionReference
+        inlined: true
+        description: Optional immutable reference to the parent policy definition.
+      assumptions:
+        range: ScenarioAssumption
+        multivalued: true
+        inlined_as_list: true
+        required: true
+        minimum_cardinality: 1
+        description: One or more typed assumptions that define this scenario.
+  ScenarioAssumptionBinding:
+    description: >-
+      One declared relationship between a canonical assumption and a native
+      model contract element.
+    annotations:
+      conformance_requirements: >-
+        transformed requires transformation_description; override requires
+        override_rationale and is incompatible; unsupported omits
+        resolved_native_value and may be compatible_with_gaps; direct or alias
+        value disagreement is incompatible.
+    attributes:
+      assumption_key:
+        required: true
+        description: Stable key of the canonical ScenarioAssumption being bound.
+      native_element:
+        range: NativeContractElementReference
+        required: true
+        inlined: true
+        description: Pinned native element that supplies or lacks this assumption.
+      resolved_native_value:
+        range: string
+        description: Value resolved from the native element when the mode supports one.
+      binding_mode:
+        range: ScenarioAssumptionBindingMode
+        required: true
+        description: Declared relationship between the native and canonical values.
+      compatibility_state:
+        range: ScenarioCompatibilityState
+        required: true
+        description: Declared compatibility outcome for this assumption binding.
+      transformation_description:
+        description: Required conformance evidence when binding_mode is transformed.
+      override_rationale:
+        description: Required conformance evidence when binding_mode is override.
+  ModelScenarioBinding:
+    description: >-
+      A model-specific declaration of how one native configuration implements a
+      canonical scenario definition revision.
+    annotations:
+      conformance_requirements: >-
+        Every assumption binding must name a canonical assumption; conditional
+        requirements on ScenarioAssumptionBinding are enforced by the
+        conformance layer rather than standard LinkML validation.
+    attributes:
+      binding_id:
+        identifier: true
+        required: true
+        description: Stable identifier for this model scenario binding.
+      model_name:
+        required: true
+        description: Name of the model or workflow making this binding declaration.
+      scenario_definition_ref:
+        range: ScenarioDefinitionReference
+        required: true
+        inlined: true
+        description: Immutable canonical scenario definition selected by this model.
+      native_contract_catalog:
+        range: NativeContractCatalogReference
+        required: true
+        inlined: true
+        description: Catalog used to resolve all native elements in this binding.
+      assumption_bindings:
+        range: ScenarioAssumptionBinding
+        multivalued: true
+        inlined_as_list: true
+        required: true
+        minimum_cardinality: 1
+        description: One or more canonical assumption bindings for this model.

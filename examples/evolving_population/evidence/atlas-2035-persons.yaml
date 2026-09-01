@@ -1,0 +1,7 @@
+rows:
+  - person_id: alex
+    age: 40
+    household_id: family-a-1
+  - person_id: new-2030
+    age: 6
+    household_id: family-a-2

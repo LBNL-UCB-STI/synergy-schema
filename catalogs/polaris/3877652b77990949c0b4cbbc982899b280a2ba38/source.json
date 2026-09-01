@@ -1,0 +1,14 @@
+{
+  "kind": "polaris",
+  "revision": "3877652b77990949c0b4cbbc982899b280a2ba38",
+  "source_paths": [
+    "polaris_population_translation/00_inputs.sql",
+    "polaris_population_translation/10_households.sql",
+    "polaris_population_translation/20_persons.sql",
+    "polaris_population_translation/30_vehicle_dimensions.sql",
+    "polaris_population_translation/40_vehicles.sql",
+    "polaris_population_translation/50_vehicle_class.sql",
+    "polaris_population_translation/60_vehicle_type.sql",
+    "polaris_population_translation/99_exports.sql"
+  ]
+}

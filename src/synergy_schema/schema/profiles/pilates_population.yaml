@@ -21,6 +21,21 @@ imports:
   - ../vendor/consist-provenance/0.1.0/provenance
 
 enums:
+  DiscoveryManifestGenerationMode:
+    description: >-
+      Generation mode allowed for a DayZeroExchangeManifest. The day-zero
+      manifest is deliberately discovery-only and cannot be a production
+      receipt.
+    permissible_values:
+      manual_discovery:
+        description: Human-created discovery evidence beside existing artifacts.
+  PilatesHandoffYearStatus:
+    description: Outcome recorded for one requested PILATES population handoff year.
+    permissible_values:
+      exported:
+        description: The requested population handoff was successfully exported.
+      skipped:
+        description: The requested population handoff was not successfully exported.
   PopulationMemberRole:
     description: >-
       Required semantic roles in a complete yearly population snapshot bundle.
@@ -35,6 +50,152 @@ enums:
         description: Vehicle artifact using the ATLAS-owned AtlasVehicleOutput contract root.
 
 classes:
+  DayZeroExchangeManifest:
+    description: >-
+      Thin discovery-only evidence for one existing PILATES exchange payload.
+      It records byte-identified payload and producer artifacts without
+      claiming mapping review, production acceptance, or a parallel ledger.
+    annotations:
+      conformance_requirements: >-
+        generation_mode is restricted to manual_discovery. This manifest may
+        expose missing context but cannot satisfy production receipt acceptance.
+    attributes:
+      payload_artifact:
+        range: PhysicalArtifactReference
+        required: true
+        inlined: true
+        description: Immutable physical payload artifact discovered for exchange.
+      producer_artifact:
+        range: PhysicalArtifactReference
+        required: true
+        inlined: true
+        description: Immutable script or SQL artifact that produced the payload.
+      native_scenario_namespace:
+        required: true
+        description: Native producer namespace for the scenario label.
+      native_scenario_label:
+        required: true
+        description: Native producer scenario label observed for the exchange.
+      simulation_year:
+        range: integer
+        required: true
+        description: Simulation year represented by the discovered payload.
+      generation_mode:
+        range: DiscoveryManifestGenerationMode
+        required: true
+        description: Invariant discovery-only generation mode for this manifest.
+      scenario_definition_ref:
+        range: ScenarioDefinitionReference
+        inlined: true
+        description: Optional resolved immutable scenario definition identity.
+  PilatesScheduleYearStatus:
+    description: >-
+      Outcome evidence for one requested population handoff year in a PILATES
+      schedule. A skipped year retains its producer-declared reason.
+    attributes:
+      simulation_year:
+        range: integer
+        required: true
+        description: Requested population handoff year.
+      status:
+        range: PilatesHandoffYearStatus
+        required: true
+        description: Whether the requested handoff was exported or skipped.
+      skip_reason:
+        description: Producer-declared reason when status is skipped.
+  PilatesScheduleEvidence:
+    description: >-
+      Operational evidence of the PILATES schedule used to request population
+      handoffs. It records execution boundaries without attempting to
+      reimplement PILATES scheduling semantics.
+    annotations:
+      conformance_requirements: >-
+        There must be exactly one handoff_year_statuses entry for every
+        requested handoff year in the composed PopulationTrajectoryBundle;
+        exported and skipped status records must agree with the trajectory's
+        successful and skipped year sets. These conditional cross-document
+        checks are enforced by later conformance code.
+    attributes:
+      planned_execution_boundaries:
+        range: integer
+        multivalued: true
+        required: true
+        minimum_cardinality: 1
+        description: Ordered planned execution boundaries reported by PILATES.
+      handoff_year_statuses:
+        range: PilatesScheduleYearStatus
+        multivalued: true
+        inlined_as_list: true
+        required: true
+        minimum_cardinality: 1
+        description: Status evidence for every requested population handoff year.
+      config_catalog:
+        range: PhysicalArtifactReference
+        required: true
+        inlined: true
+        description: Pinned config catalog artifact used to derive this schedule.
+      scheduler_implementation:
+        range: PhysicalArtifactReference
+        required: true
+        inlined: true
+        description: Pinned scheduler implementation artifact used for this evidence.
+  PilatesConsistChildRunEvidence:
+    description: >-
+      PILATES adapter evidence for one child Consist run. Year and iteration
+      are copied because they are not fields in the vendored 0.1.0 Consist
+      provenance schema.
+    attributes:
+      child_run:
+        range: ConsistRunReference
+        required: true
+        inlined: true
+        description: Vendored portable reference to the observed child Consist run.
+      simulation_year:
+        range: integer
+        required: true
+        description: Year copied by the PILATES adapter for this child run.
+      equilibrium_iteration:
+        range: integer
+        description: Optional iteration copied by the PILATES adapter for this child run.
+  PilatesConsistTrajectoryEvidence:
+    description: >-
+      PILATES/Synergy adapter-produced evidence relating a scenario-header
+      Consist run to child runs used for yearly population handoffs.
+    annotations:
+      conformance_requirements: >-
+        Child parent_run evidence, when supplied, must directly reference
+        scenario_header_run. Child simulation_year and equilibrium_iteration
+        must agree with the corresponding population snapshot, and association
+        run references must identify declared child runs. These conditional
+        cross-document checks are enforced by later conformance code.
+    attributes:
+      scenario_header_run:
+        range: ConsistRunReference
+        required: true
+        inlined: true
+        description: Vendored Consist parent run assigned the scenario_header role.
+      child_run_evidence:
+        range: PilatesConsistChildRunEvidence
+        multivalued: true
+        inlined_as_list: true
+        required: true
+        minimum_cardinality: 1
+        description: Adapter-copied year and iteration evidence for child runs.
+  PopulationTrajectoryBundleReference:
+    description: >-
+      Typed immutable reference to a PopulationTrajectoryBundle manifest. The
+      stable bundle identifier is paired with the canonical manifest digest.
+    attributes:
+      population_trajectory_bundle_id:
+        required: true
+        description: Stable identifier of the referenced trajectory bundle.
+      manifest_content_digest_algorithm:
+        range: DigestAlgorithm
+        required: true
+        description: Algorithm paired with the referenced manifest content digest.
+      manifest_content_digest:
+        required: true
+        description: Digest of the referenced canonical manifest content projection.
   PopulationSnapshotBundleMember:
     description: >-
       A population-table member with one of the profile's allowed roles. The
@@ -79,3 +240,68 @@ classes:
         minimum_cardinality: 3
         description: >-
           Required households, persons, and vehicles members for this snapshot.
+  PopulationTrajectoryBundle:
+    description: >-
+      PILATES operational composition of one core population trajectory with
+      its successfully exported yearly PopulationSnapshotBundle manifests and
+      evidence for the schedule and Consist runs that produced them. A
+      realization identity is a separately defined semantic projection; an
+      optional receipt envelope carries mutable operational evidence outside
+      that projection.
+    is_a: HandoffBundle
+    annotations:
+      manifest_digest_projection: >-
+        The legacy deterministic logical full-bundle manifest_content_digest
+        is calculated from a canonical content projection of this bundle,
+        including inherited HandoffBundle content and all profile attributes,
+        but excluding manifest_content_digest itself. It covers mutable
+        schedule and Consist evidence, so it is not a realization identity or
+        a checksum of serialized YAML or JSON bytes. The paired digest
+        algorithm remains in the projection. Conditional cross-document
+        completeness and year-alignment checks are enforced by later
+        conformance code.
+    attributes:
+      population_trajectory:
+        range: PopulationTrajectory
+        required: true
+        inlined: true
+        description: Core immutable scenario-scoped population trajectory.
+      population_snapshot_bundles:
+        range: PopulationSnapshotBundle
+        multivalued: true
+        inlined_as_list: true
+        required: true
+        minimum_cardinality: 1
+        description: Successful yearly PILATES PopulationSnapshotBundle manifests.
+      schedule_evidence:
+        range: PilatesScheduleEvidence
+        required: true
+        inlined: true
+        description: Operational schedule evidence for requested handoff years.
+      consist_trajectory_evidence:
+        range: PilatesConsistTrajectoryEvidence
+        required: true
+        inlined: true
+        description: Operational Consist run evidence assembled by the PILATES adapter.
+      manifest_content_digest_algorithm:
+        range: DigestAlgorithm
+        required: true
+        description: Algorithm paired with this legacy logical full-bundle content digest.
+      manifest_content_digest:
+        required: true
+        description: >-
+          Legacy logical full-bundle content digest of the parsed manifest,
+          excluding this self-referential field. It is not the realization
+          identity and not a checksum of serialized YAML or JSON bytes.
+      realization_identity:
+        range: ScenarioRealizationIdentity
+        inlined: true
+        description: >-
+          Optional portable semantic identity calculated from the closed
+          population-trajectory realization projection.
+      realization_receipt:
+        range: ScenarioRealizationReceipt
+        inlined: true
+        description: >-
+          Optional separately versioned receipt for mutable location,
+          validation, admission, or execution evidence about this realization.

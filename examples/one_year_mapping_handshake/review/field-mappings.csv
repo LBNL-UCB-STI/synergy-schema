@@ -1,0 +1,4 @@
+id,source_kind,source_path,target_kind,target_path,transformation_mode,rule,implementation_evidence
+household_id,sql_column,atlas_households.household_id,sql_column,polaris_households.hhold,renamed,Rename the source household ID to the POLARIS household key.,"[""implementation/translation.sql""]"
+household_type,sql_column,atlas_households.hh_type,sql_column,polaris_households.household_type,derived,Translate atlas_households.hh_type through the synthetic household-type lookup.,"[""implementation/translation.sql""]"
+persons,sql_column,atlas_households.persons,sql_column,polaris_households.persons,renamed,Carry the source person count into the POLARIS household record.,"[""implementation/translation.sql""]"

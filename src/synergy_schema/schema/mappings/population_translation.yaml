@@ -1,0 +1,397 @@
+id: https://w3id.org/LBNL-UCB-STI/synergy-schema/mappings/population-translation
+name: population_translation
+title: Population translation release contracts
+description: >-
+  Immutable semantic contracts for translating population exchange fields
+  between model-owned native contracts. Implementation bindings and governance
+  evidence are intentionally separate from the semantic mapping content.
+
+prefixes:
+  synergy_schema: https://w3id.org/LBNL-UCB-STI/synergy-schema/
+  linkml: https://w3id.org/linkml/
+
+default_prefix: synergy_schema
+default_range: string
+
+imports:
+  - linkml:types
+  - ../core/native_contract
+  - population_identity
+
+enums:
+  PopulationFieldTransformationMode:
+    description: Controlled relationship between one source and target exchange field.
+    permissible_values:
+      direct: {}
+      renamed: {}
+      unit_or_enum_converted: {}
+      derived: {}
+  MappingResidueKind:
+    description: Intentional translation behavior that is not a clean field mapping.
+    permissible_values:
+      unmapped_source: {}
+      required_target_default: {}
+      lookup_or_crosswalk: {}
+      filtered_rows: {}
+      aggregated_or_split: {}
+      dropped_context: {}
+  MappingLifecycleStatus:
+    description: Review lifecycle of a mapping contract revision.
+    permissible_values:
+      draft: {}
+      approved: {}
+      superseded: {}
+      deprecated: {}
+  MappingReviewRole:
+    description: Accountable role for a mapping review decision.
+    permissible_values:
+      source_owner: {}
+      target_owner: {}
+      workflow_integrator: {}
+  MappingReviewDecision:
+    description: Decision recorded by one mapping reviewer.
+    permissible_values:
+      accept: {}
+      request_changes: {}
+      reject: {}
+  TranslationImplementationStatus:
+    description: Conformance state of a workflow-owned translation implementation.
+    permissible_values:
+      declared: {}
+      conformance_checked: {}
+      retired: {}
+
+classes:
+  PopulationTranslationContractReference:
+    description: >-
+      Portable immutable reference to one population translation contract
+      revision and its semantic content.
+    attributes:
+      population_translation_contract_id:
+        required: true
+        description: Stable identifier of the referenced mapping contract.
+      revision:
+        required: true
+        description: Immutable revision or release label of the referenced contract.
+      semantic_content_digest_algorithm:
+        range: DigestAlgorithm
+        required: true
+        description: Algorithm paired with semantic_content_digest for this identity.
+      semantic_content_digest:
+        required: true
+        description: Digest paired with semantic_content_digest_algorithm for this identity.
+  PopulationFieldMapping:
+    description: >-
+      One reviewed mapping between catalog-resolved source and target exchange
+      fields. This general field vocabulary does not replace the narrower
+      identity-bearing PopulationSlotMapping vocabulary.
+    annotations:
+      semantic_digest_projection: >-
+        Includes id, source_element, target_element, transformation_mode, and
+        rule. Excludes implementation_evidence.
+    attributes:
+      id:
+        identifier: true
+        required: true
+        description: Stable identifier for this field mapping within a contract revision.
+      source_element:
+        range: NativeContractElementReference
+        required: true
+        inlined: true
+        description: Pinned source field in its model-owned native contract catalog.
+      target_element:
+        range: NativeContractElementReference
+        required: true
+        inlined: true
+        description: Pinned target field in its model-owned native contract catalog.
+      transformation_mode:
+        range: PopulationFieldTransformationMode
+        required: true
+        description: Controlled classification of the field transformation.
+      rule:
+        required: true
+        description: Plain-language rule that defines the field transformation.
+      implementation_evidence:
+        multivalued: true
+        required: true
+        minimum_cardinality: 1
+        description: Evidence locations for the reviewed implementation behavior.
+  MappingResidueRecord:
+    description: >-
+      One declared intentional translation behavior that is not a clean
+      source-to-target field mapping.
+    annotations:
+      semantic_digest_projection: >-
+        Includes id, residue_kind, affected_elements, deterministic_rule,
+        rationale, and disposition. Excludes implementation_evidence.
+      conformance_requirements: >-
+        Every source exchange column has one primary disposition: a field
+        mapping or an unmapped_source/dropped_context residue; every required
+        target column has one primary disposition: a field mapping or a
+        required_target_default residue. lookup_or_crosswalk, filtered_rows,
+        and aggregated_or_split residues may attach to that primary
+        disposition and do not establish another one.
+    attributes:
+      id:
+        identifier: true
+        required: true
+        description: Stable identifier for this residue declaration within a contract revision.
+      residue_kind:
+        range: MappingResidueKind
+        required: true
+        description: Controlled kind of intentional non-clean translation behavior.
+      affected_elements:
+        range: NativeContractElementReference
+        multivalued: true
+        required: true
+        minimum_cardinality: 1
+        inlined_as_list: true
+        description: One or more pinned native elements affected by this residue.
+      deterministic_rule:
+        description: Optional deterministic transformation rule when one exists.
+      rationale:
+        required: true
+        description: Reason this residue is intentional and acceptable for the contract.
+      disposition:
+        required: true
+        description: Declared outcome for the affected data or context.
+      implementation_evidence:
+        multivalued: true
+        required: true
+        minimum_cardinality: 1
+        description: Evidence locations for this residue's implementation behavior.
+  MappingResidueObservation:
+    description: >-
+      Run-specific evidence that one declared mapping residue occurred while a
+      translation was applied. Observations are not immutable contract content.
+    attributes:
+      residue_record_id:
+        required: true
+        description: Stable identifier of the declared MappingResidueRecord observed.
+      semantic_content_digest_algorithm:
+        range: DigestAlgorithm
+        required: true
+        description: Algorithm paired with semantic_content_digest for this identity.
+      semantic_content_digest:
+        required: true
+        description: Digest paired with semantic_content_digest_algorithm for this identity.
+      simulation_year:
+        range: integer
+        required: true
+        description: Simulation year for the observed translation application.
+      affected_artifact_roles:
+        multivalued: true
+        required: true
+        minimum_cardinality: 1
+        description: Artifact roles affected by this observed residue.
+      observed_count:
+        range: integer
+        minimum_value: 0
+        description: Optional observed row or value count when applicable.
+      observed_lookup_digest:
+        description: Optional digest of the lookup or crosswalk revision observed.
+      resulting_disposition:
+        required: true
+        description: Resulting disposition observed for this application.
+  MappingReviewRecord:
+    description: Review decision by one accountable model or workflow role.
+    attributes:
+      reviewer_role:
+        range: MappingReviewRole
+        required: true
+        description: Accountable role making this review decision.
+      reviewing_team:
+        required: true
+        description: Team responsible for this review decision.
+      review_date:
+        range: date
+        required: true
+        description: Date on which the review decision was made.
+      decision:
+        range: MappingReviewDecision
+        required: true
+        description: Recorded review decision.
+      assessed_semantic_content_digest_algorithm:
+        range: DigestAlgorithm
+        required: true
+        description: Algorithm paired with the semantic digest assessed by this reviewer.
+      assessed_semantic_content_digest:
+        required: true
+        description: Digest paired with its algorithm assessed by this reviewer.
+      team_contact:
+        description: Optional contact for the reviewing team.
+      rationale:
+        required: true
+        description: Review rationale, including any limitations or requested changes.
+  MappingGovernance:
+    description: >-
+      Stewardship and review lifecycle for one translation contract revision.
+      Governance remains outside immutable semantic mapping content.
+    annotations:
+      conformance_requirements: >-
+        approved requires accept decisions from both the source_owner and
+        target_owner roles for the contract's current semantic_content_digest
+        with its semantic_content_digest_algorithm; standard LinkML validation
+        does not resolve this cross-record rule.
+    attributes:
+      maintaining_team:
+        required: true
+        description: Team maintaining the typed contract encoding and review record.
+      lifecycle_status:
+        range: MappingLifecycleStatus
+        required: true
+        description: Current review lifecycle of this contract revision.
+      successor_contract:
+        range: PopulationTranslationContractReference
+        inlined: true
+        description: Optional immutable successor when this revision is superseded or deprecated.
+      review_records:
+        range: MappingReviewRecord
+        multivalued: true
+        inlined_as_list: true
+        description: Recorded review decisions from accountable roles.
+  PopulationTranslationContract:
+    description: >-
+      Frozen statement of how one source population representation maps to one
+      target representation. It pins both native catalogs, every field rule,
+      and every declared default, omission, filter, lookup, or other residue.
+      The semantic content digest fingerprints those meaning-bearing parts so
+      reviewers and implementations can identify the exact same agreement.
+    annotations:
+      semantic_digest_projection: >-
+        Includes source_catalog, target_catalog, field_mappings, and
+        residue_records. Excludes encoding_source, supporting_sources,
+        PopulationFieldMapping.implementation_evidence,
+        MappingResidueRecord.implementation_evidence, governance, review
+        records, lifecycle status, and implementation bindings; cross-document
+        digest checks are enforced by the conformance layer rather than
+        standard LinkML validation.
+    attributes:
+      id:
+        identifier: true
+        required: true
+        description: Stable semantic identifier for this population translation contract.
+      revision:
+        required: true
+        description: Human-readable immutable label for this version of the agreement.
+      semantic_content_digest_algorithm:
+        range: DigestAlgorithm
+        required: true
+        description: Algorithm paired with semantic_content_digest for this identity.
+      semantic_content_digest:
+        required: true
+        description: Digest paired with semantic_content_digest_algorithm for this identity.
+      encoding_source:
+        range: PhysicalArtifactReference
+        required: true
+        inlined: true
+        description: >-
+          Required root artifact from which this typed contract was transcribed;
+          it is provenance rather than semantic contract content.
+      supporting_sources:
+        range: PhysicalArtifactReference
+        multivalued: true
+        inlined_as_list: true
+        description: Optional additional provenance artifacts supporting the transcription.
+      source_catalog:
+        range: NativeContractCatalogReference
+        required: true
+        inlined: true
+        description: Immutable source native contract catalog for this translation.
+      target_catalog:
+        range: NativeContractCatalogReference
+        required: true
+        inlined: true
+        description: Immutable target native contract catalog for this translation.
+      source_schema_contract:
+        range: SchemaContractReference
+        required: true
+        inlined: true
+        description: Source schema contract expected by every receipt of this release.
+      target_schema_contract:
+        range: SchemaContractReference
+        required: true
+        inlined: true
+        description: Target schema contract expected by every receipt of this release.
+      field_mappings:
+        range: PopulationFieldMapping
+        multivalued: true
+        inlined_as_list: true
+        required: true
+        minimum_cardinality: 1
+        description: Complete reviewed source-to-target field mappings.
+      residue_records:
+        range: MappingResidueRecord
+        multivalued: true
+        inlined_as_list: true
+        description: Optional declared translation residues outside clean field mappings.
+      identity_mappings:
+        range: PopulationRepresentationMapping
+        multivalued: true
+        description: Optional references to existing identity-bearing mapping contracts.
+      governance:
+        range: MappingGovernance
+        required: true
+        inlined: true
+        description: Stewardship and review state kept separate from semantic content.
+  TranslationImplementationBindingReference:
+    description: >-
+      Pinned reference to one workflow-owned translation implementation binding.
+    attributes:
+      translation_implementation_binding_id:
+        required: true
+        description: Stable identifier of the referenced implementation binding.
+      implemented_semantic_content_digest_algorithm:
+        range: DigestAlgorithm
+        required: true
+        description: Algorithm paired with the implemented semantic contract digest.
+      implemented_semantic_content_digest:
+        required: true
+        description: Digest paired with its algorithm for the implemented contract.
+      implementation_content_digest_algorithm:
+        range: DigestAlgorithm
+        required: true
+        description: Algorithm paired with implementation_content_digest for this identity.
+      implementation_content_digest:
+        required: true
+        description: Digest paired with implementation_content_digest_algorithm.
+  TranslationImplementationBinding:
+    description: >-
+      Workflow-owned registration of an implementation artifact for one
+      immutable translation contract digest. It is deliberately not embedded
+      in PopulationTranslationContract.
+    annotations:
+      conformance_requirements: >-
+        implemented_semantic_content_digest with
+        implemented_semantic_content_digest_algorithm must identify a
+        registered PopulationTranslationContract revision; production
+        acceptance requires conformance_checked status. These cross-document
+        checks are enforced by the conformance layer rather than standard
+        LinkML validation.
+    attributes:
+      id:
+        identifier: true
+        required: true
+        description: Stable identifier for this workflow-owned implementation binding.
+      implementation_artifact:
+        range: PhysicalArtifactReference
+        required: true
+        inlined: true
+        description: Immutable byte-identified translation executable, script, or SQL artifact.
+      implemented_semantic_content_digest_algorithm:
+        range: DigestAlgorithm
+        required: true
+        description: Algorithm paired with the implemented semantic contract digest.
+      implemented_semantic_content_digest:
+        required: true
+        description: Digest paired with its algorithm for the implemented contract.
+      workflow_owner:
+        required: true
+        description: Workflow team accountable for this translation implementation.
+      status:
+        range: TranslationImplementationStatus
+        required: true
+        description: Declared conformance state of this implementation binding.
+      validation_evidence:
+        multivalued: true
+        description: Optional validation evidence, required by later conformance rules when checked.

@@ -1,0 +1,35 @@
+urbansim_household:
+  household_id: 101
+  block_id: "060750101001001"
+urbansim_person:
+  person_id: 1001
+  household_id: 101
+  member_id: 1
+  work_zone_id: 5002
+  school_zone_id: 5003
+activitysim_household:
+  household_id: 101
+  block_id: "060750101001001"
+  taz: 5001
+activitysim_person:
+  person_id: 1001
+  household_id: 101
+  member_id: 1
+  taz: 5001
+  work_zone_id: 5002
+  workplace_taz: 5002
+  school_zone_id: 5003
+  school_taz: 5003
+activitysim_land_use:
+  taz: 5001
+polaris_household:
+  household: 101
+  hhold: 101
+  location: 60750101001001
+polaris_person:
+  person: 1001
+  household: 101
+  id: 0
+polaris_vehicle:
+  vehicle_id: 1
+  hhold: 101

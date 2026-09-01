@@ -1,0 +1,130 @@
+id: mapping:atlas-demo-to-polaris
+revision: revision-1
+semantic_content_digest_algorithm: sha256
+semantic_content_digest: 02ae76d67869ec8cee8ca138288e44907cd86ba31db81b66fa6d2e845e798663
+encoding_source:
+  artifact_identity:
+    digest_algorithm: sha256
+    content_digest: f27c1e616556ab77eb27cfe62ed0a25d37d5be442f18fd816990eebe718f387b
+  locator: encoding-source/team-mapping.csv
+  media_type: text/plain
+supporting_sources: []
+source_catalog: &id001
+  catalog_id: atlas-demo
+  catalog_kind: atlas
+  revision: synthetic-r1
+  digest_algorithm: sha256
+  content_digest: daa660b27d1514a1be7b031cfa73b2c2f9f4d70136865caef37cb1f183f68465
+target_catalog: &id002
+  catalog_id: polaris-demo
+  catalog_kind: polaris
+  revision: synthetic-r1
+  digest_algorithm: sha256
+  content_digest: eb66e339871181fcd0a55dd1c1ea20d7100490a3beb36454193195cf2766f626
+source_schema_contract:
+  language: linkml
+  schema_digest_algorithm: sha256
+  schema_digest: 67f877d114b704bc414f687941fabd39ca3d68fca00b47461e3ce848626a0166
+  selected_root: AtlasHouseholdInput
+  schema_uri: src/synergy_schema/schema/synergy_schema.yaml
+target_schema_contract:
+  language: linkml
+  schema_digest_algorithm: sha256
+  schema_digest: 67f877d114b704bc414f687941fabd39ca3d68fca00b47461e3ce848626a0166
+  selected_root: PolarisHouseholdRecord
+  schema_uri: src/synergy_schema/schema/synergy_schema.yaml
+field_mappings:
+  - id: household_id
+    source_element:
+      catalog: *id001
+      kind: sql_column
+      path: atlas_households.household_id
+    target_element:
+      catalog: *id002
+      kind: sql_column
+      path: polaris_households.hhold
+    transformation_mode: renamed
+    rule: Rename the source household ID to the POLARIS household key.
+    implementation_evidence:
+      - implementation/translation.sql
+  - id: persons
+    source_element:
+      catalog: *id001
+      kind: sql_column
+      path: atlas_households.persons
+    target_element:
+      catalog: *id002
+      kind: sql_column
+      path: polaris_households.persons
+    transformation_mode: renamed
+    rule: Carry the source person count into the POLARIS household record.
+    implementation_evidence:
+      - implementation/translation.sql
+  - id: household_type
+    source_element:
+      catalog: *id001
+      kind: sql_column
+      path: atlas_households.hh_type
+    target_element:
+      catalog: *id002
+      kind: sql_column
+      path: polaris_households.household_type
+    transformation_mode: derived
+    rule: Translate atlas_households.hh_type through the synthetic household-type lookup.
+    implementation_evidence:
+      - implementation/translation.sql
+residue_records:
+  - id: household-type-lookup
+    residue_kind: lookup_or_crosswalk
+    affected_elements:
+      - catalog: *id002
+        kind: sql_column
+        path: polaris_households.household_type
+    deterministic_rule: Use synthetic-household-type-r1; any unlisted source code becomes
+      other.
+    rationale: POLARIS household type has a narrower controlled vocabulary than the synthetic
+      ATLAS source.
+    disposition: Emit the lookup value or the deterministic other default.
+    implementation_evidence:
+      - implementation/translation.sql
+  - id: out-of-region-households-filtered
+    residue_kind: filtered_rows
+    affected_elements:
+      - catalog: *id002
+        kind: sql_column
+        path: polaris_households.hhold
+    deterministic_rule: Do not emit a POLARIS household row when source region_flag is not
+      in_region.
+    rationale: The draft handoff intentionally limits the exchange to the synthetic modeled
+      region.
+    disposition: Drop out-of-region household rows before target artifact creation.
+    implementation_evidence:
+      - implementation/translation.sql
+  - id: unsupported-source-tenure
+    residue_kind: unmapped_source
+    affected_elements:
+      - catalog: *id001
+        kind: sql_column
+        path: atlas_households.tenure
+    deterministic_rule: Do not translate atlas_households.tenure in this draft release.
+    rationale: No reviewed POLARIS target field is available for the synthetic tenure encoding.
+    disposition: Retain only in the source; omit from the translated artifacts.
+    implementation_evidence:
+      - implementation/translation.sql
+  - id: vehicle-year-context-dropped
+    residue_kind: dropped_context
+    affected_elements:
+      - catalog: *id001
+        kind: sql_column
+        path: atlas_vehicles.modelyear
+    deterministic_rule: Do not carry source vehicle model year into the population translation
+      artifacts.
+    rationale: The synthetic POLARIS handoff records vehicle roles but does not claim a reviewed
+      vehicle-year target contract.
+    disposition: Drop vehicle model-year context before POLARIS artifact creation.
+    implementation_evidence:
+      - implementation/translation.sql
+governance:
+  maintaining_team: Synergy schema maintainers
+  lifecycle_status: draft
+  review_records: []

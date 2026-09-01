@@ -10,6 +10,7 @@ household:
 person:
   person_id: 1001
   household_id: 101
+  member_id: 1
   age: 42
   hours: 40
   worker: 1

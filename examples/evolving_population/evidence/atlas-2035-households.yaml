@@ -1,0 +1,5 @@
+rows:
+  - household_id: family-a-1
+    persons: 1
+  - household_id: family-a-2
+    persons: 1

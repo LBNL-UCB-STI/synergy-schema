@@ -1,0 +1,35 @@
+source_trajectory_bundle: {population_trajectory_bundle_id: bundle:synthetic-evolving-baseline, manifest_content_digest_algorithm: sha256, manifest_content_digest: da4549f73ed846cc0baf387f0cabcbd3a0d472c96263e11f1344ccf703780689}
+scenario_definition_ref: {scenario_definition_id: scenario:synthetic-evolving-baseline, revision: r1, content_digest: 1e06cb98d859ef9c0339c65846e0a9b69e219996f29afd36d342b787f3dbe8f4}
+stochastic_realization_id: realization:synthetic-evolving
+population_translation_contract: {population_translation_contract_id: mapping:atlas-demo-to-polaris, revision: revision-1, semantic_content_digest_algorithm: sha256, semantic_content_digest: 27ebe23dd7914042323c91213cebbb117468bc99619fe33a4ea3449fa1c9709e}
+translation_implementation_binding: {translation_implementation_binding_id: implementation:synthetic-pilates, implemented_semantic_content_digest_algorithm: sha256, implemented_semantic_content_digest: 27ebe23dd7914042323c91213cebbb117468bc99619fe33a4ea3449fa1c9709e, implementation_content_digest_algorithm: sha256, implementation_content_digest: 9d87d0b920d3ee7719639bbd80adcaedef58f8b0e496a44dc55a2058a1b19fc2}
+implementation_artifact: {artifact_identity: {digest_algorithm: sha256, content_digest: 9d87d0b920d3ee7719639bbd80adcaedef58f8b0e496a44dc55a2058a1b19fc2}, locator: ../one_year_mapping_handshake/implementation/translation.sql, media_type: text/plain}
+source_schema_contract: {language: LinkML, schema_digest_algorithm: sha256, schema_digest: 67f877d114b704bc414f687941fabd39ca3d68fca00b47461e3ce848626a0166, selected_root: AtlasHouseholdInput}
+target_schema_contract: {language: LinkML, schema_digest_algorithm: sha256, schema_digest: 67f877d114b704bc414f687941fabd39ca3d68fca00b47461e3ce848626a0166, selected_root: PolarisHouseholdRecord}
+requested_years: [2025, 2030, 2035]
+successful_years: [2025, 2030, 2035]
+skipped_years: []
+receipt_generation_mode: manual_discovery
+members:
+  - {semantic_role: households, simulation_year: 2025, artifact: {artifact_identity: {digest_algorithm: sha256, content_digest: 62838bbe6bdbf0f1d995894c311a236b7d822e918b36076c18079af7e97e37e5}, locator: evidence/baseline-polaris-2025-households.yaml, media_type: application/yaml}}
+  - {semantic_role: persons, simulation_year: 2025, artifact: {artifact_identity: {digest_algorithm: sha256, content_digest: 9da0e0d06a6c11cd03baf7011b855a0c78ddb76313109a2286f5bd37ce42d3a5}, locator: evidence/baseline-polaris-2025-persons.yaml, media_type: application/yaml}}
+  - {semantic_role: vehicles, simulation_year: 2025, artifact: {artifact_identity: {digest_algorithm: sha256, content_digest: e4d8a16ab3273dbd16ff9f50182396380752876be091a7577297b2093e9d08d6}, locator: evidence/baseline-polaris-2025-vehicles.yaml, media_type: application/yaml}}
+  - {semantic_role: vehicle_class, simulation_year: 2025, artifact: {artifact_identity: {digest_algorithm: sha256, content_digest: 6256c6a419a6d40e3a0c831388a9233d9ad53a60e3a161535955c1266fc51dc4}, locator: evidence/baseline-polaris-2025-vehicle_class.yaml, media_type: application/yaml}}
+  - {semantic_role: vehicle_type, simulation_year: 2025, artifact: {artifact_identity: {digest_algorithm: sha256, content_digest: c2af4bcc659dd7d7bf221f2000316336e114e4db1a6703940aabd00ebb08b144}, locator: evidence/baseline-polaris-2025-vehicle_type.yaml, media_type: application/yaml}}
+  - {semantic_role: households, simulation_year: 2030, artifact: {artifact_identity: {digest_algorithm: sha256, content_digest: 37925e5fb2fb1a66df9f728e4a6d156ac0dffaf33fc44697dbbc8361e82ffce9}, locator: evidence/baseline-polaris-2030-households.yaml, media_type: application/yaml}}
+  - {semantic_role: persons, simulation_year: 2030, artifact: {artifact_identity: {digest_algorithm: sha256, content_digest: d62ae50164798ffa93c4c15e511feb94682004a8cdcec3eac730a98bedeed81d}, locator: evidence/baseline-polaris-2030-persons.yaml, media_type: application/yaml}}
+  - {semantic_role: vehicles, simulation_year: 2030, artifact: {artifact_identity: {digest_algorithm: sha256, content_digest: 8e3b91483242da0465c60970dce2a52203ba311224a72ebb78585cab5e791da5}, locator: evidence/baseline-polaris-2030-vehicles.yaml, media_type: application/yaml}}
+  - {semantic_role: vehicle_class, simulation_year: 2030, artifact: {artifact_identity: {digest_algorithm: sha256, content_digest: 6256c6a419a6d40e3a0c831388a9233d9ad53a60e3a161535955c1266fc51dc4}, locator: evidence/baseline-polaris-2030-vehicle_class.yaml, media_type: application/yaml}}
+  - {semantic_role: vehicle_type, simulation_year: 2030, artifact: {artifact_identity: {digest_algorithm: sha256, content_digest: c2af4bcc659dd7d7bf221f2000316336e114e4db1a6703940aabd00ebb08b144}, locator: evidence/baseline-polaris-2030-vehicle_type.yaml, media_type: application/yaml}}
+  - {semantic_role: households, simulation_year: 2035, artifact: {artifact_identity: {digest_algorithm: sha256, content_digest: 37925e5fb2fb1a66df9f728e4a6d156ac0dffaf33fc44697dbbc8361e82ffce9}, locator: evidence/baseline-polaris-2035-households.yaml, media_type: application/yaml}}
+  - {semantic_role: persons, simulation_year: 2035, artifact: {artifact_identity: {digest_algorithm: sha256, content_digest: d62ae50164798ffa93c4c15e511feb94682004a8cdcec3eac730a98bedeed81d}, locator: evidence/baseline-polaris-2035-persons.yaml, media_type: application/yaml}}
+  - {semantic_role: vehicles, simulation_year: 2035, artifact: {artifact_identity: {digest_algorithm: sha256, content_digest: 8e3b91483242da0465c60970dce2a52203ba311224a72ebb78585cab5e791da5}, locator: evidence/baseline-polaris-2035-vehicles.yaml, media_type: application/yaml}}
+  - {semantic_role: vehicle_class, simulation_year: 2035, artifact: {artifact_identity: {digest_algorithm: sha256, content_digest: 6256c6a419a6d40e3a0c831388a9233d9ad53a60e3a161535955c1266fc51dc4}, locator: evidence/baseline-polaris-2035-vehicle_class.yaml, media_type: application/yaml}}
+  - {semantic_role: vehicle_type, simulation_year: 2035, artifact: {artifact_identity: {digest_algorithm: sha256, content_digest: c2af4bcc659dd7d7bf221f2000316336e114e4db1a6703940aabd00ebb08b144}, locator: evidence/baseline-polaris-2035-vehicle_type.yaml, media_type: application/yaml}}
+residue_observations:
+  - {residue_record_id: household-type-lookup, semantic_content_digest_algorithm: sha256, semantic_content_digest: 27ebe23dd7914042323c91213cebbb117468bc99619fe33a4ea3449fa1c9709e, simulation_year: 2025, affected_artifact_roles: [households], observed_count: 1, resulting_disposition: lookup value or default}
+  - {residue_record_id: out-of-region-households-filtered, semantic_content_digest_algorithm: sha256, semantic_content_digest: 27ebe23dd7914042323c91213cebbb117468bc99619fe33a4ea3449fa1c9709e, simulation_year: 2025, affected_artifact_roles: [households], observed_count: 1, resulting_disposition: out-of-region row omitted}
+id: bundle:polaris-synthetic-evolving-baseline
+manifest_version: '0.1'
+completeness_status: complete
+producing_run: {provider: POLARIS, run_id: run:bundle:polaris-synthetic-evolving-baseline:translation}

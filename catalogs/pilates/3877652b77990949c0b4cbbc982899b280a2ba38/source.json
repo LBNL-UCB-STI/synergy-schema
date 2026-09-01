@@ -1,0 +1,8 @@
+{
+  "kind": "pilates",
+  "revision": "3877652b77990949c0b4cbbc982899b280a2ba38",
+  "source_paths": [
+    "pilates/config/models.py",
+    "pilates/workflows/artifact_keys.py"
+  ]
+}

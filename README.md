@@ -35,13 +35,16 @@ the same definition into several places.
 
 ## Current status
 
-The first two vertical slices define population-snapshot context and a
+The first vertical slices define population-snapshot context and a
 provider-neutral handoff bundle, then compose them into a PILATES yearly
-population profile. The profile now binds its three population artifacts to
+population profile. The profile binds its three population artifacts to
 ATLAS-owned household/person input and vehicle-output record contracts and to a
-pinned Consist provenance graph. Native model records remain independent of
-Consist. Native code vocabularies, mappings, and broader production validation
-remain to come.
+pinned Consist provenance graph. The root schema now also imports
+identity-bearing, partial UrbanSim, ActivitySim, and POLARIS projections plus
+typed mappings for the observed PILATES population path. Native model records
+remain independent of Consist. This is not complete native-table coverage or
+runtime validation: model-owner review, artifact integrity checks, and broader
+production validation remain to come.
 
 ## Getting started
 
@@ -63,6 +66,18 @@ Run the tests:
 ```sh
 uv run pytest -q
 ```
+
+Preview the generated schema documentation:
+
+```sh
+scripts/preview-schema-docs
+```
+
+The command regenerates the ignored `docs/schema/` directory and starts a
+Zensical development server at <http://127.0.0.1:8000/>. To generate the
+reference and verify a static site build without starting a server, run
+`scripts/preview-schema-docs build`. Set `ZENSICAL_DEV_ADDR`, for example to
+`127.0.0.1:8001`, when the default preview port is already in use.
 
 Build the Python package and confirm that it includes the root schema:
 

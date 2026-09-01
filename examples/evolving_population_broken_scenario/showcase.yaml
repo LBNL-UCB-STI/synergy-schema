@@ -1,0 +1,7 @@
+scenario_definition: broken-scenario-definition.yaml
+model_bindings: ../evolving_population/zev-model-bindings.yaml
+trajectory: ../evolving_population/zev-trajectory.yaml
+population_bundle: ../evolving_population/zev-pilates-trajectory-bundle.yaml
+polaris_bundle: ../evolving_population/zev-polaris-translation-bundle.yaml
+mapping_release: ../evolving_population/mapping-release/revision-1
+catalog_root: ../evolving_population/catalogs

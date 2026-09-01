@@ -15,6 +15,14 @@ default_range: string
 imports:
   - linkml:types
   - core/population_snapshot
+  - core/population_trajectory
   - core/handoff_bundle
+  - core/native_contract
+  - core/scenario_definition
   - models/atlas/atlas_population
+  - models/urbansim/urbansim_population
+  - models/activitysim/activitysim_population
+  - models/polaris/polaris_population
   - profiles/pilates_population
+  - profiles/polaris_population_translation
+  - mappings/population_translation

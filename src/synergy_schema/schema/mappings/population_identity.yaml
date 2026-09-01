@@ -1,0 +1,151 @@
+id: https://w3id.org/LBNL-UCB-STI/synergy-schema/mappings/population-identity
+name: population_identity_mappings
+title: Cross-model population identity mappings
+description: >-
+  Typed declarations of how identity-bearing population fields relate across
+  model-owned projections. These mappings document workflow behavior; they do
+  not make model-specific fields interchangeable.
+
+prefixes:
+  synergy_schema: https://w3id.org/LBNL-UCB-STI/synergy-schema/
+  linkml: https://w3id.org/linkml/
+
+default_prefix: synergy_schema
+default_range: string
+
+imports:
+  - linkml:types
+
+enums:
+  PopulationMappingStatus:
+    description: Classification of the transformation between source and target paths.
+    permissible_values:
+      direct: {}
+      renamed: {}
+      unit_or_enum_converted: {}
+      derived: {}
+      unsupported: {}
+      platform_specific: {}
+  PopulationIdentityRole:
+    description: Semantic role of the identity-bearing value being mapped.
+    permissible_values:
+      entity_identifier: {}
+      relationship_foreign_key: {}
+      within_parent_ordinal: {}
+      geographic_identifier: {}
+      artifact_scoped_identifier: {}
+  PopulationValueStability:
+    description: Whether the target value remains stable across the mapping.
+    permissible_values:
+      preserved: {}
+      derived: {}
+      regenerated: {}
+      alias: {}
+      artifact_scoped: {}
+
+classes:
+  PopulationRepresentationMapping:
+    description: Mapping between one source representation and one target representation.
+    attributes:
+      id:
+        identifier: true
+        required: true
+      source_representation:
+        required: true
+        description: Name of the representation that supplies the mapped values.
+      target_representation:
+        required: true
+        description: Name of the representation that receives the mapped values.
+      slot_mappings:
+        range: PopulationSlotMapping
+        multivalued: true
+        inlined_as_list: true
+        required: true
+        minimum_cardinality: 1
+        description: Identity-bearing slot mappings between the two representations.
+      identity_constructions:
+        range: PopulationIdentityConstruction
+        multivalued: true
+        inlined_as_list: true
+        description: >-
+          Optional composite constructions whose target identifier requires
+          multiple already-mapped semantic inputs.
+  PopulationSlotMapping:
+    description: Mapping for one identity-bearing slot or related set of slots.
+    attributes:
+      id:
+        identifier: true
+        required: true
+      source_paths:
+        multivalued: true
+        required: true
+        minimum_cardinality: 1
+        description: Fully qualified source slot paths used by this mapping.
+      target_paths:
+        multivalued: true
+        required: true
+        minimum_cardinality: 1
+        description: Fully qualified target slot paths produced by this mapping.
+      mapping_status:
+        range: PopulationMappingStatus
+        required: true
+        description: Classification of the value transformation.
+      identity_role:
+        range: PopulationIdentityRole
+        required: true
+        description: Semantic identity role of the mapped values.
+      value_stability:
+        range: PopulationValueStability
+        required: true
+        description: Whether the target values remain stable through the mapping.
+      relationship_cardinality:
+        description: Optional relationship cardinality such as one-to-one or many-to-one.
+      transformation:
+        required: true
+        description: Plain-language account of the transformation.
+      evidence:
+        multivalued: true
+        required: true
+        minimum_cardinality: 1
+        description: >-
+          Repository-relative source locations aligned by position with the
+          source and target mapping paths.
+  PopulationIdentityConstruction:
+    description: >-
+      Construction of one snapshot- or artifact-scoped identifier from two or
+      more semantic input paths. This records the construction contract; it
+      does not assert that ordinary LinkML validation resolves the inputs.
+    attributes:
+      id:
+        identifier: true
+        required: true
+      source_paths:
+        multivalued: true
+        required: true
+        minimum_cardinality: 2
+        description: Fully qualified semantic paths required by the construction.
+      target_path:
+        required: true
+        description: Fully qualified path of the constructed identifier.
+      mapping_status:
+        range: PopulationMappingStatus
+        required: true
+        description: Classification of the construction transformation.
+      identity_role:
+        range: PopulationIdentityRole
+        required: true
+        description: Semantic identity role of the constructed value.
+      value_stability:
+        range: PopulationValueStability
+        required: true
+        description: Scope within which the constructed value remains stable.
+      relationship_cardinality:
+        description: Cardinality of constructed identifiers relative to input tuples.
+      transformation:
+        required: true
+        description: Plain-language account of the composite construction.
+      evidence:
+        multivalued: true
+        required: true
+        minimum_cardinality: 1
+        description: Repository-relative schema or example evidence for the construction.

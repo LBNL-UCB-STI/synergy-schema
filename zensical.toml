@@ -1,0 +1,81 @@
+[project]
+site_name = "Synergy Schema"
+site_description = "Shared definitions and evidence for coordinated modeling workflows"
+docs_dir = "docs"
+site_dir = "site"
+nav = [
+    { "Overview" = "index.md" },
+    { "Shared structure" = [
+        { "How Synergy is organized" = "shared-structure/index.md" },
+        { "Scenario definitions and trajectories" = "shared-structure/scenario-definitions-and-trajectories.md" },
+        { "Population snapshots and artifact identity" = "shared-structure/population-snapshots-and-artifact-identity.md" },
+        { "Population trajectory realization identity" = "shared-structure/realization-identity.md" },
+        { "Core schema UML" = "schema/core-schema-uml.md" },
+        { "Glossary" = "shared-structure/glossary.md" },
+    ] },
+    { "Proof of concept" = [
+        { "A population that changes over three years" = "proof-of-concept/index.md" },
+        { "Following the proof from claim to file" = "proof-of-concept/check-the-showcase.md" },
+    ] },
+    { "Cross-model mappings" = [
+        { "Cross-model mappings" = "cross-model-mappings/index.md" },
+        { "Population identity" = "cross-model-mappings/population-identity.md" },
+        { "Mapping meaning, implementation, and lineage" = "cross-model-mappings/mapping-lineage.md" },
+        { "Scenario compatibility" = "cross-model-mappings/scenario-compatibility.md" },
+    ] },
+    { "Workflow structures" = [
+        { "Workflow structures" = "workflow-structures/index.md" },
+        { "PILATES post-ATLAS population" = "workflow-structures/pilates.md" },
+        { "POLARIS translated population" = "workflow-structures/polaris.md" },
+    ] },
+    { "Bring an existing mapping" = [
+        { "Bring an existing mapping" = "bring-an-existing-mapping/index.md" },
+        { "Day-zero manifest" = "bring-an-existing-mapping/day-zero-manifest.md" },
+        { "One-year mapping handshake" = "bring-an-existing-mapping/one-year-mapping-handshake.md" },
+        { "Mapping at a glance" = "bring-an-existing-mapping/contract-at-a-glance.md" },
+        { "Costs and exit" = "bring-an-existing-mapping/costs-and-exit.md" },
+    ] },
+    { "Design rationale" = [
+        { "Design rationale" = "design-rationale/index.md" },
+        { "Why LinkML" = "design-rationale/why-linkml.md" },
+        { "Why not one big table?" = "design-rationale/why-not-one-big-table.md" },
+        { "Are flat files enough?" = "design-rationale/are-flat-files-enough.md" },
+    ] },
+    { "Schema reference" = [
+        { "Complete generated reference" = "schema/index.md" },
+    ] },
+]
+
+[project.theme]
+language = "en"
+features = ["content.code.copy", "navigation.indexes", "navigation.top", "search.highlight", "toc.follow"]
+
+[project.markdown_extensions.pymdownx.superfences]
+custom_fences = [
+  { name = "mermaid", class = "mermaid", format = "pymdownx.superfences.fence_code_format" },
+]
+
+[project.markdown_extensions.pymdownx.tabbed]
+alternate_style = true
+
+[project.markdown_extensions.zensical.extensions.macros]
+module_name = "docs_macros"
+on_error_fail = true
+on_undefined = "strict"
+
+[[project.theme.palette]]
+media = "(prefers-color-scheme)"
+toggle.icon = "lucide/sun-moon"
+toggle.name = "Switch color mode"
+
+[[project.theme.palette]]
+media = "(prefers-color-scheme: light)"
+scheme = "default"
+toggle.icon = "lucide/sun"
+toggle.name = "Switch to dark mode"
+
+[[project.theme.palette]]
+media = "(prefers-color-scheme: dark)"
+scheme = "slate"
+toggle.icon = "lucide/moon"
+toggle.name = "Switch to system preference"

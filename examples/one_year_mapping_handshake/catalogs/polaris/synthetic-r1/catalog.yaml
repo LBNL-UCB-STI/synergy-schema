@@ -1,0 +1,16 @@
+catalog_id: polaris-demo
+catalog_kind: polaris
+revision: synthetic-r1
+upstream:
+  revision: synthetic-r1
+  source_paths:
+    - team-mapping.csv
+elements:
+  - kind: sql_column
+    path: polaris_households.hhold
+  - kind: sql_column
+    path: polaris_households.household_type
+  - kind: sql_column
+    path: polaris_households.persons
+digest_algorithm: sha256
+content_digest: eb66e339871181fcd0a55dd1c1ea20d7100490a3beb36454193195cf2766f626

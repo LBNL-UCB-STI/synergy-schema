@@ -1,0 +1,13 @@
+id: implementation:synthetic-pilates
+implementation_artifact: {artifact_identity: {digest_algorithm: sha256, content_digest: 9d87d0b920d3ee7719639bbd80adcaedef58f8b0e496a44dc55a2058a1b19fc2}, locator: ../../../../one_year_mapping_handshake/implementation/translation.sql, media_type: text/plain}
+implemented_semantic_content_digest_algorithm: sha256
+implemented_semantic_content_digest: 27ebe23dd7914042323c91213cebbb117468bc99619fe33a4ea3449fa1c9709e
+implementation_content_digest_algorithm: sha256
+implementation_content_digest: 9d87d0b920d3ee7719639bbd80adcaedef58f8b0e496a44dc55a2058a1b19fc2
+workflow_owner: PILATES workflow integrator
+status: conformance_checked
+validation_evidence: [synthetic draft smoke check]
+source_owner: ATLAS model team
+target_owner: POLARIS model team
+required_semantic_review_roles: [source_owner, target_owner]
+enforcement: Repository ownership metadata

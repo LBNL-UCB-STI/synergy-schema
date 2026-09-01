@@ -1,0 +1,61 @@
+contract:
+  encoding_source:
+    artifact_identity:
+      content_digest: f27c1e616556ab77eb27cfe62ed0a25d37d5be442f18fd816990eebe718f387b
+      digest_algorithm: sha256
+    locator: encoding-source/team-mapping.csv
+    media_type: text/plain
+  governance:
+    lifecycle_status: draft
+    maintaining_team: Synergy schema maintainers
+    review_records: []
+  id: mapping:atlas-demo-to-polaris
+  revision: revision-1
+  semantic_content_digest: 02ae76d67869ec8cee8ca138288e44907cd86ba31db81b66fa6d2e845e798663
+  semantic_content_digest_algorithm: sha256
+  source_catalog:
+    catalog_id: atlas-demo
+    catalog_kind: atlas
+    content_digest: daa660b27d1514a1be7b031cfa73b2c2f9f4d70136865caef37cb1f183f68465
+    digest_algorithm: sha256
+    revision: synthetic-r1
+  source_schema_contract:
+    language: linkml
+    schema_digest: 67f877d114b704bc414f687941fabd39ca3d68fca00b47461e3ce848626a0166
+    schema_digest_algorithm: sha256
+    schema_uri: src/synergy_schema/schema/synergy_schema.yaml
+    selected_root: AtlasHouseholdInput
+  supporting_sources: []
+  target_catalog:
+    catalog_id: polaris-demo
+    catalog_kind: polaris
+    content_digest: eb66e339871181fcd0a55dd1c1ea20d7100490a3beb36454193195cf2766f626
+    digest_algorithm: sha256
+    revision: synthetic-r1
+  target_schema_contract:
+    language: linkml
+    schema_digest: 67f877d114b704bc414f687941fabd39ca3d68fca00b47461e3ce848626a0166
+    schema_digest_algorithm: sha256
+    schema_uri: src/synergy_schema/schema/synergy_schema.yaml
+    selected_root: PolarisHouseholdRecord
+implementations:
+  - id: implementation:synthetic-pilates
+    implementation_artifact:
+      artifact_identity:
+        content_digest: 9d87d0b920d3ee7719639bbd80adcaedef58f8b0e496a44dc55a2058a1b19fc2
+        digest_algorithm: sha256
+      locator: implementation/translation.sql
+      media_type: text/plain
+    implemented_semantic_content_digest: 02ae76d67869ec8cee8ca138288e44907cd86ba31db81b66fa6d2e845e798663
+    implemented_semantic_content_digest_algorithm: sha256
+    status: conformance_checked
+    validation_evidence:
+      - synthetic draft smoke check
+    workflow_owner: PILATES workflow integrator
+ownership:
+  enforcement: Repository ownership metadata; Git handles intentionally not fabricated.
+  required_semantic_review_roles:
+    - source_owner
+    - target_owner
+  source_owner: ATLAS model team
+  target_owner: POLARIS model team

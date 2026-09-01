@@ -31,6 +31,39 @@ enums:
         description: The producer declares one or more required members absent.
 
 classes:
+  ScenarioRealizationIdentity:
+    description: >-
+      Portable semantic identity for one closed, versioned realization-manifest
+      projection. This identity is distinct from an individual artifact byte
+      digest and from a full exchange-envelope content digest.
+    attributes:
+      kind:
+        required: true
+        description: Closed realization projection kind used to calculate content_digest.
+      projection_version:
+        required: true
+        description: Version of the projection rules named by kind.
+      digest_algorithm:
+        range: DigestAlgorithm
+        required: true
+        description: Algorithm used to calculate the realization projection digest.
+      content_digest:
+        required: true
+        description: Digest of the canonical realization projection, excluding this field.
+  ScenarioRealizationReceipt:
+    description: >-
+      Separately versioned receipt envelope for observations, validation,
+      admission, locations, or execution evidence about one realization. Its
+      fields are logically outside the realization projection.
+    attributes:
+      receipt_version:
+        required: true
+        description: Version of this receipt envelope and any composed receipt profile.
+      realization_identity:
+        range: ScenarioRealizationIdentity
+        required: true
+        inlined: true
+        description: Immutable realization identity to which this receipt applies.
   ProducingRunReference:
     description: >-
       Provider-neutral reference to the run that produced a handoff. The

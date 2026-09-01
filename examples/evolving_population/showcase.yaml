@@ -1,0 +1,10 @@
+# Synthetic, draft-only evidence for a three-year, two-branch population exchange.
+scenario_definition: zev-scenario-definition.yaml
+model_bindings: zev-model-bindings.yaml
+trajectory: zev-trajectory.yaml
+population_bundle: zev-pilates-trajectory-bundle.yaml
+polaris_bundle: zev-polaris-translation-bundle.yaml
+# Use the one-year example's reviewed field rules and declared translation
+# losses by reference instead of copying them here.
+mapping_release: mapping-release/revision-1
+catalog_root: catalogs
