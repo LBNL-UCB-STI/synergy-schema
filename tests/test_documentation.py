@@ -6,6 +6,7 @@ from pathlib import Path
 import tomllib
 
 import docs_macros
+from zensical.config import parse_config
 
 
 ROOT = Path(__file__).parents[1]
@@ -68,6 +69,13 @@ def test_navigation_has_the_approved_eight_sections_and_existing_leaves() -> Non
         if target.startswith("schema/"):
             continue
         assert (DOCS / target).is_file()
+
+
+def test_docs_configuration_parses_markdown_inside_linkml_html_wrappers() -> None:
+    """Generated LinkML reference pages use ``<div markdown=\"1\">`` wrappers."""
+    config = parse_config(str(ROOT / "zensical.toml"))
+
+    assert "md_in_html" in config["markdown_extensions"]
 
 
 def test_realization_identity_contract_is_public_and_release_ready() -> None:
