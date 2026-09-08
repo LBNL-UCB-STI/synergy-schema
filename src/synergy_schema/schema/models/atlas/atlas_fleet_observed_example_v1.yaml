@@ -1,0 +1,107 @@
+id: https://w3id.org/LBNL-UCB-STI/synergy-schema/models/atlas/fleet-observed-example-v1
+name: atlas_fleet_observed_example_v1
+title: ATLAS provisional fleet output v1
+description: >-
+  Provisional schema for the two observed ATLAS fleet-output tables retained
+  in evidence/atlas_outputs. It records a v1 schema for those rows for owner
+  review; it is not evidence of a shared cross-model handoff.
+
+prefixes:
+  synergy_schema: https://w3id.org/LBNL-UCB-STI/synergy-schema/
+  linkml: https://w3id.org/linkml/
+
+default_prefix: synergy_schema
+default_range: string
+
+imports:
+  - linkml:types
+
+classes:
+  # Provisional row schema derived from the supplied ATLAS files.
+  AtlasHouseholdFleetOutputExampleV1:
+    description: >-
+      Observed household-side fleet example row from the paired ATLAS example
+      files. Membership in the paired example and reconciliation of nvehicles
+      to vehicle rows are external conformance checks, not LinkML proof.
+    annotations:
+      model_association: ATLAS
+      evidence_status: observed_example
+      status: provisional
+      contract_family: provisional_fleet_output
+      physical_source: evidence/atlas_outputs/48.453.atlas_hh.csv
+      producer_authority: maintainer_review_pending
+      simulation_year: not_inferred
+      conformance_boundary: >-
+        Membership and nvehicles reconciliation require an external checker.
+    attributes:
+      houseid:
+        range: integer
+        identifier: true
+        required: true
+        annotations:
+          physical_name: HOUSEID
+        description: Observed household identifier in the example file.
+      nvehicles:
+        range: integer
+        required: true
+        minimum_value: 0
+        description: Observed household vehicle-count value.
+
+  # Provisional row schema, paired only within the supplied files.
+  AtlasVehicleFleetOutputExampleV1:
+    description: >-
+      Observed vehicle-side fleet example row paired with
+      AtlasHouseholdFleetOutputExampleV1. The (HOUSEID, VEHID) uniqueness rule
+      and membership in the paired example are external conformance checks,
+      not LinkML proof.
+    annotations:
+      model_association: ATLAS
+      evidence_status: observed_example
+      status: provisional
+      contract_family: provisional_fleet_output
+      physical_source: evidence/atlas_outputs/48.453.atlas_veh.csv
+      producer_authority: maintainer_review_pending
+      simulation_year: not_inferred
+      conformance_boundary: >-
+        Membership and (HOUSEID, VEHID) uniqueness require an external checker.
+    unique_keys:
+      atlas_vehicle_fleet_example_v1:
+        description: >-
+          Composite row key within this observed example only; uniqueness is
+          an external conformance requirement.
+        unique_key_slots:
+          - houseid
+          - vehid
+    attributes:
+      houseid:
+        range: integer
+        required: true
+        annotations:
+          physical_name: HOUSEID
+          relationship_target: AtlasHouseholdFleetOutputExampleV1
+          relationship_scope: within_example_only
+          validation_boundary: >-
+            LinkML validates the scalar shape, not cross-file referential
+            membership.
+        description: Observed household identifier joining the paired example.
+      vehid:
+        range: integer
+        required: true
+        annotations:
+          physical_name: VEHID
+        description: Observed vehicle identifier within a household.
+      bodytype:
+        range: string
+        description: Observed bodytype value.
+      vintage_category:
+        range: string
+        description: Observed vintage_category value.
+      annual_mileage:
+        range: float
+        description: Observed annual_mileage value.
+      pred_power:
+        range: string
+        description: Observed pred_power value.
+      modelyear:
+        range: integer
+        description: Observed modelyear value.

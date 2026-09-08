@@ -6,7 +6,35 @@ ATLAS produces. It deliberately does not contain PILATES artifact keys, run
 identifiers, paths, or snapshot metadata; the PILATES population profile owns
 that operational context.
 
-The first slice uses the current exporter spellings as explicit physical
-bindings. That keeps the contract reviewable against today's tables without
-claiming those spellings belong in the shared kernel. Legacy code values remain
-primitive values until the ATLAS owner confirms their vocabularies.
+## Owner review map
+
+Review the class for the physical ATLAS table or export. The established post-ATLAS
+records remain together in [`atlas_population.yaml`](atlas_population.yaml) so
+their household/person/vehicle boundary is visible.
+
+| ATLAS records | LinkML review block | Status | Owner review focus |
+| --- | --- | --- | --- |
+| Household row consumed by ATLAS | [`AtlasHouseholdInput`](atlas_population.yaml#L22) | Established native contract | Physical field inventory, descriptions, types, nullability, and household-code meanings. |
+| Person row consumed by ATLAS | [`AtlasPersonInput`](atlas_population.yaml#L117) | Established native contract | Physical field inventory, person/household identity scope, and demographic/status-code meanings. |
+| Vehicle row produced by ATLAS | [`AtlasVehicleOutput`](atlas_population.yaml#L224) | Established native contract | Physical field inventory, `(household_id, vehicle_id, year)` identity, output-year semantics, and vehicle-code meanings. |
+| Paired household/vehicle fleet examples | [`atlas_fleet_observed_example_v1.yaml`](atlas_fleet_observed_example_v1.yaml) | Model-associated observed example | Whether the files are native ATLAS exports, the export/release context, `annual_mileage` units, and omitted year/geography semantics. |
+
+Each established class exposes `owner`, `direction`, and `physical_binding`
+annotations in the generated reference. Edit an attribute's `description` to
+clarify a field; change range, requiredness, keys, or enums only when the
+underlying producer behavior is confirmed.
+
+## Naming and separation
+
+LinkML class names are stable review handles; attributes retain current
+physical spellings. Add an alias only for an ATLAS-confirmed durable synonym,
+not an adapter rename or prospective cross-model mapping.
+
+The established `atlas_population.yaml` remains one consolidated module. The
+fleet example stays separate because it is evidence from an unconfirmed export
+context, not a replacement or successor to the established vehicle contract.
+
+`atlas_fleet_observed_example_v1.yaml` is separate from that established
+contract. It records the exact headers of one model-associated fleet-output
+example, including `HOUSEID` and `VEHID`, through explicit physical bindings,
+but makes no producer-authority, year, or handoff claim.

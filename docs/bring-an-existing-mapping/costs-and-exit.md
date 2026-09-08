@@ -1,10 +1,9 @@
 # Costs and exit
 
 The first mapping takes the most work because interface elements, ownership,
-and known losses must be made explicit. Once those records are stable, emitting
-and inspecting a known exchange should take minutes, not hours, in addition to
-normal review time for a change in meaning. The first encode-and-return target
-is five business days.
+and known losses must be made explicit. Measure the effort to prepare, consume,
+and inspect the first real exchange before setting operating targets for a
+repeated exchange or for a change in meaning.
 
 Adoption remains reversible. Existing payloads, readable review tables, and
 plain manifests remain useful if Synergy-specific checking is later removed.

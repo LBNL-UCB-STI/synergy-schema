@@ -15,29 +15,10 @@ population identities while POLARIS retains a branch-specific vehicle type.
 The models can therefore differ in what they own without losing the same shared
 universe.
 
-The records that support this comparison are deliberately explicit. A
-[ScenarioDefinition](../schema/ScenarioDefinition.md) identifies the scenario
-revision. A [PopulationTrajectory](../schema/PopulationTrajectory.md) orders
-the yearly snapshots. [HouseholdState](../schema/HouseholdState.md),
-[PersonState](../schema/PersonState.md), and vehicle relationship records say
-which entities and connections persist. [VehicleState](../schema/VehicleState.md)
-keeps the shared vehicle identity separate from native vehicle attributes. A
-[ConsistProvenanceDocument](../schema/ConsistProvenanceDocument.md) connects the
-exchange to exact runs and files.
-
-Evidence, interfaces, and review records address different ways that a model
-comparison can become ambiguous:
-
-- Evidence identifies the files and runs behind a claim, so a result can be
-  checked against the material that produced it.
-- Model interfaces show where a shared assumption enters each model's native
-  configuration, including cases that are unsupported.
-- Mapping review records distinguish a proposed translation from one that has
-  received the intended technical and scientific review.
-
-These records focus on the difficult boundaries because those boundaries are
-where two otherwise reasonable workflows can stop representing the same world.
-They do not require the workflows to use identical internal tables.
+The proof records scenario identity, population change, model interfaces,
+mappings, reviews, and run/file evidence. It keeps shared identities separate
+from model-owned attributes, so workflows can differ without silently
+describing different populations.
 
 This is a test of the documented exchange shape and cross-file checks. It is
 not a deployed PILATES or POLARIS runtime, and it does not establish that a

@@ -33,28 +33,27 @@ enums:
 classes:
   ScenarioRealizationIdentity:
     description: >-
-      Portable semantic identity for one closed, versioned realization-manifest
-      projection. This identity is distinct from an individual artifact byte
-      digest and from a full exchange-envelope content digest.
+      Portable semantic identity for a closed, versioned realization manifest.
+      It differs from an artifact byte digest and a full exchange-envelope digest.
     attributes:
       kind:
         required: true
-        description: Closed realization projection kind used to calculate content_digest.
+        description: Closed realization canonical-representation kind used to calculate content_digest.
       projection_version:
         required: true
-        description: Version of the projection rules named by kind.
+        description: Version of the canonical-representation rules named by kind.
       digest_algorithm:
         range: DigestAlgorithm
         required: true
-        description: Algorithm used to calculate the realization projection digest.
+        description: Algorithm used to calculate the realization canonical-representation digest.
       content_digest:
         required: true
-        description: Digest of the canonical realization projection, excluding this field.
+        description: Digest of the canonical realization representation, excluding this field.
   ScenarioRealizationReceipt:
     description: >-
       Separately versioned receipt envelope for observations, validation,
       admission, locations, or execution evidence about one realization. Its
-      fields are logically outside the realization projection.
+      fields are logically outside the realization canonical representation.
     attributes:
       receipt_version:
         required: true

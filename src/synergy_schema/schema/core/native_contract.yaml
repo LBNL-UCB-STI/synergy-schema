@@ -3,7 +3,8 @@ name: native_contract
 title: Provider-neutral native contract references
 description: >-
   Immutable references to model-owned contract inventories. These references
-  identify native surfaces without importing a provider's runtime schemas.
+  identify native configuration paths, artifact keys, and table columns without
+  importing a provider's runtime schemas.
 
 prefixes:
   synergy_schema: https://w3id.org/LBNL-UCB-STI/synergy-schema/

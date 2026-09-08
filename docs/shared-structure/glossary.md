@@ -6,20 +6,6 @@ guides use a shorter phrase. The [generated schema
 reference](../schema/index.md) remains authoritative for exact fields, types,
 requiredness, and cardinality.
 
-## Why these records exist
-
-No single file can establish that several workflows simulated the same shared
-universe. A scenario definition states the common assumptions. An interface
-reference locates those assumptions in a model-owned system. A mapping states
-how representations relate. A review record records a named role's decision on
-one exact mapping version. An implementation binding names the code associated
-with that version, and a receipt records one actual use of the code and files.
-
-These records are separate because the underlying facts change independently.
-The separation also limits each claim: evidence that a file came from a named
-run is not proof that the mapping was approved, and an approved mapping is not
-proof that the expected code ran.
-
 ## Shared scenarios and changing populations
 
 ### Scenario definition
@@ -130,10 +116,10 @@ universal table.
 
 ### Native contract
 
-A model-owned description of the interface surfaces that another workflow may
-refer to: configuration paths, artifact keys, or table columns and their exact
-spellings. In Synergy, “contract” means that these surfaces are deliberately
-named and versioned for exchange. It is not a Synergy-owned replacement for the
+A model-owned description of configuration paths, artifact keys, or table
+columns that another workflow may refer to, including their exact spellings. In
+Synergy, “contract” means that these elements are deliberately named and
+versioned for exchange. It is not a Synergy-owned replacement for the
 model's schema, runtime objects, or payload files.
 
 ### Native contract catalog
@@ -180,6 +166,15 @@ of households and the SQL script that created it are different artifacts.
 
 An algorithm plus content digest that identifies exact bytes. A path or URI
 can change while the artifact identity remains the same.
+
+### Canonical representation
+
+A newly constructed, ordered set of selected fields used to calculate a stable
+digest. It is not a model record set, a database view, or a copy of the source
+document with fields removed. For compatibility, some schema fields and Python
+functions retain `projection` in their names, such as `projection_version` and
+`canonical_realization_projection`; in the guides, “canonical representation”
+is the preferred name for this hashing input.
 
 ### Evidence
 

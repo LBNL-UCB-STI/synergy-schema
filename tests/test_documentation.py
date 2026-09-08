@@ -6,6 +6,7 @@ from pathlib import Path
 import tomllib
 
 import docs_macros
+from zensical.config import parse_config
 
 
 ROOT = Path(__file__).parents[1]
@@ -27,15 +28,16 @@ def _leaf_targets(items: list[dict[str, object]]) -> list[tuple[str, str]]:
     return leaves
 
 
-def test_navigation_has_the_approved_eight_sections_and_existing_leaves() -> None:
+def test_navigation_has_the_approved_nine_sections_and_existing_leaves() -> None:
     nav = _nav()
     assert [next(iter(item)) for item in nav] == [
         "Overview",
-        "Shared structure",
+        "Model contract review",
+        "Bring an existing mapping",
         "Proof of concept",
+        "Shared structure",
         "Cross-model mappings",
         "Workflow structures",
-        "Bring an existing mapping",
         "Design rationale",
         "Schema reference",
     ]
@@ -60,6 +62,12 @@ def test_navigation_has_the_approved_eight_sections_and_existing_leaves() -> Non
         "Population identity",
         "Mapping meaning, implementation, and lineage",
         "Scenario compatibility",
+        "Model contract review",
+        "ATLAS",
+        "ActivitySim",
+        "UrbanSim",
+        "POLARIS",
+        "DEMOS",
         "Complete generated reference",
     }
     leaves = _leaf_targets(nav)
@@ -68,6 +76,13 @@ def test_navigation_has_the_approved_eight_sections_and_existing_leaves() -> Non
         if target.startswith("schema/"):
             continue
         assert (DOCS / target).is_file()
+
+
+def test_docs_configuration_parses_markdown_inside_linkml_html_wrappers() -> None:
+    """Generated LinkML reference pages use ``<div markdown=\"1\">`` wrappers."""
+    config = parse_config(str(ROOT / "zensical.toml"))
+
+    assert "md_in_html" in config["markdown_extensions"]
 
 
 def test_realization_identity_contract_is_public_and_release_ready() -> None:
@@ -170,16 +185,15 @@ def test_overview_explains_the_shared_universe_and_why_records_matter() -> None:
         "## The coordination problem",
         "## One shared universe, several modeling systems",
         "## Why the difficult records matter",
-        "## How Synergy organizes the answer",
         "## Scope and limits",
         "## How the documentation builds",
     ):
         assert heading in overview
-    assert "same shared universe" in overview
+    assert "declared consistency" in overview
     assert "Interface descriptions" in overview
     assert "Review records" in overview
     assert "Evidence" in overview
-    assert "this claim checkable" in overview
+    assert "evidence from the" in overview
     assert "PILATES modeling pipeline" in overview
     assert "and POLARIS" in overview
     assert "keep their own schemas" in overview
@@ -209,20 +223,12 @@ def test_public_guides_avoid_second_person_and_attestation_language() -> None:
 def test_proof_uses_the_executable_showcase_and_preserves_scope() -> None:
     proof = (DOCS / "proof-of-concept/index.md").read_text()
     normalized_proof = " ".join(proof.split())
-    for reference in (
-        "ScenarioDefinition",
-        "PopulationTrajectory",
-        "HouseholdState",
-        "PersonState",
-        "Vehicle",
-        "ConsistProvenanceDocument",
-    ):
-        assert reference in proof
     for idea in (
         "same shared universe",
-        "Evidence",
+        "scenario identity",
         "interfaces",
-        "review records",
+        "reviews",
+        "run/file evidence",
         "not a deployed PILATES or POLARIS runtime",
     ):
         assert idea in normalized_proof
@@ -339,14 +345,15 @@ def test_adoption_guides_are_honest_about_scope_cost_and_exit() -> None:
     adoption = "\n".join(
         path.read_text() for path in (DOCS / "bring-an-existing-mapping").glob("*.md")
     )
-    for heading in ("Inputs", "What stays unchanged", "Outputs", "Typical timing"):
+    for heading in ("Inputs", "What stays unchanged", "First useful result"):
         assert heading in adoption
     assert "contract-at-a-glance" in adoption
     assert "discovery evidence" in adoption
     assert "Automatic receipt emission" in adoption
     assert "Work stops" in adoption
-    assert "minutes, not hours" in adoption
-    assert "five business days" in adoption
+    assert "consumer's existing import or dry-run path" in adoption
+    assert "For repeated exchanges or material mapping changes" in adoption
+    assert "five business days" not in adoption
     assert "payloads, readable review tables, and" in adoption
     assert "historical incidents" in adoption
     assert "Flat files plus a README can be enough" in adoption

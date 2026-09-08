@@ -1,8 +1,8 @@
 id: https://w3id.org/LBNL-UCB-STI/synergy-schema/models/activitysim/population
 name: activitysim_population
-title: ActivitySim population identity projections
+title: ActivitySim population identity and join records
 description: >-
-  ActivitySim-owned identity-bearing partial projections used to join household,
+  ActivitySim-owned partial identity and join record sets used to join household,
   person, and land-use-zone records across the current PILATES workflow.
 
 prefixes:
@@ -17,10 +17,10 @@ imports:
 
 classes:
   ActivitySimHouseholdInputRecord:
-    description: ActivitySim household input identity and location projection.
+    description: ActivitySim household input identity and location fields.
     annotations:
       owner: ActivitySim
-      coverage: identity-bearing partial projection
+      coverage: partial identity and join record set
       enforcement_status: PILATES-observed
     attributes:
       household_id:
@@ -41,10 +41,10 @@ classes:
         description: Optional household traffic-analysis-zone reference.
 
   ActivitySimPersonInputRecord:
-    description: ActivitySim person input identity and household-join projection.
+    description: ActivitySim person input identity and household-join fields.
     annotations:
       owner: ActivitySim
-      coverage: identity-bearing partial projection
+      coverage: partial identity and join record set
       enforcement_status: PILATES-observed
     attributes:
       person_id:
@@ -94,10 +94,10 @@ classes:
         description: Optional school traffic-analysis-zone alias.
 
   ActivitySimLandUseZoneRecord:
-    description: ActivitySim land-use-zone identity projection.
+    description: ActivitySim land-use-zone identity fields.
     annotations:
       owner: ActivitySim
-      coverage: identity-bearing partial projection
+      coverage: partial identity and join record set
       enforcement_status: PILATES-observed
     attributes:
       taz:

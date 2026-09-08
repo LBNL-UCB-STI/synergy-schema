@@ -3,8 +3,10 @@ set -euo pipefail
 
 repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 schema_path="$repo_root/src/synergy_schema/schema/synergy_schema.yaml"
+observed_examples_schema_path="$repo_root/src/synergy_schema/schema/observed_examples.yaml"
 mapping_path="$repo_root/examples/post_atlas_population_bundle/population_identity_mappings.yaml"
 generated_docs="$repo_root/docs/schema"
+observed_examples_docs="$generated_docs/observed-examples"
 mode="${1:-serve}"
 dev_addr="${ZENSICAL_DEV_ADDR:-127.0.0.1:8000}"
 
@@ -23,12 +25,18 @@ fi
 
 rm -rf "$generated_docs"
 mkdir -p "$generated_docs"
+mkdir -p "$observed_examples_docs"
 
 cd "$repo_root"
 uv run gen-doc \
   --no-render-imports \
   --directory "$generated_docs" \
   "$schema_path"
+
+uv run gen-doc \
+  --no-render-imports \
+  --directory "$observed_examples_docs" \
+  "$observed_examples_schema_path"
 
 uv run python -m synergy_schema.cross_model_identity_diagram \
   "$mapping_path" \

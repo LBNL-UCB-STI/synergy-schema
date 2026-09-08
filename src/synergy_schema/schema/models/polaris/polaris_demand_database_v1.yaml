@@ -1,0 +1,153 @@
+id: https://w3id.org/LBNL-UCB-STI/synergy-schema/models/polaris/demand-database-v1
+name: polaris_demand_database_v1
+title: POLARIS demand database provisional table description v1
+description: >-
+  Provisional, model-associated description of selected population tables in the
+  ignored Austin-Demand_incl_relp_hh_matches_acs.sqlite example. This is not a
+  complete native POLARIS database contract or a claim that the SQLite database
+  version is a Synergy schema version.
+
+prefixes:
+  synergy_schema: https://w3id.org/LBNL-UCB-STI/synergy-schema/
+  linkml: https://w3id.org/linkml/
+
+default_prefix: synergy_schema
+default_range: string
+
+imports:
+  - linkml:types
+
+annotations:
+  version: v1
+  model_association: POLARIS
+  status: provisional
+  coverage: observed example selected population-table description
+  source_evidence: evidence/demos_input_population_from_polaris/Austin-Demand_incl_relp_hh_matches_acs.sqlite
+  conformance_boundary: >-
+    Person.household and Vehicle.hhold joins to Household.household are
+    external conformance checks; this table description does not declare SQLite
+    foreign keys.
+
+classes:
+  PolarisDemandDatabaseV1Household:
+    description: >-
+      Provisional Household table row description. The listed fields are
+      physical columns, not a complete native POLARIS contract.
+    annotations:
+      table_name: Household
+      model_association: POLARIS demand database
+      coverage: provisional observed record set
+    attributes:
+      household:
+        range: integer
+        identifier: true
+        required: true
+        annotations:
+          physical_name: household
+        description: Physical Household primary-key column.
+      hhold:
+        range: integer
+        required: true
+        annotations:
+          physical_name: hhold
+        description: Physical household column retained as distinct from household; not an alias or uniqueness constraint.
+      location:
+        range: integer
+        required: true
+        annotations:
+          physical_name: location
+        description: Physical household location identifier.
+      persons:
+        range: integer
+        required: true
+        annotations:
+          physical_name: persons
+        description: Physical household person-count column.
+      workers:
+        range: integer
+        required: true
+        annotations:
+          physical_name: workers
+        description: Physical household worker-count column.
+      vehicles:
+        range: integer
+        required: true
+        annotations:
+          physical_name: vehicles
+        description: Physical household vehicle-count column.
+      type:
+        range: integer
+        required: true
+        annotations:
+          physical_name: type
+        description: Physical household type field; code semantics are not asserted here.
+      income:
+        range: integer
+        required: true
+        annotations:
+          physical_name: income
+        description: Physical household income field; units and semantics are not asserted here.
+      housing_unit_type:
+        range: integer
+        required: true
+        annotations:
+          physical_name: housing_unit_type
+        description: Physical housing-unit-type field; code semantics are not asserted here.
+
+  PolarisDemandDatabaseV1Person:
+    description: Provisional Person table row description.
+    annotations:
+      table_name: Person
+      model_association: POLARIS demand database
+      coverage: provisional observed record set
+    attributes:
+      person:
+        range: integer
+        identifier: true
+        required: true
+        annotations:
+          physical_name: person
+        description: Physical Person primary-key column.
+      household:
+        range: integer
+        required: true
+        annotations:
+          physical_name: household
+          relationship_target: PolarisDemandDatabaseV1Household.household
+          validation_boundary: external conformance check, not a SQLite foreign key
+        description: Physical household join value checked externally against Household.household.
+      id:
+        range: integer
+        required: true
+        annotations:
+          physical_name: id
+        description: Physical within-household person identifier.
+
+  PolarisDemandDatabaseV1Vehicle:
+    description: Provisional Vehicle table row description.
+    annotations:
+      table_name: Vehicle
+      model_association: POLARIS demand database
+      coverage: provisional observed record set
+    attributes:
+      vehicle_id:
+        range: integer
+        identifier: true
+        required: true
+        annotations:
+          physical_name: vehicle_id
+        description: Physical Vehicle primary-key column.
+      hhold:
+        range: integer
+        required: true
+        annotations:
+          physical_name: hhold
+          relationship_target: PolarisDemandDatabaseV1Household.household
+          validation_boundary: external conformance check, not a SQLite foreign key
+        description: Physical household join value checked externally against Household.household.
+      type:
+        range: integer
+        required: true
+        annotations:
+          physical_name: type
+        description: Physical vehicle type field; code semantics are not asserted here.

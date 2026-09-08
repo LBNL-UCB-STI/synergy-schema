@@ -43,8 +43,7 @@ shared assumption.
 
 ## Why the difficult records matter
 
-The abstract-looking parts of Synergy address failures that surface only after
-several systems, teams, and years of data are involved.
+Each record resolves a distinct coordination risk.
 
 | Record | Why it exists |
 | --- | --- |
@@ -55,26 +54,8 @@ several systems, teams, and years of data are involved.
 | Receipts and evidence | Connect one scenario and year to the run, implementation, inputs, and outputs actually used. Evidence supports a bounded claim about an exchange; it does not prove that a model is scientifically correct. |
 | Content digests | Give changing definitions and files stable fingerprints, allowing checks to distinguish an edited file from a moved or renamed one. |
 
-Together, these records make this claim checkable: the workflows represented
-the same shared universe, used the reviewed translation, and exchanged the
-identified files. No single record can establish all three.
-
-## How Synergy organizes the answer
-
-Synergy separates four concerns that change for different reasons:
-
-1. **Shared structure** describes scenarios, years, population occurrences,
-   relationships, and file identity.
-2. **Model-owned structure** names the native settings and records exposed at
-   each workflow boundary.
-3. **Mappings and workflow packages** connect the shared description to those
-   native structures and record known translation losses.
-4. **Conformance checks** compare identities and declarations across documents
-   that a field-level schema cannot evaluate on its own.
-
-LinkML is the source language for these definitions and for the generated
-field reference. Participating models do not need LinkML in their runtime
-systems.
+Together they let the checker test declared consistency; evidence from the
+producing and consuming runtimes is still required to establish actual use.
 
 ## Scope and limits
 

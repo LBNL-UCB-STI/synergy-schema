@@ -3,7 +3,7 @@ name: polaris_population_translation
 title: POLARIS population translation profile
 description: >-
   Workflow-owned receipt for translated annual POLARIS population artifacts.
-  It composes partial POLARIS-native projections with source trajectory,
+  It composes partial POLARIS-native record sets with source trajectory,
   mapping, implementation, and artifact evidence without redefining native
   POLARIS records.
 
@@ -58,7 +58,7 @@ classes:
     description: >-
       Derived POLARIS population exchange package for a scenario realization.
       It preserves the source trajectory identity and mapping/implementation
-      evidence while leaving native POLARIS records as partial projections.
+      evidence while leaving native POLARIS records as partial record sets.
     is_a: HandoffBundle
     annotations:
       conformance_requirements: >-

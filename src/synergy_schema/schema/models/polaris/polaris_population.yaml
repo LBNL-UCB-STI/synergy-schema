@@ -1,8 +1,8 @@
 id: https://w3id.org/LBNL-UCB-STI/synergy-schema/models/polaris/population
 name: polaris_population
-title: POLARIS population identity projections
+title: POLARIS population identity and join records
 description: >-
-  POLARIS-owned identity-bearing partial projections used to join translated
+  POLARIS-owned partial identity and join record sets used to join translated
   household, person, and vehicle population records in the PILATES workflow.
 
 prefixes:
@@ -17,10 +17,10 @@ imports:
 
 classes:
   PolarisHouseholdRecord:
-    description: POLARIS household identity and location projection.
+    description: POLARIS household identity and location fields.
     annotations:
       owner: POLARIS
-      coverage: identity-bearing partial projection
+      coverage: partial identity and join record set
       enforcement_status: PILATES-observed
     attributes:
       household:
@@ -39,10 +39,10 @@ classes:
         description: Optional household location identifier.
 
   PolarisPersonRecord:
-    description: POLARIS person identity and household-join projection.
+    description: POLARIS person identity and household-join fields.
     annotations:
       owner: POLARIS
-      coverage: identity-bearing partial projection
+      coverage: partial identity and join record set
       enforcement_status: PILATES-observed
     attributes:
       person:
@@ -66,12 +66,12 @@ classes:
 
   PolarisVehicleRecord:
     description: >-
-      POLARIS vehicle identity and household-join projection. The translation
+      POLARIS vehicle identity and household-join fields. The translation
       drops the ATLAS forecast/output year, so its (hhold, vehicle_id) pair is
       identifiable only within the enclosing PopulationSnapshot artifact scope.
     annotations:
       owner: POLARIS
-      coverage: identity-bearing partial projection
+      coverage: partial identity and join record set
       enforcement_status: PILATES-observed
       identity_scope: enclosing translated population snapshot artifact
     unique_keys:
