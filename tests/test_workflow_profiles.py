@@ -108,7 +108,7 @@ def test_pilates_profile_composes_operational_trajectory_evidence() -> None:
     assert trajectory_bundle.attributes["manifest_content_digest_algorithm"].range == (
         "DigestAlgorithm"
     )
-    assert "canonical content projection" in str(
+    assert "canonical content representation" in str(
         trajectory_bundle.annotations["manifest_digest_projection"].value
     )
     assert "manifest_content_digest itself" in str(
@@ -250,5 +250,5 @@ def test_polaris_profile_packages_yearly_translation_receipts() -> None:
     ):
         assert (
             schema_view.induced_class(class_name).annotations["coverage"].value
-            == "identity-bearing partial projection"
+            == "partial identity and join record set"
         )

@@ -1,8 +1,8 @@
 id: https://w3id.org/LBNL-UCB-STI/synergy-schema/models/urbansim/population
 name: urbansim_population
-title: UrbanSim population identity projections
+title: UrbanSim population identity and join records
 description: >-
-  UrbanSim-owned identity-bearing partial projections used to join household
+  UrbanSim-owned partial identity and join record sets used to join household
   and person population records across the current PILATES workflow.
 
 prefixes:
@@ -17,10 +17,10 @@ imports:
 
 classes:
   UrbanSimHouseholdPopulationRecord:
-    description: UrbanSim household identity and location projection.
+    description: UrbanSim household identity and location fields.
     annotations:
       owner: UrbanSim
-      coverage: identity-bearing partial projection
+      coverage: partial identity and join record set
       enforcement_status: PILATES-observed
     attributes:
       household_id:
@@ -34,10 +34,10 @@ classes:
           Census block identifier for the household location, preserving leading zeros.
 
   UrbanSimPersonPopulationRecord:
-    description: UrbanSim person identity and household-join projection.
+    description: UrbanSim person identity and household-join fields.
     annotations:
       owner: UrbanSim
-      coverage: identity-bearing partial projection
+      coverage: partial identity and join record set
       enforcement_status: PILATES-observed
     attributes:
       person_id:

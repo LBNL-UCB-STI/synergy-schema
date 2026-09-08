@@ -14,13 +14,13 @@ SCHEMA_PATH = (
 )
 
 
-def test_v1_is_a_provisional_observed_projection() -> None:
+def test_v1_is_a_provisional_observed_record_set() -> None:
     view = SchemaView(str(SCHEMA_PATH))
     assert view.schema.name == "polaris_demand_database_v1"
     assert view.schema.annotations["version"].value == "v1"
     assert view.schema.annotations["model_association"].value == "POLARIS"
     assert view.schema.annotations["status"].value == "provisional"
-    assert "observed_example" in view.schema.annotations["coverage"].value
+    assert "observed example" in view.schema.annotations["coverage"].value
     assert set(view.all_classes()) == {
         "PolarisDemandDatabaseV1Household",
         "PolarisDemandDatabaseV1Person",

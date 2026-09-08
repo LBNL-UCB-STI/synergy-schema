@@ -40,7 +40,7 @@ provider-neutral handoff bundle, then compose them into a PILATES yearly
 population profile. The profile binds its three population artifacts to
 ATLAS-owned household/person input and vehicle-output record contracts and to a
 pinned Consist provenance graph. The root schema now also imports
-identity-bearing, partial UrbanSim, ActivitySim, and POLARIS projections plus
+partial UrbanSim, ActivitySim, and POLARIS identity and join record sets plus
 typed mappings for the observed PILATES population path. Native model records
 remain independent of Consist. This is not complete native-table coverage or
 runtime validation: model-owner review, artifact integrity checks, and broader

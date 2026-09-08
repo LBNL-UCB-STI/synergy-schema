@@ -181,6 +181,15 @@ of households and the SQL script that created it are different artifacts.
 An algorithm plus content digest that identifies exact bytes. A path or URI
 can change while the artifact identity remains the same.
 
+### Canonical representation
+
+A newly constructed, ordered set of selected fields used to calculate a stable
+digest. It is not a model record set, a database view, or a copy of the source
+document with fields removed. For compatibility, some schema fields and Python
+functions retain `projection` in their names, such as `projection_version` and
+`canonical_realization_projection`; in the guides, “canonical representation”
+is the preferred name for this hashing input.
+
 ### Evidence
 
 A record that supports a limited factual claim. A file digest can support a

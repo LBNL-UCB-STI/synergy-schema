@@ -22,9 +22,9 @@ digest_algorithm: sha256
 content_digest: <64 lowercase hexadecimal characters>
 ```
 
-`content_digest` is SHA-256 over the canonical projection below. It is not
+`content_digest` is SHA-256 over the canonical representation below. It is not
 part of the bytes it hashes. `kind`, `projection_version`, and
-`digest_algorithm` are part of those bytes, so a later projection must use a
+`digest_algorithm` are part of those bytes, so a later canonical representation must use a
 new kind or version rather than silently changing v1 rules.
 
 `ScenarioRealizationIdentity` and `ScenarioRealizationReceipt` are published
@@ -33,11 +33,11 @@ in the provider-neutral LinkML schema at
 The PILATES `PopulationTrajectoryBundle` profile composes them with the source
 manifest fields.
 
-## Closed v1 projection
+## Closed v1 canonical representation
 
 After validation, construct a new mapping with exactly this shape. Do not copy
 the input bundle and delete selected fields; unrecognized source fields are
-excluded unless a later projection version explicitly adds them.
+excluded unless a later `projection_version` explicitly adds them.
 
 ```yaml
 kind: synergy:scenario-realization:population-trajectory-v1
@@ -78,7 +78,7 @@ trajectory:
             selected_root: <schema root>
 ```
 
-The projection includes the declared scenario, realization, trajectory, and
+The canonical representation includes the declared scenario, realization, trajectory, and
 snapshot context; requested/successful/skipped year closure; completeness;
 member roles; selected artifact byte identities; and schema interpretation
 identities. It excludes the outer exchange `id`, locators, storage paths,
@@ -88,12 +88,12 @@ references, human annotations, receipts, and both digest-result fields.
 
 ## Required validation
 
-Before returning a projection or digest, a conforming implementation must:
+Before returning a canonical representation or digest, a conforming implementation must:
 
 1. validate the declared `PopulationTrajectoryBundle` LinkML shape;
 2. validate cross-record scenario, trajectory, year, provenance, and artifact
    agreement required by the source envelope;
-3. validate this profile's projection rules; and
+3. validate this profile's canonical-representation rules; and
 4. compare any supplied top-level or receipt identity to the calculated
    identity.
 
@@ -108,7 +108,7 @@ snapshot bundle must be complete. Invalid input receives no realization digest.
 
 ## Canonical bytes
 
-Serialize the closed projection as UTF-8 using the
+Serialize the closed canonical representation as UTF-8 using the
 [RFC 8785 JSON Canonicalization Scheme (JCS)](https://www.rfc-editor.org/rfc/rfc8785).
 For this v1 profile, values are restricted to objects with string keys, arrays,
 strings containing Unicode scalar values, integers, and booleans. `null`,
@@ -152,7 +152,7 @@ realization. It may hold locations, observations, validation, admission, or
 execution provenance, but those facts never enter the v1 digest. A receipt
 identity must match the calculated realization identity. During migration a
 receipt may be physically adjacent to the source bundle; it remains logically
-outside this manifest projection. Consumers that do not need receipt evidence
+outside this manifest's canonical representation. Consumers that do not need receipt evidence
 may ignore it entirely.
 
 ## Compatibility
@@ -161,5 +161,5 @@ may ignore it entirely.
 bundle digest. It changes when any included envelope evidence changes and is
 neither original-document-byte integrity nor a realization or registry
 identity. Future derived profiles, including POLARIS translations, require
-their own published projection and test vector before they can claim a
+their own published canonical representation and test vector before they can claim a
 realization identity.

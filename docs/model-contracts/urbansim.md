@@ -1,7 +1,7 @@
 # UrbanSim contract review
 
-The current UrbanSim surface is an identity-bearing partial projection used to
-join household and person population records in the current workflow. It is
+The current UrbanSim surface is a partial set of identity and join fields used
+to join household and person population records in the current workflow. It is
 not a complete UrbanSim input or output catalog.
 
 | Physical role | LinkML class | Review first |

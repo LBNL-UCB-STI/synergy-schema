@@ -5,16 +5,16 @@ navigating the shared handoff, mapping, or workflow material. Each class link
 opens the generated LinkML reference, including its field table, annotations,
 relationships, and direct source declaration.
 
-The pages distinguish established current-workflow projections from provisional
-observed model contracts. A provisional contract is real review surface, but it
+The pages distinguish established current-workflow record sets from provisional
+observed model contracts. A provisional contract is a real review surface, but it
 does not establish a shared release, mapping, or cross-model handoff.
 
 | Model | Established review surface | Provisional observed surface |
 | --- | --- | --- |
 | [ATLAS](atlas.md) | Household and person inputs; vehicle output | Paired fleet-output CSV row shapes |
-| [ActivitySim](activitysim.md) | Household, person, and land-use-zone identity projections | None currently |
-| [UrbanSim](urbansim.md) | Household and person identity projections | None currently |
-| [POLARIS](polaris.md) | Translated household, person, and vehicle projections | Selected demand-database population tables |
+| [ActivitySim](activitysim.md) | Household, person, and land-use-zone identity and join records | None currently |
+| [UrbanSim](urbansim.md) | Household and person identity and join records | None currently |
+| [POLARIS](polaris.md) | Translated household, person, and vehicle records | Selected demand-database population tables |
 | [DEMOS](demos.md) | None currently | Mapped household and person CSV exports |
 
 For review, first confirm whether the listed physical surface and direction are

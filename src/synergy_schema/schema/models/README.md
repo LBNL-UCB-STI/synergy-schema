@@ -18,7 +18,7 @@ meaning is genuinely shared.
 The model-owned population slices are:
 
 - [`activitysim/`](activitysim/), the ActivitySim household, person, and
-  land-use-zone join projections observed by the current PILATES adapter.
+  land-use-zone identity and join records observed by the current PILATES adapter.
 - [`atlas/`](atlas/), the ATLAS household and person inputs plus vehicle output
   used by the post-ATLAS population handoff.
 - [`atlas/atlas_fleet_observed_example_v1.yaml`](atlas/atlas_fleet_observed_example_v1.yaml),
@@ -28,13 +28,13 @@ The model-owned population slices are:
   `POLARIS_mapped` exports; their publisher and target-ingest status remain
   unconfirmed.
 - [`polaris/`](polaris/), the translated POLARIS household, person, and
-  vehicle identity projections.
+  vehicle identity records.
 - [`polaris/polaris_demand_database_v1.yaml`](polaris/polaris_demand_database_v1.yaml),
-  a selected population-table projection from an observed demand database;
+  a description of selected population tables from an observed demand database;
   it is neither a complete database schema nor a confirmed seed-input contract.
-- [`urbansim/`](urbansim/), the UrbanSim household and person join projections.
+- [`urbansim/`](urbansim/), the UrbanSim household and person join records.
 
-The established projections remain model-owned. The provisional surfaces record
+The established record sets remain model-owned. The provisional surfaces record
 their observed model association while maintainers review their semantics.
 PILATES binds relevant approved artifacts to an operational profile without
 copying model fields into a shared kernel.

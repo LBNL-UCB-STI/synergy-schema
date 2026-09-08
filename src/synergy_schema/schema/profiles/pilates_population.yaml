@@ -195,7 +195,7 @@ classes:
         description: Algorithm paired with the referenced manifest content digest.
       manifest_content_digest:
         required: true
-        description: Digest of the referenced canonical manifest content projection.
+        description: Digest of the referenced canonical manifest content representation.
   PopulationSnapshotBundleMember:
     description: >-
       A population-table member with one of the profile's allowed roles. The
@@ -245,19 +245,19 @@ classes:
       PILATES operational composition of one core population trajectory with
       its successfully exported yearly PopulationSnapshotBundle manifests and
       evidence for the schedule and Consist runs that produced them. A
-      realization identity is a separately defined semantic projection; an
+      realization identity is a separately defined canonical representation; an
       optional receipt envelope carries mutable operational evidence outside
-      that projection.
+      that representation.
     is_a: HandoffBundle
     annotations:
       manifest_digest_projection: >-
         The legacy deterministic logical full-bundle manifest_content_digest
-        is calculated from a canonical content projection of this bundle,
+        is calculated from a canonical content representation of this bundle,
         including inherited HandoffBundle content and all profile attributes,
         but excluding manifest_content_digest itself. It covers mutable
         schedule and Consist evidence, so it is not a realization identity or
         a checksum of serialized YAML or JSON bytes. The paired digest
-        algorithm remains in the projection. Conditional cross-document
+        algorithm remains in the representation. Conditional cross-document
         completeness and year-alignment checks are enforced by later
         conformance code.
     attributes:
@@ -298,7 +298,7 @@ classes:
         inlined: true
         description: >-
           Optional portable semantic identity calculated from the closed
-          population-trajectory realization projection.
+          population-trajectory realization canonical representation.
       realization_receipt:
         range: ScenarioRealizationReceipt
         inlined: true

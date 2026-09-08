@@ -79,7 +79,7 @@ lookup.
 
 The [population trajectory realization identity definition](../shared-structure/realization-identity.md)
 is the public normative definition for independent consumers. It identifies
-the projection, canonical bytes, test vector, and trust boundary; this guide
+the canonical representation, canonical bytes, test vector, and trust boundary; this guide
 only introduces the concept.
 
 ## Provenance

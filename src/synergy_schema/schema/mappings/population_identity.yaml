@@ -3,7 +3,7 @@ name: population_identity_mappings
 title: Cross-model population identity mappings
 description: >-
   Typed declarations of how identity-bearing population fields relate across
-  model-owned projections. These mappings document workflow behavior; they do
+  model-owned record sets. These mappings document workflow behavior; they do
   not make model-specific fields interchangeable.
 
 prefixes:

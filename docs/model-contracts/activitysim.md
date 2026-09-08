@@ -1,7 +1,7 @@
 # ActivitySim contract review
 
-The current ActivitySim surface is an identity-bearing partial projection used
-by the PILATES workflow. It is not a complete ActivitySim input or output
+The current ActivitySim surface is a partial set of identity and join fields
+used by the PILATES workflow. It is not a complete ActivitySim input or output
 catalog.
 
 | Physical role | LinkML class | Review first |
