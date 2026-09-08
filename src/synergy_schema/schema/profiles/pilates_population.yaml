@@ -23,9 +23,8 @@ imports:
 enums:
   DiscoveryManifestGenerationMode:
     description: >-
-      Generation mode allowed for a DayZeroExchangeManifest. The day-zero
-      manifest is deliberately discovery-only and cannot be a production
-      receipt.
+      Allowed generation mode for a discovery-only DayZeroExchangeManifest; it
+      cannot be a production receipt.
     permissible_values:
       manual_discovery:
         description: Human-created discovery evidence beside existing artifacts.

@@ -6,20 +6,6 @@ guides use a shorter phrase. The [generated schema
 reference](../schema/index.md) remains authoritative for exact fields, types,
 requiredness, and cardinality.
 
-## Why these records exist
-
-No single file can establish that several workflows simulated the same shared
-universe. A scenario definition states the common assumptions. An interface
-reference locates those assumptions in a model-owned system. A mapping states
-how representations relate. A review record records a named role's decision on
-one exact mapping version. An implementation binding names the code associated
-with that version, and a receipt records one actual use of the code and files.
-
-These records are separate because the underlying facts change independently.
-The separation also limits each claim: evidence that a file came from a named
-run is not proof that the mapping was approved, and an approved mapping is not
-proof that the expected code ran.
-
 ## Shared scenarios and changing populations
 
 ### Scenario definition

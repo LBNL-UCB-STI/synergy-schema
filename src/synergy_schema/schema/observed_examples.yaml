@@ -2,10 +2,9 @@ id: https://w3id.org/LBNL-UCB-STI/synergy-schema/observed-examples
 name: observed_examples
 title: Synergy provisional model contracts
 description: >-
-  Separate LinkML entry point for provisional model-associated row contracts
-  derived from local structural examples. It is intentionally not imported by
-  the established Synergy aggregate schema: these classes do not establish a
-  common cross-model handoff profile.
+  Separate entry point for provisional model-associated row contracts from
+  local structural examples. It is not imported by the established aggregate
+  schema and establishes no cross-model handoff.
 
 prefixes:
   synergy_schema: https://w3id.org/LBNL-UCB-STI/synergy-schema/

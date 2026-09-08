@@ -33,9 +33,8 @@ enums:
 classes:
   ScenarioRealizationIdentity:
     description: >-
-      Portable semantic identity for one closed, versioned realization-manifest
-      canonical representation. This identity is distinct from an individual artifact byte
-      digest and from a full exchange-envelope content digest.
+      Portable semantic identity for a closed, versioned realization manifest.
+      It differs from an artifact byte digest and a full exchange-envelope digest.
     attributes:
       kind:
         required: true

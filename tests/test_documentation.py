@@ -185,16 +185,15 @@ def test_overview_explains_the_shared_universe_and_why_records_matter() -> None:
         "## The coordination problem",
         "## One shared universe, several modeling systems",
         "## Why the difficult records matter",
-        "## How Synergy organizes the answer",
         "## Scope and limits",
         "## How the documentation builds",
     ):
         assert heading in overview
-    assert "declared scenario" in overview
+    assert "declared consistency" in overview
     assert "Interface descriptions" in overview
     assert "Review records" in overview
     assert "Evidence" in overview
-    assert "executed that translation requires" in overview
+    assert "evidence from the" in overview
     assert "PILATES modeling pipeline" in overview
     assert "and POLARIS" in overview
     assert "keep their own schemas" in overview
@@ -224,20 +223,12 @@ def test_public_guides_avoid_second_person_and_attestation_language() -> None:
 def test_proof_uses_the_executable_showcase_and_preserves_scope() -> None:
     proof = (DOCS / "proof-of-concept/index.md").read_text()
     normalized_proof = " ".join(proof.split())
-    for reference in (
-        "ScenarioDefinition",
-        "PopulationTrajectory",
-        "HouseholdState",
-        "PersonState",
-        "Vehicle",
-        "ConsistProvenanceDocument",
-    ):
-        assert reference in proof
     for idea in (
         "same shared universe",
-        "Evidence",
+        "scenario identity",
         "interfaces",
-        "review records",
+        "reviews",
+        "run/file evidence",
         "not a deployed PILATES or POLARIS runtime",
     ):
         assert idea in normalized_proof

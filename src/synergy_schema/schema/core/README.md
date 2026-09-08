@@ -1,13 +1,9 @@
 # Shared concepts
 
-This directory is for concepts that mean the same thing across two or more
-models. Likely examples include identifiers, units, time periods, and
-geographic references, once their meaning has been agreed.
-
-Keep this area small. A field should not move here just because two models use
-the same name. The teams involved should agree that the field represents the
-same idea, uses compatible values, and can be described without favoring one
-model's implementation.
+This directory holds concepts with an agreed meaning across at least two
+models, such as identifiers, units, time periods, and geographic references.
+Keep it small: a shared name is insufficient; teams must agree on meaning,
+values, and a model-neutral description.
 
 Details that belong to only one model should stay in
 [`../models/`](../models/). Relationships between different definitions belong

@@ -35,26 +35,18 @@ the same definition into several places.
 
 ## Current status
 
-The first vertical slices define population-snapshot context and a
-provider-neutral handoff bundle, then compose them into a PILATES yearly
-population profile. The profile binds its three population artifacts to
-ATLAS-owned household/person input and vehicle-output record contracts and to a
-pinned Consist provenance graph. The root schema now also imports
-partial UrbanSim, ActivitySim, and POLARIS identity and join record sets plus
-typed mappings for the observed PILATES population path. Native model records
-remain independent of Consist. This is not complete native-table coverage or
-runtime validation: model-owner review, artifact integrity checks, and broader
-production validation remain to come.
+The root schema covers the current PILATES population handoff, partial
+UrbanSim, ActivitySim, and POLARIS identity/join records, and mappings for the
+observed PILATES population path. It does not claim complete native-table
+coverage, runtime validation, model-owner approval, or production artifact
+integrity.
 
 ### Provisional model contracts
 
 [`observed_examples.yaml`](src/synergy_schema/schema/observed_examples.yaml)
-is a separate entry point for provisional model-contract row shapes derived from local examples
-of DEMOS mapped population exports, ATLAS fleet outputs, and a POLARIS demand
-database. It is intentionally outside the aggregate `synergy_schema.yaml`:
-the examples come from separate model contexts and do not establish a shared
-handoff, mapping, scenario, or trajectory. The existing aggregate contract and
-its receipt digests therefore remain unchanged.
+separately describes provisional DEMOS, ATLAS, and POLARIS row shapes from
+local examples. It is outside `synergy_schema.yaml` because those examples do
+not establish a shared handoff, mapping, scenario, or trajectory.
 
 ## Getting started
 

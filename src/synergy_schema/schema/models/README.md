@@ -1,19 +1,11 @@
 # Model-owned schemas
 
-This directory is where each modeling system can describe its own data in its
-own terms. ActivitySim, ATLAS, BEAM, POLARIS, and UrbanSim may have different
-field names, codes, table shapes, or ideas about what is required. Those
-differences should be visible here rather than hidden behind a forced common
-model.
-
-The team that knows a model's data should remain the authority for its
-definitions. Contributors can review generated tables and diagrams without
-using LinkML in the model's runtime.
-
-When two model-owned definitions are related, record that relationship in
-[`../mappings/`](../mappings/). Move a concept to
-[`../core/`](../core/) only after the participating teams agree that its
-meaning is genuinely shared.
+Each model describes its data here in its own terms; differences in fields,
+codes, table shapes, and requirements stay visible rather than being forced
+into a common model. The model-owning team remains authoritative. Put
+relationships between definitions in [`../mappings/`](../mappings/); move a
+concept to [`../core/`](../core/) only after participating teams agree its
+meaning is shared.
 
 The model-owned population slices are:
 
@@ -34,10 +26,9 @@ The model-owned population slices are:
   it is neither a complete database schema nor a confirmed seed-input contract.
 - [`urbansim/`](urbansim/), the UrbanSim household and person join records.
 
-The established record sets remain model-owned. The provisional surfaces record
-their observed model association while maintainers review their semantics.
-PILATES binds relevant approved artifacts to an operational profile without
-copying model fields into a shared kernel.
+Established record sets remain model-owned. Provisional surfaces record
+observed associations pending semantic review. PILATES binds approved artifacts
+through an operational profile without copying fields into a shared kernel.
 
 ## Provisional-contract entry point
 

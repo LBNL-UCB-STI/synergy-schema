@@ -8,10 +8,9 @@ that operational context.
 
 ## Owner review map
 
-Start with the named class that corresponds to the physical ATLAS surface under
-review. The established post-ATLAS records are intentionally consolidated in
-[`atlas_population.yaml`](atlas_population.yaml); keeping their relationships
-together makes the household/person/vehicle boundary easier to inspect.
+Review the class for the physical ATLAS surface. The established post-ATLAS
+records remain together in [`atlas_population.yaml`](atlas_population.yaml) so
+their household/person/vehicle boundary is visible.
 
 | ATLAS surface | LinkML review block | Status | Owner review focus |
 | --- | --- | --- | --- |
@@ -27,11 +26,9 @@ underlying producer behavior is confirmed.
 
 ## Naming and separation
 
-The LinkML class names are stable review handles, while attributes preserve
-the current physical spellings. Do not add aliases merely for a convenient
-label: use an alias only after ATLAS confirms it is an exact, durable synonym
-for the same native record or field. In particular, do not use aliases to
-represent an adapter rename or a prospective cross-model mapping.
+LinkML class names are stable review handles; attributes retain current
+physical spellings. Add an alias only for an ATLAS-confirmed durable synonym,
+not an adapter rename or prospective cross-model mapping.
 
 The established `atlas_population.yaml` remains one consolidated module. The
 fleet example stays separate because it is evidence from an unconfirmed export

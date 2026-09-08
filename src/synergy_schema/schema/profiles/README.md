@@ -12,23 +12,18 @@ A profile is about practical use, not ownership. Native BEAM or POLARIS
 definitions still belong in [`../models/`](../models/), even when PILATES uses
 them.
 
-The first workflow profile is `pilates_population.yaml`. It composes a
-post-ATLAS yearly `PopulationSnapshotBundle` from a population snapshot and
-households, persons, and vehicles artifact members, then documents each role's
-ATLAS-owned native contract root. The native row definitions remain in
-`../models/atlas/`; this profile does not copy their fields. The bundle also
-requires a `ConsistProvenanceDocument` from the pinned module under
-`../vendor/`. This operational provenance stays in the PILATES profile rather
-than leaking into shared population concepts or ATLAS-owned rows.
+`pilates_population.yaml` composes a post-ATLAS yearly
+`PopulationSnapshotBundle` from a snapshot plus household, person, and vehicle
+artifacts, and names each ATLAS-owned contract root. Native rows remain in
+`../models/atlas/`; this profile adds no fields. Its required vendored
+`ConsistProvenanceDocument` stays operational, not shared or ATLAS-owned.
 
 ## Identity-bearing population records
 
-The current population slice also documents the small sets of identity and join
-fields that PILATES connects across UrbanSim, ActivitySim, ATLAS, and
-POLARIS. These are not full native-table definitions. They expose only the
-fields needed to describe identity, household membership, and the current
-location joins; the model-owned schemas and the typed mapping manifest retain
-the physical spellings and the observed PILATES evidence.
+The population slice records only the identity and join fields that PILATES
+connects across UrbanSim, ActivitySim, ATLAS, and POLARIS. It is not a
+native-table definition: model schemas and the mapping manifest retain physical
+spellings and observed PILATES evidence.
 
 `household_id` and `person_id` are preserved where the mapping declares an
 entity identifier or household-membership relationship. Local ordinals are a
