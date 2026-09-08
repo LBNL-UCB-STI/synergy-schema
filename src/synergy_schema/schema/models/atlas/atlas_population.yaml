@@ -18,6 +18,7 @@ imports:
   - linkml:types
 
 classes:
+  # Established ATLAS input: review physical household fields in this block.
   AtlasHouseholdInput:
     description: >-
       Household row consumed by ATLAS. The post-ATLAS export retains this
@@ -112,6 +113,7 @@ classes:
         range: integer
         description: Household-type code; vocabulary requires ATLAS-owner confirmation.
 
+  # Established ATLAS input: review physical person fields in this block.
   AtlasPersonInput:
     description: ATLAS person row consumed as population input.
     annotations:
@@ -218,6 +220,7 @@ classes:
         range: integer
         description: Education-attainment code; vocabulary requires ATLAS-owner confirmation.
 
+  # Established ATLAS output: review physical vehicle fields in this block.
   AtlasVehicleOutput:
     description: >-
       Vehicle row produced by ATLAS. Its natural identity is the composite

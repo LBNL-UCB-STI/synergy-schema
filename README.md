@@ -46,6 +46,16 @@ remain independent of Consist. This is not complete native-table coverage or
 runtime validation: model-owner review, artifact integrity checks, and broader
 production validation remain to come.
 
+### Provisional model contracts
+
+[`observed_examples.yaml`](src/synergy_schema/schema/observed_examples.yaml)
+is a separate entry point for provisional model-contract row shapes derived from local examples
+of DEMOS mapped population exports, ATLAS fleet outputs, and a POLARIS demand
+database. It is intentionally outside the aggregate `synergy_schema.yaml`:
+the examples come from separate model contexts and do not establish a shared
+handoff, mapping, scenario, or trajectory. The existing aggregate contract and
+its receipt digests therefore remain unchanged.
+
 ## Getting started
 
 The project uses [uv](https://docs.astral.sh/uv/) to manage Python and its
@@ -73,11 +83,12 @@ Preview the generated schema documentation:
 scripts/preview-schema-docs
 ```
 
-The command regenerates the ignored `docs/schema/` directory and starts a
-Zensical development server at <http://127.0.0.1:8000/>. To generate the
-reference and verify a static site build without starting a server, run
-`scripts/preview-schema-docs build`. Set `ZENSICAL_DEV_ADDR`, for example to
-`127.0.0.1:8001`, when the default preview port is already in use.
+The command regenerates the ignored `docs/schema/` directory, including a
+separate observed-example reference, and starts a Zensical development server
+at <http://127.0.0.1:8000/>. To generate the reference and verify a static
+site build without starting a server, run `scripts/preview-schema-docs build`.
+Set `ZENSICAL_DEV_ADDR`, for example to `127.0.0.1:8001`, when the default
+preview port is already in use.
 
 Build the Python package and confirm that it includes the root schema:
 

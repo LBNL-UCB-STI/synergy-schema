@@ -18,11 +18,14 @@ contains the first row of that table. Its mapping-content fingerprint is the
 fingerprint; the implementation binding names the SQL or code associated with
 it; and the receipt records one actual use.
 
-This chain lets the checker distinguish “approved rules, wrong script” from
-“right script, wrong year.” It also preserves authority. The workflow team owns
-the executable, while the source and target model teams decide what their
-fields mean and whether the cross-model rule is acceptable. Synergy records and
-checks those decisions but cannot create approval on either team's behalf.
+This chain lets the checker distinguish declared “approved rules, wrong script”
+from “right script, wrong year.” It checks declaration consistency; it does not
+independently establish that the named executable produced an artifact.
+Fixture-byte verification and evidence from the producing and consuming
+runtimes are separate results. The workflow team owns the executable, while
+the source and target model teams decide what their fields mean and whether the
+cross-model rule is acceptable. Synergy records and checks those decisions but
+cannot create approval on either team's behalf.
 
 Known defaults, filtered rows, unsupported fields, and dropped context are
 recorded as [mapping residue](../shared-structure/glossary.md#mapping-residue).

@@ -27,15 +27,18 @@ Neither model must change its runtime, rename native fields, replace payload
 formats, or approve a schema by implication. The original mapping source stays
 identifiable alongside the Synergy representation.
 
-## Outputs
+## First useful result
 
-The pilot produces a day-zero manifest, a one-year mapping review, and a
-generated one-page mapping summary. Together they identify the existing files,
-state the mapping rules and known losses, connect those rules to executable
-code, and preserve review decisions.
+Start with one producer export and one named consumer. Retain the payload,
+record its checksum and producer version, and describe the fields the consumer
+needs: identifiers, joins, units, year, and any defaults or dropped
+information.
 
-## Typical timing
+Run the consumer's existing import or dry-run path. Record whether it accepted
+the payload and whether the exchanged values retained their intended meaning.
+Keep runtime translation and validation with the consuming workflow.
 
-Discovery can begin as soon as the representative inputs are available. The
-encode-and-return target is five business days after the inputs and owner
-feedback arrive.
+For repeated exchanges or material mapping changes, the
+[one-year mapping handshake](one-year-mapping-handshake.md) adds versioned
+rules, implementation references, and review records. Record the first pilot's
+effort before estimating the cost of subsequent exchanges.

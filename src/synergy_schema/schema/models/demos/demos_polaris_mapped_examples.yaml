@@ -1,0 +1,129 @@
+id: https://w3id.org/LBNL-UCB-STI/synergy-schema/models/demos/polaris-mapped-examples
+name: demos_polaris_mapped_examples
+title: DEMOS provisional POLARIS-mapped exports
+description: >-
+  Provisional row contracts for the DEMOS POLARIS-mapped CSV exports found in
+  local evidence. These classes preserve physical headers; they do not assert
+  a shared handoff, verified POLARIS ingestion, year semantics, or cross-year
+  continuity.
+
+prefixes:
+  synergy_schema: https://w3id.org/LBNL-UCB-STI/synergy-schema/
+  linkml: https://w3id.org/linkml/
+
+default_prefix: synergy_schema
+default_range: string
+
+imports:
+  - linkml:types
+
+classes:
+  DemosPolarisMappedHouseholdExampleV1:
+    description: >-
+      Provisional household row contract for a supplied CSV export mapped
+      from POLARIS. The physical columns are preserved exactly. Any relation
+      to person rows and interpretation of persons as a row count are
+      conformance checks outside this LinkML row shape.
+    annotations:
+      evidence_status: observed_example
+      schema_status: provisional
+      authority_status: maintainer_review_pending
+    attributes:
+      household:
+        range: integer
+        identifier: true
+        required: true
+        description: Physical household identifier column.
+      block_id:
+        range: integer
+        required: true
+        description: Physical block identifier column.
+      lcm_county_id:
+        range: integer
+        required: true
+        description: Physical LCM county identifier column.
+      age_of_head:
+        range: float
+        required: true
+        description: Physical household-head age column.
+      workers:
+        range: float
+        required: true
+        description: Physical household workers column.
+      race_of_head:
+        range: float
+        required: true
+        description: Physical household-head race code column.
+      income:
+        range: float
+        required: true
+        description: Physical household income column.
+      persons:
+        range: integer
+        required: true
+        description: Physical household persons-count column.
+      is_reorg_household:
+        range: boolean
+        required: true
+        description: Physical household reorganization indicator column.
+
+  DemosPolarisMappedPersonExampleV1:
+    description: >-
+      Provisional person row contract for a supplied CSV export mapped from
+      POLARIS. The physical columns are preserved exactly. The household field
+      is an observed primitive identifier column; relationship conformance is
+      outside this LinkML row shape, and id is not asserted to be unique.
+    annotations:
+      evidence_status: observed_example
+      schema_status: provisional
+      authority_status: maintainer_review_pending
+    attributes:
+      person:
+        range: integer
+        required: true
+        description: Physical person identifier column.
+      relp:
+        range: integer
+        required: true
+        description: Physical relationship-to-household code column.
+      gender:
+        range: integer
+        required: true
+        description: Physical gender code column.
+      education:
+        range: integer
+        required: true
+        description: Physical education code column.
+      income:
+        range: float
+        required: true
+        description: Physical person income column.
+      id:
+        range: float
+        annotations:
+          observed_value_gap: >-
+            Blank values occur in the supplied examples, so this provisional row
+            shape does not require a value.
+        description: >-
+          Physical within-row/person ordinal-like column; it is optional in
+          this provisional shape and uniqueness is not asserted.
+      age:
+        range: integer
+        required: true
+        description: Physical person age column.
+      household:
+        range: integer
+        required: true
+        description: Physical household identifier column.
+      marital_status:
+        range: integer
+        required: true
+        description: Physical marital-status code column.
+      employment:
+        range: float
+        required: true
+        description: Physical employment code column.
+      school_enrollment:
+        range: float
+        required: true
+        description: Physical school-enrollment code column.

@@ -1,0 +1,26 @@
+id: https://w3id.org/LBNL-UCB-STI/synergy-schema/observed-examples
+name: observed_examples
+title: Synergy provisional model contracts
+description: >-
+  Separate LinkML entry point for provisional model-associated row contracts
+  derived from local structural examples. It is intentionally not imported by
+  the established Synergy aggregate schema: these classes do not establish a
+  common cross-model handoff profile.
+
+prefixes:
+  synergy_schema: https://w3id.org/LBNL-UCB-STI/synergy-schema/
+  linkml: https://w3id.org/linkml/
+
+default_prefix: synergy_schema
+default_range: string
+
+imports:
+  - linkml:types
+  - models/atlas/atlas_fleet_observed_example_v1
+  - models/demos/demos_polaris_mapped_examples
+  - models/polaris/polaris_demand_database_v1
+
+annotations:
+  evidence_status: observed_example
+  schema_status: provisional
+  handoff_status: not_a_cross_model_handoff

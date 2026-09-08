@@ -55,9 +55,11 @@ several systems, teams, and years of data are involved.
 | Receipts and evidence | Connect one scenario and year to the run, implementation, inputs, and outputs actually used. Evidence supports a bounded claim about an exchange; it does not prove that a model is scientifically correct. |
 | Content digests | Give changing definitions and files stable fingerprints, allowing checks to distinguish an edited file from a moved or renamed one. |
 
-Together, these records make this claim checkable: the workflows represented
-the same shared universe, used the reviewed translation, and exchanged the
-identified files. No single record can establish all three.
+Together, these records let the checker test whether the declared scenario,
+mapping, implementation, and artifact identities agree. Establishing that a
+workflow actually used those inputs and executed that translation requires
+evidence from the producing and consuming runtimes. The current synthetic
+examples exercise the declarations and selected consistency checks.
 
 ## How Synergy organizes the answer
 

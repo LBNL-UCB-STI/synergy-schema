@@ -5,6 +5,25 @@ docs_dir = "docs"
 site_dir = "site"
 nav = [
     { "Overview" = "index.md" },
+    { "Model contract review" = [
+        { "Model contract review" = "model-contracts/index.md" },
+        { "ATLAS" = "model-contracts/atlas.md" },
+        { "ActivitySim" = "model-contracts/activitysim.md" },
+        { "UrbanSim" = "model-contracts/urbansim.md" },
+        { "POLARIS" = "model-contracts/polaris.md" },
+        { "DEMOS" = "model-contracts/demos.md" },
+    ] },
+    { "Bring an existing mapping" = [
+        { "Bring an existing mapping" = "bring-an-existing-mapping/index.md" },
+        { "Day-zero manifest" = "bring-an-existing-mapping/day-zero-manifest.md" },
+        { "One-year mapping handshake" = "bring-an-existing-mapping/one-year-mapping-handshake.md" },
+        { "Mapping at a glance" = "bring-an-existing-mapping/contract-at-a-glance.md" },
+        { "Costs and exit" = "bring-an-existing-mapping/costs-and-exit.md" },
+    ] },
+    { "Proof of concept" = [
+        { "A population that changes over three years" = "proof-of-concept/index.md" },
+        { "Following the proof from claim to file" = "proof-of-concept/check-the-showcase.md" },
+    ] },
     { "Shared structure" = [
         { "How Synergy is organized" = "shared-structure/index.md" },
         { "Scenario definitions and trajectories" = "shared-structure/scenario-definitions-and-trajectories.md" },
@@ -12,10 +31,6 @@ nav = [
         { "Population trajectory realization identity" = "shared-structure/realization-identity.md" },
         { "Core schema UML" = "schema/core-schema-uml.md" },
         { "Glossary" = "shared-structure/glossary.md" },
-    ] },
-    { "Proof of concept" = [
-        { "A population that changes over three years" = "proof-of-concept/index.md" },
-        { "Following the proof from claim to file" = "proof-of-concept/check-the-showcase.md" },
     ] },
     { "Cross-model mappings" = [
         { "Cross-model mappings" = "cross-model-mappings/index.md" },
@@ -27,13 +42,6 @@ nav = [
         { "Workflow structures" = "workflow-structures/index.md" },
         { "PILATES post-ATLAS population" = "workflow-structures/pilates.md" },
         { "POLARIS translated population" = "workflow-structures/polaris.md" },
-    ] },
-    { "Bring an existing mapping" = [
-        { "Bring an existing mapping" = "bring-an-existing-mapping/index.md" },
-        { "Day-zero manifest" = "bring-an-existing-mapping/day-zero-manifest.md" },
-        { "One-year mapping handshake" = "bring-an-existing-mapping/one-year-mapping-handshake.md" },
-        { "Mapping at a glance" = "bring-an-existing-mapping/contract-at-a-glance.md" },
-        { "Costs and exit" = "bring-an-existing-mapping/costs-and-exit.md" },
     ] },
     { "Design rationale" = [
         { "Design rationale" = "design-rationale/index.md" },

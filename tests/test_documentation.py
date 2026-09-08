@@ -28,15 +28,16 @@ def _leaf_targets(items: list[dict[str, object]]) -> list[tuple[str, str]]:
     return leaves
 
 
-def test_navigation_has_the_approved_eight_sections_and_existing_leaves() -> None:
+def test_navigation_has_the_approved_nine_sections_and_existing_leaves() -> None:
     nav = _nav()
     assert [next(iter(item)) for item in nav] == [
         "Overview",
-        "Shared structure",
+        "Model contract review",
+        "Bring an existing mapping",
         "Proof of concept",
+        "Shared structure",
         "Cross-model mappings",
         "Workflow structures",
-        "Bring an existing mapping",
         "Design rationale",
         "Schema reference",
     ]
@@ -61,6 +62,12 @@ def test_navigation_has_the_approved_eight_sections_and_existing_leaves() -> Non
         "Population identity",
         "Mapping meaning, implementation, and lineage",
         "Scenario compatibility",
+        "Model contract review",
+        "ATLAS",
+        "ActivitySim",
+        "UrbanSim",
+        "POLARIS",
+        "DEMOS",
         "Complete generated reference",
     }
     leaves = _leaf_targets(nav)
@@ -183,11 +190,11 @@ def test_overview_explains_the_shared_universe_and_why_records_matter() -> None:
         "## How the documentation builds",
     ):
         assert heading in overview
-    assert "same shared universe" in overview
+    assert "declared scenario" in overview
     assert "Interface descriptions" in overview
     assert "Review records" in overview
     assert "Evidence" in overview
-    assert "this claim checkable" in overview
+    assert "executed that translation requires" in overview
     assert "PILATES modeling pipeline" in overview
     assert "and POLARIS" in overview
     assert "keep their own schemas" in overview
@@ -347,14 +354,15 @@ def test_adoption_guides_are_honest_about_scope_cost_and_exit() -> None:
     adoption = "\n".join(
         path.read_text() for path in (DOCS / "bring-an-existing-mapping").glob("*.md")
     )
-    for heading in ("Inputs", "What stays unchanged", "Outputs", "Typical timing"):
+    for heading in ("Inputs", "What stays unchanged", "First useful result"):
         assert heading in adoption
     assert "contract-at-a-glance" in adoption
     assert "discovery evidence" in adoption
     assert "Automatic receipt emission" in adoption
     assert "Work stops" in adoption
-    assert "minutes, not hours" in adoption
-    assert "five business days" in adoption
+    assert "consumer's existing import or dry-run path" in adoption
+    assert "For repeated exchanges or material mapping changes" in adoption
+    assert "five business days" not in adoption
     assert "payloads, readable review tables, and" in adoption
     assert "historical incidents" in adoption
     assert "Flat files plus a README can be enough" in adoption
