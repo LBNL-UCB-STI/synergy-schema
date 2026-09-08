@@ -1,6 +1,6 @@
 # ActivitySim contract review
 
-The current ActivitySim surface is a partial set of identity and join fields
+The current ActivitySim record set is a partial set of identity and join fields
 used by the PILATES workflow. It is not a complete ActivitySim input or output
 catalog.
 

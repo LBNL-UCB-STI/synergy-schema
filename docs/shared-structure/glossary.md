@@ -116,10 +116,10 @@ universal table.
 
 ### Native contract
 
-A model-owned description of the interface surfaces that another workflow may
-refer to: configuration paths, artifact keys, or table columns and their exact
-spellings. In Synergy, “contract” means that these surfaces are deliberately
-named and versioned for exchange. It is not a Synergy-owned replacement for the
+A model-owned description of configuration paths, artifact keys, or table
+columns that another workflow may refer to, including their exact spellings. In
+Synergy, “contract” means that these elements are deliberately named and
+versioned for exchange. It is not a Synergy-owned replacement for the
 model's schema, runtime objects, or payload files.
 
 ### Native contract catalog

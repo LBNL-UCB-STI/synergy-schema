@@ -14,4 +14,4 @@ physical representation.
 `polaris_demand_database_v1.yaml` is a separate provisional description of
 selected population tables in a model-associated demand database. Its raw
 `hhold` field is intentionally distinct from the translated-output alias above
-and is neither unique nor an identifier in that provisional surface.
+and is neither unique nor an identifier in that provisional table description.

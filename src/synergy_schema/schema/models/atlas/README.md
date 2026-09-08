@@ -8,11 +8,11 @@ that operational context.
 
 ## Owner review map
 
-Review the class for the physical ATLAS surface. The established post-ATLAS
+Review the class for the physical ATLAS table or export. The established post-ATLAS
 records remain together in [`atlas_population.yaml`](atlas_population.yaml) so
 their household/person/vehicle boundary is visible.
 
-| ATLAS surface | LinkML review block | Status | Owner review focus |
+| ATLAS records | LinkML review block | Status | Owner review focus |
 | --- | --- | --- | --- |
 | Household row consumed by ATLAS | [`AtlasHouseholdInput`](atlas_population.yaml#L22) | Established native contract | Physical field inventory, descriptions, types, nullability, and household-code meanings. |
 | Person row consumed by ATLAS | [`AtlasPersonInput`](atlas_population.yaml#L117) | Established native contract | Physical field inventory, person/household identity scope, and demographic/status-code meanings. |

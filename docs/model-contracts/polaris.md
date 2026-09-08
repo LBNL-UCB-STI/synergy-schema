@@ -5,8 +5,8 @@ labeled `PILATES-observed`. It supports synthetic exchange examples; this
 repository does not establish a completed POLARIS runtime integration or
 model-owner approval. The source revision is not recorded here.
 
-The provisional demand-database table description covers a separate physical
-surface. Its raw `hhold` field is not interchangeable with the
+The provisional demand-database table description covers a separate set of
+physical database tables. Its raw `hhold` field is not interchangeable with the
 translated-output alias. Select the applicable record set or table description
 using the specific exporter/importer context.
 

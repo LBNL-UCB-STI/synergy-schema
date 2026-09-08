@@ -6,10 +6,10 @@ opens the generated LinkML reference, including its field table, annotations,
 relationships, and direct source declaration.
 
 The pages distinguish established current-workflow record sets from provisional
-observed model contracts. A provisional contract is a real review surface, but it
+observed model contracts. A provisional contract is reviewable, but it
 does not establish a shared release, mapping, or cross-model handoff.
 
-| Model | Established review surface | Provisional observed surface |
+| Model | Established records | Provisional observed rows |
 | --- | --- | --- |
 | [ATLAS](atlas.md) | Household and person inputs; vehicle output | Paired fleet-output CSV row shapes |
 | [ActivitySim](activitysim.md) | Household, person, and land-use-zone identity and join records | None currently |
@@ -17,8 +17,8 @@ does not establish a shared release, mapping, or cross-model handoff.
 | [POLARIS](polaris.md) | Translated household, person, and vehicle records | Selected demand-database population tables |
 | [DEMOS](demos.md) | None currently | Mapped household and person CSV exports |
 
-For review, first confirm whether the listed physical surface and direction are
-correct. Then amend field descriptions, types, requiredness, identities,
+For review, first confirm whether the listed table, export, or configuration
+item and its direction are correct. Then amend field descriptions, types, requiredness, identities,
 vocabularies, and codebook references as supported by the producer. Keep
 cross-model mappings and workflow-specific behavior outside the model page
 until their owners approve them.

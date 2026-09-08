@@ -3,7 +3,7 @@ name: atlas_fleet_observed_example_v1
 title: ATLAS provisional fleet output v1
 description: >-
   Provisional schema for the two observed ATLAS fleet-output tables retained
-  in evidence/atlas_outputs. It records a v1 model-contract surface for owner
+  in evidence/atlas_outputs. It records a v1 schema for those rows for owner
   review; it is not evidence of a shared cross-model handoff.
 
 prefixes:
@@ -17,7 +17,7 @@ imports:
   - linkml:types
 
 classes:
-  # Provisional model-contract surface derived from the supplied ATLAS files.
+  # Provisional row schema derived from the supplied ATLAS files.
   AtlasHouseholdFleetOutputExampleV1:
     description: >-
       Observed household-side fleet example row from the paired ATLAS example
@@ -47,7 +47,7 @@ classes:
         minimum_value: 0
         description: Observed household vehicle-count value.
 
-  # Provisional model-contract surface, paired only within the supplied files.
+  # Provisional row schema, paired only within the supplied files.
   AtlasVehicleFleetOutputExampleV1:
     description: >-
       Observed vehicle-side fleet example row paired with

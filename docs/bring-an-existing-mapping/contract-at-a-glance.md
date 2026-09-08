@@ -6,6 +6,6 @@ digest, implementation identity, field coverage, known losses, and review
 state.
 
 This page exists because review quality drops when the important decisions are
-scattered across YAML, SQL, and meeting notes. It is a reading surface generated
+scattered across YAML, SQL, and meeting notes. It is a generated summary
 from the structured records, not a second source of truth. The documentation
 build copies the summary from the synthetic one-year example.

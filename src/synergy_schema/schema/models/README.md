@@ -26,13 +26,13 @@ The model-owned population slices are:
   it is neither a complete database schema nor a confirmed seed-input contract.
 - [`urbansim/`](urbansim/), the UrbanSim household and person join records.
 
-Established record sets remain model-owned. Provisional surfaces record
+Established record sets remain model-owned. Provisional record sets record
 observed associations pending semantic review. PILATES binds approved artifacts
 through an operational profile without copying fields into a shared kernel.
 
 ## Provisional-contract entry point
 
 [`../observed_examples.yaml`](../observed_examples.yaml) assembles the three
-provisional surfaces for local review and focused validation. It deliberately
+provisional examples for local review and focused validation. It deliberately
 is not imported by `synergy_schema.yaml`: the examples are separate model
 contexts, not a shared handoff, approved mapping, or aggregate release.

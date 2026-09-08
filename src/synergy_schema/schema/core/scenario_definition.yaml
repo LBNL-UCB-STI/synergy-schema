@@ -27,7 +27,7 @@ enums:
       code: {}
       reference: {}
   ScenarioAssumptionBindingMode:
-    description: How a native model surface relates to a canonical assumption.
+    description: How a native model element relates to a canonical assumption.
     permissible_values:
       direct: {}
       alias: {}
