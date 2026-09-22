@@ -30,6 +30,7 @@ def test_parser_exposes_the_complete_conformance_surface() -> None:
         "check-scenario",
         "check-mappings",
         "check-population-bundle",
+        "check-population-assembly",
         "check-polaris-bundle",
         "check-all",
         "create-day-zero-manifest",
@@ -100,6 +101,33 @@ def test_bundle_commands_use_explicit_bundle_and_manifest_directory_arguments() 
     assert polaris.source_population_bundle == "source.yaml"
     assert polaris.mapping_release == "release"
     assert check_all.dir == "example"
+
+    assembly = parser.parse_args(
+        [
+            "check-population-assembly",
+            "--schema",
+            "schema.yaml",
+            "--assembly",
+            "assembly.yaml",
+        ]
+    )
+    assert assembly.assembly == "assembly.yaml"
+    assert assembly.contribution == []
+
+    assembly_with_contributions = parser.parse_args(
+        [
+            "check-population-assembly",
+            "--schema",
+            "schema.yaml",
+            "--assembly",
+            "assembly.yaml",
+            "--contribution",
+            "demos.yaml",
+            "--contribution",
+            "atlas.yaml",
+        ]
+    )
+    assert assembly_with_contributions.contribution == ["demos.yaml", "atlas.yaml"]
 
 
 def test_bundle_command_rejects_unknown_closed_profile_field_before_semantics(

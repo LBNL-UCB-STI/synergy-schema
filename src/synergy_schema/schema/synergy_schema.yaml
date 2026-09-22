@@ -19,6 +19,7 @@ imports:
   - core/handoff_bundle
   - core/native_contract
   - core/scenario_definition
+  - assembly/core_population_assembly
   - models/atlas/atlas_population
   - models/urbansim/urbansim_population
   - models/activitysim/activitysim_population

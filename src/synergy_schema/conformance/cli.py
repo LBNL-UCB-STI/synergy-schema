@@ -13,6 +13,7 @@ import yaml
 from linkml_runtime.utils.schemaview import SchemaView
 
 from .bundles import validate_polaris_bundle, validate_population_bundle
+from .assembly import validate_population_assembly
 from .day_zero import create_day_zero_manifest, validate_day_zero_manifest
 from .diagnostics import CheckResult, InputError
 from .documents import load_list, load_mapping, load_mapping_release, load_showcase
@@ -26,6 +27,7 @@ _COMMANDS = (
     "check-scenario",
     "check-mappings",
     "check-population-bundle",
+    "check-population-assembly",
     "check-polaris-bundle",
     "check-all",
     "create-day-zero-manifest",
@@ -53,6 +55,15 @@ def build_parser() -> argparse.ArgumentParser:
     population = commands.add_parser("check-population-bundle")
     population.add_argument("--schema", required=True)
     population.add_argument("--bundle", required=True)
+    assembly = commands.add_parser("check-population-assembly")
+    assembly.add_argument("--schema", required=True)
+    assembly.add_argument("--assembly", required=True)
+    assembly.add_argument(
+        "--contribution",
+        action="append",
+        default=[],
+        help="canonical CorePopulationContribution manifest (repeatable)",
+    )
     polaris = commands.add_parser("check-polaris-bundle")
     polaris.add_argument("--schema", required=True)
     polaris.add_argument("--bundle", required=True)
@@ -119,6 +130,26 @@ def _dispatch(args: argparse.Namespace) -> CheckResult:
         _require_roots(args.schema, {"PopulationTrajectoryBundle"})
         bundle = load_mapping(args.bundle)
         return _check_population_bundle(args.schema, bundle)
+    if args.command == "check-population-assembly":
+        _require_roots(
+            args.schema, {"CorePopulationAssembly", "CorePopulationContribution"}
+        )
+        assembly_document = load_mapping(args.assembly)
+        shape = validate_bundle_shape(
+            args.schema, assembly_document, "CorePopulationAssembly"
+        )
+        if shape.exit_code:
+            return shape
+        contribution_documents = []
+        for path in args.contribution:
+            document = load_mapping(path)
+            contribution_shape = validate_bundle_shape(
+                args.schema, document, "CorePopulationContribution"
+            )
+            if contribution_shape.exit_code:
+                return contribution_shape
+            contribution_documents.append(document)
+        return validate_population_assembly(assembly_document, contribution_documents)
     if args.command == "check-polaris-bundle":
         _require_roots(args.schema, {"PolarisPopulationTranslationBundle"})
         bundle = load_mapping(args.bundle)
