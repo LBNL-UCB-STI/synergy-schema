@@ -9,6 +9,21 @@ The goal is a small, reversible pilot around one representative year. The
 existing mapping becomes a versioned description that can be read, reviewed,
 and compared with the code and files used in an actual exchange.
 
+## A three-step pilot
+
+1. **[Inventory the file](day-zero-manifest.md).** Record the representative
+   input or output, its producer context, and its byte identity without
+   changing the payload.
+2. **[Declare the mapping](contract-at-a-glance.md).** Transcribe the existing
+   spreadsheet, SQL, or script into reviewable rules, including defaults,
+   dropped fields, and other translation exceptions.
+3. **[Run the one-year check](one-year-mapping-handshake.md).** Connect the
+   reviewed rules to the implementation and evidence for one representative
+   exchange.
+
+The [costs and exit](costs-and-exit.md) page explains when this additional
+structure is not worthwhile or should be retired.
+
 ## Inputs
 
 The pilot needs one representative payload, its producer context, named owners,

@@ -5,9 +5,31 @@ still leave a basic question unanswered: did every model represent the same
 scenario, population, and point in time? Synergy Schema supplies a shared
 language for answering that question across independently maintained systems.
 
-> **New to Synergy?** Start with the [three-year proof](proof-of-concept/index.md)
-> for a concrete changing-population example. For one snapshot built in stages
-> by different models, read the [core-population assembly guide](workflow-structures/core-population-assembly.md).
+## A one-minute mental model
+
+Synergy is the coordination layer around independent transportation models. It
+does not replace their native tables or runtime code. Instead, it records the
+shared scenario, population state, mappings, and exact exchanged artifacts so
+that a workflow can show what crossed each boundary.
+
+```mermaid
+flowchart LR
+  land["Land use and demand\nUrbanSim / ActivitySim / DEMOS"]
+  fleet["Vehicle fleet\nATLAS"]
+  traffic["Traffic simulation\nPOLARIS"]
+  synergy["Synergy Schema\nshared context, mappings, checks"]
+
+  land -->|population inputs| fleet
+  fleet -->|vehicle inputs| traffic
+  synergy -. describes and checks .-> land
+  synergy -. describes and checks .-> fleet
+  synergy -. describes and checks .-> traffic
+```
+
+**Start here:** the [three-year proof](proof-of-concept/index.md) follows a
+changing population through an executable example. For one snapshot built in
+stages by different models, see the
+[core-population assembly guide](workflow-structures/core-population-assembly.md).
 
 ## The coordination problem
 
