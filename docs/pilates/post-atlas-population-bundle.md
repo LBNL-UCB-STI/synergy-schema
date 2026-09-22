@@ -9,6 +9,12 @@ updated household vehicle ownership: the population state being represented,
 the three physical table artifacts delivered together, and the provenance of
 the run that produced them.
 
+This complete handoff is distinct from the
+[staged core-population assembly](../workflow-structures/core-population-assembly.md).
+The assembly can declare partial, immutable contributions before a named
+consumer is ready; this bundle describes the complete three-artifact boundary
+that the PILATES profile expects.
+
 ## Population snapshot
 
 A [PopulationSnapshot](../schema/PopulationSnapshot.md) identifies one

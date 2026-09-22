@@ -37,9 +37,11 @@ the same definition into several places.
 
 The first vertical slices define population-snapshot context and a
 provider-neutral handoff bundle, then compose them into a PILATES yearly
-population profile. The profile binds its three population artifacts to
-ATLAS-owned household/person input and vehicle-output record contracts and to a
-pinned Consist provenance graph. The root schema now also imports
+population profile. A separate staged-assembly slice now lets immutable DEMOS
+and ATLAS contributions describe different facets of one partial snapshot
+without rewriting either model's native tables. The profile binds its three
+population artifacts to ATLAS-owned household/person input and vehicle-output
+record contracts and to a pinned Consist provenance graph. The root schema now also imports
 identity-bearing, partial UrbanSim, ActivitySim, and POLARIS projections plus
 typed mappings for the observed PILATES population path. Native model records
 remain independent of Consist. This is not complete native-table coverage or
@@ -91,6 +93,11 @@ unzip -l dist/synergy_schema-*.whl | rg 'synergy_schema/schema/synergy_schema.ya
 The [post-ATLAS population bundle example](examples/post_atlas_population_bundle/)
 walks through native ATLAS rows, their snapshot-scoped population state, and
 the PILATES bundle that composes the three corresponding artifacts.
+
+For a staged rather than complete handoff, see the
+[core-population assembly example](examples/core_population_assembly/). It
+shows separate DEMOS and ATLAS contributions, explicit column authority, and
+the command that validates their shared snapshot.
 
 ## Contributing a schema
 

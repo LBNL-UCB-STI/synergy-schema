@@ -5,6 +5,10 @@ still leave a basic question unanswered: did every model represent the same
 scenario, population, and point in time? Synergy Schema supplies a shared
 language for answering that question across independently maintained systems.
 
+> **New to Synergy?** Start with the [three-year proof](proof-of-concept/index.md)
+> for a concrete changing-population example. For one snapshot built in stages
+> by different models, read the [core-population assembly guide](workflow-structures/core-population-assembly.md).
+
 ## The coordination problem
 
 Integrated studies often connect land-use, travel-demand, vehicle, and
@@ -97,7 +101,7 @@ its own.
 | [Shared structure](shared-structure/index.md) | Which facts belong to the shared universe, and which remain model-owned? |
 | [Three-year proof](proof-of-concept/index.md) | What do those distinctions look like in a small, executable example? |
 | [Cross-model mappings](cross-model-mappings/index.md) | How do identities, assumptions, and fields connect across models? |
-| [Workflow structures](workflow-structures/index.md) | How are shared definitions combined at the PILATES and proposed POLARIS boundaries? |
+| [Workflow structures](workflow-structures/index.md) | How are shared definitions combined at the PILATES, proposed POLARIS, and staged-population boundaries? |
 | [Bring an existing mapping](bring-an-existing-mapping/index.md) | How can an existing spreadsheet, SQL script, or column mapping become a durable, reviewable exchange description? |
 | [Design rationale](design-rationale/index.md) | Why are the definitions separated this way, and when is a simpler approach enough? |
 | [Glossary](shared-structure/glossary.md) | What do the recurring formal terms mean in plain language? |

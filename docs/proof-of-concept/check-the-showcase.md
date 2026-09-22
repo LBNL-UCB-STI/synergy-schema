@@ -127,8 +127,8 @@ The baseline and ZEV branches are checked independently from the repository
 root:
 
 ```sh
-.venv/bin/python -m synergy_schema.conformance check-all --schema src/synergy_schema/schema/synergy_schema.yaml --dir examples/evolving_population/baseline
-.venv/bin/python -m synergy_schema.conformance check-all --schema src/synergy_schema/schema/synergy_schema.yaml --dir examples/evolving_population/zev
+uv run python -m synergy_schema.conformance check-all --schema src/synergy_schema/schema/synergy_schema.yaml --dir examples/evolving_population/baseline
+uv run python -m synergy_schema.conformance check-all --schema src/synergy_schema/schema/synergy_schema.yaml --dir examples/evolving_population/zev
 ```
 
 Both valid branches exit 0. The baseline branch reports
@@ -139,9 +139,9 @@ retains its draft review state and unsupported POLARIS policy interface.
 The deliberately broken exchanges exit 1:
 
 ```sh
-.venv/bin/python -m synergy_schema.conformance check-all --schema src/synergy_schema/schema/synergy_schema.yaml --dir examples/evolving_population_broken_scenario
+uv run python -m synergy_schema.conformance check-all --schema src/synergy_schema/schema/synergy_schema.yaml --dir examples/evolving_population_broken_scenario
 # SCENARIO_DIGEST_MISMATCH
-.venv/bin/python -m synergy_schema.conformance check-all --schema src/synergy_schema/schema/synergy_schema.yaml --dir examples/evolving_population_broken_artifact_identity
+uv run python -m synergy_schema.conformance check-all --schema src/synergy_schema/schema/synergy_schema.yaml --dir examples/evolving_population_broken_artifact_identity
 # ARTIFACT_IDENTITY_MISMATCH
 ```
 

@@ -26,6 +26,7 @@ nav = [
     { "Workflow structures" = [
         { "Workflow structures" = "workflow-structures/index.md" },
         { "PILATES post-ATLAS population" = "workflow-structures/pilates.md" },
+        { "Staged core-population assembly" = "workflow-structures/core-population-assembly.md" },
         { "POLARIS translated population" = "workflow-structures/polaris.md" },
     ] },
     { "Bring an existing mapping" = [
