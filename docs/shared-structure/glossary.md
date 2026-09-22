@@ -64,6 +64,25 @@ A shared, snapshot-scoped identity for a household, person, vehicle, or
 relationship. Core state records intentionally omit model-specific
 demographics, technologies, and predicted behavior.
 
+### Core population contribution
+
+One model's immutable addition to a shared snapshot, such as DEMOS supplying
+households and people or ATLAS supplying vehicles. A contribution points to its
+native artifacts and mappings; it does not rewrite another model's records.
+
+### Core population assembly
+
+A digest-pinned inventory of immutable contributions for one snapshot. Its
+resolved facet index tells a consumer where the selected authoritative value
+for a supplied facet lives. An assembly may be partial.
+
+### Column authority classification
+
+A declaration of what a native column means in an assembly: a shared core
+assertion, a model view, a value carried through from a named upstream
+assertion, or an unclassified native field. This prevents a copied column or
+matching name from silently becoming a new authority.
+
 ## Schemas, contracts, profiles, and native records
 
 ### Schema
@@ -249,6 +268,7 @@ An intentional case that is not a clean source-to-target field mapping—for
 example, a required default, lookup table, filtered row, unsupported source
 field, or context dropped from each output row. Residue is not automatically
 an error; it makes accepted translation loss or extra behavior reviewable.
+In plain language, it is a documented translation exception or data loss.
 
 ### Review record
 
