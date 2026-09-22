@@ -8,7 +8,7 @@ change without the others.
 The synthetic analogue can be checked from the repository root:
 
 ```sh
-.venv/bin/python -m synergy_schema.conformance check-all --schema src/synergy_schema/schema/synergy_schema.yaml --dir examples/one_year_mapping_handshake
+uv run python -m synergy_schema.conformance check-all --schema src/synergy_schema/schema/synergy_schema.yaml --dir examples/one_year_mapping_handshake
 ```
 
 The [receipt](../shared-structure/glossary.md#receipt) is

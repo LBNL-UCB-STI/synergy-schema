@@ -19,3 +19,10 @@ consumed those bytes.
 Separating population identity, artifact identity, and provenance prevents a
 shared row identifier, a filename, or a run record from being asked to prove
 more than it can.
+
+When different models add facets of the same snapshot in stages, a
+[core-population assembly](../workflow-structures/core-population-assembly.md)
+names the immutable contributions and materializes a resolved facet index. The
+assembly answers which contribution and artifact are authoritative for a
+supplied facet; it does not merge native tables or imply that a receiving model
+has accepted them.

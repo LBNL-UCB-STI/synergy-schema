@@ -32,3 +32,13 @@ The generated [core schema UML](../schema/core-schema-uml.md) shows the classes
 and typed relationships. The [Glossary](glossary.md) defines recurring terms
 and contrasts similar concepts such as scenario, trajectory, snapshot, receipt,
 residue, and digest.
+
+## A useful reading order
+
+Start with [scenario definitions and trajectories](scenario-definitions-and-trajectories.md)
+to establish the shared assumptions and timeline. Continue with
+[population snapshots and artifact identity](population-snapshots-and-artifact-identity.md)
+for one year's state and the exact files that carry it. The
+[realization-identity specification](realization-identity.md) is the
+normative technical reference for independent consumers and can be read after
+the conceptual guides.

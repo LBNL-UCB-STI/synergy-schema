@@ -5,6 +5,32 @@ still leave a basic question unanswered: did every model represent the same
 scenario, population, and point in time? Synergy Schema supplies a shared
 language for answering that question across independently maintained systems.
 
+## A one-minute mental model
+
+Synergy is the coordination layer around independent transportation models. It
+does not replace their native tables or runtime code. Instead, it records the
+shared scenario, population state, mappings, and exact exchanged artifacts so
+that a workflow can show what crossed each boundary.
+
+```mermaid
+flowchart LR
+  land["Land use and demand\nUrbanSim / ActivitySim / DEMOS"]
+  fleet["Vehicle fleet\nATLAS"]
+  traffic["Traffic simulation\nPOLARIS"]
+  synergy["Synergy Schema\nshared context, mappings, checks"]
+
+  land -->|population inputs| fleet
+  fleet -->|vehicle inputs| traffic
+  synergy -. describes and checks .-> land
+  synergy -. describes and checks .-> fleet
+  synergy -. describes and checks .-> traffic
+```
+
+**Start here:** the [three-year proof](proof-of-concept/index.md) follows a
+changing population through an executable example. For one snapshot built in
+stages by different models, see the
+[core-population assembly guide](workflow-structures/core-population-assembly.md).
+
 ## The coordination problem
 
 Integrated studies often connect land-use, travel-demand, vehicle, and
@@ -78,7 +104,7 @@ its own.
 | [Shared structure](shared-structure/index.md) | Which facts belong to the shared universe, and which remain model-owned? |
 | [Three-year proof](proof-of-concept/index.md) | What do those distinctions look like in a small, executable example? |
 | [Cross-model mappings](cross-model-mappings/index.md) | How do identities, assumptions, and fields connect across models? |
-| [Workflow structures](workflow-structures/index.md) | How are shared definitions combined at the PILATES and proposed POLARIS boundaries? |
+| [Workflow structures](workflow-structures/index.md) | How are shared definitions combined at the PILATES, proposed POLARIS, and staged-population boundaries? |
 | [Bring an existing mapping](bring-an-existing-mapping/index.md) | How can an existing spreadsheet, SQL script, or column mapping become a durable, reviewable exchange description? |
 | [Design rationale](design-rationale/index.md) | Why are the definitions separated this way, and when is a simpler approach enough? |
 | [Glossary](shared-structure/glossary.md) | What do the recurring formal terms mean in plain language? |

@@ -5,13 +5,9 @@ docs_dir = "docs"
 site_dir = "site"
 nav = [
     { "Overview" = "index.md" },
-    { "Model contract review" = [
-        { "Model contract review" = "model-contracts/index.md" },
-        { "ATLAS" = "model-contracts/atlas.md" },
-        { "ActivitySim" = "model-contracts/activitysim.md" },
-        { "UrbanSim" = "model-contracts/urbansim.md" },
-        { "POLARIS" = "model-contracts/polaris.md" },
-        { "DEMOS" = "model-contracts/demos.md" },
+    { "Proof of concept" = [
+        { "A population that changes over three years" = "proof-of-concept/index.md" },
+        { "Following the proof from claim to file" = "proof-of-concept/check-the-showcase.md" },
     ] },
     { "Bring an existing mapping" = [
         { "Bring an existing mapping" = "bring-an-existing-mapping/index.md" },
@@ -19,10 +15,6 @@ nav = [
         { "One-year mapping handshake" = "bring-an-existing-mapping/one-year-mapping-handshake.md" },
         { "Mapping at a glance" = "bring-an-existing-mapping/contract-at-a-glance.md" },
         { "Costs and exit" = "bring-an-existing-mapping/costs-and-exit.md" },
-    ] },
-    { "Proof of concept" = [
-        { "A population that changes over three years" = "proof-of-concept/index.md" },
-        { "Following the proof from claim to file" = "proof-of-concept/check-the-showcase.md" },
     ] },
     { "Shared structure" = [
         { "How Synergy is organized" = "shared-structure/index.md" },
@@ -41,6 +33,7 @@ nav = [
     { "Workflow structures" = [
         { "Workflow structures" = "workflow-structures/index.md" },
         { "PILATES post-ATLAS population" = "workflow-structures/pilates.md" },
+        { "Staged core-population assembly" = "workflow-structures/core-population-assembly.md" },
         { "POLARIS translated population" = "workflow-structures/polaris.md" },
     ] },
     { "Design rationale" = [
@@ -48,6 +41,14 @@ nav = [
         { "Why LinkML" = "design-rationale/why-linkml.md" },
         { "Why not one big table?" = "design-rationale/why-not-one-big-table.md" },
         { "Are flat files enough?" = "design-rationale/are-flat-files-enough.md" },
+    ] },
+    { "Model contract review" = [
+        { "Model contract review" = "model-contracts/index.md" },
+        { "ATLAS" = "model-contracts/atlas.md" },
+        { "ActivitySim" = "model-contracts/activitysim.md" },
+        { "UrbanSim" = "model-contracts/urbansim.md" },
+        { "POLARIS" = "model-contracts/polaris.md" },
+        { "DEMOS" = "model-contracts/demos.md" },
     ] },
     { "Schema reference" = [
         { "Complete generated reference" = "schema/index.md" },

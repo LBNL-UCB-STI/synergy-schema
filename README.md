@@ -37,9 +37,10 @@ the same definition into several places.
 
 The root schema covers the current PILATES population handoff, partial
 UrbanSim, ActivitySim, and POLARIS identity/join records, and mappings for the
-observed PILATES population path. It does not claim complete native-table
-coverage, runtime validation, model-owner approval, or production artifact
-integrity.
+observed PILATES population path. It also includes a staged-assembly slice for
+immutable DEMOS and ATLAS contributions to one partial population snapshot.
+The repository does not claim complete native-table coverage, runtime
+validation, model-owner approval, or production artifact integrity.
 
 ### Provisional model contracts
 
@@ -94,6 +95,11 @@ unzip -l dist/synergy_schema-*.whl | rg 'synergy_schema/schema/synergy_schema.ya
 The [post-ATLAS population bundle example](examples/post_atlas_population_bundle/)
 walks through native ATLAS rows, their snapshot-scoped population state, and
 the PILATES bundle that composes the three corresponding artifacts.
+
+For a staged rather than complete handoff, see the
+[core-population assembly example](examples/core_population_assembly/). It
+shows separate DEMOS and ATLAS contributions, explicit column authority, and
+the command that validates their shared snapshot.
 
 ## Contributing a schema
 

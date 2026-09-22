@@ -1,22 +1,38 @@
 # Core population assembly example
 
-This synthetic example is the smallest staged assembly described in the
-2026-09-21 core-population proposal. It describes one `2030` snapshot for
-`synthetic-region` and two immutable contributions:
+This synthetic example shows how two models can contribute different parts of
+one `2030` population snapshot without producing a universal replacement
+table. It describes `synthetic-region` with two immutable contributions:
 
 * DEMOS supplies households, people, and household membership.
 * ATLAS adds vehicles and household--vehicle assignments.
 
-The DEMOS household table also contains `will_move_next_iteration`. That
-column is explicitly classified as a `model_view`; it is associated with the
-same household state but does not assert a new core population fact.
+The DEMOS contribution also classifies `will_move_next_iteration` as a
+`model_view`: useful model-owned information about a household, not a change to
+the shared population structure.
 
-`assembly.yaml` is a complete-for-named-consumer declaration for the synthetic
-`vehicle-fleet-consumer-v1` requirements. Its resolved facet index makes the
-selected authority explicit for every supplied core facet. The artifact
-digests and schema-contract digests are synthetic values, included to make
-identity checks deterministic; no external model run or Parquet exchange is
-claimed.
+`assembly.yaml` is deliberately `partial`. It names the two contribution
+identities and its resolved facet index answers where the authoritative value
+for each supplied facet lives. The contributions retain their native artifact
+roles, mappings, and column classifications.
+
+## Run the check
+
+From the repository root, validate the assembly and its two contribution
+manifests together:
+
+```sh
+uv run python -m synergy_schema.conformance check-population-assembly \
+  --schema src/synergy_schema/schema/synergy_schema.yaml \
+  --assembly examples/core_population_assembly/assembly.yaml \
+  --contribution examples/core_population_assembly/demos-contribution.yaml \
+  --contribution examples/core_population_assembly/atlas-contribution.yaml
+```
+
+The artifact and schema digests are synthetic values included to make identity
+checks deterministic. This is a schema-gated proof of the declarations, not a
+claim that an external model run produced, consumed, or scientifically
+validated these files.
 
 The two `invalid-*.yaml` files are intentional checker fixtures:
 
