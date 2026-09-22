@@ -1,11 +1,17 @@
 # PILATES post-ATLAS population
 
+In the PILATES simulation pipeline, UrbanSim simulates land use and ActivitySim
+generates travel activity schedules. ATLAS then models household vehicle
+choice—updating vehicle ownership, vehicle retirement, and EV technology
+adoption.
+
 ## Current
 
 The [post-ATLAS population bundle](../pilates/post-atlas-population-bundle.md)
 describes one documented PILATES handoff after ATLAS updates vehicle ownership.
-It groups household, person, and vehicle files with their roles, exact file
-identities, population snapshot, and Consist run evidence.
+It groups household, person, and vehicle files (artifacts) with their roles,
+exact file identities (cryptographic hashes), population snapshot (year-specific
+state), and Consist run evidence.
 
 ## Proposed
 

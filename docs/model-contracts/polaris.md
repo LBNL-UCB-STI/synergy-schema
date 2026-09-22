@@ -1,5 +1,9 @@
 # POLARIS contract review
 
+POLARIS is an agent-based transportation simulation platform developed at
+Argonne National Laboratory. It integrates travel demand modeling, dynamic
+network traffic assignment, and vehicle routing.
+
 The aggregate schema contains a partial translated-population record set
 labeled `PILATES-observed`. It supports synthetic exchange examples; this
 repository does not establish a completed POLARIS runtime integration or
@@ -12,7 +16,7 @@ using the specific exporter/importer context.
 
 ## Existing translated-output records
 
-| Physical role | LinkML class | Review first |
+| Exchange file / Table role | LinkML class | Review first |
 | --- | --- | --- |
 | Household translated record | [PolarisHouseholdRecord](../schema/PolarisHouseholdRecord.md) | `household`/`hhold` relationship and location semantics. |
 | Person translated record | [PolarisPersonRecord](../schema/PolarisPersonRecord.md) | Person key, household join, and within-household `id` semantics. |
@@ -20,7 +24,7 @@ using the specific exporter/importer context.
 
 ## Provisional demand-database population rows
 
-| Physical table role | Provisional class | Owner question |
+| Exchange file / Table role | Provisional class | Owner question |
 | --- | --- | --- |
 | Household seed-shaped table | [PolarisDemandDatabaseV1Household](../schema/observed-examples/PolarisDemandDatabaseV1Household.md) | What does non-unique raw `hhold` mean, and which table roles are inputs? |
 | Person seed-shaped table | [PolarisDemandDatabaseV1Person](../schema/observed-examples/PolarisDemandDatabaseV1Person.md) | Confirm person/household key scope and importer semantics. |

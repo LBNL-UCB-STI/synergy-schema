@@ -1,12 +1,17 @@
 # ATLAS contract review
 
-The established ATLAS module keeps the three current post-ATLAS record shapes
-together. Review the native fields here before considering the PILATES handoff
-profile or any cross-model mapping.
+ATLAS (Automotive Technology Life-cycle and Allocation Simulation) models
+household vehicle ownership, vehicle retirement, and vehicle technology
+adoption over multi-year simulation horizons.
+
+The established ATLAS module defines the three table structures used in the
+PILATES pipeline handoff after ATLAS updates household vehicle fleets. Review
+the native fields here before considering the PILATES handoff profile or any
+cross-model mapping.
 
 ## Established current-workflow records
 
-| Physical role | LinkML class | Review first |
+| Exchange file / Table role | LinkML class | Review first |
 | --- | --- | --- |
 | Household row consumed by ATLAS | [AtlasHouseholdInput](../schema/AtlasHouseholdInput.md) | Field spelling, household identifiers, code meanings, types, and nullability. |
 | Person row consumed by ATLAS | [AtlasPersonInput](../schema/AtlasPersonInput.md) | Field spelling, person and household identity scope, and demographic/status codes. |
@@ -18,7 +23,7 @@ These are separate from the established records above. They provisionally model
 the supplied paired CSV structure as an ATLAS fleet-output contract, while the
 owner confirms its release/export context and field semantics.
 
-| Physical example role | Provisional class | Owner question |
+| Exchange file / Table role | Provisional class | Owner question |
 | --- | --- | --- |
 | Household fleet summary | [AtlasHouseholdFleetOutputExampleV1](../schema/observed-examples/AtlasHouseholdFleetOutputExampleV1.md) | Is this a native export, and what release/export context produced it? |
 | Vehicle fleet rows | [AtlasVehicleFleetOutputExampleV1](../schema/observed-examples/AtlasVehicleFleetOutputExampleV1.md) | Confirm export status, `annual_mileage` units, and omitted year/geography semantics. |

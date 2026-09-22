@@ -9,6 +9,12 @@ Adoption remains reversible. Existing payloads, readable review tables, and
 plain manifests remain useful if Synergy-specific checking is later removed.
 No proprietary runtime or opaque registry is required to interpret them.
 
+If a project decides to discontinue Synergy Schema, participating models
+continue using their native CSV, Parquet, or database files without code changes.
+The LinkML schemas, YAML manifests, and review digests function as external
+documentation and validation checks; removing them does not break or alter the
+physical storage or execution of individual models.
+
 Flat files plus a README can be enough for a stable one-off exchange. Stable
 identity, structured mapping rules, and review records become more useful when
 delivery repeats, scenarios change, or debugging crosses team boundaries.

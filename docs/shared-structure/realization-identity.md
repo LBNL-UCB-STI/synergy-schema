@@ -1,5 +1,10 @@
 # Population trajectory realization identity
 
+> **Note for readers:** This page is a formal normative specification for tool
+> implementers and conformance checkers. Readers looking for conceptual overviews
+> can continue to the [Glossary](glossary.md) or the
+> [Three-year proof](../proof-of-concept/index.md).
+
 This page is the public interoperability definition for
 `synergy:scenario-realization:population-trajectory-v1`. It gives a selected
 PILATES population trajectory one portable content identity. That identity

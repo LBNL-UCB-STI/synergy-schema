@@ -1,5 +1,9 @@
 # POLARIS translated population
 
+POLARIS is an agent-based travel demand and dynamic network traffic simulation
+engine. In integrated studies, it consumes synthetic populations translated from
+upstream modeling outputs to simulate regional traffic flow and congestion.
+
 ## Current
 
 POLARIS native records are partial in this schema. They support a synthetic

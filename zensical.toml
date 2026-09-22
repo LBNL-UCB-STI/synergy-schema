@@ -3,6 +3,7 @@ site_name = "Synergy Schema"
 site_description = "Shared definitions and evidence for coordinated modeling workflows"
 docs_dir = "docs"
 site_dir = "site"
+extra_css = ["stylesheets/extra.css"]
 nav = [
     { "Overview" = "index.md" },
     { "Model contract review" = [
@@ -41,6 +42,7 @@ nav = [
     { "Workflow structures" = [
         { "Workflow structures" = "workflow-structures/index.md" },
         { "PILATES post-ATLAS population" = "workflow-structures/pilates.md" },
+        { "Post-ATLAS bundle details" = "pilates/post-atlas-population-bundle.md" },
         { "POLARIS translated population" = "workflow-structures/polaris.md" },
     ] },
     { "Design rationale" = [
@@ -57,6 +59,10 @@ nav = [
 [project.theme]
 language = "en"
 features = ["content.code.copy", "navigation.indexes", "navigation.top", "search.highlight", "toc.follow"]
+
+[project.theme.font]
+text = "Libre Franklin"
+code = "JetBrains Mono"
 
 [project.markdown_extensions.pymdownx.superfences]
 custom_fences = [

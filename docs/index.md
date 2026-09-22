@@ -8,16 +8,25 @@ language for answering that question across independently maintained systems.
 ## The coordination problem
 
 Integrated studies often connect land-use, travel-demand, vehicle, and
-traffic-simulation models. Each system has its own settings, tables, identifiers,
-release cycle, and technical owners. A policy called `zev_mandate` in one model
-might appear as a database value in another. A household identifier may persist
-across years in one file and identify only a row in another. A path may still
-exist after its contents have changed.
+traffic-simulation models. In this environment:
+
+- **UrbanSim** models land use, real estate developments, and regional demographics;
+- **ActivitySim** models daily activity schedules, tours, and travel demand;
+- **ATLAS** models household vehicle fleet evolution, vehicle retirement, and EV technology adoption;
+- **POLARIS** models agent-based traffic simulation, network assignments, and dynamic travel behavior; and
+- **PILATES** serves as an orchestration pipeline coordinating these models across simulated years.
+
+Each system has its own settings, tables, identifiers, release cycle, and
+technical owners. A policy called `zev_mandate` in one model might appear as a
+database value in another. A household identifier (such as `HH_100`) may
+persist across years in one file, split into two households in another, or
+identify only a row index in another. A path may still exist after its contents
+have changed.
 
 Ordinary file exchange does not settle questions such as:
 
 - Which exact scenario assumptions were represented?
-- Which population realization and simulation year does a file describe?
+- Which population realization (random seed or simulation run) and simulation year does a file describe?
 - Which identities persist across models or years, and which are local row IDs?
 - Which mapping rules and executable code produced the translated rows?
 - Which model owners reviewed those rules?
@@ -30,10 +39,10 @@ workflows can appear aligned while quietly describing different worlds.
 
 Synergy treats a study as one shared universe with several model-specific
 views. Agreement concerns the facts that must be common: the scenario revision,
-stochastic realization, simulation year, population identity, declared
-relationships, and identity of exchanged files. The PILATES modeling pipeline
-and POLARIS, along with ATLAS and other systems, can keep their own schemas,
-settings, and model-specific results.
+stochastic realization (the specific random seed or simulation run), simulation
+year, population identity, declared relationships, and identity of exchanged
+files. The PILATES modeling pipeline and POLARIS, along with ATLAS and other
+systems, can keep their own schemas, settings, and model-specific results.
 
 Different predictions are therefore not automatically conflicts. The systems
 may legitimately produce different model-specific results. A conflict exists
@@ -45,14 +54,14 @@ shared assumption.
 
 Each record resolves a distinct coordination risk.
 
-| Record | Why it exists |
-| --- | --- |
-| Interface descriptions | Locate a shared idea in a model-owned setting, artifact key, or table column without taking ownership of that model's schema. |
-| Mapping descriptions | Record how source values become target values, including defaults, lookups, filtered rows, and information that cannot be carried forward. |
-| Review records | Preserve the decision made by a person or team acting in a named authority role for one exact version of the rules. General agreement in a meeting is not enough when the mapping later changes. |
-| Implementation links | Identify the SQL or code that claims to apply the reviewed rules. Meaning and executable behavior can change independently. |
-| Receipts and evidence | Connect one scenario and year to the run, implementation, inputs, and outputs actually used. Evidence supports a bounded claim about an exchange; it does not prove that a model is scientifically correct. |
-| Content digests | Give changing definitions and files stable fingerprints, allowing checks to distinguish an edited file from a moved or renamed one. |
+| Record | What it represents | Why it exists |
+| --- | --- | --- |
+| Interface descriptions | Model settings and table columns | Locate a shared idea in a model-owned setting, artifact key, or table column without taking ownership of that model's schema. |
+| Mapping descriptions | Translation rules and known differences | Record how source values become target values, including defaults, lookups, filtered rows, and information that cannot be carried forward (mapping residue). |
+| Review records | Model-owner decisions | Preserve the decision made by a person or team acting in a named authority role for one exact version of the rules. General agreement in a meeting is not enough when the mapping later changes. |
+| Implementation links | Translation code and scripts | Identify the SQL or code that claims to apply the reviewed rules. Meaning and executable behavior can change independently. |
+| Receipts and evidence | Verified execution records | Connect one scenario and year to the run, implementation, inputs, and outputs actually used. Evidence supports a bounded claim about an exchange; it does not prove that a model is scientifically correct. |
+| Content digests | Cryptographic fingerprints | Give changing definitions and files stable fingerprints (hashes), allowing checks to distinguish an edited file from a moved or renamed one. |
 
 Together they let the checker test declared consistency; evidence from the
 producing and consuming runtimes is still required to establish actual use.
@@ -75,11 +84,12 @@ its own.
 
 | Documentation area | Question it answers |
 | --- | --- |
-| [Shared structure](shared-structure/index.md) | Which facts belong to the shared universe, and which remain model-owned? |
+| [Model contract review](model-contracts/index.md) | What native tables, inputs, and outputs do ATLAS, ActivitySim, UrbanSim, POLARIS, and DEMOS expect or provide? |
+| [Bring an existing mapping](bring-an-existing-mapping/index.md) | How can an existing spreadsheet, SQL script, or column mapping become a durable, reviewable exchange description? |
 | [Three-year proof](proof-of-concept/index.md) | What do those distinctions look like in a small, executable example? |
+| [Shared structure](shared-structure/index.md) | Which facts belong to the shared universe, and which remain model-owned? |
 | [Cross-model mappings](cross-model-mappings/index.md) | How do identities, assumptions, and fields connect across models? |
 | [Workflow structures](workflow-structures/index.md) | How are shared definitions combined at the PILATES and proposed POLARIS boundaries? |
-| [Bring an existing mapping](bring-an-existing-mapping/index.md) | How can an existing spreadsheet, SQL script, or column mapping become a durable, reviewable exchange description? |
 | [Design rationale](design-rationale/index.md) | Why are the definitions separated this way, and when is a simpler approach enough? |
 | [Glossary](shared-structure/glossary.md) | What do the recurring formal terms mean in plain language? |
 | [Generated schema reference](schema/index.md) | What are the exact fields, types, required values, and relationships? |

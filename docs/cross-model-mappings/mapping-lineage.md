@@ -27,6 +27,9 @@ the source and target model teams decide what their fields mean and whether the
 cross-model rule is acceptable. Synergy records and checks those decisions but
 cannot create approval on either team's behalf.
 
-Known defaults, filtered rows, unsupported fields, and dropped context are
-recorded as [mapping residue](../shared-structure/glossary.md#mapping-residue).
-Residue is visible translation behavior, not automatically an error.
+When translating data between two models, not every field or filter has a direct
+one-to-one match. Known defaults, filtered rows, unsupported fields, and dropped
+context are recorded explicitly as [mapping residue](../shared-structure/glossary.md#mapping-residue).
+Recording residue makes known translation losses and assumptions visible to
+both teams, rather than hiding them inside translation scripts. Residue is
+declared behavior, not an unexpected error.
