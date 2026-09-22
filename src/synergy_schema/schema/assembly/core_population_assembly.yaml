@@ -55,11 +55,13 @@ classes:
     description: Typed reference to an immutable contribution named by an assembly.
     attributes:
       contribution_id:
+        description: Stable identifier of an immutable contribution.
         identifier: true
         required: true
       revision:
         required: true
       semantic_identity:
+        description: Digest-pinned semantic identity of a contribution or assembly.
         range: ContributionSemanticIdentity
         required: true
         inlined: true
@@ -67,6 +69,7 @@ classes:
     description: Typed target for a core facet or a field within that facet.
     attributes:
       facet:
+        description: Core population facet being addressed.
         range: CorePopulationFacet
         required: true
       field:
@@ -75,6 +78,7 @@ classes:
     description: Reference to an asserted field binding in one contribution.
     attributes:
       contribution:
+        description: Contribution that supplies a binding or resolved value.
         range: CorePopulationContributionReference
         required: true
         inlined: true
@@ -87,16 +91,19 @@ classes:
         identifier: true
         required: true
       artifact_member_role:
+        description: Semantic role of the artifact member containing a field.
         required: true
       native_element:
         range: NativeContractElementReference
         required: true
         inlined: true
       core_target:
+        description: Core facet or field asserted by a native binding.
         range: CoreFacetFieldReference
         required: true
         inlined: true
       assertion_authority:
+        description: Party responsible for an asserted core value.
         required: true
   ColumnAuthorityClassification:
     description: Classification of a digest-pinned native contract element in a wide table.
@@ -109,9 +116,11 @@ classes:
         required: true
         inlined: true
       classification:
+        description: Declared authority category for a native column.
         range: ColumnAuthorityKind
         required: true
       target:
+        description: Core facet or field supplied or resolved by a declaration.
         range: CoreFacetFieldReference
         inlined: true
       upstream_assertion:
@@ -125,23 +134,29 @@ classes:
         identifier: true
         required: true
       source_contribution:
+        description: Contribution containing a relationship source key.
         range: CorePopulationContributionReference
         required: true
         inlined: true
       source_artifact_member_role:
+        description: Semantic role of the artifact member containing a source key.
         required: true
       source_key_fields:
+        description: Native contract elements forming a relationship source key.
         range: NativeContractElementReference
         required: true
         multivalued: true
         inlined_as_list: true
       target_contribution:
+        description: Contribution supplying a relationship target key.
         range: CorePopulationContributionReference
         inlined: true
       target_core:
+        description: Core facet addressed by a relationship target key.
         range: CoreFacetFieldReference
         inlined: true
       target_key_fields:
+        description: Core fields forming a relationship target key.
         range: CoreFacetFieldReference
         multivalued: true
         inlined_as_list: true
@@ -165,14 +180,17 @@ classes:
     description: Core facet and authority declared as supplied by an assembly.
     attributes:
       target:
+        description: Core facet or field supplied or resolved by a declaration.
         range: CoreFacetFieldReference
         required: true
         inlined: true
       contribution:
+        description: Contribution that supplies a binding or resolved value.
         range: CorePopulationContributionReference
         required: true
         inlined: true
       binding:
+        description: Binding that supplies a declared core target.
         range: CoreFieldBinding
         required: true
         inlined: true
@@ -183,23 +201,28 @@ classes:
         identifier: true
         required: true
       target:
+        description: Core facet or field supplied or resolved by a declaration.
         range: CoreFacetFieldReference
         required: true
         inlined: true
       scope:
+        description: Scope over which a field-resolution choice applies.
         required: true
       candidate_assertions:
+        description: Competing asserted bindings considered for resolution.
         range: ContributionFieldReference
         required: true
         multivalued: true
         inlined_as_list: true
       selected_assertion:
+        description: Reviewed assertion selected from the candidate set.
         range: ContributionFieldReference
         required: true
         inlined: true
       reason:
         required: true
       approval:
+        description: Review or owner approval authorizing a resolution.
         required: true
   ResolvedFacetIndexEntry:
     description: Materialized authoritative lookup for one supplied core target.
@@ -208,23 +231,28 @@ classes:
         identifier: true
         required: true
       target:
+        description: Core facet or field supplied or resolved by a declaration.
         range: CoreFacetFieldReference
         required: true
         inlined: true
       contribution:
+        description: Contribution that supplies a binding or resolved value.
         range: CorePopulationContributionReference
         required: true
         inlined: true
       artifact_member_role:
+        description: Semantic role of the artifact member containing a field.
         required: true
       schema_contract:
         range: SchemaContractReference
         inlined: true
       native_to_core_binding:
+        description: Binding used to locate and interpret a resolved core value.
         range: CoreFieldBinding
         required: true
         inlined: true
       field_resolution:
+        description: Resolution record used for overlapping core assertions.
         range: FieldResolution
         inlined: true
   CorePopulationContribution:
@@ -232,42 +260,53 @@ classes:
     description: Immutable model assertion about one or more facets of a core snapshot.
     attributes:
       contribution_revision:
+        description: Immutable revision label assigned to a contribution.
         required: true
       target_snapshot:
+        description: Shared population snapshot to which a manifest applies.
         range: PopulationSnapshot
         required: true
         inlined: true
       input_snapshots:
+        description: Population snapshots used as contribution inputs.
         range: PopulationSnapshot
         multivalued: true
         inlined: false
       input_contributions:
+        description: Earlier immutable contributions used as inputs.
         range: CorePopulationContributionReference
         multivalued: true
         inlined_as_list: true
       producing_model:
+        description: Model responsible for the native output.
         required: true
       producing_component:
+        description: Model component responsible for the native output.
         required: true
       semantic_identity:
+        description: Digest-pinned semantic identity of a contribution or assembly.
         range: ContributionSemanticIdentity
         required: true
         inlined: true
       supplied_bindings:
+        description: Native-to-core bindings asserted by a contribution.
         range: CoreFieldBinding
         multivalued: true
         inlined_as_list: true
       column_classifications:
+        description: Logical authority classifications for native output columns.
         range: ColumnAuthorityClassification
         multivalued: true
         inlined_as_list: true
       relationship_bindings:
+        description: Declared relationships from a contribution to other facets.
         range: RelationshipBinding
         multivalued: true
         inlined_as_list: true
       mapping_reference:
         required: true
       completeness_declaration:
+        description: Producer declaration of the contribution's supplied scope.
         required: true
   CorePopulationAssembly:
     description: Immutable inventory of contributions describing one core snapshot revision.
@@ -282,35 +321,43 @@ classes:
         identifier: true
         required: true
       assembly_revision:
+        description: Immutable revision label assigned to an assembly manifest.
         required: true
       target_snapshot:
+        description: Shared population snapshot to which a manifest applies.
         range: PopulationSnapshot
         required: true
         inlined: true
       contributions:
+        description: Immutable contribution identities included in an assembly.
         range: CorePopulationContributionReference
         required: true
         minimum_cardinality: 1
         multivalued: true
         inlined_as_list: true
       supplied_facets:
+        description: Core facets and bindings declared as supplied by an assembly.
         range: SuppliedCoreFacet
         multivalued: true
         inlined_as_list: true
       field_resolutions:
+        description: Explicit authority choices for overlapping core assertions.
         range: FieldResolution
         multivalued: true
         inlined_as_list: true
       resolved_facet_index:
+        description: Materialized authoritative lookup for supplied facets.
         range: ResolvedFacetIndexEntry
         required: true
         multivalued: true
         inlined_as_list: true
       semantic_identity:
+        description: Digest-pinned semantic identity of a contribution or assembly.
         range: AssemblySemanticIdentity
         required: true
         inlined: true
       status:
+        description: Declared completeness state of an assembly.
         range: CorePopulationAssemblyStatus
         required: true
       prior_assembly:
