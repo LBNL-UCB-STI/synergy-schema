@@ -1,0 +1,103 @@
+id: assembly:synthetic-region-2030-r1
+assembly_revision: "1"
+target_snapshot:
+  id: population-snapshot:synthetic-region-2030-r1
+  scenario_definition_ref: {scenario_definition_id: scenario:synthetic-region, revision: "1", content_digest: "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"}
+  stochastic_realization_id: realization:synthetic-region-r1
+  simulation_year: 2030
+status: partial
+semantic_identity:
+  kind: core-population-assembly
+  projection_version: "1"
+  digest_algorithm: sha256
+  content_digest: "f64341e8654780370446492c1325202dc337ce13dffde81ce1656d3f31e9592a"
+contributions:
+  - contribution_id: contribution:demos-2030-r1
+    revision: "1"
+    semantic_identity: &demos_identity
+      kind: core-population-contribution
+      projection_version: "1"
+      digest_algorithm: sha256
+      content_digest: "1111111111111111111111111111111111111111111111111111111111111111"
+  - contribution_id: contribution:atlas-2030-r1
+    revision: "1"
+    semantic_identity: &atlas_identity
+      kind: core-population-contribution
+      projection_version: "1"
+      digest_algorithm: sha256
+      content_digest: "2222222222222222222222222222222222222222222222222222222222222222"
+resolved_facet_index:
+  - id: resolved:households
+    target: {facet: households}
+    contribution: {contribution_id: contribution:demos-2030-r1, revision: "1", semantic_identity: *demos_identity}
+    artifact_member_role: households
+    native_to_core_binding:
+      id: binding:demos-households
+      artifact_member_role: households
+      native_element: &demos_household_id
+        catalog:
+          catalog_id: catalog:demos-2030
+          catalog_kind: output-columns
+          revision: "1"
+          digest_algorithm: sha256
+          content_digest: "3333333333333333333333333333333333333333333333333333333333333333"
+        kind: sql_column
+        path: household_id
+      core_target: {facet: households, field: household_id}
+      assertion_authority: DEMOS
+  - id: resolved:people
+    target: {facet: people}
+    contribution: {contribution_id: contribution:demos-2030-r1, revision: "1", semantic_identity: *demos_identity}
+    artifact_member_role: people
+    native_to_core_binding:
+      id: binding:demos-people
+      artifact_member_role: people
+      native_element: *demos_household_id
+      core_target: {facet: people, field: person_id}
+      assertion_authority: DEMOS
+  - id: resolved:household-membership
+    target: {facet: household_membership}
+    contribution: {contribution_id: contribution:demos-2030-r1, revision: "1", semantic_identity: *demos_identity}
+    artifact_member_role: household_membership
+    native_to_core_binding:
+      id: binding:demos-membership
+      artifact_member_role: household_membership
+      native_element: *demos_household_id
+      core_target: {facet: household_membership, field: household_id}
+      assertion_authority: DEMOS
+  - id: resolved:vehicles
+    target: {facet: vehicles}
+    contribution: {contribution_id: contribution:atlas-2030-r1, revision: "1", semantic_identity: *atlas_identity}
+    artifact_member_role: vehicles
+    native_to_core_binding:
+      id: binding:atlas-vehicles
+      artifact_member_role: vehicles
+      native_element:
+        catalog:
+          catalog_id: catalog:atlas-2030
+          catalog_kind: output-columns
+          revision: "1"
+          digest_algorithm: sha256
+          content_digest: "4444444444444444444444444444444444444444444444444444444444444444"
+        kind: sql_column
+        path: vehicle_id
+      core_target: {facet: vehicles, field: vehicle_id}
+      assertion_authority: ATLAS
+  - id: resolved:household-vehicle-assignment
+    target: {facet: household_vehicle_assignment}
+    contribution: {contribution_id: contribution:atlas-2030-r1, revision: "1", semantic_identity: *atlas_identity}
+    artifact_member_role: household_vehicle_assignment
+    native_to_core_binding:
+      id: binding:atlas-assignment
+      artifact_member_role: household_vehicle_assignment
+      native_element:
+        catalog:
+          catalog_id: catalog:atlas-2030
+          catalog_kind: output-columns
+          revision: "1"
+          digest_algorithm: sha256
+          content_digest: "4444444444444444444444444444444444444444444444444444444444444444"
+        kind: sql_column
+        path: household_id
+      core_target: {facet: household_vehicle_assignment, field: household_id}
+      assertion_authority: ATLAS

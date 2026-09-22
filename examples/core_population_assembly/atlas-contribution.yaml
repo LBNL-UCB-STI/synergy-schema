@@ -1,0 +1,56 @@
+id: contribution:atlas-2030-r1
+manifest_version: "0.1"
+completeness_status: complete
+producing_run:
+  provider: ATLAS
+  run_id: run:atlas-synthetic-region-2030-r1
+members:
+  - semantic_role: vehicles
+    artifact:
+      locator: synthetic/2030/atlas-vehicles.parquet
+      media_type: application/vnd.apache.parquet
+      artifact_identity: {digest_algorithm: sha256, content_digest: "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"}
+contribution_revision: "1"
+target_snapshot:
+  id: population-snapshot:synthetic-region-2030-r1
+  scenario_definition_ref: {scenario_definition_id: scenario:synthetic-region, revision: "1", content_digest: "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"}
+  stochastic_realization_id: realization:synthetic-region-r1
+  simulation_year: 2030
+input_contributions:
+  - contribution_id: contribution:demos-2030-r1
+    revision: "1"
+    semantic_identity: {kind: core-population-contribution, projection_version: "1", digest_algorithm: sha256, content_digest: "1111111111111111111111111111111111111111111111111111111111111111"}
+producing_model: ATLAS
+producing_component: fleet-model
+semantic_identity:
+  kind: core-population-contribution
+  projection_version: "1"
+  digest_algorithm: sha256
+  content_digest: "2222222222222222222222222222222222222222222222222222222222222222"
+mapping_reference: atlas-native-to-core:v1
+completeness_declaration: vehicles-and-assignments
+column_classifications:
+  - id: classification:atlas-vehicle-id
+    native_element:
+      catalog: {catalog_id: catalog:atlas-2030, catalog_kind: output-columns, revision: "1", digest_algorithm: sha256, content_digest: "4444444444444444444444444444444444444444444444444444444444444444"}
+      kind: sql_column
+      path: vehicle_id
+    classification: core_assertion
+    target: {facet: vehicles, field: vehicle_id}
+  - id: classification:atlas-household-id
+    native_element:
+      catalog: {catalog_id: catalog:atlas-2030, catalog_kind: output-columns, revision: "1", digest_algorithm: sha256, content_digest: "4444444444444444444444444444444444444444444444444444444444444444"}
+      kind: sql_column
+      path: household_id
+    classification: core_assertion
+    target: {facet: household_vehicle_assignment, field: household_id}
+  - id: classification:atlas-carried-household-id
+    native_element:
+      catalog: {catalog_id: catalog:atlas-2030, catalog_kind: output-columns, revision: "1", digest_algorithm: sha256, content_digest: "4444444444444444444444444444444444444444444444444444444444444444"}
+      kind: sql_column
+      path: household_id
+    classification: carried_through
+    upstream_assertion:
+      contribution: {contribution_id: contribution:demos-2030-r1, revision: "1", semantic_identity: {kind: core-population-contribution, projection_version: "1", digest_algorithm: sha256, content_digest: "1111111111111111111111111111111111111111111111111111111111111111"}}
+      binding_id: classification:demos-household-id
+relationship_bindings: []

@@ -1,0 +1,320 @@
+id: https://w3id.org/LBNL-UCB-STI/synergy-schema/assembly/core-population-assembly
+name: core_population_assembly
+title: Core population assembly manifests
+description: >-
+  Logical declarations for assembling immutable model contributions into a
+  shared population snapshot. This module annotates existing handoff bundles;
+  it does not define native model tables or storage layouts.
+
+prefixes:
+  synergy_schema: https://w3id.org/LBNL-UCB-STI/synergy-schema/
+  linkml: https://w3id.org/linkml/
+
+default_prefix: synergy_schema
+default_range: string
+
+imports:
+  - linkml:types
+  - ../core/population_snapshot
+  - ../core/handoff_bundle
+  - ../core/native_contract
+
+enums:
+  CorePopulationFacet:
+    permissible_values:
+      households: {}
+      people: {}
+      household_membership: {}
+      vehicles: {}
+      household_vehicle_assignment: {}
+  ColumnAuthorityKind:
+    description: Logical authority of a native column in a contribution.
+    permissible_values:
+      core_assertion: {}
+      model_view: {}
+      carried_through: {}
+  CorePopulationAssemblyStatus:
+    permissible_values:
+      partial: {}
+      complete_for_named_consumer: {}
+
+classes:
+  ContributionSemanticIdentity:
+    description: Versioned, algorithm-tagged identity of a contribution's declared meaning.
+    attributes:
+      kind:
+        required: true
+      projection_version:
+        required: true
+      digest_algorithm:
+        range: DigestAlgorithm
+        required: true
+      content_digest:
+        required: true
+  CorePopulationContributionReference:
+    description: Typed reference to an immutable contribution named by an assembly.
+    attributes:
+      contribution_id:
+        identifier: true
+        required: true
+      revision:
+        required: true
+      semantic_identity:
+        range: ContributionSemanticIdentity
+        required: true
+        inlined: true
+  CoreFacetFieldReference:
+    description: Typed target for a core facet or a field within that facet.
+    attributes:
+      facet:
+        range: CorePopulationFacet
+        required: true
+      field:
+        description: Optional named field; omitted when the whole facet is targeted.
+  ContributionFieldReference:
+    description: Reference to an asserted field binding in one contribution.
+    attributes:
+      contribution:
+        range: CorePopulationContributionReference
+        required: true
+        inlined: true
+      binding_id:
+        required: true
+  CoreFieldBinding:
+    description: Mapping from one native contract element to one declared core target.
+    attributes:
+      id:
+        identifier: true
+        required: true
+      artifact_member_role:
+        required: true
+      native_element:
+        range: NativeContractElementReference
+        required: true
+        inlined: true
+      core_target:
+        range: CoreFacetFieldReference
+        required: true
+        inlined: true
+      assertion_authority:
+        required: true
+  ColumnAuthorityClassification:
+    description: Classification of a digest-pinned native contract element in a wide table.
+    attributes:
+      id:
+        identifier: true
+        required: true
+      native_element:
+        range: NativeContractElementReference
+        required: true
+        inlined: true
+      classification:
+        range: ColumnAuthorityKind
+        required: true
+      target:
+        range: CoreFacetFieldReference
+        inlined: true
+      upstream_assertion:
+        range: ContributionFieldReference
+        inlined: true
+        description: Required by conformance when classification is carried_through.
+  RelationshipBinding:
+    description: Declared key mapping for a relationship crossing contribution boundaries.
+    attributes:
+      id:
+        identifier: true
+        required: true
+      source_contribution:
+        range: CorePopulationContributionReference
+        required: true
+        inlined: true
+      source_artifact_member_role:
+        required: true
+      source_key_fields:
+        range: NativeContractElementReference
+        required: true
+        multivalued: true
+        inlined_as_list: true
+      target_contribution:
+        range: CorePopulationContributionReference
+        inlined: true
+      target_core:
+        range: CoreFacetFieldReference
+        inlined: true
+      target_key_fields:
+        range: CoreFacetFieldReference
+        multivalued: true
+        inlined_as_list: true
+      mapping_reference:
+        description: Reviewed mapping or translation identity used to compare the keys.
+      relationship_kind:
+        required: true
+  AssemblySemanticIdentity:
+    description: Versioned, algorithm-tagged identity of an assembly's closed declared projection.
+    attributes:
+      kind:
+        required: true
+      projection_version:
+        required: true
+      digest_algorithm:
+        range: DigestAlgorithm
+        required: true
+      content_digest:
+        required: true
+  SuppliedCoreFacet:
+    description: Core facet and authority declared as supplied by an assembly.
+    attributes:
+      target:
+        range: CoreFacetFieldReference
+        required: true
+        inlined: true
+      contribution:
+        range: CorePopulationContributionReference
+        required: true
+        inlined: true
+      binding:
+        range: CoreFieldBinding
+        required: true
+        inlined: true
+  FieldResolution:
+    description: Explicit reviewed selection among competing assertions for a target and scope.
+    attributes:
+      id:
+        identifier: true
+        required: true
+      target:
+        range: CoreFacetFieldReference
+        required: true
+        inlined: true
+      scope:
+        required: true
+      candidate_assertions:
+        range: ContributionFieldReference
+        required: true
+        multivalued: true
+        inlined_as_list: true
+      selected_assertion:
+        range: ContributionFieldReference
+        required: true
+        inlined: true
+      reason:
+        required: true
+      approval:
+        required: true
+  ResolvedFacetIndexEntry:
+    description: Materialized authoritative lookup for one supplied core target.
+    attributes:
+      id:
+        identifier: true
+        required: true
+      target:
+        range: CoreFacetFieldReference
+        required: true
+        inlined: true
+      contribution:
+        range: CorePopulationContributionReference
+        required: true
+        inlined: true
+      artifact_member_role:
+        required: true
+      schema_contract:
+        range: SchemaContractReference
+        inlined: true
+      native_to_core_binding:
+        range: CoreFieldBinding
+        required: true
+        inlined: true
+      field_resolution:
+        range: FieldResolution
+        inlined: true
+  CorePopulationContribution:
+    is_a: HandoffBundle
+    description: Immutable model assertion about one or more facets of a core snapshot.
+    attributes:
+      contribution_revision:
+        required: true
+      target_snapshot:
+        range: PopulationSnapshot
+        required: true
+        inlined: true
+      input_snapshots:
+        range: PopulationSnapshot
+        multivalued: true
+        inlined: false
+      input_contributions:
+        range: CorePopulationContributionReference
+        multivalued: true
+        inlined_as_list: true
+      producing_model:
+        required: true
+      producing_component:
+        required: true
+      semantic_identity:
+        range: ContributionSemanticIdentity
+        required: true
+        inlined: true
+      supplied_bindings:
+        range: CoreFieldBinding
+        multivalued: true
+        inlined_as_list: true
+      column_classifications:
+        range: ColumnAuthorityClassification
+        multivalued: true
+        inlined_as_list: true
+      relationship_bindings:
+        range: RelationshipBinding
+        multivalued: true
+        inlined_as_list: true
+      mapping_reference:
+        required: true
+      completeness_declaration:
+        required: true
+  CorePopulationAssembly:
+    description: Immutable inventory of contributions describing one core snapshot revision.
+    annotations:
+      conformance_requirements: >-
+        Contributions must target the same snapshot; overlapping core targets
+        require an explicit FieldResolution; and the resolved facet index must
+        be recomputable from the declarations. These are conformance rules,
+        not ordinary LinkML shape validation.
+    attributes:
+      id:
+        identifier: true
+        required: true
+      assembly_revision:
+        required: true
+      target_snapshot:
+        range: PopulationSnapshot
+        required: true
+        inlined: true
+      contributions:
+        range: CorePopulationContributionReference
+        required: true
+        minimum_cardinality: 1
+        multivalued: true
+        inlined_as_list: true
+      supplied_facets:
+        range: SuppliedCoreFacet
+        multivalued: true
+        inlined_as_list: true
+      field_resolutions:
+        range: FieldResolution
+        multivalued: true
+        inlined_as_list: true
+      resolved_facet_index:
+        range: ResolvedFacetIndexEntry
+        required: true
+        multivalued: true
+        inlined_as_list: true
+      semantic_identity:
+        range: AssemblySemanticIdentity
+        required: true
+        inlined: true
+      status:
+        range: CorePopulationAssemblyStatus
+        required: true
+      prior_assembly:
+        range: string
+        description: Identifier of an earlier assembly revision for the same snapshot.
+      replacement_reason:
+        description: Reason this assembly supersedes or corrects the prior assembly.
