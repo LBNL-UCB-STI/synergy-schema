@@ -35,19 +35,25 @@ the same definition into several places.
 
 ## Current status
 
-The root schema covers the current PILATES population handoff, partial
-UrbanSim, ActivitySim, and POLARIS identity/join records, and mappings for the
-observed PILATES population path. It also includes a staged-assembly slice for
-immutable DEMOS and ATLAS contributions to one partial population snapshot.
-The repository does not claim complete native-table coverage, runtime
-validation, model-owner approval, or production artifact integrity.
+The main schema currently covers:
+
+- the PILATES population handoff after ATLAS;
+- the ID and join fields from UrbanSim, ActivitySim, and POLARIS (not their
+  full tables);
+- mappings for the population as it moves through PILATES; and
+- staged assemblies, where DEMOS and ATLAS each contribute part of one year's
+  population.
+
+It doesn't yet cover every model table, validate anything at runtime, or have
+sign-off from the model teams, and it isn't used for production data.
 
 ### Provisional model contracts
 
 [`observed_examples.yaml`](src/synergy_schema/schema/observed_examples.yaml)
-separately describes provisional DEMOS, ATLAS, and POLARIS row shapes from
-local examples. It is outside `synergy_schema.yaml` because those examples do
-not establish a shared handoff, mapping, scenario, or trajectory.
+holds first-draft descriptions of DEMOS, ATLAS, and POLARIS tables, based on
+example files. They're kept out of `synergy_schema.yaml` because they haven't
+been confirmed as part of any shared handoff, mapping, scenario, or
+trajectory.
 
 ## Getting started
 
@@ -93,13 +99,13 @@ unzip -l dist/synergy_schema-*.whl | rg 'synergy_schema/schema/synergy_schema.ya
 ## See a complete synthetic handoff
 
 The [post-ATLAS population bundle example](examples/post_atlas_population_bundle/)
-walks through native ATLAS rows, their snapshot-scoped population state, and
-the PILATES bundle that composes the three corresponding artifacts.
+walks through sample ATLAS rows, the shared population records for that year,
+and the PILATES bundle that ties the three files together.
 
-For a staged rather than complete handoff, see the
+For a population built up in stages, see the
 [core-population assembly example](examples/core_population_assembly/). It
-shows separate DEMOS and ATLAS contributions, explicit column authority, and
-the command that validates their shared snapshot.
+shows separate DEMOS and ATLAS contributions, which model is the authority for
+each column, and the command that checks them against each other.
 
 ## Contributing a schema
 

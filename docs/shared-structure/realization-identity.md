@@ -1,15 +1,15 @@
 # Population trajectory realization identity
 
-This page is the public interoperability definition for
-`synergy:scenario-realization:population-trajectory-v1`. It gives a selected
-PILATES population trajectory one portable content identity. That identity
-allows independent systems to determine whether they selected the same
-scenario revision, realization, ordered snapshots, and member files even when
-the surrounding manifests or storage locations differ.
+This page is the public specification for
+`synergy:scenario-realization:population-trajectory-v1`. It defines a single
+fingerprint for a PILATES population trajectory. Two independent systems can
+compare fingerprints to tell whether they picked the same scenario version,
+random draw, sequence of yearly snapshots, and member files, even if their
+manifests or storage locations differ.
 
-The definition does not create a registry, a Tracker protocol, an artifact
-locator policy, or runtime admission behavior. Those concerns sit outside the
-identity being compared.
+This page only defines how to compute and compare that fingerprint. It does
+not define a registry, a Tracker protocol, rules for where files live, or what
+a runtime should accept.
 
 ## Identity envelope
 
@@ -22,22 +22,23 @@ digest_algorithm: sha256
 content_digest: <64 lowercase hexadecimal characters>
 ```
 
-`content_digest` is SHA-256 over the canonical representation below. It is not
-part of the bytes it hashes. `kind`, `projection_version`, and
-`digest_algorithm` are part of those bytes, so a later canonical representation must use a
-new kind or version rather than silently changing v1 rules.
+`content_digest` is the SHA-256 hash of the canonical representation
+described below. The digest itself is not part of what gets hashed, but
+`kind`, `projection_version`, and `digest_algorithm` are. Any future change to
+the canonical representation therefore needs a new kind or version; v1 rules
+never change in place.
 
-`ScenarioRealizationIdentity` and `ScenarioRealizationReceipt` are published
-in the provider-neutral LinkML schema at
+`ScenarioRealizationIdentity` and `ScenarioRealizationReceipt` are defined
+in the shared LinkML schema at
 [`src/synergy_schema/schema/core/handoff_bundle.yaml`](https://github.com/LBNL-UCB-STI/synergy-schema/blob/main/src/synergy_schema/schema/core/handoff_bundle.yaml).
-The PILATES `PopulationTrajectoryBundle` profile composes them with the source
-manifest fields.
+The PILATES `PopulationTrajectoryBundle` profile combines them with the
+source manifest fields.
 
 ## Closed v1 canonical representation
 
-After validation, construct a new mapping with exactly this shape. Do not copy
-the input bundle and delete selected fields; unrecognized source fields are
-excluded unless a later `projection_version` explicitly adds them.
+After validation, build a new object with exactly this shape. Don't copy the
+input bundle and delete fields from it. Any field not listed here is left out,
+unless a later `projection_version` explicitly adds it.
 
 ```yaml
 kind: synergy:scenario-realization:population-trajectory-v1
@@ -78,17 +79,20 @@ trajectory:
             selected_root: <schema root>
 ```
 
-The canonical representation includes the declared scenario, realization, trajectory, and
-snapshot context; requested/successful/skipped year closure; completeness;
-member roles; selected artifact byte identities; and schema interpretation
-identities. It excludes the outer exchange `id`, locators, storage paths,
-schema URI and version labels, media observations, row counts, diagnostics,
-timestamps, validation/admission/execution evidence, Consist or Tracker run
-references, human annotations, receipts, and both digest-result fields.
+**Included:** the scenario, realization, trajectory, and snapshot context;
+which years were requested, completed, and skipped; completeness; member
+roles; the file fingerprints; and the fingerprints of the schemas used to
+read them.
+
+**Excluded:** the outer exchange `id`, locators and storage paths, schema URI
+and version labels, media observations, row counts, diagnostics, timestamps,
+validation/admission/execution evidence, Consist or Tracker run references,
+human annotations, receipts, and both digest-result fields.
 
 ## Required validation
 
-Before returning a canonical representation or digest, a conforming implementation must:
+Before returning a canonical representation or digest, an implementation
+must:
 
 1. validate the declared `PopulationTrajectoryBundle` LinkML shape;
 2. validate cross-record scenario, trajectory, year, provenance, and artifact
@@ -97,14 +101,24 @@ Before returning a canonical representation or digest, a conforming implementati
 4. compare any supplied top-level or receipt identity to the calculated
    identity.
 
-Reject missing root or snapshot manifest versions; malformed SHA-256 digests;
-missing member schema contracts; duplicate snapshot IDs; duplicate or missing
-semantic roles within a snapshot; invalid `snapshot_id`/semantic-role member
-selection; non-ascending or duplicate requested/skipped years; skipped years
-outside the requested set or overlapping successful years; non-increasing
-snapshot years; invalid/missing parent snapshots; inconsistent scenario or
-stochastic-realization references; and inconsistent completeness. A successful
-snapshot bundle must be complete. Invalid input receives no realization digest.
+Reject the input if any of these are true:
+
+- a root or snapshot manifest version is missing;
+- a SHA-256 digest is malformed;
+- a member has no schema contract;
+- two snapshots share an ID;
+- a snapshot has a duplicate or missing semantic role;
+- a member selection by `snapshot_id` and semantic role is invalid;
+- requested or skipped years are duplicated or not in ascending order;
+- a skipped year is outside the requested set or also appears as a successful
+  year;
+- snapshot years don't strictly increase;
+- a parent snapshot is invalid or missing;
+- scenario or stochastic-realization references don't agree; or
+- completeness is inconsistent.
+
+A successful snapshot bundle must be complete. Invalid input gets no
+realization digest.
 
 ## Canonical bytes
 
@@ -136,30 +150,32 @@ The repository commits a standalone v1 test vector:
   and
   [`pilates_population.yaml`](https://github.com/LBNL-UCB-STI/synergy-schema/blob/main/src/synergy_schema/schema/profiles/pilates_population.yaml)
 
-A receiver should cite a released Synergy tag or commit containing these files,
-then independently reproduce the published bytes and digest. A release tag is
-the stable reference; a moving branch name is not.
+A receiver should cite a released Synergy tag or commit that contains these
+files, then reproduce the published bytes and digest on its own. Pin to a
+release tag or commit, not a branch name, since branches move.
 
 ## Trust boundary and receipts
 
-Parsing an unpinned bundle only establishes self-consistency: the supplied
-bundle produces the supplied realization identity. It does not authenticate a
-publisher or prove that the sender delivered a previously selected realization.
-A receiver that needs that assurance must compare against an independently supplied expected identity from trusted configuration, a reviewed Git release, or another independent channel.
+Computing the identity of a bundle on its own only shows that the bundle is
+self-consistent: it produces the identity it claims. That doesn't prove who
+published it, or that the sender delivered the realization the receiver
+actually wanted. A receiver that needs that assurance must compare against an
+independently supplied expected identity, such as one from trusted
+configuration, a reviewed Git release, or another separate channel.
 
-`ScenarioRealizationReceipt` is separately versioned mutable evidence about a
-realization. It may hold locations, observations, validation, admission, or
-execution provenance, but those facts never enter the v1 digest. A receipt
-identity must match the calculated realization identity. During migration a
-receipt may be physically adjacent to the source bundle; it remains logically
-outside this manifest's canonical representation. Consumers that do not need receipt evidence
-may ignore it entirely.
+`ScenarioRealizationReceipt` is a separately versioned record that can be
+updated over time. It can hold file locations, observations, and validation,
+admission, or execution provenance, but none of that ever goes into the v1
+digest. The identity on a receipt must match the calculated realization
+identity. During migration a receipt may sit next to the source bundle, but it
+is still outside the canonical representation. Consumers that don't need
+receipt evidence can ignore it.
 
 ## Compatibility
 
-`manifest_content_digest` is retained only as a legacy logical full parsed
-bundle digest. It changes when any included envelope evidence changes and is
-neither original-document-byte integrity nor a realization or registry
-identity. Future derived profiles, including POLARIS translations, require
-their own published canonical representation and test vector before they can claim a
-realization identity.
+`manifest_content_digest` is kept only for backward compatibility. It hashes
+the whole parsed bundle, so it changes whenever any evidence in the bundle
+changes. It is not a checksum of the original file bytes, and it is not a
+realization or registry identity. Other profiles built on this one, including
+POLARIS translations, need their own published canonical representation and
+test vector before they can claim a realization identity.

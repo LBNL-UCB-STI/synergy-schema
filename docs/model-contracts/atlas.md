@@ -1,8 +1,8 @@
 # ATLAS contract review
 
-The established ATLAS module keeps the three current post-ATLAS record shapes
-together. Review the native fields here before considering the PILATES handoff
-profile or any cross-model mapping.
+The established ATLAS records are the three tables used in today's
+post-ATLAS handoff. Review these fields first, before looking at the PILATES
+handoff profile or any cross-model mapping.
 
 ## Established current-workflow records
 
@@ -14,15 +14,16 @@ profile or any cross-model mapping.
 
 ## Provisional fleet-output records
 
-These are separate from the established records above. They provisionally model
-the supplied paired CSV structure as an ATLAS fleet-output contract, while the
-owner confirms its release/export context and field semantics.
+These are separate from the established records above. They're a first
+attempt at describing the paired fleet-output CSVs we were given. The ATLAS
+team still needs to confirm where the files come from and what the fields
+mean.
 
 | Physical example role | Provisional class | Owner question |
 | --- | --- | --- |
 | Household fleet summary | [AtlasHouseholdFleetOutputExampleV1](../schema/observed-examples/AtlasHouseholdFleetOutputExampleV1.md) | Is this a native export, and what release/export context produced it? |
 | Vehicle fleet rows | [AtlasVehicleFleetOutputExampleV1](../schema/observed-examples/AtlasVehicleFleetOutputExampleV1.md) | Confirm export status, `annual_mileage` units, and omitted year/geography semantics. |
 
-Do not use aliases to represent an adapter rename or a prospective mapping.
-An alias is appropriate only after ATLAS confirms that it is an exact, durable
-synonym for the same native record or field.
+Don't use aliases for a rename done by an adapter or for a mapping that's
+still being proposed. Only add an alias once ATLAS confirms it's an exact,
+permanent synonym for the same record or field.

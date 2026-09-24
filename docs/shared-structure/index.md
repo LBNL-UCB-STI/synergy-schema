@@ -1,44 +1,45 @@
 # How Synergy is organized
 
-Synergy separates the facts needed to describe a shared universe from the
-details that remain inside each modeling system. The boundary is intentionally
-small. Shared structure covers scenario identity, time, population occurrences,
-declared relationships, and exact file identity. Native settings, detailed
-attributes, and model predictions stay with their owning systems.
+Synergy draws a line between the facts every model needs to agree on and the
+details that stay inside each model. That shared set is kept small on purpose:
+the scenario, the year, who is in the population, how people and vehicles
+relate, and exactly which files were exchanged. Model settings, detailed
+attributes, and predictions stay with the model that owns them.
 
 ## The agreement boundary
 
-A core record is comparable when two workflows make the same kind of claim for
-the same scenario revision, year, realization, and authority. The claim may be
-absent when a model does not represent it, but two authoritative claims cannot
-contradict each other and still count as the same shared universe.
+Two workflows are comparable on a shared record when they're making the same
+kind of claim about the same scenario version, year, random draw, and
+authority. The claim may be left out when a model doesn't represent that fact,
+but two authoritative claims cannot contradict each other and still count as
+the same shared universe.
 
-Examples include the selected scenario, the simulation year, a person identity
-within one snapshot, and a declared household-membership relationship. Age,
-vehicle technology, and predicted travel behavior remain model-owned because
-different models may legitimately represent or calculate them differently.
+Shared facts include the chosen scenario, the year, a person's ID within one
+year's population, and which household that person belongs to. Age, vehicle
+technology, and predicted travel behavior stay with each model, because
+different models can reasonably represent or calculate them differently.
 
-Shared structure does not prevent disagreement. It makes disagreement visible
-and gives conformance code a precise comparison to perform.
+The shared structure does not prevent disagreement. It makes disagreement
+visible and gives the checker something precise to compare.
 
 ## Exchange structure
 
-Core classes also identify files, the schemas that interpret them, model-owned
-interface elements, and groups of files passed together. These records answer
-which content moved across a boundary and how it should be read. They do not
-transfer ownership of native schemas or payloads.
+The shared schema also describes the files themselves: what's in them, which
+schema reads them, which model settings or columns they touch, and which files
+travel together. These records say what crossed a boundary and how to read
+it. They don't take over ownership of any model's schema or files.
 
-The generated [core schema UML](../schema/core-schema-uml.md) shows the classes
-and typed relationships. The [Glossary](glossary.md) defines recurring terms
-and contrasts similar concepts such as scenario, trajectory, snapshot, receipt,
-residue, and digest.
+The generated [core schema UML](../schema/core-schema-uml.md) diagrams the
+classes and how they connect. The [Glossary](glossary.md) defines recurring
+terms and explains the ones that are easy to mix up, such as scenario,
+trajectory, snapshot, receipt, residue, and digest.
 
-## A useful reading order
+## Suggested reading order
 
-Start with [scenario definitions and trajectories](scenario-definitions-and-trajectories.md)
-to establish the shared assumptions and timeline. Continue with
-[population snapshots and artifact identity](population-snapshots-and-artifact-identity.md)
-for one year's state and the exact files that carry it. The
-[realization-identity specification](realization-identity.md) is the
-normative technical reference for independent consumers and can be read after
-the conceptual guides.
+1. [Scenario definitions and trajectories](scenario-definitions-and-trajectories.md)
+   covers the shared assumptions and the timeline.
+2. [Population snapshots and artifact identity](population-snapshots-and-artifact-identity.md)
+   covers one year's population and the files that carry it.
+3. The [realization-identity specification](realization-identity.md) is the
+   precise technical reference for tools that need to compute and compare
+   identities. Read it after the other two.

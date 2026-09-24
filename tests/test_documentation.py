@@ -184,7 +184,7 @@ def test_overview_explains_the_shared_universe_and_why_records_matter() -> None:
     for heading in (
         "## The coordination problem",
         "## One shared universe, several modeling systems",
-        "## Why the difficult records matter",
+        "## What Synergy records, and why",
         "## Scope and limits",
         "## How the documentation builds",
     ):

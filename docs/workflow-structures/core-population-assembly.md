@@ -1,31 +1,34 @@
 # Staged core-population assembly
 
-Use a staged assembly when different models supply different structural facts
-about the same single-year population state. It lets each model keep its native
-tables while making the selected authority for a shared facet explicit.
+Use a staged assembly when different models supply different parts of the
+same year's population. Each model keeps its own tables, and the assembly
+makes it explicit which model is the authority for each shared part.
 
-For example, a DEMOS contribution can supply households, people, and household
-membership for 2030. An ATLAS contribution can later supply vehicles and
-household--vehicle assignments for that same snapshot. The assembly names both
-immutable contributions and provides a resolved facet index, so a consumer can
-find the authoritative artifact and native-to-core binding without relying on
-file names or contribution order.
+For example, DEMOS might supply the 2030 households, people, and who lives
+where. ATLAS might later add the vehicles and which household owns each one.
+The assembly lists both contributions, which don't change once published, and
+builds an index of which contribution supplies each part. A consumer can then
+find the right file, and how its columns map onto the shared records, without
+relying on file names or the order the contributions arrived in.
 
 ## What the check establishes
 
-The checker confirms that the contributions target the same snapshot, their
-artifact and semantic digests match the assembly references, core assertions
-do not silently overlap, carried-through columns name their upstream
-assertion, and declared vehicle-to-household relationships are well formed.
+The checker confirms that:
 
-It does not merge files, prove that a join succeeded from row data, or show
-that a receiving model accepted the result. Those are later evidence gates.
+- all contributions target the same snapshot;
+- their file and content fingerprints match what the assembly lists;
+- no two contributions quietly claim the same shared fact;
+- columns copied from an earlier contribution say where they came from; and
+- vehicle-to-household links are well formed.
+
+It doesn't merge files, confirm that joins actually work on the row data, or
+show that a receiving model accepted the result. Those are later checks.
 
 ## Try the synthetic example
 
 The [core-population assembly example](../../examples/core_population_assembly/)
 contains a partial 2030 DEMOS + ATLAS assembly and two intentionally invalid
-contributions. Run its check from the repository root:
+contributions. Run the check from the repository root:
 
 ```sh
 uv run python -m synergy_schema.conformance check-population-assembly \
@@ -35,5 +38,5 @@ uv run python -m synergy_schema.conformance check-population-assembly \
   --contribution examples/core_population_assembly/atlas-contribution.yaml
 ```
 
-The example is a schema-gated proof of the declarations, not a real
-producer-to-consumer exchange.
+The example checks the declarations against the schema. It isn't a real
+exchange between a producing and a consuming model.

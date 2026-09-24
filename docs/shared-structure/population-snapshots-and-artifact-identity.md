@@ -1,28 +1,29 @@
 # Population snapshots and artifact identity
 
-A population snapshot describes households, people, vehicles, and declared
-relationships at one simulation year. The records are occurrences in time, not
-timeless master entities. Longitudinal references can connect occurrences
-across years without assuming that every identifier or relationship persists.
+A population snapshot describes the households, people, vehicles, and their
+relationships in one simulation year. Each record describes something at one
+point in time, not a permanent master entity. Longitudinal references can link
+records across years, but nothing assumes every ID or relationship carries
+over.
 
-The focused [population relationship
+The [population relationship
 overview](../schema/core-schema-uml.md#population-relationship-overview) shows
-household, person, and vehicle occurrences connected through explicit
-membership and vehicle-assignment records. Co-location in a file is not treated
-as proof of a relationship.
+how households, people, and vehicles connect through explicit membership and
+vehicle-assignment records. Two rows sitting in the same file are not taken as
+proof that they're related.
 
-Artifact identity answers a different question: which exact file bytes carried
-the records? A content digest stays stable when a file moves and changes when
-its contents change. Provenance then records which workflow run produced or
-consumed those bytes.
+Artifact identity answers a different question: which exact file carried the
+records? A content digest stays the same when a file moves and changes when
+its contents change. Provenance then records which run produced or used that
+file.
 
-Separating population identity, artifact identity, and provenance prevents a
-shared row identifier, a filename, or a run record from being asked to prove
-more than it can.
+Keeping population identity, file identity, and provenance separate means no
+single row ID, filename, or run record is asked to prove more than it can.
 
-When different models add facets of the same snapshot in stages, a
+Sometimes different models fill in different parts of the same snapshot at
+different times. A
 [core-population assembly](../workflow-structures/core-population-assembly.md)
-names the immutable contributions and materializes a resolved facet index. The
-assembly answers which contribution and artifact are authoritative for a
-supplied facet; it does not merge native tables or imply that a receiving model
-has accepted them.
+lists those contributions, which never change once published, and builds an
+index of which contribution supplies each part. It tells a consumer where the
+authoritative data for each part lives. It doesn't merge the models' tables
+or mean that a receiving model has accepted them.

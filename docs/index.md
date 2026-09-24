@@ -1,16 +1,17 @@
 # Synergy Schema
 
-A transportation modeling workflow can exchange perfectly readable files and
-still leave a basic question unanswered: did every model represent the same
-scenario, population, and point in time? Synergy Schema supplies a shared
-language for answering that question across independently maintained systems.
+A transportation modeling workflow can pass perfectly readable files from one
+model to the next and still leave a basic question open: were all the models
+working on the same scenario, the same population, and the same year? Synergy
+Schema gives independently maintained models a shared way to answer that
+question.
 
-## A one-minute mental model
+## The short version
 
-Synergy is the coordination layer around independent transportation models. It
-does not replace their native tables or runtime code. Instead, it records the
-shared scenario, population state, mappings, and exact exchanged artifacts so
-that a workflow can show what crossed each boundary.
+Synergy sits alongside the models. It does not replace their tables or their
+code. It writes down the few things the models need to agree on (the scenario,
+the population, how fields map between models, and exactly which files were
+exchanged) so that anyone can later see what crossed each boundary.
 
 ```mermaid
 flowchart LR
@@ -27,88 +28,91 @@ flowchart LR
 ```
 
 **Start here:** the [three-year proof](proof-of-concept/index.md) follows a
-changing population through an executable example. For one snapshot built in
-stages by different models, see the
+small, changing population through a runnable example. To see one year's
+population built up in stages by different models, read the
 [core-population assembly guide](workflow-structures/core-population-assembly.md).
 
 ## The coordination problem
 
-Integrated studies often connect land-use, travel-demand, vehicle, and
-traffic-simulation models. Each system has its own settings, tables, identifiers,
-release cycle, and technical owners. A policy called `zev_mandate` in one model
-might appear as a database value in another. A household identifier may persist
-across years in one file and identify only a row in another. A path may still
-exist after its contents have changed.
+Integrated studies often chain together land-use, travel-demand, vehicle, and
+traffic models. Each one has its own settings, tables, IDs, release schedule,
+and team. That leads to familiar problems:
 
-Ordinary file exchange does not settle questions such as:
+- A policy called `zev_mandate` in one model is a database value in another.
+- A household ID stays the same across years in one file, but is just a row
+  number in the next.
+- A file path still exists, but the file's contents have changed.
 
-- Which exact scenario assumptions were represented?
-- Which population realization and simulation year does a file describe?
-- Which identities persist across models or years, and which are local row IDs?
-- Which mapping rules and executable code produced the translated rows?
-- Which model owners reviewed those rules?
-- Which exact input and output bytes were used in one run?
+Passing files around doesn't answer questions like:
 
-When those answers live only in filenames, meeting notes, or memory, two
-workflows can appear aligned while quietly describing different worlds.
+- Which scenario assumptions did each model actually use?
+- Which population, random draw, and year does this file describe?
+- Which IDs are stable across models or years, and which are just row numbers?
+- Which mapping rules and which code produced the translated rows?
+- Did the model teams sign off on those rules?
+- Exactly which input and output files did this run use?
+
+When the answers live only in filenames, meeting notes, or someone's memory,
+two workflows can look aligned while quietly modeling different worlds.
 
 ## One shared universe, several modeling systems
 
-Synergy treats a study as one shared universe with several model-specific
-views. Agreement concerns the facts that must be common: the scenario revision,
-stochastic realization, simulation year, population identity, declared
-relationships, and identity of exchanged files. The PILATES modeling pipeline
-and POLARIS, along with ATLAS and other systems, can keep their own schemas,
-settings, and model-specific results.
+Synergy treats a study as one shared world seen through several models. The
+models only need to agree on a small set of facts: the scenario version, the
+random draw, the year, who is in the population, how those people relate to
+each other, and which files were exchanged. Beyond that, the
+PILATES modeling pipeline and POLARIS, along with ATLAS and other models,
+keep their own schemas, settings, and results.
 
-Different predictions are therefore not automatically conflicts. The systems
-may legitimately produce different model-specific results. A conflict exists
-when authoritative records disagree about a fact that the workflows explicitly
-share. A model may also record a visible gap when it cannot represent one
-shared assumption.
+So different predictions are not automatically a problem. Models can
+legitimately produce different model-specific results. There is a conflict
+only when two authoritative records disagree about a fact the workflows have
+agreed to share. If a model simply can't represent a shared assumption, that is
+recorded as a visible gap rather than a conflict.
 
-## Why the difficult records matter
+## What Synergy records, and why
 
-Each record resolves a distinct coordination risk.
+Each kind of record exists to head off a specific coordination problem.
 
 | Record | Why it exists |
 | --- | --- |
-| Interface descriptions | Locate a shared idea in a model-owned setting, artifact key, or table column without taking ownership of that model's schema. |
-| Mapping descriptions | Record how source values become target values, including defaults, lookups, filtered rows, and information that cannot be carried forward. |
-| Review records | Preserve the decision made by a person or team acting in a named authority role for one exact version of the rules. General agreement in a meeting is not enough when the mapping later changes. |
-| Implementation links | Identify the SQL or code that claims to apply the reviewed rules. Meaning and executable behavior can change independently. |
-| Receipts and evidence | Connect one scenario and year to the run, implementation, inputs, and outputs actually used. Evidence supports a bounded claim about an exchange; it does not prove that a model is scientifically correct. |
-| Content digests | Give changing definitions and files stable fingerprints, allowing checks to distinguish an edited file from a moved or renamed one. |
+| Interface descriptions | Point to where a shared idea lives inside a model (a setting, a file key, a table column) without taking over that model's schema. |
+| Mapping descriptions | Spell out how source values become target values, including defaults, lookups, dropped rows, and anything that gets lost along the way. |
+| Review records | Capture who signed off on which exact version of the rules. "We agreed in a meeting" stops being useful once the mapping changes. |
+| Implementation links | Name the SQL or script that is supposed to apply the reviewed rules. The rules and the code can drift apart. |
+| Receipts and evidence | Tie a scenario and year to the run, code, inputs, and outputs actually used. Evidence backs up a specific claim about an exchange; it doesn't prove a model is scientifically right. |
+| Content digests | Fingerprint files and definitions so a check can tell an edited file from one that was merely moved or renamed. |
 
-Together they let the checker test declared consistency; evidence from the
-producing and consuming runtimes is still required to establish actual use.
+Together these let the checker test declared consistency: whether the records
+agree with each other. Showing that the models actually used those files still
+takes evidence from the runs that produced and consumed them.
 
 ## Scope and limits
 
-Synergy does not create one universal population table, rename native fields,
-or require model-specific predictions to agree. It records the narrow shared
-facts needed for coordination and leaves model-owned detail with the model that
-produces or consumes it.
+Synergy does not build one universal population table, rename native fields,
+or require models to predict the same things. It records only the shared facts
+needed for coordination and leaves everything else with the model that owns
+it.
 
-The current POLARIS material describes a proposed and tested exchange boundary,
-not a completed POLARIS runtime integration. Public guides distinguish current,
-proposed, and out-of-scope behavior where that boundary matters.
+The POLARIS material describes a proposed exchange that has been tested with
+examples. It is not a finished POLARIS integration. The guides say which parts
+are current, proposed, or out of scope wherever that matters.
 
 ## How the documentation builds
 
-The documentation forms a progression, while each section remains useful on
-its own.
+Each section stands on its own, but they build on each other in roughly this
+order.
 
 | Documentation area | Question it answers |
 | --- | --- |
-| [Shared structure](shared-structure/index.md) | Which facts belong to the shared universe, and which remain model-owned? |
-| [Three-year proof](proof-of-concept/index.md) | What do those distinctions look like in a small, executable example? |
-| [Cross-model mappings](cross-model-mappings/index.md) | How do identities, assumptions, and fields connect across models? |
-| [Workflow structures](workflow-structures/index.md) | How are shared definitions combined at the PILATES, proposed POLARIS, and staged-population boundaries? |
-| [Bring an existing mapping](bring-an-existing-mapping/index.md) | How can an existing spreadsheet, SQL script, or column mapping become a durable, reviewable exchange description? |
-| [Design rationale](design-rationale/index.md) | Why are the definitions separated this way, and when is a simpler approach enough? |
-| [Glossary](shared-structure/glossary.md) | What do the recurring formal terms mean in plain language? |
-| [Generated schema reference](schema/index.md) | What are the exact fields, types, required values, and relationships? |
+| [Shared structure](shared-structure/index.md) | What do the models share, and what stays with each model? |
+| [Three-year proof](proof-of-concept/index.md) | What does that look like in a small, runnable example? |
+| [Cross-model mappings](cross-model-mappings/index.md) | How do IDs, assumptions, and fields line up across models? |
+| [Workflow structures](workflow-structures/index.md) | How do the pieces fit together at real handoffs (PILATES, proposed POLARIS, staged populations)? |
+| [Bring an existing mapping](bring-an-existing-mapping/index.md) | How can an existing spreadsheet, SQL script, or column list become something reviewable? |
+| [Design rationale](design-rationale/index.md) | Why is it split up this way, and when is something simpler enough? |
+| [Glossary](shared-structure/glossary.md) | What do the recurring terms mean in plain language? |
+| [Generated schema reference](schema/index.md) | What are the exact fields, types, and required values? |
 
-The generated reference is the precise field-level source. The maintained
-guides explain the problem, the boundaries, and the reasons those fields exist.
+The generated reference is the authority on field-level details. The guides
+explain the problem, the boundaries, and why the fields exist.
