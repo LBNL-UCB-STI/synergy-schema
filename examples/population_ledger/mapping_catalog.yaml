@@ -1,0 +1,44 @@
+# Mapping catalog for the synthetic UrbanSim -> DEMOS -> ATLAS example.
+# Fixed system knowledge, maintained separately from runs; ledgers cite it by ID.
+catalog_id: mapping-catalog:synthetic-region/v1
+mappings:
+  - mapping_id: mapping:urbansim-core/v1#households
+    facet: households
+    input_view_kinds: [urbansim/households_output]
+    field_bindings:
+      - {view_kind: urbansim/households_output, view_column: household_id, core_field: household_id}
+  - mapping_id: mapping:urbansim-core/v1#people
+    facet: people
+    input_view_kinds: [urbansim/persons_output]
+    field_bindings:
+      - {view_kind: urbansim/persons_output, view_column: person_id, core_field: person_id}
+  - mapping_id: mapping:urbansim-core/v1#household_membership
+    facet: household_membership
+    input_view_kinds: [urbansim/persons_output]
+    field_bindings:
+      - {view_kind: urbansim/persons_output, view_column: person_id, core_field: person_id}
+      - {view_kind: urbansim/persons_output, view_column: household_id, core_field: household_id}
+  - mapping_id: mapping:demos-core/v1#households
+    facet: households
+    input_view_kinds: [demos/households_output]
+    field_bindings:
+      - {view_kind: demos/households_output, view_column: household_id, core_field: household_id}
+  - mapping_id: mapping:demos-core/v1#people
+    facet: people
+    input_view_kinds: [demos/deaths_output]
+    input_facets: [people]
+    field_bindings:
+      - {view_kind: demos/deaths_output, view_column: person_id, core_field: person_id}
+    rule: Parent people minus person_id values in the deaths output.
+  - mapping_id: mapping:demos-core/v1#household_membership
+    facet: household_membership
+    input_view_kinds: [demos/persons_output]
+    field_bindings:
+      - {view_kind: demos/persons_output, view_column: person_id, core_field: person_id}
+      - {view_kind: demos/persons_output, view_column: household_id, core_field: household_id}
+  - mapping_id: mapping:atlas-core/v1#vehicles
+    facet: vehicles
+    input_view_kinds: [atlas/vehicles_output]
+    field_bindings:
+      - {view_kind: atlas/vehicles_output, view_column: household_id, core_field: household_id}
+      - {view_kind: atlas/vehicles_output, view_column: vehicle_id, core_field: vehicle_id}
