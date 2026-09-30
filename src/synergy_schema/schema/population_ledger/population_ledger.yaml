@@ -1,0 +1,532 @@
+id: https://w3id.org/LBNL-UCB-STI/synergy-schema/population-ledger
+name: population_ledger
+title: Population ledger
+description: >-
+  Provisional draft for review. A versioned record of one population as
+  several models edit it in turn, modeled on git. A PopulationSnapshot is a
+  commit: it names the model step that produced it, the snapshot(s) it was
+  built from, and the full core population state afterward. A CoreState is
+  the commit's tree: a content-addressed map from each core facet to a
+  canonical digest. A PopulationCheckpoint is a tag naming the snapshot that
+  counts as a given year's population. Models never read or write core
+  tables directly; they read and write model-owned views, and Synergy
+  mappings derive core facets from those views.
+
+prefixes:
+  synergy_schema: https://w3id.org/LBNL-UCB-STI/synergy-schema/
+  linkml: https://w3id.org/linkml/
+
+default_prefix: synergy_schema
+default_range: string
+
+imports:
+  - linkml:types
+  - ../core/handoff_bundle
+  - ../core/scenario_definition
+  - ../mappings/population_translation
+
+enums:
+  CoreFacet:
+    description: >-
+      Shared population facts that every model must agree on within one
+      state. Test for membership: two models cannot legitimately disagree
+      about it at the same moment. Can eventually add other facets -- e.g.
+      buildings, freight carriers and vehicles, firms, jobs, etc.
+    permissible_values:
+      households:
+        description: Which households exist.
+      people:
+        description: Which people exist (alive and in the population).
+      household_membership:
+        description: Which household each person belongs to.
+      vehicles:
+        description: Which vehicles exist.
+      household_vehicle_assignment:
+        description: Which household each vehicle belongs to.
+
+classes:
+  FacetContentDigest:
+    description: >-
+      Identity of one core facet's content: the rows of its core table class,
+      normalized (columns in declared order, rows sorted by key, fixed types
+      and null handling) and then hashed. It is not a hash of file bytes, so
+      the same rows read from different models' files, or rebuilt from
+      parent facets and a delta, give the same digest. File-byte identity
+      uses ImmutableArtifactIdentity instead.
+    attributes:
+      canonical_form:
+        required: true
+        pattern: "^core_facet_table/v[0-9]+$"
+        description: Versioned normalization rules applied before hashing, such as core_facet_table/v1.
+      digest_algorithm:
+        range: DigestAlgorithm
+        required: true
+        description: Algorithm applied to the normalized table.
+      content_digest:
+        required: true
+        description: Digest of the normalized table.
+
+  StateDigest:
+    description: >-
+      Identity of a whole CoreState: a hash over its sorted (facet, facet
+      content digest) pairs, like a git tree hash. No file is read to compute
+      it, so identical populations share a StateDigest across steps, years,
+      and scenarios.
+    attributes:
+      canonical_form:
+        required: true
+        pattern: "^core_state/v[0-9]+$"
+        description: Versioned rules for combining facet digests, such as core_state/v1.
+      digest_algorithm:
+        range: DigestAlgorithm
+        required: true
+        description: Algorithm applied to the combined facet digests.
+      content_digest:
+        required: true
+        description: Digest of the combined facet digests.
+
+  ModelView:
+    description: >-
+      One model-owned artifact read or written by a model step, such as the
+      ATLAS household input or the DEMOS persons output. Views are named by
+      their owning model and may hold any model-specific columns. Input views
+      record the core state they were prepared from, which must be the
+      state of a parent snapshot.
+    attributes:
+      view_id:
+        identifier: true
+        required: true
+        description: Stable identifier for this view occurrence.
+      model:
+        required: true
+        description: Model that owns the view's structure and meaning.
+      view_kind:
+        required: true
+        description: >-
+          Model-scoped name for the kind of view, such as atlas/household_input
+          or demos/persons_output.
+      artifact:
+        range: PhysicalArtifactReference
+        required: true
+        inlined: true
+        description: Physical artifact holding the view's rows.
+      schema_contract:
+        range: SchemaContractReference
+        inlined: true
+        description: Optional contract describing the view's columns.
+      prepared_from_state:
+        range: StateDigest
+        inlined: true
+        description: >-
+          For input views, the CoreState the view was prepared from; it must
+          equal a parent snapshot's state_digest. Omitted for output views,
+          whose population is the producing snapshot's CoreState.
+
+  CoreFacetMapping:
+    description: >-
+      How Synergy derives one core facet from a model's output views, declared
+      once per ledger rather than repeated in every snapshot. Inputs may
+      include the parent's content for some facets, for steps whose views are
+      partial (a deaths-only delta, or a view missing a key column).
+    annotations:
+      conformance_requirements: >-
+        Every attribute of the facet's core table class must come from at
+        least one field binding or input facet; when an attribute has more
+        than one source, rule must say how they combine. Each binding's
+        view_kind must appear in input_view_kinds. These rules are enforced by
+        conformance code rather than standard LinkML validation.
+    rules:
+      - description: A mapping with column bindings must name the view kinds it reads.
+        preconditions:
+          slot_conditions:
+            field_bindings:
+              value_presence: PRESENT
+        postconditions:
+          slot_conditions:
+            input_view_kinds:
+              required: true
+    attributes:
+      mapping_id:
+        identifier: true
+        required: true
+        description: Stable identifier for this mapping, such as mapping:demos-core/v1#people.
+      facet:
+        range: CoreFacet
+        required: true
+        description: Core facet this mapping produces.
+      input_view_kinds:
+        multivalued: true
+        description: Kinds of model output view the mapping reads, such as demos/deaths_output.
+      input_facets:
+        range: CoreFacet
+        multivalued: true
+        description: Core facets whose parent content the mapping starts from or joins against.
+      field_bindings:
+        range: CoreFieldFromView
+        multivalued: true
+        inlined_as_list: true
+        description: View columns supplying fields of the facet's core table.
+      rule:
+        description: >-
+          Plain-language rule for combining the inputs when it is not a direct
+          copy, such as "parent people minus person_id values in the deaths
+          output" or a join across two views.
+      translation_contract:
+        range: PopulationTranslationContractReference
+        inlined: true
+        description: >-
+          Optional reviewed translation contract holding the full rules,
+          residues, and approvals behind this mapping.
+
+  CoreFieldFromView:
+    description: One view column supplying one field of a core table.
+    attributes:
+      view_kind:
+        required: true
+        description: Kind of view holding the column.
+      view_column:
+        required: true
+        description: Column name in the view, resolved against the view's schema_contract.
+      core_field:
+        required: true
+        description: >-
+          Attribute of the facet's core table class, such as household_id on
+          CoreHouseholdMembership.
+      transformation:
+        description: >-
+          Optional plain-language rule when the value is not copied directly,
+          such as a cast or an ID prefix.
+
+  FacetDigest:
+    description: One core facet's content, pinned by its canonical digest.
+    attributes:
+      facet:
+        range: CoreFacet
+        required: true
+        description: Core facet whose content is pinned.
+      digest:
+        range: FacetContentDigest
+        required: true
+        inlined: true
+        description: Canonical content identity of that facet.
+
+  CoreFacetEntry:
+    description: >-
+      One established core facet within a CoreState. A facet absent from a
+      CoreState has not been established yet; a facet established as empty
+      is present, with the digest of the empty canonical table. An entry
+      either repeats its parent's entry unchanged or is produced by this
+      snapshot's step, applying its mapping to that step's output views and
+      the parent's content for the mapping's input facets. Earlier history is
+      found by following parent snapshots, not stored on the entry.
+    annotations:
+      conformance_requirements: >-
+        An entry must equal the parent's entry for its facet or be produced by
+        this step: derived_from_views must be output views of this step whose
+        kinds appear in the mapping's input_view_kinds, and derived_from_facets
+        must match the mapping's input_facets and the parent's digests for
+        them. The mapping's facet must equal this entry's facet. These rules
+        are enforced by conformance code rather than standard LinkML
+        validation.
+    rules:
+      - description: An entry derived from views must be derived from at least one view.
+        preconditions:
+          slot_conditions:
+            derived_from_facets:
+              value_presence: ABSENT
+        postconditions:
+          slot_conditions:
+            derived_from_views:
+              required: true
+    attributes:
+      facet:
+        range: CoreFacet
+        required: true
+        description: Core facet described by this entry.
+      digest:
+        range: FacetContentDigest
+        required: true
+        inlined: true
+        description: Canonical content identity of the facet.
+      mapping:
+        range: CoreFacetMapping
+        inlined: false
+        required: true
+        description: Mapping used to derive the facet.
+      derived_from_views:
+        range: ModelView
+        multivalued: true
+        inlined: false
+        description: Output views the facet was derived from.
+      derived_from_facets:
+        range: FacetDigest
+        multivalued: true
+        inlined_as_list: true
+        description: Parent facet content the facet was derived from, pinned by digest.
+      stored_object:
+        range: PhysicalArtifactReference
+        inlined: true
+        description: >-
+          Optional materialized core table: its byte identity and, optionally,
+          a locator for retrieving it. Lets a consumer start from the stored
+          table instead of replaying a chain of derivations through
+          derived_from_facets.
+
+  CoreState:
+    description: >-
+      The whole core population at one point, as a map from facet to canonical
+      digest (the git tree). Its state_digest is derived only from the facet
+      digests, so identical populations share a state digest across steps,
+      years, and scenarios.
+    annotations:
+      conformance_requirements: >-
+        Each facet appears at most once; state_digest must be recomputable
+        from the facet entries under its canonical form. These rules are
+        enforced by conformance code rather than standard LinkML validation.
+    attributes:
+      state_digest:
+        range: StateDigest
+        required: true
+        inlined: true
+        description: Content identity of the full set of facet digests.
+      facets:
+        range: CoreFacetEntry
+        multivalued: true
+        inlined_as_list: true
+        description: Established core facets; absent facets are not yet established.
+
+  ModelStep:
+    description: >-
+      One model run within a snapshot: the views it read and wrote and the
+      core facets it declared as read and written. Synergy records the reads
+      from how it prepared the input views and the writes from the facets it
+      maps out of the output views. When a model changes the same facet
+      through several views in a fixed order (for example marriages, then
+      moves), record each as its own step and snapshot so the order is
+      explicit and each intermediate state has a digest.
+    attributes:
+      model:
+        required: true
+        description: Model that ran this step.
+      producing_run:
+        range: ProducingRunReference
+        required: true
+        inlined: true
+        description: Provenance reference for the run, such as a Consist run.
+      input_views:
+        range: ModelView
+        multivalued: true
+        inlined_as_list: true
+        description: Views the model read.
+      output_views:
+        range: ModelView
+        multivalued: true
+        inlined_as_list: true
+        description: Views the model wrote.
+      reads:
+        range: CoreFacet
+        multivalued: true
+        description: Core facets the step's inputs depended on.
+      writes:
+        range: CoreFacet
+        multivalued: true
+        description: >-
+          Core facets the step was allowed to change. It may list facets whose
+          content ended up unchanged.
+      entity_lineage:
+        range: PhysicalArtifactReference
+        inlined: true
+        description: >-
+          Optional old-to-new entity map for structural changes, such as one
+          household splitting in two. Its row structure is not yet defined.
+
+  PopulationSnapshot:
+    description: >-
+      One commit in the population ledger: the step that ran, the snapshot(s)
+      it was built from, and the full core state afterward. A step that
+      changes no core facet still produces a snapshot whose core state equals
+      its parent's. Order comes from parent links, not from a stored number.
+    annotations:
+      conformance_requirements: >-
+        Every facet whose digest differs from the parent's core state must be
+        listed in step.writes. Every input view's prepared_from_state must
+        equal a parent's state_digest. Every facet in step.reads must be established
+        in the parent's core state. With several parents, their changed facets
+        must not overlap. These rules are enforced by conformance code rather
+        than standard LinkML validation.
+    attributes:
+      snapshot_id:
+        identifier: true
+        required: true
+        description: Stable identifier for this snapshot.
+      parent_snapshots:
+        range: PopulationSnapshot
+        multivalued: true
+        inlined: false
+        description: >-
+          Snapshots this one was built from. Empty for the first snapshot in a
+          ledger; usually one; more than one only when independent steps are
+          joined.
+      simulation_year:
+        range: integer
+        required: true
+        description: Simulation year the step belongs to.
+      equilibrium_iteration:
+        range: integer
+        description: >-
+          Optional iteration number for feedback loops, which are recorded as a
+          sequence of snapshots rather than a cycle.
+      step:
+        range: ModelStep
+        required: true
+        inlined: true
+        description: Model step that produced this snapshot.
+      core_state:
+        range: CoreState
+        required: true
+        inlined: true
+        description: Full core population after the step.
+
+  PopulationCheckpoint:
+    description: >-
+      Named pointer to the snapshot that counts as the population for one
+      simulation year (a git tag). Trajectories keep one entry per year by
+      pointing at checkpoints; within-year snapshots sit underneath.
+    annotations:
+      conformance_requirements: >-
+        Every facet entry in the checkpoint snapshot's core state that has
+        derived_from_facets must have a stored_object, so rebuilding a
+        checkpoint never replays derivations across years.
+    attributes:
+      simulation_year:
+        range: integer
+        required: true
+        description: Simulation year this checkpoint represents.
+      snapshot:
+        range: PopulationSnapshot
+        inlined: false
+        required: true
+        description: Snapshot designated as that year's population.
+
+  PopulationLedger:
+    description: >-
+      All snapshots and checkpoints for one scenario definition and one
+      stochastic realization (a branch).
+    tree_root: true
+    annotations:
+      conformance_requirements: >-
+        Parent links must form a directed acyclic graph within the ledger;
+        checkpoint years must be unique and strictly increasing; each
+        checkpoint's snapshot must carry the same simulation_year.
+    attributes:
+      ledger_id:
+        identifier: true
+        required: true
+        description: Stable identifier for this ledger.
+      scenario_definition_ref:
+        range: ScenarioDefinitionReference
+        required: true
+        inlined: true
+        description: Scenario definition shared by every snapshot in the ledger.
+      stochastic_realization_id:
+        required: true
+        description: Stochastic realization shared by every snapshot in the ledger.
+      facet_mappings:
+        range: CoreFacetMapping
+        multivalued: true
+        inlined_as_list: true
+        description: Mappings referenced by facet entries in this ledger.
+      snapshots:
+        range: PopulationSnapshot
+        multivalued: true
+        required: true
+        minimum_cardinality: 1
+        inlined_as_list: true
+        description: Snapshots in the ledger, parents before children.
+      checkpoints:
+        range: PopulationCheckpoint
+        multivalued: true
+        inlined_as_list: true
+        description: Year-end checkpoints in year order.
+
+  # Core tables. These are Synergy's canonical form for each facet, derived
+  # from model views; no model is expected to read or write them directly.
+  # Their attributes are exactly what core_facet_table/v1 hashes. Core tables
+  # hold only keys; a new shared fact (such as household location) becomes a
+  # new facet, established when its first writer runs, rather than a new
+  # column on an existing core table.
+  CoreHousehold:
+    description: One household in the core households facet.
+    annotations:
+      core_facet: households
+    attributes:
+      household_id:
+        identifier: true
+        required: true
+        description: Household identifier shared across models within a state.
+
+  CorePerson:
+    description: One person in the core people facet.
+    annotations:
+      core_facet: people
+    attributes:
+      person_id:
+        identifier: true
+        required: true
+        description: Person identifier shared across models within a state.
+
+  CoreHouseholdMembership:
+    description: One person's household in the core household_membership facet.
+    annotations:
+      core_facet: household_membership
+    unique_keys:
+      one_household_per_person:
+        unique_key_slots: [person_id]
+    attributes:
+      person_id:
+        range: CorePerson
+        required: true
+        description: Member person.
+      household_id:
+        range: CoreHousehold
+        required: true
+        description: Containing household.
+
+  CoreVehicle:
+    description: >-
+      One vehicle in the core vehicles facet. Provisional key: vehicle_id is
+      household-scoped in ATLAS, so a vehicle is identified by
+      (household_id, vehicle_id). A vehicle that changes household therefore
+      appears as a new vehicle until a global vehicle identity is agreed.
+    annotations:
+      core_facet: vehicles
+    unique_keys:
+      household_vehicle:
+        unique_key_slots: [household_id, vehicle_id]
+    attributes:
+      household_id:
+        range: CoreHousehold
+        required: true
+        description: Household that scopes the vehicle identifier.
+      vehicle_id:
+        required: true
+        description: Vehicle identifier, unique within its household.
+
+  CoreHouseholdVehicleAssignment:
+    description: >-
+      One vehicle's household in the core household_vehicle_assignment facet.
+      Derivable from the provisional CoreVehicle key today; kept separate so
+      a future global vehicle identity can map onto it unchanged.
+    annotations:
+      core_facet: household_vehicle_assignment
+    unique_keys:
+      one_household_per_vehicle:
+        unique_key_slots: [household_id, vehicle_id]
+    attributes:
+      household_id:
+        range: CoreHousehold
+        required: true
+        description: Household the vehicle belongs to.
+      vehicle_id:
+        required: true
+        description: Assigned vehicle, identified within its household.
