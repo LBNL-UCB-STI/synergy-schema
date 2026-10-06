@@ -3,6 +3,7 @@ site_name = "Synergy Schema"
 site_description = "Shared definitions and evidence for coordinated modeling workflows"
 docs_dir = "docs"
 site_dir = "site"
+extra_css = ["stylesheets/extra.css"]
 nav = [
     { "Overview" = "index.md" },
     { "Bring an existing mapping" = [
@@ -54,6 +55,10 @@ nav = [
 [project.theme]
 language = "en"
 features = ["content.code.copy", "navigation.indexes", "navigation.top", "search.highlight", "toc.follow"]
+
+[project.theme.font]
+text = "Libre Franklin"
+code = "JetBrains Mono"
 
 [project.markdown_extensions.pymdownx.superfences]
 custom_fences = [

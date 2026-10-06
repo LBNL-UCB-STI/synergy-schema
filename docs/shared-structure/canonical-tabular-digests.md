@@ -109,3 +109,19 @@ Used for model view tables, including SQLite demand database tables
 - **Primary key columns**: Table primary key columns defined in SQLite DDL or LinkML
   identifier slots.
 - **Storage format**: SQLite tables, CSV files, or DuckDB relations.
+
+### 2.3 `core_state/v1` (Merkle tree state digest)
+
+Used for composite snapshot state trees (`state.state_digest` in `CoreState`).
+It seals all established attribute facets into a single cryptographic digest:
+
+1. Facet entries are sorted lexicographically by their facet name (e.g. `dwelling`,
+   `employment`, `location`, `people`, `vehicles`).
+2. Each facet contributes a line formatted as `<facet_name>:<facet_content_digest>\n`.
+3. The Merkle root is computed as the SHA-256 hash of the concatenated lines,
+   prefixed by `sha256:`.
+
+$$\text{state\_digest} = \text{"sha256:"} + \text{hex}\left(\text{SHA-256}\left(\sum_{f \in \text{sorted facets}} f + \text{":"} + \text{digest}_f + \text{"\n"}\right)\right)$$
+
+Any modification to any row in any facet table changes that facet's content digest,
+which deterministically changes the snapshot's state digest.

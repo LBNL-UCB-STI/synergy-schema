@@ -36,6 +36,23 @@ One run of a model that makes random choices. Two runs of the same scenario
 can turn out differently, so each gets its own realization ID to keep the
 results apart.
 
+### Population ledger
+
+A versioned, checkable ledger (`PopulationLedger`) recording simulation progress
+across models and years for one scenario definition and stochastic realization. It
+tracks yearly checkpoints and a directed acyclic graph (DAG) of snapshots.
+
+### Population checkpoint
+
+A designated reference (`PopulationCheckpoint`) in the ledger tagging a specific
+snapshot as the official, authoritative population state for a given simulation year.
+
+### Core state
+
+The composite state tree (`CoreState`) of a population snapshot. It maps each
+established attribute facet (dwelling, employment, location, people, vehicles)
+to its canonical tabular content digest, sealed by a Merkle tree `state_digest`.
+
 ### Core population state
 
 The shared record of a household, person, vehicle, or relationship in one
@@ -334,6 +351,21 @@ approve a mapping on either team's behalf.
 A fingerprint calculated from some content, usually with SHA-256. The same
 content always gives the same fingerprint. The schema says which content is
 included.
+
+### Canonical tabular digest
+
+A deterministic, layout-independent fingerprint (`canonical_tabular_digest/v1`)
+of a tabular dataset. Rows are sorted by primary key, column values are formatted
+into canonical byte representations, and row digests are concatenated into an overall
+SHA-256 hash. Format differences (CSV, Parquet, DuckDB) or arbitrary row orders
+produce the identical digest if logical values match.
+
+### State digest
+
+A composite cryptographic root (`core_state/v1`) calculated over all attribute
+facets in a population snapshot. Sorted facet names and their canonical tabular
+digests are hashed together via SHA-256. Modifying any cell in any facet table
+changes the state digest.
 
 ### Semantic digest
 
