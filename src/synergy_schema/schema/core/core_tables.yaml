@@ -50,6 +50,16 @@ enums:
         description: Which household each person belongs to.
       vehicles:
         description: Which vehicles exist, and which household each belongs to.
+      household_location:
+        description: Household spatial coordinates and geographic zone identifiers.
+      person_demographics:
+        description: Inherent individual demographic attributes (age, sex, race, relationship).
+      household_dwelling:
+        description: Dwelling unit characteristics, housing type, tenure, and charging.
+      person_schooling:
+        description: Educational enrollment status, attainment, and school location assignment.
+      person_employment:
+        description: Employment status, worker classification, and work location assignment.
 
 classes:
   # Core tables. These are Synergy's canonical form for each facet, derived
@@ -116,3 +126,127 @@ classes:
       vehicle_id:
         required: true
         description: Vehicle identifier, unique within its household.
+
+  CoreHouseholdLocation:
+    description: Spatial coordinates and geographic zones for households.
+    annotations:
+      core_facet: household_location
+    attributes:
+      household_id:
+        range: CoreHousehold
+        identifier: true
+        required: true
+        description: Household identifier.
+      latitude:
+        range: float
+        description: Decimal latitude coordinate.
+      longitude:
+        range: float
+        description: Decimal longitude coordinate.
+      tract:
+        range: string
+        description: Census tract identifier.
+      block_group:
+        range: string
+        description: Census block group identifier.
+      taz:
+        range: integer
+        description: Traffic analysis zone identifier.
+
+  CorePersonDemographics:
+    description: Core demographic attributes for persons.
+    annotations:
+      core_facet: person_demographics
+    attributes:
+      person_id:
+        range: CorePerson
+        identifier: true
+        required: true
+        description: Person identifier.
+      age:
+        range: integer
+        required: true
+        description: Person age in integer years.
+      sex:
+        range: integer
+        description: Biological sex or gender indicator.
+      race:
+        range: integer
+        description: Race category code.
+      hispanic:
+        range: integer
+        description: Hispanic origin indicator.
+      relate:
+        range: integer
+        description: Relationship to household head code.
+
+  CoreHouseholdDwelling:
+    description: Dwelling unit characteristics and housing details for households.
+    annotations:
+      core_facet: household_dwelling
+    attributes:
+      household_id:
+        range: CoreHousehold
+        identifier: true
+        required: true
+        description: Household identifier.
+      housing_unit_type:
+        range: integer
+        required: true
+        description: Housing unit type code (single family, apartment, etc.).
+      tenure:
+        range: integer
+        description: Homeownership tenure (own vs rent).
+      has_residential_charging:
+        range: integer
+        description: Dedicated residential EV charging availability indicator.
+      time_in_home:
+        range: float
+        description: Longitudinal residence duration in years in current home.
+
+  CorePersonSchooling:
+    description: Educational enrollment and school location for persons.
+    annotations:
+      core_facet: person_schooling
+    attributes:
+      person_id:
+        range: CorePerson
+        identifier: true
+        required: true
+        description: Person identifier.
+      school_status:
+        range: integer
+        description: School attendance or student status indicator.
+      school_location_id:
+        range: integer
+        description: Assigned school location identifier (-1 if not attending).
+      education_level:
+        range: integer
+        description: Highest educational attainment level code.
+
+  CorePersonEmployment:
+    description: Employment, labor force status, and work location for persons.
+    annotations:
+      core_facet: person_employment
+    attributes:
+      person_id:
+        range: CorePerson
+        identifier: true
+        required: true
+        description: Person identifier.
+      employment_status:
+        range: integer
+        required: true
+        description: Employment / labor force status code.
+      worker_type:
+        range: integer
+        description: Worker category or industry code.
+      work_location_id:
+        range: integer
+        description: Assigned work location identifier (-1 if not working or unassigned).
+      hours_worked:
+        range: integer
+        description: Weekly work hours.
+      commute_mode:
+        range: integer
+        description: Primary commute travel mode.

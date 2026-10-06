@@ -40,6 +40,7 @@ trajectory, snapshot, receipt, residue, and digest.
    covers the shared assumptions and the timeline.
 2. [Population snapshots and artifact identity](population-snapshots-and-artifact-identity.md)
    covers one year's population and the files that carry it.
-3. The [realization-identity specification](realization-identity.md) is the
-   precise technical reference for tools that need to compute and compare
-   identities. Read it after the other two.
+3. [Canonical tabular content digests](canonical-tabular-digests.md)
+   specifies the deterministic, format-independent digest algorithm (`canonical_tabular_digest/v1`).
+4. The [realization-identity specification](realization-identity.md) is preserved
+   for historical reference.

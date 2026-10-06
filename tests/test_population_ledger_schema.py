@@ -366,3 +366,47 @@ def test_join_of_conflicting_facets_is_rejected() -> None:
     assert any(
         "more than one parent changed households" in m for m in _ledger_messages(ledger)
     )
+
+
+def test_core_attribute_facets_and_classes_present() -> None:
+    view = SchemaView(SCHEMA_PATH)
+    facet_enum = view.get_enum("CoreFacet")
+    assert facet_enum is not None
+
+    expected_facets = {
+        "households",
+        "people",
+        "household_membership",
+        "vehicles",
+        "household_location",
+        "person_demographics",
+        "household_dwelling",
+        "person_schooling",
+        "person_employment",
+    }
+    assert expected_facets.issubset(set(facet_enum.permissible_values.keys()))
+
+    expected_classes = {
+        "CoreHouseholdLocation",
+        "CorePersonDemographics",
+        "CoreHouseholdDwelling",
+        "CorePersonSchooling",
+        "CorePersonEmployment",
+    }
+    for cls_name in expected_classes:
+        cls = view.get_class(cls_name)
+        assert cls is not None
+        assert "core_facet" in cls.annotations
+
+
+def test_write_policy_and_mapping_direction() -> None:
+    view = SchemaView(SCHEMA_PATH)
+    write_policy_enum = view.get_enum("WritePolicy")
+    assert write_policy_enum is not None
+    assert {"preserve", "refine_with_prior", "overwrite"}.issubset(
+        set(write_policy_enum.permissible_values.keys())
+    )
+
+    direction_enum = view.get_enum("MappingDirection")
+    assert direction_enum is not None
+    assert {"derive", "project"}.issubset(set(direction_enum.permissible_values.keys()))

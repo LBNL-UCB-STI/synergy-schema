@@ -4,41 +4,80 @@ catalog_id: mapping-catalog:synthetic-region/v1
 mappings:
   - mapping_id: mapping:urbansim-core/v1#households
     facet: households
+    direction: derive
     input_view_kinds: [urbansim/households_output]
     field_bindings:
-      - {view_kind: urbansim/households_output, view_column: household_id, core_field: household_id}
+      - {view_kind: urbansim/households_output, view_column: household_id, core_field: household_id, write_policy: overwrite}
   - mapping_id: mapping:urbansim-core/v1#people
     facet: people
+    direction: derive
     input_view_kinds: [urbansim/persons_output]
     field_bindings:
-      - {view_kind: urbansim/persons_output, view_column: person_id, core_field: person_id}
+      - {view_kind: urbansim/persons_output, view_column: person_id, core_field: person_id, write_policy: overwrite}
   - mapping_id: mapping:urbansim-core/v1#household_membership
     facet: household_membership
+    direction: derive
     input_view_kinds: [urbansim/persons_output]
     field_bindings:
-      - {view_kind: urbansim/persons_output, view_column: person_id, core_field: person_id}
-      - {view_kind: urbansim/persons_output, view_column: household_id, core_field: household_id}
+      - {view_kind: urbansim/persons_output, view_column: person_id, core_field: person_id, write_policy: overwrite}
+      - {view_kind: urbansim/persons_output, view_column: household_id, core_field: household_id, write_policy: overwrite}
   - mapping_id: mapping:demos-core/v1#households
     facet: households
+    direction: derive
     input_view_kinds: [demos/households_output]
     field_bindings:
-      - {view_kind: demos/households_output, view_column: household_id, core_field: household_id}
+      - {view_kind: demos/households_output, view_column: household_id, core_field: household_id, write_policy: overwrite}
   - mapping_id: mapping:demos-core/v1#people
     facet: people
+    direction: derive
     input_view_kinds: [demos/deaths_output]
     input_facets: [people]
     field_bindings:
-      - {view_kind: demos/deaths_output, view_column: person_id, core_field: person_id}
+      - {view_kind: demos/deaths_output, view_column: person_id, core_field: person_id, write_policy: overwrite}
     rule: Parent people minus person_id values in the deaths output.
   - mapping_id: mapping:demos-core/v1#household_membership
     facet: household_membership
+    direction: derive
     input_view_kinds: [demos/persons_output]
     field_bindings:
-      - {view_kind: demos/persons_output, view_column: person_id, core_field: person_id}
-      - {view_kind: demos/persons_output, view_column: household_id, core_field: household_id}
+      - {view_kind: demos/persons_output, view_column: person_id, core_field: person_id, write_policy: overwrite}
+      - {view_kind: demos/persons_output, view_column: household_id, core_field: household_id, write_policy: overwrite}
+  - mapping_id: mapping:demos-core/v1#person_demographics
+    facet: person_demographics
+    direction: derive
+    input_view_kinds: [demos/persons_output]
+    field_bindings:
+      - {view_kind: demos/persons_output, view_column: person_id, core_field: person_id, write_policy: overwrite}
+      - {view_kind: demos/persons_output, view_column: age, core_field: age, write_policy: overwrite}
+      - {view_kind: demos/persons_output, view_column: sex, core_field: sex, write_policy: overwrite}
+      - {view_kind: demos/persons_output, view_column: race, core_field: race, write_policy: overwrite}
+      - {view_kind: demos/persons_output, view_column: hispanic, core_field: hispanic, write_policy: overwrite}
+      - {view_kind: demos/persons_output, view_column: relate, core_field: relate, write_policy: overwrite}
+  - mapping_id: mapping:demos-core/v1#household_location
+    facet: household_location
+    direction: derive
+    input_view_kinds: [demos/households_output]
+    field_bindings:
+      - {view_kind: demos/households_output, view_column: household_id, core_field: household_id, write_policy: overwrite}
+      - {view_kind: demos/households_output, view_column: latitude, core_field: latitude, write_policy: preserve}
+      - {view_kind: demos/households_output, view_column: longitude, core_field: longitude, write_policy: preserve}
+      - {view_kind: demos/households_output, view_column: tract, core_field: tract, write_policy: preserve}
+      - {view_kind: demos/households_output, view_column: block_group, core_field: block_group, write_policy: preserve}
+      - {view_kind: demos/households_output, view_column: taz, core_field: taz, write_policy: preserve}
+  - mapping_id: mapping:refine-core/v1#household_dwelling
+    facet: household_dwelling
+    direction: derive
+    input_view_kinds: [demos/households_output]
+    field_bindings:
+      - {view_kind: demos/households_output, view_column: household_id, core_field: household_id, write_policy: refine_with_prior}
+      - {view_kind: demos/households_output, view_column: housing_unit_type, core_field: housing_unit_type, write_policy: refine_with_prior}
+      - {view_kind: demos/households_output, view_column: tenure, core_field: tenure, write_policy: refine_with_prior}
+      - {view_kind: demos/households_output, view_column: has_residential_charging, core_field: has_residential_charging, write_policy: refine_with_prior}
+      - {view_kind: demos/households_output, view_column: time_in_home, core_field: time_in_home, write_policy: refine_with_prior}
   - mapping_id: mapping:atlas-core/v1#vehicles
     facet: vehicles
+    direction: derive
     input_view_kinds: [atlas/vehicles_output]
     field_bindings:
-      - {view_kind: atlas/vehicles_output, view_column: household_id, core_field: household_id}
-      - {view_kind: atlas/vehicles_output, view_column: vehicle_id, core_field: vehicle_id}
+      - {view_kind: atlas/vehicles_output, view_column: household_id, core_field: household_id, write_policy: overwrite}
+      - {view_kind: atlas/vehicles_output, view_column: vehicle_id, core_field: vehicle_id, write_policy: overwrite}

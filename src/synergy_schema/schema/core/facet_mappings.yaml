@@ -19,6 +19,33 @@ imports:
   - native_contract
   - ../mappings/population_translation
 
+enums:
+  WritePolicy:
+    description: >-
+      Policy controlling how field updates interact with existing or prior core
+      facet attributes across pipeline steps.
+    permissible_values:
+      preserve:
+        description: >-
+          Protects existing or unmodeled core attributes from being overwritten by
+          coarser upstream derive runs; preserves prior values when inputs are partial.
+      refine_with_prior:
+        description: >-
+          Conditions refinement or stochastic draw on prior attribute state, updating
+          or enriching the facet while maintaining consistency with prior facts.
+      overwrite:
+        description: >-
+          Directly replaces the attribute value from the model view without checking
+          prior state.
+
+  MappingDirection:
+    description: Direction of facet derivation or view projection.
+    permissible_values:
+      derive:
+        description: Derives core facet table rows from model output views.
+      project:
+        description: Projects core facet table rows into a model input view.
+
 classes:
   ModelView:
     description: >-
@@ -84,6 +111,9 @@ classes:
         range: CoreFacet
         required: true
         description: Core facet this mapping produces.
+      direction:
+        range: MappingDirection
+        description: Whether this mapping derives core facets from views or projects core facets to a model view.
       input_view_kinds:
         multivalued: true
         description: Kinds of model output view the mapping reads, such as demos/deaths_output.
@@ -125,6 +155,11 @@ classes:
         description: >-
           Attribute of the facet's core table class, such as household_id on
           CoreHouseholdMembership.
+      write_policy:
+        range: WritePolicy
+        description: >-
+          Policy controlling whether this field derivation preserves unmodeled prior
+          values, conditions on prior state, or directly overwrites.
       transformation:
         description: >-
           Optional plain-language rule when the value is not copied directly,

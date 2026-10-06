@@ -22,6 +22,11 @@ def test_core_schema_uml_contains_every_core_class_and_key_relationships() -> No
         "CorePerson",
         "CoreHouseholdMembership",
         "CoreVehicle",
+        "CoreHouseholdLocation",
+        "CorePersonDemographics",
+        "CoreHouseholdDwelling",
+        "CorePersonSchooling",
+        "CorePersonEmployment",
         # facet_mappings
         "ModelView",
         "CoreFacetMapping",

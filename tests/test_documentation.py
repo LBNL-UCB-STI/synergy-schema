@@ -50,6 +50,7 @@ def test_navigation_has_approved_sections_and_existing_leaves() -> None:
         "How Synergy is organized",
         "Scenario definitions and trajectories",
         "Population snapshots and artifact identity",
+        "Canonical tabular content digests",
         "Population trajectory realization identity",
         "Core schema UML",
         "Glossary",

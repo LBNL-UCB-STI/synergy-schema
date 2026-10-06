@@ -16,6 +16,7 @@ nav = [
         { "How Synergy is organized" = "shared-structure/index.md" },
         { "Scenario definitions and trajectories" = "shared-structure/scenario-definitions-and-trajectories.md" },
         { "Population snapshots and artifact identity" = "shared-structure/population-snapshots-and-artifact-identity.md" },
+        { "Canonical tabular content digests" = "shared-structure/canonical-tabular-digests.md" },
         { "Population trajectory realization identity" = "shared-structure/realization-identity.md" },
         { "Core schema UML" = "schema/core-schema-uml.md" },
         { "Glossary" = "shared-structure/glossary.md" },

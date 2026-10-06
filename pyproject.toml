@@ -8,7 +8,12 @@ version = "0.0.0"
 description = "Federated LinkML semantic contracts for Synergy workflows"
 readme = "README.md"
 requires-python = ">=3.10"
-dependencies = ["linkml-runtime>=1.9.4,<2", "linkml>=1.9.4,<2"]
+dependencies = [
+    "duckdb>=1.5.6",
+    "linkml-runtime>=1.9.4,<2",
+    "linkml>=1.9.4,<2",
+    "pyarrow>=25.0.1",
+]
 
 [project.optional-dependencies]
 consist = ["consist>=0.3.5; python_version >= '3.11'"]
