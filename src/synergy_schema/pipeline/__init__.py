@@ -17,6 +17,8 @@ from synergy_schema.pipeline.refine import (
     refine_person_employment,
     refine_person_schooling,
 )
+from synergy_schema.pipeline.consist_runner import run_simulation_with_consist
+from synergy_schema.pipeline.runner import run_simulation_pipeline
 
 __all__ = [
     "CORE_FACET_COLUMNS",
@@ -30,4 +32,6 @@ __all__ = [
     "refine_household_dwelling",
     "refine_person_employment",
     "refine_person_schooling",
+    "run_simulation_pipeline",
+    "run_simulation_with_consist",
 ]

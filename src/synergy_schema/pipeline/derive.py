@@ -59,6 +59,7 @@ CORE_FACET_COLUMNS: dict[str, list[str]] = {
         "commute_mode",
         "income",
     ],
+    "vehicles": ["vehicle_id", "household_id", "type_id"],
 }
 
 CORE_FACET_KEY_COLUMNS: dict[str, list[str]] = {
@@ -71,6 +72,7 @@ CORE_FACET_KEY_COLUMNS: dict[str, list[str]] = {
     "household_dwelling": ["household_id"],
     "person_schooling": ["person_id"],
     "person_employment": ["person_id"],
+    "vehicles": ["household_id", "vehicle_id"],
 }
 
 
