@@ -60,6 +60,8 @@ enums:
         description: Educational enrollment status, attainment, and school location assignment.
       person_employment:
         description: Employment status, worker classification, and work location assignment.
+      household_income:
+        description: Household annual income deflated to a shared base dollar year.
 
 classes:
   # Core tables. These are Synergy's canonical form for each facet, derived
@@ -126,6 +128,9 @@ classes:
       vehicle_id:
         required: true
         description: Vehicle identifier, unique within its household.
+      type_id:
+        range: integer
+        description: Vehicle type identifier matching POLARIS Vehicle_Type.
 
   CoreHouseholdLocation:
     description: Spatial coordinates and geographic zones for households.
@@ -223,6 +228,9 @@ classes:
       education_level:
         range: integer
         description: Highest educational attainment level code.
+      school_grade_level:
+        range: integer
+        description: "School grade level code (crosswalk X-P3: 0..16)."
 
   CorePersonEmployment:
     description: Employment, labor force status, and work location for persons.
@@ -241,6 +249,9 @@ classes:
       worker_type:
         range: integer
         description: Worker category or industry code.
+      industry:
+        range: integer
+        description: Employment industry code (ACS INDP).
       work_location_id:
         range: integer
         description: Assigned work location identifier (-1 if not working or unassigned).
@@ -250,3 +261,21 @@ classes:
       commute_mode:
         range: integer
         description: Primary commute travel mode.
+      income:
+        range: integer
+        description: Person annual earnings or income in integer dollars.
+
+  CoreHouseholdIncome:
+    description: Annual income for households in fixed base-year dollars.
+    annotations:
+      core_facet: household_income
+    attributes:
+      household_id:
+        range: CoreHousehold
+        identifier: true
+        required: true
+        description: Household identifier.
+      income:
+        range: integer
+        required: true
+        description: Household annual income in integer dollars (deflated).

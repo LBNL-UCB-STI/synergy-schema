@@ -81,3 +81,34 @@ mappings:
     field_bindings:
       - {view_kind: atlas/vehicles_output, view_column: household_id, core_field: household_id, write_policy: overwrite}
       - {view_kind: atlas/vehicles_output, view_column: vehicle_id, core_field: vehicle_id, write_policy: overwrite}
+      - {view_kind: atlas/vehicles_output, view_column: type_id, core_field: type_id, write_policy: overwrite}
+  - mapping_id: mapping:refine-core/v1#person_schooling
+    facet: person_schooling
+    direction: derive
+    input_view_kinds: [demos/persons_output]
+    field_bindings:
+      - {view_kind: demos/persons_output, view_column: person_id, core_field: person_id, write_policy: refine_with_prior}
+      - {view_kind: demos/persons_output, view_column: school_status, core_field: school_status, write_policy: refine_with_prior}
+      - {view_kind: demos/persons_output, view_column: school_location_id, core_field: school_location_id, write_policy: refine_with_prior}
+      - {view_kind: demos/persons_output, view_column: education_level, core_field: education_level, write_policy: refine_with_prior}
+      - {view_kind: demos/persons_output, view_column: school_grade_level, core_field: school_grade_level, write_policy: refine_with_prior}
+  - mapping_id: mapping:refine-core/v1#person_employment
+    facet: person_employment
+    direction: derive
+    input_view_kinds: [demos/persons_output]
+    field_bindings:
+      - {view_kind: demos/persons_output, view_column: person_id, core_field: person_id, write_policy: refine_with_prior}
+      - {view_kind: demos/persons_output, view_column: employment_status, core_field: employment_status, write_policy: refine_with_prior}
+      - {view_kind: demos/persons_output, view_column: worker_type, core_field: worker_type, write_policy: refine_with_prior}
+      - {view_kind: demos/persons_output, view_column: industry, core_field: industry, write_policy: refine_with_prior}
+      - {view_kind: demos/persons_output, view_column: work_location_id, core_field: work_location_id, write_policy: refine_with_prior}
+      - {view_kind: demos/persons_output, view_column: hours_worked, core_field: hours_worked, write_policy: refine_with_prior}
+      - {view_kind: demos/persons_output, view_column: commute_mode, core_field: commute_mode, write_policy: refine_with_prior}
+      - {view_kind: demos/persons_output, view_column: income, core_field: income, write_policy: refine_with_prior}
+  - mapping_id: mapping:demos-core/v1#household_income
+    facet: household_income
+    direction: derive
+    input_view_kinds: [demos/households_output]
+    field_bindings:
+      - {view_kind: demos/households_output, view_column: household_id, core_field: household_id, write_policy: overwrite}
+      - {view_kind: demos/households_output, view_column: income, core_field: income, write_policy: overwrite}

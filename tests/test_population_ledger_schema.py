@@ -97,8 +97,8 @@ def test_snapshot_requires_step_and_core_state() -> None:
 
 def test_core_facets_are_a_closed_vocabulary() -> None:
     ledger = _example()
-    ledger["snapshots"][1]["step"]["reads"] = ["household_income"]
-    assert any("household_income" in m for m in _validation_messages(ledger))
+    ledger["snapshots"][1]["step"]["reads"] = ["nonexistent_facet"]
+    assert any("nonexistent_facet" in m for m in _validation_messages(ledger))
 
 
 def test_digests_must_be_sha256_strings() -> None:
@@ -383,6 +383,7 @@ def test_core_attribute_facets_and_classes_present() -> None:
         "household_dwelling",
         "person_schooling",
         "person_employment",
+        "household_income",
     }
     assert expected_facets.issubset(set(facet_enum.permissible_values.keys()))
 
@@ -392,6 +393,7 @@ def test_core_attribute_facets_and_classes_present() -> None:
         "CoreHouseholdDwelling",
         "CorePersonSchooling",
         "CorePersonEmployment",
+        "CoreHouseholdIncome",
     }
     for cls_name in expected_classes:
         cls = view.get_class(cls_name)
