@@ -1,4 +1,4 @@
-"""Provisional ledger checks, packaged as a LinkML validation plugin.
+"""Population ledger checks, packaged as a LinkML validation plugin.
 
 These cover rules that span records within one PopulationLedger document and
 that standard LinkML validation cannot express. They check declared metadata
@@ -8,11 +8,15 @@ only; nothing here reads parquet or recomputes digests.
 from __future__ import annotations
 
 from collections.abc import Iterator
-from typing import Any
+from pathlib import Path
+from typing import Any, Mapping
 
-from linkml.validator.plugins import ValidationPlugin
+from linkml.validator import Validator
+from linkml.validator.plugins import JsonschemaValidationPlugin, ValidationPlugin
 from linkml.validator.report import Severity, ValidationResult
 from linkml.validator.validation_context import ValidationContext
+
+from .diagnostics import CheckResult, Diagnostic
 
 
 def _facets(snapshot: dict[str, Any]) -> dict[str, dict[str, Any]]:
@@ -277,3 +281,31 @@ class LedgerConformancePlugin(ValidationPlugin):
                 instantiates=context.target_class,
                 message=message,
             )
+
+
+def validate_ledger(
+    ledger: Mapping[str, Any],
+    catalog: Mapping[str, Any] | None = None,
+    schema_path: str | Path | None = None,
+) -> CheckResult:
+    """Validate a PopulationLedger against LinkML schema rules and ledger invariants."""
+    if schema_path is None:
+        schema_path = (
+            Path(__file__).parents[1] / "schema" / "core" / "population_ledger.yaml"
+        )
+    plugins = [
+        JsonschemaValidationPlugin(closed=True),
+        LedgerConformancePlugin(dict(catalog) if catalog is not None else None),
+    ]
+    report = Validator(str(schema_path), validation_plugins=plugins).validate(
+        dict(ledger), "PopulationLedger"
+    )
+    diagnostics = []
+    for result in report.results:
+        code = (
+            "LEDGER_CONFORMANCE_INVALID"
+            if result.type == "ledger-conformance"
+            else "LEDGER_SHAPE_INVALID"
+        )
+        diagnostics.append(Diagnostic(code, str(result.message), "error"))
+    return CheckResult(tuple(diagnostics))

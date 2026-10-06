@@ -1,11 +1,9 @@
 from __future__ import annotations
 
 from pathlib import Path
-import shutil
 import subprocess
 import sys
 
-import yaml
 
 from synergy_schema.conformance.cli import build_parser, main
 from synergy_schema.conformance.diagnostics import CheckResult, Diagnostic, InputError
@@ -29,9 +27,7 @@ def test_parser_exposes_the_complete_conformance_surface() -> None:
     assert set(subcommands.choices) == {
         "check-scenario",
         "check-mappings",
-        "check-population-bundle",
-        "check-population-assembly",
-        "check-polaris-bundle",
+        "check-ledger",
         "check-all",
         "create-day-zero-manifest",
         "render-mapping",
@@ -43,7 +39,7 @@ def test_parser_exposes_the_complete_conformance_surface() -> None:
 def test_help_and_error_exit_codes(capsys: object) -> None:
     assert main(["--help"]) == 0
     assert main(["check-all"]) == 2
-    assert main(["check-population-bundle"]) == 2
+    assert main(["check-scenario"]) == 2
     assert isinstance(InputError("bad input"), Exception)
 
 
@@ -69,161 +65,21 @@ def test_keyboard_interrupt_returns_130(monkeypatch: object) -> None:
     assert cli.main(["check-all", "--dir", ".", "--schema", "schema.yaml"]) == 130
 
 
-def test_bundle_commands_use_explicit_bundle_and_manifest_directory_arguments() -> None:
-    parser = build_parser()
-    population = parser.parse_args(
-        [
-            "check-population-bundle",
-            "--schema",
-            "schema.yaml",
-            "--bundle",
-            "bundle.yaml",
-        ]
-    )
-    polaris = parser.parse_args(
-        [
-            "check-polaris-bundle",
-            "--schema",
-            "schema.yaml",
-            "--bundle",
-            "bundle.yaml",
-            "--source-population-bundle",
-            "source.yaml",
-            "--mapping-release",
-            "release",
-        ]
-    )
-    check_all = parser.parse_args(
-        ["check-all", "--schema", "schema.yaml", "--dir", "example"]
-    )
-    assert population.bundle == "bundle.yaml"
-    assert polaris.bundle == "bundle.yaml"
-    assert polaris.source_population_bundle == "source.yaml"
-    assert polaris.mapping_release == "release"
-    assert check_all.dir == "example"
-
-    assembly = parser.parse_args(
-        [
-            "check-population-assembly",
-            "--schema",
-            "schema.yaml",
-            "--assembly",
-            "assembly.yaml",
-        ]
-    )
-    assert assembly.assembly == "assembly.yaml"
-    assert assembly.contribution == []
-
-    assembly_with_contributions = parser.parse_args(
-        [
-            "check-population-assembly",
-            "--schema",
-            "schema.yaml",
-            "--assembly",
-            "assembly.yaml",
-            "--contribution",
-            "demos.yaml",
-            "--contribution",
-            "atlas.yaml",
-        ]
-    )
-    assert assembly_with_contributions.contribution == ["demos.yaml", "atlas.yaml"]
-
-
-def test_bundle_command_rejects_unknown_closed_profile_field_before_semantics(
-    tmp_path: Path, capsys: object
-) -> None:
-    """Closed LinkML profile validation guards semantic checks from unknown data."""
-    example = ROOT / "examples" / "one_year_mapping_handshake"
-    bundle = yaml.safe_load(
-        (example / "pilates-trajectory-bundle.yaml").read_text(encoding="utf-8")
-    )
-    bundle["not_a_profile_slot"] = "forged"
-    path = tmp_path / "bundle.yaml"
-    path.write_text(yaml.safe_dump(bundle), encoding="utf-8")
-
-    assert (
-        main(
-            [
-                "check-population-bundle",
-                "--schema",
-                str(ROOT / "src/synergy_schema/schema/synergy_schema.yaml"),
-                "--bundle",
-                str(path),
-            ]
-        )
-        == 1
-    )
-    assert "BUNDLE_SHAPE_INVALID" in capsys.readouterr().err
-
-
-def test_granular_bundle_commands_gate_semantics_on_invalid_population_shape(
-    tmp_path: Path, capsys: object
-) -> None:
-    """Malformed years stop both granular paths before integer coercion."""
+def test_check_all_on_one_year_handshake(capsys: object) -> None:
     example = ROOT / "examples" / "one_year_mapping_handshake"
     schema = ROOT / "src/synergy_schema/schema/synergy_schema.yaml"
-    bundle = yaml.safe_load(
-        (example / "pilates-trajectory-bundle.yaml").read_text(encoding="utf-8")
-    )
-    bundle["population_trajectory"]["requested_years"] = ["not-a-year"]
-    path = tmp_path / "bundle.yaml"
-    path.write_text(yaml.safe_dump(bundle), encoding="utf-8")
-
-    commands = (
-        [
-            "check-population-bundle",
-            "--schema",
-            str(schema),
-            "--bundle",
-            str(path),
-        ],
-        [
-            "check-polaris-bundle",
-            "--schema",
-            str(schema),
-            "--bundle",
-            str(example / "polaris-translation-bundle.yaml"),
-            "--source-population-bundle",
-            str(path),
-            "--mapping-release",
-            str(example / "mapping-release/revision-1"),
-        ],
-    )
-    for command in commands:
-        assert main(command) == 1
-        error = capsys.readouterr().err
-        assert error.count("BUNDLE_SHAPE_INVALID") == 1
-        assert "Traceback" not in error
-
-
-def test_check_all_gates_semantics_on_invalid_population_shape(
-    tmp_path: Path, capsys: object
-) -> None:
-    """The aggregate path reports shape once without running bundle semantics."""
-    source = ROOT / "examples" / "one_year_mapping_handshake"
-    example = tmp_path / "one_year_mapping_handshake"
-    shutil.copytree(source, example)
-    bundle_path = example / "pilates-trajectory-bundle.yaml"
-    bundle = yaml.safe_load(bundle_path.read_text(encoding="utf-8"))
-    bundle["population_trajectory"]["requested_years"] = ["not-a-year"]
-    bundle_path.write_text(yaml.safe_dump(bundle), encoding="utf-8")
-
     assert (
         main(
             [
                 "check-all",
                 "--schema",
-                str(ROOT / "src/synergy_schema/schema/synergy_schema.yaml"),
+                str(schema),
                 "--dir",
                 str(example),
             ]
         )
-        == 1
+        == 0
     )
-    error = capsys.readouterr().err
-    assert error.count("BUNDLE_SHAPE_INVALID") == 1
-    assert "Traceback" not in error
 
 
 def test_adoption_commands_expose_their_public_arguments() -> None:
@@ -258,3 +114,30 @@ def test_adoption_commands_expose_their_public_arguments() -> None:
     assert rendered.out_dir == "review"
     assert diffed.format == "json"
     assert imported.out_release == "release"
+
+
+def test_check_ledger_cli(capsys: object) -> None:
+    ledger_path = ROOT / "examples/ledger/urbansim_demos_atlas_2025.yaml"
+    catalog_path = ROOT / "examples/ledger/mapping_catalog.yaml"
+    schema_path = ROOT / "src/synergy_schema/schema/core/population_ledger.yaml"
+
+    # Success with catalog
+    assert (
+        main(
+            [
+                "check-ledger",
+                str(ledger_path),
+                "--mapping-catalog",
+                str(catalog_path),
+                "--schema",
+                str(schema_path),
+            ]
+        )
+        == 0
+    )
+
+    # Success without catalog
+    assert main(["check-ledger", str(ledger_path)]) == 0
+
+    # Missing ledger positional
+    assert main(["check-ledger"]) == 2

@@ -9,7 +9,7 @@ numbers that only mean something inside one table or one year. Synergy records
 which is which, so two rows that happen to share the number 42 aren't treated
 as the same household.
 
-The generated [identity map](../schema/cross-model-population-identity.md)
-shows which IDs are kept as-is, renamed, derived, combined from several
-fields, or local-only as data moves between UrbanSim, ActivitySim, ATLAS, and
-POLARIS.
+The [contract review](../schema/contract-at-a-glance.md)
+and [core schema UML](../schema/core-schema-uml.md)
+show how canonical identities, memberships, and translation contracts connect
+native model views to core entity tables.

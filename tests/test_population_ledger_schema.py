@@ -15,14 +15,10 @@ from synergy_schema.conformance.ledger import LedgerConformancePlugin
 
 ROOT = Path(__file__).parents[1]
 SCHEMA_PATH = (
-    ROOT
-    / "src"
-    / "synergy_schema"
-    / "schema"
-    / "population_ledger"
-    / "population_ledger.yaml"
+    ROOT / "src" / "synergy_schema" / "schema" / "core" / "population_ledger.yaml"
 )
-EXAMPLES = ROOT / "examples" / "population_ledger"
+SYNERGY_SCHEMA_PATH = ROOT / "src" / "synergy_schema" / "schema" / "synergy_schema.yaml"
+EXAMPLES = ROOT / "examples" / "ledger"
 EXAMPLE_PATH = EXAMPLES / "urbansim_demos_atlas_2025.yaml"
 CATALOG_PATH = EXAMPLES / "mapping_catalog.yaml"
 
@@ -74,6 +70,20 @@ def _entry(snapshot: dict[str, Any], facet: str) -> dict[str, Any]:
 def test_example_and_catalog_validate() -> None:
     assert _validation_messages(_example()) == []
     assert _validation_messages(_catalog(), "CoreFacetMappingCatalog") == []
+
+
+def test_example_and_catalog_validate_against_aggregate_schema() -> None:
+    report_example = Validator(
+        SYNERGY_SCHEMA_PATH,
+        validation_plugins=[JsonschemaValidationPlugin(closed=True)],
+    ).validate(_example(), "PopulationLedger")
+    assert [result.message for result in report_example.results] == []
+
+    report_catalog = Validator(
+        SYNERGY_SCHEMA_PATH,
+        validation_plugins=[JsonschemaValidationPlugin(closed=True)],
+    ).validate(_catalog(), "CoreFacetMappingCatalog")
+    assert [result.message for result in report_catalog.results] == []
 
 
 def test_snapshot_requires_step_and_core_state() -> None:

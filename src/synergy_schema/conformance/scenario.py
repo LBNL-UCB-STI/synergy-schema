@@ -255,134 +255,15 @@ def _validate_bindings(
     return diagnostics
 
 
-def _validate_trajectory(
-    definition: Mapping[str, Any], trajectory: Mapping[str, Any]
+def _validate_scenario_reference(
+    definition: Mapping[str, Any], target: Mapping[str, Any]
 ) -> list[Diagnostic]:
     diagnostics: list[Diagnostic] = []
-    if not _reference_matches(trajectory.get("scenario_definition_ref"), definition):
+    if not _reference_matches(target.get("scenario_definition_ref"), definition):
         diagnostics.append(
             Diagnostic(
                 "SCENARIO_BINDING_CONFLICT",
-                "trajectory selects a different scenario definition",
-                "error",
-            )
-        )
-    snapshots = trajectory.get("snapshots", [])
-    if not isinstance(snapshots, list):
-        return [
-            Diagnostic(
-                "SCENARIO_DOCUMENT_INVALID",
-                "trajectory snapshots must be a list",
-                "error",
-            )
-        ]
-    years: list[int] = []
-    known_ids: set[str] = set()
-    realization = trajectory.get("stochastic_realization_id")
-    for snapshot in snapshots:
-        if not isinstance(snapshot, Mapping):
-            diagnostics.append(
-                Diagnostic(
-                    "SCENARIO_DOCUMENT_INVALID",
-                    "trajectory snapshots must be mappings",
-                    "error",
-                )
-            )
-            continue
-        try:
-            year = int(snapshot.get("simulation_year"))
-        except (TypeError, ValueError):
-            diagnostics.append(
-                Diagnostic(
-                    "SCENARIO_DOCUMENT_INVALID",
-                    "snapshot simulation_year must be an integer",
-                    "error",
-                )
-            )
-            continue
-        years.append(year)
-        parent = snapshot.get("parent_snapshot_ref")
-        if parent is not None and str(parent) not in known_ids:
-            diagnostics.append(
-                Diagnostic(
-                    "TRAJECTORY_PARENT_INVALID",
-                    f"parent for {snapshot.get('id')} is not earlier",
-                    "error",
-                )
-            )
-        known_ids.add(str(snapshot.get("id")))
-        if (
-            not _reference_matches(snapshot.get("scenario_definition_ref"), definition)
-            or snapshot.get("stochastic_realization_id") != realization
-        ):
-            diagnostics.append(
-                Diagnostic(
-                    "TRAJECTORY_MEMBER_MISMATCH",
-                    f"snapshot {snapshot.get('id')} differs from trajectory",
-                    "error",
-                )
-            )
-    if years != sorted(years) or len(years) != len(set(years)):
-        diagnostics.append(
-            Diagnostic(
-                "TRAJECTORY_YEAR_ORDER",
-                "snapshot years must be ordered and unique",
-                "error",
-            )
-        )
-    requested_years = trajectory.get("requested_years", [])
-    skipped = trajectory.get("skipped_years", [])
-    if not isinstance(requested_years, list) or not isinstance(skipped, list):
-        return diagnostics + [
-            Diagnostic(
-                "SCENARIO_DOCUMENT_INVALID",
-                "trajectory year declarations must be lists",
-                "error",
-            )
-        ]
-    try:
-        requested = {int(year) for year in requested_years}
-    except (TypeError, ValueError):
-        return diagnostics + [
-            Diagnostic(
-                "SCENARIO_DOCUMENT_INVALID", "requested years must be integers", "error"
-            )
-        ]
-    skipped_years: set[int] = set()
-    for skipped_year in skipped:
-        if not isinstance(skipped_year, Mapping) or not skipped_year.get("reason"):
-            return diagnostics + [
-                Diagnostic(
-                    "SCENARIO_DOCUMENT_INVALID",
-                    "skipped years require an integer year and non-empty reason",
-                    "error",
-                )
-            ]
-        try:
-            skipped_years.add(int(skipped_year["year"]))
-        except (KeyError, TypeError, ValueError):
-            return diagnostics + [
-                Diagnostic(
-                    "SCENARIO_DOCUMENT_INVALID",
-                    "skipped years require an integer year and non-empty reason",
-                    "error",
-                )
-            ]
-    sets_agree = (
-        requested == set(years) | skipped_years and not set(years) & skipped_years
-    )
-    expected_status = (
-        "complete"
-        if not skipped_years and requested == set(years)
-        else "incomplete"
-        if sets_agree
-        else None
-    )
-    if not sets_agree or trajectory.get("completeness_status") != expected_status:
-        diagnostics.append(
-            Diagnostic(
-                "TRAJECTORY_COMPLETENESS_MISMATCH",
-                "requested, successful, and skipped years disagree",
+                "execution target selects a different scenario definition",
                 "error",
             )
         )
@@ -392,7 +273,7 @@ def _validate_trajectory(
 def validate_scenario(
     definition: Mapping[str, Any],
     bindings: Sequence[Mapping[str, Any]],
-    trajectory: Mapping[str, Any],
+    target: Mapping[str, Any] | None = None,
     *,
     catalog_root: Path | str | None = None,
 ) -> CheckResult:
@@ -413,12 +294,13 @@ def validate_scenario(
         )
         return CheckResult(tuple(diagnostics))
     diagnostics.extend(_validate_bindings(definition, bindings, catalog_root))
-    if not isinstance(trajectory, Mapping):
-        diagnostics.append(
-            Diagnostic(
-                "SCENARIO_DOCUMENT_INVALID", "trajectory must be a mapping", "error"
+    if target is not None:
+        if not isinstance(target, Mapping):
+            diagnostics.append(
+                Diagnostic(
+                    "SCENARIO_DOCUMENT_INVALID", "target must be a mapping", "error"
+                )
             )
-        )
-    else:
-        diagnostics.extend(_validate_trajectory(definition, trajectory))
+        else:
+            diagnostics.extend(_validate_scenario_reference(definition, target))
     return CheckResult(tuple(diagnostics))

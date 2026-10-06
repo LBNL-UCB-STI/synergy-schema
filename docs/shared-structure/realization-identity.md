@@ -1,8 +1,21 @@
-# Population trajectory realization identity
+# Population trajectory realization identity (Retired)
 
-This page is the public specification for
-`synergy:scenario-realization:population-trajectory-v1`. It defines a single
-fingerprint for a PILATES population trajectory. Two independent systems can
+**Specification Retired**: `synergy:scenario-realization:population-trajectory-v1`
+and multi-file trajectory bundles have been retired in favor of the
+**Population Ledger** (`PopulationLedger`) and canonical **State Digest**
+(`StateDigest`).
+
+In the ledger architecture, population state is captured as a git-style tree
+of canonical facet table digests (`core_facet_table/v1`), and simulation year
+checkpoints (`PopulationCheckpoint`) tag the canonical state snapshot. See
+[Population snapshots and artifact identity](population-snapshots-and-artifact-identity.md)
+and [Core schema UML](../schema/core-schema-uml.md).
+
+---
+
+This page is preserved for historical reference as the public specification for
+`synergy:scenario-realization:population-trajectory-v1`. It defined a single
+fingerprint for a legacy PILATES population trajectory. Two independent systems could
 compare fingerprints to tell whether they picked the same scenario version,
 random draw, sequence of yearly snapshots, and member files, even if their
 manifests or storage locations differ.

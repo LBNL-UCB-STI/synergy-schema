@@ -1,7 +1,0 @@
-scenario_definition: ../baseline-scenario-definition.yaml
-model_bindings: ../baseline-model-bindings.yaml
-trajectory: ../baseline-trajectory.yaml
-population_bundle: ../baseline-pilates-trajectory-bundle.yaml
-polaris_bundle: ../baseline-polaris-translation-bundle.yaml
-mapping_release: ../mapping-release/revision-1
-catalog_root: ../catalogs

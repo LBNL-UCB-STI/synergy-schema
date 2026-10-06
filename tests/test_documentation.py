@@ -5,7 +5,6 @@ from pathlib import Path
 
 import tomllib
 
-import docs_macros
 from zensical.config import parse_config
 
 
@@ -28,11 +27,10 @@ def _leaf_targets(items: list[dict[str, object]]) -> list[tuple[str, str]]:
     return leaves
 
 
-def test_navigation_has_the_approved_nine_sections_and_existing_leaves() -> None:
+def test_navigation_has_approved_sections_and_existing_leaves() -> None:
     nav = _nav()
     assert [next(iter(item)) for item in nav] == [
         "Overview",
-        "Proof of concept",
         "Bring an existing mapping",
         "Shared structure",
         "Cross-model mappings",
@@ -42,8 +40,6 @@ def test_navigation_has_the_approved_nine_sections_and_existing_leaves() -> None
         "Schema reference",
     ]
     expected = {
-        "A population that changes over three years",
-        "Following the proof from claim to file",
         "Day-zero manifest",
         "One-year mapping handshake",
         "Mapping at a glance",
@@ -201,7 +197,7 @@ def test_overview_explains_the_shared_universe_and_why_records_matter() -> None:
     assert "model-specific results" in overview
     assert "| Documentation area | Question it answers |" in overview
     assert "Bring an existing mapping" in overview
-    assert "Three-year proof" in overview
+    assert "one-year mapping handshake" in overview
 
 
 def test_public_guides_avoid_second_person_and_attestation_language() -> None:
@@ -210,7 +206,6 @@ def test_public_guides_avoid_second_person_and_attestation_language() -> None:
         for _label, target in _leaf_targets(_nav())
         if not target.startswith("schema/")
     }
-    maintained_pages.add("pilates/post-atlas-population-bundle.md")
     second_person = re.compile(r"\b(?:you|your|yours|yourself)\b", re.IGNORECASE)
     attestation = re.compile(r"\battest\w*\b", re.IGNORECASE)
 
@@ -218,127 +213,6 @@ def test_public_guides_avoid_second_person_and_attestation_language() -> None:
         page = (DOCS / relative_path).read_text()
         assert second_person.search(page) is None, relative_path
         assert attestation.search(page) is None, relative_path
-
-
-def test_proof_uses_the_executable_showcase_and_preserves_scope() -> None:
-    proof = (DOCS / "proof-of-concept/index.md").read_text()
-    normalized_proof = " ".join(proof.split())
-    for idea in (
-        "same shared universe",
-        "scenario identity",
-        "interfaces",
-        "reviews",
-        "run/file evidence",
-        "not a deployed PILATES or POLARIS runtime",
-    ):
-        assert idea in normalized_proof
-    commands = (DOCS / "proof-of-concept/check-the-showcase.md").read_text()
-    assert "examples/evolving_population/baseline" in commands
-    assert "examples/evolving_population/zev" in commands
-    assert "exit 0" in commands
-    assert "evolving_population_broken_scenario" in commands
-    assert "evolving_population_broken_artifact_identity" in commands
-    assert "exit 1" in commands
-    assert "SCENARIO_DIGEST_MISMATCH" in commands
-    assert "ARTIFACT_IDENTITY_MISMATCH" in commands
-
-
-def test_checker_page_displays_tables_from_the_showcase_fixtures() -> None:
-    page = (DOCS / "proof-of-concept/check-the-showcase.md").read_text()
-    for heading in (
-        "## The population over time",
-        "## Shared identity and model-owned results",
-        "## From a shared assumption to an exact file",
-        "## What the proof establishes",
-        "## Deliberately broken exchanges",
-    ):
-        assert heading in page
-    rendered = "\n".join(
-        (
-            docs_macros.showcase_population_timeline_table(),
-            docs_macros.showcase_branch_comparison_table(),
-            docs_macros.showcase_scenario_assumptions_table(),
-            docs_macros.showcase_bindings_table(),
-            docs_macros.showcase_evidence_trace_table(),
-            docs_macros.showcase_status_ladder_table(),
-            docs_macros.showcase_broken_scenario_table(),
-            docs_macros.showcase_broken_artifact_table(),
-        )
-    )
-    for macro in (
-        "{{ showcase_population_timeline_table() }}",
-        "{{ showcase_branch_comparison_table() }}",
-        "{{ showcase_scenario_assumptions_table(4) }}",
-        "{{ showcase_bindings_table(4) }}",
-        "{{ showcase_evidence_trace_table() }}",
-        "{{ showcase_status_ladder_table() }}",
-        "{{ showcase_broken_scenario_table(4) }}",
-        "{{ showcase_broken_artifact_table(4) }}",
-    ):
-        assert macro in page
-    for value in (
-        "person:synthetic-evolving:new-2030",
-        "household-state:synthetic-evolving-2030:family-a-2",
-        "compatible_with_gaps",
-        "zev_policy",
-        "SCENARIO_DIGEST_MISMATCH",
-        "ARTIFACT_IDENTITY_MISMATCH",
-    ):
-        assert value in rendered
-    assert "core-population-evolution.yaml" in page
-    assert "zev-model-bindings.yaml" in page
-    assert "Every person state has an explicit household membership" in page
-    assert "does not declare person-to-household membership" not in page
-    assert "Not declared in this fixture" not in rendered
-    assert "review records" in page
-    assert "Evidence" in page
-    assert (
-        "All digest values below come directly from the valid and broken fixtures"
-        in page
-    )
-    assert "Shared value" in rendered
-    assert "Valid declaration" in rendered
-    assert "Broken declaration" in rendered
-    assert "broken-scenario-definition.yaml" in page
-    assert "broken-polaris-bundle.yaml" in page
-    assert "blob/expand-schema" not in page
-    assert "blob/main" in page
-
-
-def test_evolving_population_views_are_registered_and_fixture_backed() -> None:
-    registered: dict[str, object] = {}
-
-    class Environment:
-        def macro(self, function: object) -> None:
-            registered[function.__name__] = function  # type: ignore[attr-defined]
-
-    docs_macros.define_env(Environment())
-    names = {
-        "showcase_population_timeline_table",
-        "showcase_branch_comparison_table",
-        "showcase_evidence_trace_table",
-        "showcase_status_ladder_table",
-    }
-    assert names <= registered.keys()
-    rendered = "\n".join(
-        registered[name]()
-        for name in sorted(names)  # type: ignore[operator]
-    )
-    for value in (
-        "person:synthetic-evolving:alex",
-        "battery_electric",
-        "vehicle_adoption.zev_policy",
-        "manual_discovery",
-        "Schema-valid structure",
-        "6 collections",
-        "Cross-document checker boundary",
-        "complete / complete",
-        "Draft mapping review",
-        "review_records=0",
-        "Compatibility gap",
-        "Production evidence not claimed",
-    ):
-        assert value in rendered
 
 
 def test_adoption_guides_are_honest_about_scope_cost_and_exit() -> None:
@@ -377,7 +251,6 @@ def test_workflow_and_compatibility_guides_state_boundaries_and_decisions() -> N
 
 def test_docs_build_generates_identity_diagram_and_contract_review_copy() -> None:
     script = (ROOT / "scripts/preview-schema-docs").read_text()
-    assert "cross_model_identity_diagram" in script
     assert "core_schema_diagram" in script
     assert "contract-at-a-glance.md" in script
     ci = (ROOT / ".github/workflows/ci.yml").read_text()
@@ -397,7 +270,7 @@ def test_shared_structure_explains_core_agreement_boundary() -> None:
     snapshot_page = (
         DOCS / "shared-structure/population-snapshots-and-artifact-identity.md"
     ).read_text()
-    assert "#population-relationship-overview" in snapshot_page
+    assert "#core-entity-tables" in snapshot_page
 
 
 def test_maintained_surfaces_avoid_ambiguous_release_jargon() -> None:

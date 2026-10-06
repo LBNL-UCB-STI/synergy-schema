@@ -5,10 +5,6 @@ docs_dir = "docs"
 site_dir = "site"
 nav = [
     { "Overview" = "index.md" },
-    { "Proof of concept" = [
-        { "A population that changes over three years" = "proof-of-concept/index.md" },
-        { "Following the proof from claim to file" = "proof-of-concept/check-the-showcase.md" },
-    ] },
     { "Bring an existing mapping" = [
         { "Bring an existing mapping" = "bring-an-existing-mapping/index.md" },
         { "Day-zero manifest" = "bring-an-existing-mapping/day-zero-manifest.md" },
@@ -33,7 +29,6 @@ nav = [
     { "Workflow structures" = [
         { "Workflow structures" = "workflow-structures/index.md" },
         { "PILATES post-ATLAS population" = "workflow-structures/pilates.md" },
-        { "Staged core-population assembly" = "workflow-structures/core-population-assembly.md" },
         { "POLARIS translated population" = "workflow-structures/polaris.md" },
     ] },
     { "Design rationale" = [
@@ -68,11 +63,6 @@ custom_fences = [
 
 [project.markdown_extensions.pymdownx.tabbed]
 alternate_style = true
-
-[project.markdown_extensions.zensical.extensions.macros]
-module_name = "docs_macros"
-on_error_fail = true
-on_undefined = "strict"
 
 [[project.theme.palette]]
 media = "(prefers-color-scheme)"

@@ -17,10 +17,7 @@ SCHEMA_PATH = (
     / "synergy_schema.yaml"
 )
 EXAMPLE_PATH = (
-    Path(__file__).parents[1]
-    / "examples"
-    / "post_atlas_population_bundle"
-    / "population_snapshot_bundle.yaml"
+    Path(__file__).parents[1] / "examples" / "ledger" / "urbansim_demos_atlas_2025.yaml"
 )
 
 
@@ -32,7 +29,7 @@ def _validation_messages(instance: dict[str, object]) -> list[str]:
     report = Validator(
         SCHEMA_PATH,
         validation_plugins=[JsonschemaValidationPlugin(closed=True)],
-    ).validate(instance, "PopulationSnapshotBundle")
+    ).validate(instance, "PopulationLedger")
     return [result.message for result in report.results]
 
 
@@ -93,7 +90,7 @@ def test_scenario_contracts_preserve_identity_and_conformance_boundaries() -> No
     definition = schema_view.induced_class("ScenarioDefinition")
     assumption_binding = schema_view.induced_class("ScenarioAssumptionBinding")
     model_binding = schema_view.induced_class("ModelScenarioBinding")
-    snapshot = schema_view.induced_class("PopulationSnapshot")
+    ledger = schema_view.induced_class("PopulationLedger")
 
     assert set(catalog.attributes) == {
         "catalog_id",
@@ -155,19 +152,19 @@ def test_scenario_contracts_preserve_identity_and_conformance_boundaries() -> No
         "resolved_native_value and may be compatible_with_gaps; direct or alias "
         "value disagreement is incompatible."
     )
-    assert snapshot.attributes["scenario_definition_ref"].range == (
+    assert ledger.attributes["scenario_definition_ref"].range == (
         "ScenarioDefinitionReference"
     )
-    assert snapshot.attributes["scenario_definition_ref"].required is True
-    assert snapshot.attributes["scenario_definition_ref"].inlined is True
+    assert ledger.attributes["scenario_definition_ref"].required is True
+    assert ledger.attributes["scenario_definition_ref"].inlined is True
 
 
-def test_population_snapshot_bundle_requires_an_inlined_scenario_reference() -> None:
-    """A snapshot carries its scenario identity, revision, and content digest."""
+def test_population_ledger_requires_an_inlined_scenario_reference() -> None:
+    """A ledger carries its scenario identity, revision, and content digest."""
     assert _validation_messages(_load_fixture()) == []
 
     legacy_fixture = deepcopy(_load_fixture())
-    legacy_fixture["population_snapshot"]["scenario_definition_ref"] = (
+    legacy_fixture["scenario_definition_ref"] = (
         "scenario-definition:synthetic-region-baseline"
     )
     assert _validation_messages(legacy_fixture)

@@ -9,7 +9,7 @@ the model.
 ## Proposed
 
 A translation receipt would record the five yearly file roles, the source
-population bundle, the reviewed one-year mapping, the registered translation
+population ledger, the reviewed one-year mapping, the registered translation
 code, and any known scenario gaps. With those links, a checker can confirm the
 translation used the right scenario and year.
 

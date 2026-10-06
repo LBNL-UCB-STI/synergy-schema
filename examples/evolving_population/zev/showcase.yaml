@@ -1,7 +1,0 @@
-scenario_definition: ../zev-scenario-definition.yaml
-model_bindings: ../zev-model-bindings.yaml
-trajectory: ../zev-trajectory.yaml
-population_bundle: ../zev-pilates-trajectory-bundle.yaml
-polaris_bundle: ../zev-polaris-translation-bundle.yaml
-mapping_release: ../mapping-release/revision-1
-catalog_root: ../catalogs

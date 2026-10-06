@@ -1,0 +1,118 @@
+id: https://w3id.org/LBNL-UCB-STI/synergy-schema/core-tables
+name: core_tables
+title: Core population tables
+description: >-
+  Shared population tables and facets with an agreed meaning across models.
+  Core tables hold only keys; new shared facts become new facets, established
+  when their first writer runs.
+
+prefixes:
+  synergy_schema: https://w3id.org/LBNL-UCB-STI/synergy-schema/
+  linkml: https://w3id.org/linkml/
+
+default_prefix: synergy_schema
+default_range: string
+
+imports:
+  - linkml:types
+
+types:
+  FacetContentDigest:
+    typeof: string
+    pattern: "^sha256:[0-9a-f]{64}$"
+    description: >-
+      Identity of one core facet's content: the rows of its core table class,
+      normalized under the ledger's facet_digest_form and then hashed. It is
+      not a hash of file bytes, so the same rows read from different models'
+      files, or rebuilt from a parent facet and a delta, give the same
+      digest. File-byte identity uses ImmutableArtifactIdentity instead.
+  StateDigest:
+    typeof: string
+    pattern: "^sha256:[0-9a-f]{64}$"
+    description: >-
+      Identity of a whole CoreState: a hash over its sorted (facet, facet
+      content digest) pairs under the ledger's state_digest_form, like a git
+      tree hash. No file is read to compute it.
+
+enums:
+  CoreFacet:
+    description: >-
+      Shared population facts that every model must agree on within one
+      state. Test for membership: two models cannot legitimately disagree
+      about it at the same moment. Other facets (buildings, firms, jobs,
+      freight) can be added later.
+    permissible_values:
+      households:
+        description: Which households exist.
+      people:
+        description: Which people exist (alive and in the population).
+      household_membership:
+        description: Which household each person belongs to.
+      vehicles:
+        description: Which vehicles exist, and which household each belongs to.
+
+classes:
+  # Core tables. These are Synergy's canonical form for each facet, derived
+  # from model views; no model is expected to read or write them directly.
+  # Their attributes are exactly what core_facet_table/v1 hashes. Core tables
+  # hold only keys; a new shared fact (such as household location) becomes a
+  # new facet, established when its first writer runs, rather than a new
+  # column on an existing core table.
+  CoreHousehold:
+    description: One household in the core households facet.
+    annotations:
+      core_facet: households
+    attributes:
+      household_id:
+        identifier: true
+        required: true
+        description: Household identifier shared across models within a state.
+
+  CorePerson:
+    description: One person in the core people facet.
+    annotations:
+      core_facet: people
+    attributes:
+      person_id:
+        identifier: true
+        required: true
+        description: Person identifier shared across models within a state.
+
+  CoreHouseholdMembership:
+    description: One person's household in the core household_membership facet.
+    annotations:
+      core_facet: household_membership
+    unique_keys:
+      one_household_per_person:
+        unique_key_slots: [person_id]
+    attributes:
+      person_id:
+        range: CorePerson
+        required: true
+        description: Member person.
+      household_id:
+        range: CoreHousehold
+        required: true
+        description: Containing household.
+
+  CoreVehicle:
+    description: >-
+      One vehicle in the core vehicles facet. Provisional key: vehicle_id is
+      household-scoped in ATLAS, so a vehicle is identified by
+      (household_id, vehicle_id), which also records the vehicle's household.
+      A vehicle that changes household appears as a new vehicle until a
+      global vehicle identity is agreed; a separate assignment facet can be
+      added then.
+    annotations:
+      core_facet: vehicles
+    unique_keys:
+      household_vehicle:
+        unique_key_slots: [household_id, vehicle_id]
+    attributes:
+      household_id:
+        range: CoreHousehold
+        required: true
+        description: Household that scopes the vehicle identifier.
+      vehicle_id:
+        required: true
+        description: Vehicle identifier, unique within its household.

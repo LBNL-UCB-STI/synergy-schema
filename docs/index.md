@@ -27,10 +27,8 @@ flowchart LR
   synergy -. describes and checks .-> traffic
 ```
 
-**Start here:** the [three-year proof](proof-of-concept/index.md) follows a
-small, changing population through a runnable example. To see one year's
-population built up in stages by different models, read the
-[core-population assembly guide](workflow-structures/core-population-assembly.md).
+**Start here:** the [one-year mapping handshake](bring-an-existing-mapping/one-year-mapping-handshake.md)
+follows a runnable example connecting ATLAS, DEMOS, and POLARIS.
 
 ## The coordination problem
 
@@ -106,7 +104,6 @@ order.
 | Documentation area | Question it answers |
 | --- | --- |
 | [Shared structure](shared-structure/index.md) | What do the models share, and what stays with each model? |
-| [Three-year proof](proof-of-concept/index.md) | What does that look like in a small, runnable example? |
 | [Cross-model mappings](cross-model-mappings/index.md) | How do IDs, assumptions, and fields line up across models? |
 | [Workflow structures](workflow-structures/index.md) | How do the pieces fit together at real handoffs (PILATES, proposed POLARIS, staged populations)? |
 | [Bring an existing mapping](bring-an-existing-mapping/index.md) | How can an existing spreadsheet, SQL script, or column list become something reviewable? |
