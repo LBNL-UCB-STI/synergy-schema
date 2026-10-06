@@ -70,7 +70,11 @@ def test_catalog_rejects_duplicate_or_bad_digest(tmp_path: Path) -> None:
 
 def test_committed_catalogs_are_checksummed_and_resolvable() -> None:
     catalogs = sorted((ROOT / "catalogs").glob("*/*/catalog.yaml"))
-    assert {path.parent.parent.name for path in catalogs} == {"pilates", "polaris"}
+    assert {path.parent.parent.name for path in catalogs} == {
+        "atlas-demos",
+        "pilates",
+        "polaris",
+    }
     for path in catalogs:
         catalog = load_catalog(path)
         assert catalog.document["content_digest"] == catalog_digest(catalog.document)

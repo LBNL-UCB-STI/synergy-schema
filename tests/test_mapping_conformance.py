@@ -304,3 +304,10 @@ def test_native_element_catalog_identity_must_match_its_contract_side(
         "MAPPING_NOT_APPROVED",
         "NATIVE_ELEMENT_UNRESOLVED",
     ]
+
+
+def test_atlas_demos_to_polaris_revision_1_conformance() -> None:
+    release_dir = Path("mappings/releases/atlas-demos-to-polaris/revision-1")
+    result = validate_mapping_release(release_dir)
+    assert not any(d.severity == "error" for d in result.diagnostics)
+    assert [d.code for d in result.diagnostics] == ["MAPPING_NOT_APPROVED"]

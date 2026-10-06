@@ -1,0 +1,13 @@
+id: implementation:polaris-demand-translation
+implementation_artifact:
+  artifact_identity:
+    digest_algorithm: sha256
+    content_digest: eee3ca69c70f653bf504f29a31706dd662492e4a203680661359b53e39f6f4f6
+  locator: implementation/translation.sql
+  media_type: text/plain
+implemented_semantic_content_digest_algorithm: sha256
+implemented_semantic_content_digest: 51ead67024fa32be5451125ee2d8c8fbedcef3fd02ce6cbd566b6e8c16f8e9a6
+workflow_owner: PILATES workflow integrator
+status: conformance_checked
+validation_evidence:
+  - draft translation contract aligned with ANL interface document
