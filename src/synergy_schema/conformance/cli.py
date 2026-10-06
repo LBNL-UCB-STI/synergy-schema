@@ -61,6 +61,24 @@ def build_parser() -> argparse.ArgumentParser:
     ledger.add_argument(
         "--mapping-catalog", help="path to CoreFacetMappingCatalog document"
     )
+    ledger.add_argument(
+        "--verify-consist-provenance",
+        action="store_true",
+        help="verify producing_run and artifact hashes against Consist DuckDB provenance",
+    )
+    ledger.add_argument(
+        "--consist-db",
+        help="path to Consist provenance.duckdb",
+    )
+    ledger.add_argument(
+        "--data-root",
+        help="root directory for resolving relative view and stored_object artifact locators",
+    )
+    ledger.add_argument(
+        "--verify-state-digest",
+        action="store_true",
+        help="verify that core_state.state_digest matches recomputed core_state/v1 hash",
+    )
     check_all = commands.add_parser("check-all")
     check_all.add_argument("--schema", required=True)
     check_all.add_argument("--dir", required=True)
@@ -124,7 +142,15 @@ def _dispatch(args: argparse.Namespace) -> CheckResult:
         catalog_doc = (
             load_mapping(args.mapping_catalog) if args.mapping_catalog else None
         )
-        return validate_ledger(ledger_doc, catalog=catalog_doc, schema_path=args.schema)
+        return validate_ledger(
+            ledger_doc,
+            catalog=catalog_doc,
+            schema_path=args.schema,
+            verify_consist_provenance=args.verify_consist_provenance,
+            consist_db=args.consist_db,
+            data_root=args.data_root,
+            verify_state_digest=args.verify_state_digest,
+        )
     if args.command == "check-all":
         root = Path(args.dir)
         manifest = load_showcase(root)

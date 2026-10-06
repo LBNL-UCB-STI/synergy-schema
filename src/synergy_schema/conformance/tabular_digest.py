@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from collections.abc import Mapping
 from hashlib import sha256
 import math
 from pathlib import Path
@@ -113,4 +114,37 @@ def compute_tabular_digest(
             hasher.update(_DELIMITER_FIELD.join(row_bytes) + _DELIMITER_RECORD)
 
     con.close()
+    return f"sha256:{hasher.hexdigest()}"
+
+
+def compute_state_digest(
+    facets: Sequence[Mapping[str, Any]] | Mapping[str, str],
+    *,
+    profile: str = "core_state/v1",
+) -> str:
+    """Compute canonical StateDigest under core_state/v1.
+
+    A Merkle tree hash over the sorted (facet, facet_content_digest) pairs.
+    """
+    if profile != "core_state/v1":
+        raise ValueError(f"Unsupported state digest profile: {profile}")
+
+    pairs: list[tuple[str, str]] = []
+    if isinstance(facets, Mapping):
+        pairs = sorted((str(k), str(v)) for k, v in facets.items())
+    else:
+        for entry in facets:
+            pairs.append((str(entry["facet"]), str(entry["digest"])))
+        pairs.sort()
+
+    hasher = sha256()
+    hasher.update(profile.encode("utf-8") + _DELIMITER_RECORD)
+    for facet, digest in pairs:
+        hasher.update(
+            facet.encode("utf-8")
+            + _DELIMITER_FIELD
+            + digest.encode("utf-8")
+            + _DELIMITER_RECORD
+        )
+
     return f"sha256:{hasher.hexdigest()}"

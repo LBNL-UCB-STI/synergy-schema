@@ -166,3 +166,55 @@ def test_missing_key_column_raises_error() -> None:
     table = pa.Table.from_pydict({"a": [1, 2], "b": [3, 4]})
     with pytest.raises(ValueError, match="Key column 'c' must be in declared columns"):
         compute_tabular_digest(table, columns=["a", "b"], key_columns=["c"])
+
+
+def test_compute_state_digest() -> None:
+    from synergy_schema.conformance.tabular_digest import compute_state_digest
+
+    facets1 = [
+        {
+            "facet": "households",
+            "digest": "sha256:1111111111111111111111111111111111111111111111111111111111111111",
+        },
+        {
+            "facet": "people",
+            "digest": "sha256:2222222222222222222222222222222222222222222222222222222222222222",
+        },
+    ]
+    # Reordered facets
+    facets2 = [
+        {
+            "facet": "people",
+            "digest": "sha256:2222222222222222222222222222222222222222222222222222222222222222",
+        },
+        {
+            "facet": "households",
+            "digest": "sha256:1111111111111111111111111111111111111111111111111111111111111111",
+        },
+    ]
+    # Dict form
+    facets_dict = {
+        "households": "sha256:1111111111111111111111111111111111111111111111111111111111111111",
+        "people": "sha256:2222222222222222222222222222222222222222222222222222222222222222",
+    }
+
+    digest1 = compute_state_digest(facets1)
+    digest2 = compute_state_digest(facets2)
+    digest3 = compute_state_digest(facets_dict)
+
+    assert digest1.startswith("sha256:")
+    assert len(digest1) == 7 + 64
+    assert digest1 == digest2 == digest3
+
+    # Different digest
+    facets_diff = [
+        {
+            "facet": "households",
+            "digest": "sha256:3333333333333333333333333333333333333333333333333333333333333333",
+        },
+        {
+            "facet": "people",
+            "digest": "sha256:2222222222222222222222222222222222222222222222222222222222222222",
+        },
+    ]
+    assert compute_state_digest(facets_diff) != digest1

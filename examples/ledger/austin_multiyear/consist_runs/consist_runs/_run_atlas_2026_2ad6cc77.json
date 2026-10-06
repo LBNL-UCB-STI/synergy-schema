@@ -1,0 +1,92 @@
+{
+  "run": {
+    "id": "_run_atlas_2026_2ad6cc77",
+    "parent_run_id": "_run_demos_2026_e813278a",
+    "status": "completed",
+    "model_name": "_run_atlas_2026",
+    "description": null,
+    "year": null,
+    "iteration": null,
+    "stage": null,
+    "phase": null,
+    "tags": [],
+    "config_hash": "025cfa035b78548f67e6b06dbe725514802436a0a370b58c00164df6161a33ae",
+    "git_hash": "2734aa2db3fc438abda4f046501bfb2c7e89ebbf-dirty-ddc2291e8516",
+    "meta": {
+      "code_identity": "repo_git",
+      "_physical_run_dir": "/Users/zaneedell/git/synergy-schema/examples/ledger/austin_multiyear/consist_runs",
+      "cache_epoch": 1,
+      "mounts": {},
+      "cache_miss_explanation": {
+        "status": "miss",
+        "reason": "no_similar_prior_run",
+        "candidate_run_id": null,
+        "matched_components": [],
+        "mismatched_components": [],
+        "details": {},
+        "confidence": "low"
+      }
+    },
+    "started_at": "2026-10-06T23:32:31.271792Z",
+    "created_at": "2026-10-06T23:32:31.271792Z",
+    "input_hash": "b76c73df19a0e46e4a0e2fb4a4ae2b864631009e04b0cf22d4a0e75d53c6cf2a",
+    "signature": "23cc1db6c088ea3ba77f5f80b7f983f5887a843e1d85dc08c59780b2317de327",
+    "ended_at": "2026-10-06T23:32:31.392668Z",
+    "updated_at": "2026-10-06T23:32:31.392668Z"
+  },
+  "inputs": [
+    {
+      "id": "929c8f88-9a9a-4304-ad53-7c1345f9bf8a",
+      "key": "households_output",
+      "container_uri": "/Users/zaneedell/git/synergy-schema/examples/ledger/austin_multiyear/demos/2026/output/households.parquet",
+      "table_path": null,
+      "array_path": null,
+      "driver": "parquet",
+      "hash": "022b5d6c9adb2021321faf2affa761157b96a41f429540bfd1340245e02afa6c",
+      "content_id": "08702e06-ea3d-4a3e-bdfa-a7093af973a6",
+      "parent_artifact_id": null,
+      "run_id": "_run_demos_2026_e813278a",
+      "meta": {
+        "hash_semantics": {
+          "version": 1,
+          "algorithm": "sha256",
+          "kind": "file",
+          "digest_contract": "raw_file_bytes",
+          "source": "computed_full"
+        },
+        "tags": []
+      },
+      "created_at": "2026-10-06T23:32:31.045535Z"
+    }
+  ],
+  "outputs": [
+    {
+      "key": "vehicles_output",
+      "container_uri": "/Users/zaneedell/git/synergy-schema/examples/ledger/austin_multiyear/atlas/2026/output/vehicles.parquet",
+      "table_path": null,
+      "array_path": null,
+      "driver": "parquet",
+      "hash": "d8d35e21dc0fa4f5863604db340b93147e85cc591a3652614c17f91484c0659b",
+      "parent_artifact_id": null,
+      "run_id": "_run_atlas_2026_2ad6cc77",
+      "meta": {
+        "hash_semantics": {
+          "version": 1,
+          "algorithm": "sha256",
+          "kind": "file",
+          "digest_contract": "raw_file_bytes",
+          "source": "computed_full"
+        },
+        "tags": []
+      },
+      "id": "6d750da0-78f6-4ffe-8936-4b7fa1e54382",
+      "content_id": "f54a402a-9392-45dc-8aaf-c3040882edeb",
+      "created_at": "2026-10-06T23:32:31.350859Z"
+    }
+  ],
+  "cached_run": null,
+  "config": {
+    "year": 2026
+  },
+  "facet": {}
+}

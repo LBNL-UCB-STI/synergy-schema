@@ -141,3 +141,15 @@ def test_check_ledger_cli(capsys: object) -> None:
 
     # Missing ledger positional
     assert main(["check-ledger"]) == 2
+
+
+def test_synergy_conformance_entrypoint() -> None:
+    result = subprocess.run(
+        ["synergy-conformance", "--help"],
+        cwd=ROOT,
+        text=True,
+        capture_output=True,
+        check=False,
+    )
+    assert result.returncode == 0
+    assert "check-ledger" in result.stdout

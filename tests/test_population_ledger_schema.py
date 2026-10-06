@@ -10,7 +10,11 @@ from linkml.validator import Validator
 from linkml.validator.plugins import JsonschemaValidationPlugin
 from linkml_runtime.utils.schemaview import SchemaView
 
-from synergy_schema.conformance.ledger import LedgerConformancePlugin
+from synergy_schema.conformance.cli import main as cli_main
+from synergy_schema.conformance.ledger import (
+    LedgerConformancePlugin,
+    validate_ledger,
+)
 
 
 ROOT = Path(__file__).parents[1]
@@ -412,3 +416,113 @@ def test_write_policy_and_mapping_direction() -> None:
     direction_enum = view.get_enum("MappingDirection")
     assert direction_enum is not None
     assert {"derive", "project"}.issubset(set(direction_enum.permissible_values.keys()))
+
+
+MULTIYEAR_LEDGER_PATH = EXAMPLES / "austin_multiyear_simulation.yaml"
+MULTIYEAR_DATA_DIR = EXAMPLES / "austin_multiyear"
+
+
+def _multiyear_ledger() -> dict[str, Any]:
+    return yaml.safe_load(MULTIYEAR_LEDGER_PATH.read_text())
+
+
+def test_canonical_multi_year_simulation_ledger_conformance() -> None:
+    ledger = _multiyear_ledger()
+    catalog = _catalog()
+    result = validate_ledger(
+        ledger,
+        catalog=catalog,
+        verify_consist_provenance=True,
+        consist_db=MULTIYEAR_DATA_DIR / "provenance.duckdb",
+        data_root=MULTIYEAR_DATA_DIR,
+        verify_state_digest=True,
+    )
+    assert result.passed, f"Diagnostics: {result.diagnostics}"
+    assert len(result.diagnostics) == 0
+
+
+def test_verify_state_digest_detects_tampering() -> None:
+    ledger = deepcopy(_multiyear_ledger())
+    # Corrupt state digest in 2025:urbansim
+    ledger["snapshots"][0]["core_state"]["state_digest"] = "sha256:" + "0" * 64
+    result = validate_ledger(
+        ledger,
+        catalog=_catalog(),
+        verify_state_digest=True,
+    )
+    assert not result.passed
+    assert any(d.code == "LEDGER_STATE_DIGEST_MISMATCH" for d in result.diagnostics)
+
+
+def test_verify_consist_provenance_detects_unknown_run() -> None:
+    ledger = deepcopy(_multiyear_ledger())
+    # Modify producing_run to nonexistent run ID
+    ledger["snapshots"][0]["step"]["producing_run"]["run_id"] = "nonexistent_run_9999"
+    result = validate_ledger(
+        ledger,
+        catalog=_catalog(),
+        verify_consist_provenance=True,
+        consist_db=MULTIYEAR_DATA_DIR / "provenance.duckdb",
+    )
+    assert not result.passed
+    assert any(d.code == "LEDGER_CONSIST_RUN_MISSING" for d in result.diagnostics)
+
+
+def test_verify_consist_provenance_missing_db() -> None:
+    ledger = _multiyear_ledger()
+    result = validate_ledger(
+        ledger,
+        catalog=_catalog(),
+        verify_consist_provenance=True,
+        consist_db="does_not_exist.duckdb",
+    )
+    assert not result.passed
+    assert any(d.code == "CONSIST_DB_NOT_FOUND" for d in result.diagnostics)
+
+
+def test_verify_consist_provenance_detects_mismatched_artifact_hash() -> None:
+    ledger = deepcopy(_multiyear_ledger())
+    # Tamper output view digest
+    out_view = ledger["snapshots"][0]["step"]["output_views"][0]
+    out_view["artifact"]["artifact_identity"]["content_digest"] = "0" * 64
+    result = validate_ledger(
+        ledger,
+        catalog=_catalog(),
+        verify_consist_provenance=True,
+        consist_db=MULTIYEAR_DATA_DIR / "provenance.duckdb",
+    )
+    assert not result.passed
+    assert any(
+        d.code == "LEDGER_CONSIST_ARTIFACT_DIGEST_MISMATCH" for d in result.diagnostics
+    )
+
+
+def test_verify_artifact_files_detects_content_mismatch() -> None:
+    ledger = deepcopy(_multiyear_ledger())
+    out_view = ledger["snapshots"][0]["step"]["output_views"][0]
+    out_view["artifact"]["artifact_identity"]["content_digest"] = "f" * 64
+    result = validate_ledger(
+        ledger,
+        catalog=_catalog(),
+        data_root=MULTIYEAR_DATA_DIR,
+    )
+    assert not result.passed
+    assert any(d.code == "LEDGER_ARTIFACT_DIGEST_MISMATCH" for d in result.diagnostics)
+
+
+def test_cli_check_ledger_with_full_verification() -> None:
+    exit_code = cli_main(
+        [
+            "check-ledger",
+            str(MULTIYEAR_LEDGER_PATH),
+            "--mapping-catalog",
+            str(CATALOG_PATH),
+            "--verify-consist-provenance",
+            "--consist-db",
+            str(MULTIYEAR_DATA_DIR / "provenance.duckdb"),
+            "--data-root",
+            str(MULTIYEAR_DATA_DIR),
+            "--verify-state-digest",
+        ]
+    )
+    assert exit_code == 0

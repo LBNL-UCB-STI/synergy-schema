@@ -1,0 +1,329 @@
+ledger_id: population-ledger:austin-regional:baseline:r1
+scenario_definition_ref:
+  scenario_definition_id: scenario:austin-regional:baseline
+  revision: '2026.10'
+  content_digest: '0000000000000000000000000000000000000000000000000000000000000000'
+stochastic_realization_id: r1
+facet_digest_form: core_facet_table/v1
+state_digest_form: core_state/v1
+mapping_catalog: mapping-catalog:synthetic-region/v1
+snapshots:
+  - snapshot_id: snapshot:2025:urbansim
+    simulation_year: 2025
+    step:
+      model: urbansim
+      producing_run:
+        provider: consist
+        run_id: _run_urbansim_505a942c
+      output_views:
+        - view_id: view:urbansim/households_output:2025
+          view_kind: urbansim/households_output
+          artifact:
+            artifact_identity:
+              digest_algorithm: sha256
+              content_digest: e241777a9512faeebc90054ab46985fe2df661f394f293c6b704f852a5ee71a2
+            locator: urbansim/2025/households.parquet
+        - view_id: view:urbansim/persons_output:2025
+          view_kind: urbansim/persons_output
+          artifact:
+            artifact_identity:
+              digest_algorithm: sha256
+              content_digest: b115faf6dc8ac8ff5cbdae4080fb89a9bfa0e37dccdb798502fba3ef2021c9dc
+            locator: urbansim/2025/persons.parquet
+      derivations:
+        - facet: households
+          mapping: mapping:urbansim-core/v1#households
+          views:
+            - view:urbansim/households_output:2025
+        - facet: people
+          mapping: mapping:urbansim-core/v1#people
+          views:
+            - view:urbansim/persons_output:2025
+        - facet: household_membership
+          mapping: mapping:urbansim-core/v1#household_membership
+          views:
+            - view:urbansim/persons_output:2025
+    core_state:
+      state_digest: sha256:38b1baac8a453d4b6af45b66c0e41f6d6d756a359eca54e965a0ca89a9e0b865
+      facets:
+        - facet: households
+          digest: sha256:1d9dec264aebc0b6f6d4e9e8a62bf9a60a24b85bd587b487ca2bb95a23cf537c
+        - facet: people
+          digest: sha256:9a2cd98da4eb46b02b9ec47bab1a44d724d0a2258caecdd1eb07676bb41a41c0
+        - facet: household_membership
+          digest: sha256:fe93d336bb2a6bb021bad28736bef91f0c25d70ab48d65b320d24820efb93390
+  - snapshot_id: snapshot:2025:demos
+    parent_snapshots:
+      - snapshot:2025:urbansim
+    simulation_year: 2025
+    step:
+      model: demos
+      producing_run:
+        provider: consist
+        run_id: _run_demos_2025_62ffe6a2
+      input_views:
+        - view_id: view:demos/persons_input:2025
+          view_kind: demos/persons_input
+          artifact:
+            artifact_identity:
+              digest_algorithm: sha256
+              content_digest: b115faf6dc8ac8ff5cbdae4080fb89a9bfa0e37dccdb798502fba3ef2021c9dc
+            locator: urbansim/2025/persons.parquet
+          prepared_from_state: sha256:38b1baac8a453d4b6af45b66c0e41f6d6d756a359eca54e965a0ca89a9e0b865
+      output_views:
+        - view_id: view:demos/households_output:2025
+          view_kind: demos/households_output
+          artifact:
+            artifact_identity:
+              digest_algorithm: sha256
+              content_digest: 6344f61a99ef56310455931c49556d354ffd8da0bc99b4b7b27aca3db364ab22
+            locator: demos/2025/output/households.parquet
+        - view_id: view:demos/persons_output:2025
+          view_kind: demos/persons_output
+          artifact:
+            artifact_identity:
+              digest_algorithm: sha256
+              content_digest: 9a1164fbdac6ba647da9ac06ebf3804fa201deb2caa53908956eb20dcbef07a9
+            locator: demos/2025/output/persons.parquet
+        - view_id: view:demos/deaths_output:2025
+          view_kind: demos/deaths_output
+          artifact:
+            artifact_identity:
+              digest_algorithm: sha256
+              content_digest: 1fc6a56883c9b993142eca5079cced235b8230175c407a9549ecc64cb5b32c82
+            locator: demos/2025/output/deaths.parquet
+      reads:
+        - households
+        - people
+        - household_membership
+      derivations:
+        - facet: people
+          mapping: mapping:demos-core/v1#people
+          views:
+            - view:demos/deaths_output:2025
+        - facet: person_demographics
+          mapping: mapping:demos-core/v1#person_demographics
+          views:
+            - view:demos/persons_output:2025
+        - facet: household_location
+          mapping: mapping:demos-core/v1#household_location
+          views:
+            - view:demos/households_output:2025
+        - facet: household_income
+          mapping: mapping:demos-core/v1#household_income
+          views:
+            - view:demos/households_output:2025
+    core_state:
+      state_digest: sha256:3f88fa41efca5d434bd86f97c126a5b90b21ba4189b50fb0346872734e3d049d
+      facets:
+        - &id001
+          facet: households
+          digest: sha256:1d9dec264aebc0b6f6d4e9e8a62bf9a60a24b85bd587b487ca2bb95a23cf537c
+        - &id002
+          facet: people
+          digest: sha256:aaf36e38fb7c8bc231aae466847abbb5c19e49b3269d7545a9c4853ea2efe6a0
+          stored_object:
+            artifact_identity:
+              digest_algorithm: sha256
+              content_digest: 92532b6e9da7160bc46d9e6ddf2216b2954bfbb1c51c72385fb174811b8e608a
+            locator: synergy/2025/core/people.parquet
+        - &id003
+          facet: household_membership
+          digest: sha256:fe93d336bb2a6bb021bad28736bef91f0c25d70ab48d65b320d24820efb93390
+        - &id004
+          facet: person_demographics
+          digest: sha256:93ce055d938599bd8256a5c549f8626cb4d6abdb3b3336206998ec97a46d1890
+        - &id005
+          facet: household_location
+          digest: sha256:a1344f66bd54c870afe8df2270965fd4b8fc243fcfa1e285c100027dec88f9b2
+        - &id006
+          facet: household_income
+          digest: sha256:e5a17e9c43d70b36258070f614069fa3c361d03538ff4b5f008b892b35060c99
+  - snapshot_id: snapshot:2025:atlas
+    parent_snapshots:
+      - snapshot:2025:demos
+    simulation_year: 2025
+    step:
+      model: atlas
+      producing_run:
+        provider: consist
+        run_id: _run_atlas_2025_be1ff755
+      input_views:
+        - view_id: view:atlas/household_input:2025
+          view_kind: atlas/household_input
+          artifact:
+            artifact_identity:
+              digest_algorithm: sha256
+              content_digest: 6344f61a99ef56310455931c49556d354ffd8da0bc99b4b7b27aca3db364ab22
+            locator: demos/2025/output/households.parquet
+          prepared_from_state: sha256:3f88fa41efca5d434bd86f97c126a5b90b21ba4189b50fb0346872734e3d049d
+      output_views:
+        - view_id: view:atlas/vehicles_output:2025
+          view_kind: atlas/vehicles_output
+          artifact:
+            artifact_identity:
+              digest_algorithm: sha256
+              content_digest: 2a022d13bfd15318ff94507e9002d96b7a32a682366520d8a759d4891e581a0a
+            locator: atlas/2025/output/vehicles.parquet
+      reads:
+        - households
+        - household_membership
+      derivations:
+        - facet: vehicles
+          mapping: mapping:atlas-core/v1#vehicles
+          views:
+            - view:atlas/vehicles_output:2025
+    core_state:
+      state_digest: sha256:8be82a369ff2b9119da052cfde1d1fdf123fe57e90ae4c33eb5e4d91fdf9eb7e
+      facets:
+        - *id001
+        - *id002
+        - *id003
+        - *id004
+        - *id005
+        - *id006
+        - facet: vehicles
+          digest: sha256:700f5cf6433948d5dfddbfc1e6115480c20404099625d4f33c4b0f1e4db891bf
+  - snapshot_id: snapshot:2026:demos
+    parent_snapshots:
+      - snapshot:2025:atlas
+    simulation_year: 2026
+    step:
+      model: demos
+      producing_run:
+        provider: consist
+        run_id: _run_demos_2026_e813278a
+      input_views:
+        - view_id: view:demos/households_input:2026
+          view_kind: demos/households_input
+          artifact:
+            artifact_identity:
+              digest_algorithm: sha256
+              content_digest: 6344f61a99ef56310455931c49556d354ffd8da0bc99b4b7b27aca3db364ab22
+            locator: demos/2025/output/households.parquet
+          prepared_from_state: sha256:8be82a369ff2b9119da052cfde1d1fdf123fe57e90ae4c33eb5e4d91fdf9eb7e
+      output_views:
+        - view_id: view:demos/households_output:2026
+          view_kind: demos/households_output
+          artifact:
+            artifact_identity:
+              digest_algorithm: sha256
+              content_digest: 022b5d6c9adb2021321faf2affa761157b96a41f429540bfd1340245e02afa6c
+            locator: demos/2026/output/households.parquet
+        - view_id: view:demos/persons_output:2026
+          view_kind: demos/persons_output
+          artifact:
+            artifact_identity:
+              digest_algorithm: sha256
+              content_digest: ba107e48a650fe97d450a17b9b2bb7269d50a20767954a9cac65185973216c1b
+            locator: demos/2026/output/persons.parquet
+        - view_id: view:demos/deaths_output:2026
+          view_kind: demos/deaths_output
+          artifact:
+            artifact_identity:
+              digest_algorithm: sha256
+              content_digest: 909a09654d46b3674e957d9c69ff433f83cc8c9658e4a28f032676c5b86d3de8
+            locator: demos/2026/output/deaths.parquet
+      reads:
+        - households
+        - people
+        - household_membership
+        - person_demographics
+        - household_location
+        - household_income
+      derivations:
+        - facet: people
+          mapping: mapping:demos-core/v1#people
+          views:
+            - view:demos/deaths_output:2026
+        - facet: person_demographics
+          mapping: mapping:demos-core/v1#person_demographics
+          views:
+            - view:demos/persons_output:2026
+        - facet: household_income
+          mapping: mapping:demos-core/v1#household_income
+          views:
+            - view:demos/households_output:2026
+    core_state:
+      state_digest: sha256:da20f32019512b6779dda69bb6f0fa0679e65078e524028af2766effcd7d1611
+      facets:
+        - facet: households
+          digest: sha256:1d9dec264aebc0b6f6d4e9e8a62bf9a60a24b85bd587b487ca2bb95a23cf537c
+        - facet: people
+          digest: sha256:aaf36e38fb7c8bc231aae466847abbb5c19e49b3269d7545a9c4853ea2efe6a0
+          stored_object:
+            artifact_identity:
+              digest_algorithm: sha256
+              content_digest: 92532b6e9da7160bc46d9e6ddf2216b2954bfbb1c51c72385fb174811b8e608a
+            locator: synergy/2026/core/people.parquet
+        - facet: household_membership
+          digest: sha256:fe93d336bb2a6bb021bad28736bef91f0c25d70ab48d65b320d24820efb93390
+        - facet: person_demographics
+          digest: sha256:1cee00b07847cca51dff859485849ec353c89996927d9e4995ff2bcdb6f44051
+        - facet: household_location
+          digest: sha256:a1344f66bd54c870afe8df2270965fd4b8fc243fcfa1e285c100027dec88f9b2
+        - facet: household_income
+          digest: sha256:c244b1ce966fa1d64ba35aede24ca4c539a4e958cdcfea667351c2854e1f222b
+        - facet: vehicles
+          digest: sha256:700f5cf6433948d5dfddbfc1e6115480c20404099625d4f33c4b0f1e4db891bf
+  - snapshot_id: snapshot:2026:atlas
+    parent_snapshots:
+      - snapshot:2026:demos
+    simulation_year: 2026
+    step:
+      model: atlas
+      producing_run:
+        provider: consist
+        run_id: _run_atlas_2026_2ad6cc77
+      input_views:
+        - view_id: view:atlas/household_input:2026
+          view_kind: atlas/household_input
+          artifact:
+            artifact_identity:
+              digest_algorithm: sha256
+              content_digest: 022b5d6c9adb2021321faf2affa761157b96a41f429540bfd1340245e02afa6c
+            locator: demos/2026/output/households.parquet
+          prepared_from_state: sha256:da20f32019512b6779dda69bb6f0fa0679e65078e524028af2766effcd7d1611
+      output_views:
+        - view_id: view:atlas/vehicles_output:2026
+          view_kind: atlas/vehicles_output
+          artifact:
+            artifact_identity:
+              digest_algorithm: sha256
+              content_digest: d8d35e21dc0fa4f5863604db340b93147e85cc591a3652614c17f91484c0659b
+            locator: atlas/2026/output/vehicles.parquet
+      reads:
+        - households
+        - household_membership
+      derivations:
+        - facet: vehicles
+          mapping: mapping:atlas-core/v1#vehicles
+          views:
+            - view:atlas/vehicles_output:2026
+    core_state:
+      state_digest: sha256:1744ea84a1e8b8f531cdb486535076d58a83db4e83eb8d5dca0fcabfe96a78e2
+      facets:
+        - facet: households
+          digest: sha256:1d9dec264aebc0b6f6d4e9e8a62bf9a60a24b85bd587b487ca2bb95a23cf537c
+        - facet: people
+          digest: sha256:aaf36e38fb7c8bc231aae466847abbb5c19e49b3269d7545a9c4853ea2efe6a0
+          stored_object:
+            artifact_identity:
+              digest_algorithm: sha256
+              content_digest: 92532b6e9da7160bc46d9e6ddf2216b2954bfbb1c51c72385fb174811b8e608a
+            locator: synergy/2026/core/people.parquet
+        - facet: household_membership
+          digest: sha256:fe93d336bb2a6bb021bad28736bef91f0c25d70ab48d65b320d24820efb93390
+        - facet: person_demographics
+          digest: sha256:1cee00b07847cca51dff859485849ec353c89996927d9e4995ff2bcdb6f44051
+        - facet: household_location
+          digest: sha256:a1344f66bd54c870afe8df2270965fd4b8fc243fcfa1e285c100027dec88f9b2
+        - facet: household_income
+          digest: sha256:c244b1ce966fa1d64ba35aede24ca4c539a4e958cdcfea667351c2854e1f222b
+        - facet: vehicles
+          digest: sha256:fd41975c1a393c2f6a8cfe55b65aa2036d7e020246f3efefd5b481b0974d8cc6
+checkpoints:
+  - simulation_year: 2025
+    snapshot: snapshot:2025:atlas
+  - simulation_year: 2026
+    snapshot: snapshot:2026:atlas
