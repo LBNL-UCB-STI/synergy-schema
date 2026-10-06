@@ -6,7 +6,8 @@ description: >-
   several models edit it in turn, modeled on git. A PopulationSnapshot is a
   commit: it names the model step that produced it, the snapshot(s) it was
   built from, and the full core population state afterward. A CoreState is
-  the commit's tree: a map from each core facet to a content digest. A PopulationCheckpoint is a tag naming the snapshot that
+  the commit's tree: a map from each core facet to a content digest. A
+  PopulationCheckpoint is a tag naming the snapshot that
   counts as a given year's population. Models never read or write core
   tables directly; they read and write model-owned views, and Synergy
   mappings derive core facets from those views.

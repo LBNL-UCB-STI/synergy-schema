@@ -135,6 +135,11 @@ schema contract, or check coverage of core fields.
 - *Plan checks.* Check a planned workflow (steps with reads and writes)
   ahead of a run for read-before-write, conflicting writes, and
   write-after-read. The plugin's per-snapshot rules carry over.
+- *Facet dependency graph.* Derived from `step.reads` and
+  `step.derivations`: which snapshot produced each facet a step read. Basis
+  for plan checks and invalidation queries, and a precise definition of when
+  two steps can run in either order (neither writes a facet the other reads
+  or writes). Needs no schema change.
 - *Input freshness and reuse.* To skip re-preparing an input after an
   unrelated change, treat it as current if every facet in `step.reads` has
   the same digest now as in its `prepared_from_state`. This covers core facts
