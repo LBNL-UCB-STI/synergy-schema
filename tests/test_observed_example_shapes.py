@@ -67,6 +67,54 @@ def test_candidate_rows_validate_after_explicit_physical_header_binding() -> Non
         "type": 1,
         "income": 0,
         "housing_unit_type": 1,
+        "bikes": 0,
+        "ecom": 0,
+        "Has_Residential_Charging": 0,
+        "num_groceries": 0,
+        "num_meals": 0,
+    }
+    polaris_person = {
+        "person": 1,
+        "household": 1,
+        "id": 0,
+        "school_location_id": -1,
+        "work_location_id": -1,
+        "age": 30,
+        "worker_class": 1,
+        "education": 16,
+        "industry": 5000,
+        "employment": 1,
+        "gender": 1,
+        "income": 50000,
+        "journey_to_work_arrival_time": 480,
+        "journey_to_work_mode": 1,
+        "journey_to_work_travel_time": 25,
+        "journey_to_work_vehicle_occupancy": 1,
+        "marital_status": 1,
+        "race": 1,
+        "school_enrollment": 1,
+        "school_grade_level": 0,
+        "work_hours": 40,
+        "telecommute_level": 0,
+        "disability": 2,
+        "escooter_use_level": 0,
+    }
+    polaris_vehicle = {
+        "vehicle_id": 1,
+        "hhold": 1,
+        "parking": 1,
+        "L3_wtp": 0,
+        "L4_wtp": 0,
+        "subtype": 1,
+    }
+    polaris_vehicle_class = {
+        "class_id": 1,
+        "class_type": "CAR_COMPACT",
+        "capacity": 5,
+        "ev_ml_class": 1,
+    }
+    polaris_vehicle_type = {
+        "type_id": 1,
     }
 
     assert _messages(demos_household, "DemosPolarisMappedHouseholdExampleV1") == []
@@ -74,6 +122,10 @@ def test_candidate_rows_validate_after_explicit_physical_header_binding() -> Non
     assert _messages(atlas_household, "AtlasHouseholdFleetOutputExampleV1") == []
     assert _messages(atlas_vehicle, "AtlasVehicleFleetOutputExampleV1") == []
     assert _messages(polaris_household, "PolarisDemandDatabaseV1Household") == []
+    assert _messages(polaris_person, "PolarisDemandDatabaseV1Person") == []
+    assert _messages(polaris_vehicle, "PolarisDemandDatabaseV1Vehicle") == []
+    assert _messages(polaris_vehicle_class, "PolarisDemandDatabaseV1VehicleClass") == []
+    assert _messages(polaris_vehicle_type, "PolarisDemandDatabaseV1VehicleType") == []
 
 
 def test_candidate_shape_rejects_missing_required_or_unobserved_columns() -> None:
