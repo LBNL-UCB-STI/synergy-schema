@@ -46,6 +46,23 @@ def test_dist_site_is_compiled_with_all_sections() -> None:
     assert (
         site_dir / "resources" / "DEMOS_and_ATLAS_to_POLARIS_interface.xlsx"
     ).exists()
+    assert (site_dir / "javascripts" / "mathjax.js").exists()
+
+    index_html = (site_dir / "index.html").read_text(encoding="utf-8")
+    assert "<li><strong>LinkML Source Schemas</strong>" in index_html
+    assert "mathjax.js" in index_html
+
+    contract_html = (site_dir / "contract-at-a-glance" / "index.html").read_text(
+        encoding="utf-8"
+    )
+    assert "$\\to$" not in contract_html
+    assert "$\\leftrightarrow$" not in contract_html
+    assert "DEMOS Household → POLARIS" in contract_html
+
+    channel_type_md = (
+        DIST_DIR / "docs" / "schema" / "HandoffChannelType.md"
+    ).read_text(encoding="utf-8")
+    assert "Open Matrix OMX travel impedance matrices" in channel_type_md
 
 
 def test_dist_isolation_from_fy27_longitudinal_ledger() -> None:

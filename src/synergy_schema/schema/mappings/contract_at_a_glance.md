@@ -69,21 +69,21 @@ flowchart TD
 
 | Channel ID | Source Model & Artifact | Target Model & Artifact | Channel Type | Join / Reference Key | Core Attributes Transferred |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| **SKIM-IN-US** | `InputNetworkSkims` (`.omx`) | **UrbanSim** (`input_skims`) | Matrix Skims | Zone $(i, j)$ | `sov_time_am`, `sov_distance`, transit accessibility |
-| **SKIM-IN-AT** | `InputNetworkSkims` (`.omx`) | **ATLAS** (`input_skims`) | Matrix Skims | Zone $(i, j)$ | `sov_time_am`, `sov_time_md`, `sov_distance` |
-| **US-SUPPLY** | `UrbanSimZonalTotals` | **POLARIS** `Supply.sqlite/Zone` | Zonal Aggregation | `zone_id` $\leftrightarrow$ `zone` | `residential_area`, `commercial_area`, `pop_households`, `employment_*` |
+| **SKIM-IN-US** | `InputNetworkSkims` (.omx) | **UrbanSim** (`input_skims`) | Matrix Skims | Zone (i, j) | `sov_time_am`, `sov_distance`, transit accessibility |
+| **SKIM-IN-AT** | `InputNetworkSkims` (.omx) | **ATLAS** (`input_skims`) | Matrix Skims | Zone (i, j) | `sov_time_am`, `sov_time_md`, `sov_distance` |
+| **US-SUPPLY** | `UrbanSimZonalTotals` | **POLARIS** `Supply.sqlite/Zone` | Zonal Aggregation | `zone_id` ↔ `zone` | `residential_area`, `commercial_area`, `pop_households`, `employment_*` |
 | **US-DEMOS** | `UrbanSimBlockMarginals` | **DEMOS** (`marginal_targets`) | Control Totals | `block_id` | `total_households`, `total_population`, `total_workers` |
 | **DEMOS-POL-H**| `DEMOS` Household | **POLARIS** `Demand.sqlite/Household` | Tabular Microdata | `household` | `income`, `workers`, `persons`, `age_of_head`, `race_of_head`, `type`, `location` |
 | **DEMOS-POL-P**| `DEMOS` Person | **POLARIS** `Demand.sqlite/Person` | Tabular Microdata | `(household, id)` | `age`, `gender`, `relp`, `education`, `employment`, `school_enrollment` |
-| **DEMOS-AT-H** | `DEMOS` Household | **ATLAS** `atlas_hh` | Tabular Microdata | `household` $\leftrightarrow$ `HOUSEID` | Household identity, composition, and income |
-| **AT-POL-V** | `ATLAS` Vehicle | **POLARIS** `Demand.sqlite/Vehicle` | Tabular Microdata | `(HOUSEID, VEHID)` $\leftrightarrow$ `(household, id)` | `bodytype`, `pred_power`, `modelyear`, `annual_mileage` |
-| **POL-SKIM-OUT**| **POLARIS** DTA Solver | `NextYearNetworkSkims` (`.omx`) | Matrix Skims | Zone $(i, j)$ | `sov_time_am`, `sov_time_pm`, `congestion_index` |
+| **DEMOS-AT-H** | `DEMOS` Household | **ATLAS** `atlas_hh` | Tabular Microdata | `household` ↔ `HOUSEID` | Household identity, composition, and income |
+| **AT-POL-V** | `ATLAS` Vehicle | **POLARIS** `Demand.sqlite/Vehicle` | Tabular Microdata | `(HOUSEID, VEHID)` ↔ `(household, id)` | `bodytype`, `pred_power`, `modelyear`, `annual_mileage` |
+| **POL-SKIM-OUT**| **POLARIS** DTA Solver | `NextYearNetworkSkims` (.omx) | Matrix Skims | Zone (i, j) | `sov_time_am`, `sov_time_pm`, `congestion_index` |
 
 ---
 
 ## 3. Detailed Column-Level Mapping Specifications
 
-### 3.1 DEMOS Household $\to$ POLARIS `Household`
+### 3.1 DEMOS Household → POLARIS `Household`
 
 | DEMOS Column | POLARIS Column | Mode | Rule / Crosswalk | Description & Residue Handling |
 | :--- | :--- | :--- | :--- | :--- |
@@ -95,7 +95,7 @@ flowchart TD
 | `race_of_head`| `race` | `enum_crosswalk`| **X-P1** / **D-P3b** | Census PUMS race code to POLARIS race (1–9). |
 | `lcm_county_id`| `county` | `direct` | — | 5-digit State/County FIPS (e.g. 48453). |
 | `block_id` | `location` | `derived` | **D-H1** | 11-digit Census tract GEOID (`popsyn_region`). New households draw dwelling location via **D-H1**. Surviving households retain location. |
-| *(Composition)*| `type` | `derived` | **X-H1**, **X-H2** | Recomputed from composition: HHT $\times$ tenure $\to$ POLARIS `HHTYPE` (1..11). |
+| *(Composition)*| `type` | `derived` | **X-H1**, **X-H2** | Recomputed from composition: HHT × tenure → POLARIS `HHTYPE` (1..11). |
 | *(D-H1)* | `housing_unit_type`| `derived` | **X-H3** / **D-H1** | Carried for surviving households; drawn with dwelling for new households. |
 | *(D-H1)* | `Has_Residential_Charging`| `derived` | **D-H1** | Drawn jointly with dwelling; preserved for surviving households. |
 | `SERIALNO_PUMS`| — | *Residue* | Lineage Trace | Census PUMS seed record identifier; retained for auditability, not stored in POLARIS. |
@@ -104,7 +104,7 @@ flowchart TD
 
 ---
 
-### 3.2 DEMOS Person $\to$ POLARIS `Person`
+### 3.2 DEMOS Person → POLARIS `Person`
 
 | DEMOS Column | POLARIS Column | Mode | Rule / Crosswalk | Description & Residue Handling |
 | :--- | :--- | :--- | :--- | :--- |
@@ -120,30 +120,30 @@ flowchart TD
 | `marital_status`| `marital_status`| `direct` | **X-P1** / **D-P3a** | 1 Married, 2 Widowed, 3 Divorced, 4 Separated, 5 Never married. 0 resolved via **D-P3a**. |
 | `income` | `income` | `derived` | Deflated | Individual personal earned income (deflated to base year). |
 | *(Derived)* | `school_grade_level`| `derived` | **X-P3..X-P5** | Continuing students advance via **X-P4**; entrants draw via **X-P5**. |
-| *(D-P1)* | `worker_class`, `industry`, `work_hours` | `derived` | **D-P1**, **X-P7** | Donor draw conditioned on county $\times$ sex $\times$ age group $\times$ education group. |
+| *(D-P1)* | `worker_class`, `industry`, `work_hours` | `derived` | **D-P1**, **X-P7** | Donor draw conditioned on county × sex × age group × education group. |
 | *(D-P2)* | Commute attributes | `derived` | **D-P2** | Mode, travel time, occupancy, arrival time drawn for at-work persons. |
 | `SERIALNO_PUMS`| — | *Residue* | Lineage Trace | Census PUMS household seed identifier. |
 | `SPORDER` | — | *Residue* | Lineage Trace | Census PUMS person seed sequence ordinal. |
 
 ---
 
-### 3.3 ATLAS Vehicle $\to$ POLARIS `Vehicle`
+### 3.3 ATLAS Vehicle → POLARIS `Vehicle`
 
 | ATLAS Column | POLARIS Column | Mode | Rule / Crosswalk | Description & Residue Handling |
 | :--- | :--- | :--- | :--- | :--- |
 | `HOUSEID` | `hhold` | `renamed` | — | Owning household ID. Must exist in POLARIS population. |
 | `VEHID` | `vehicle_id` | `derived` | Sequence | Retained vehicles keep previous ID; new vehicles take next available ID. |
 | `bodytype` | `vehicle_class` | `derived` | **X-V1**, **D-V1** | Retained keep size; new vehicles draw size class within body type via **D-V1**. |
-| `pred_power` | `powertrain_type`| `enum_crosswalk`| **X-V2** | ICE $\to$ Conventional (0), Hybrid $\to$ HEV (1), PHEV $\to$ PHEV (2), AEV $\to$ BEV_long (3). |
-| *(Derived)* | `fuel_type` | `derived` | **X-V3**, **D-V2** | BEV $\to$ Elec (4); HEV/PHEV $\to$ Gas (0); Conventional draws Gas (0) or Diesel (1) via **D-V2**. |
-| `modelyear` | `vintage_type` | `derived` | **X-V4** | Recomputed yearly from $\text{age} = t - \text{modelyear}$ (0 = 0–5y, 1 = 6–10y, 2 = 10+y). |
+| `pred_power` | `powertrain_type`| `enum_crosswalk`| **X-V2** | ICE → Conventional (0), Hybrid → HEV (1), PHEV → PHEV (2), AEV → BEV_long (3). |
+| *(Derived)* | `fuel_type` | `derived` | **X-V3**, **D-V2** | BEV → Elec (4); HEV/PHEV → Gas (0); Conventional draws Gas (0) or Diesel (1) via **D-V2**. |
+| `modelyear` | `vintage_type` | `derived` | **X-V4** | Recomputed yearly from age = SimulationYear - modelyear (0 = 0–5y, 1 = 6–10y, 2 = 10+y). |
 | *(Composite)* | `type` | `derived` | **X-V5** | Looked up in POLARIS `Vehicle_Type` on `(class, connectivity, powertrain, automation, fuel, vintage)`. |
 | `annual_mileage`| — | *Residue* | Behavioral Model | Estimated annual VMT; used for activity allocation. |
 | `vintage_category`| — | *Residue* | Validation | Categorical vintage cross-checked against `modelyear`. |
 
 ---
 
-### 3.4 UrbanSim Zonal Totals $\to$ POLARIS `Supply.sqlite/Zone`
+### 3.4 UrbanSim Zonal Totals → POLARIS `Supply.sqlite/Zone`
 
 | UrbanSim Column | POLARIS Column | Mode | Description |
 | :--- | :--- | :--- | :--- |
@@ -168,16 +168,19 @@ flowchart TD
 ## 4. Authoritative Categorical Crosswalks
 
 ### Crosswalk X-H1: Household Type (HHT) from Composition
+
 Evaluated in strict order using the household's final person composition:
-1. If any member has `relp = 1` (spouse) $\to$ **Married-couple family**
-2. Else if any member has `relp = 2..10` (relative) and head `gender = 1` $\to$ **Other family, male head**
-3. Else if any member has `relp = 2..10` (relative) and head `gender = 2` $\to$ **Other family, female head**
-4. Else if `persons = 1` $\to$ **Nonfamily, living alone**
-5. Otherwise $\to$ **Nonfamily, not living alone**
+
+1. If any member has `relp = 1` (spouse) → **Married-couple family**
+2. Else if any member has `relp = 2..10` (relative) and head `gender = 1` → **Other family, male head**
+3. Else if any member has `relp = 2..10` (relative) and head `gender = 2` → **Other family, female head**
+4. Else if `persons = 1` → **Nonfamily, living alone**
+5. Otherwise → **Nonfamily, not living alone**
 
 *(Nonrelatives with `relp` 11–15 do not constitute a family).*
 
-### Crosswalk X-H2: Tenure $\times$ HHT $\to$ POLARIS Type (`HHTYPE`)
+### Crosswalk X-H2: Tenure × HHT → POLARIS Type (`HHTYPE`)
+
 | HHT | Own (`tenure = 1`) | Rent (`tenure = 2`) |
 | :--- | :--- | :--- |
 | Married-couple family | `1` (`HHT_OWN_FAMILY_MARRIED`) | `6` (`HHT_RENT_FAMILY_MARRIED`) |
@@ -188,16 +191,18 @@ Evaluated in strict order using the household's final person composition:
 | Group quarters | `11` (`HHT_GQ`) | `11` (`HHT_GQ`) |
 
 ### Crosswalk X-H3: Housing Unit Type (`HU_TYPE`)
-- `1` $\to$ `HU_SINGLE_FAMILY` (Single Family Detached)
-- `2` $\to$ `HU_SMALL_APT_BLD` (2–9 units)
-- `3` $\to$ `HU_LARGE_APT_BLD` (10+ units)
-- `4` $\to$ `HU_OTHER` (Mobile home, RV, boat)
-- `5` $\to$ `HU_GROUP_QUARTERS` (GQ institutional / non-institutional)
 
-### Crosswalk X-P1: DEMOS Person Variables $\to$ POLARIS
-- `relp`: 0–15 $\to$ 0–17 (RELP; 16 and 17 reserved for Group Quarters).
+- `1` → `HU_SINGLE_FAMILY` (Single Family Detached)
+- `2` → `HU_SMALL_APT_BLD` (2–9 units)
+- `3` → `HU_LARGE_APT_BLD` (10+ units)
+- `4` → `HU_OTHER` (Mobile home, RV, boat)
+- `5` → `HU_GROUP_QUARTERS` (GQ institutional / non-institutional)
+
+### Crosswalk X-P1: DEMOS Person Variables → POLARIS
+
+- `relp`: 0–15 → 0–17 (RELP; 16 and 17 reserved for Group Quarters).
 - `gender`: 1 Male, 2 Female.
-- `age`: Integer $\to$ Integer.
+- `age`: Integer → Integer.
 - `education`: 0–24 (ACS SCHL code).
 - `employment`: 0–6 (ACS ESR code).
 - `school_enrollment`: 0 NA, 1 None, 2 Public, 3 Private.
@@ -206,6 +211,7 @@ Evaluated in strict order using the household's final person composition:
 - `id`: Within-household index renumbered `0..n-1`.
 
 ### Crosswalk X-P2: Employment (ESR) Groups & Worker Identification
+
 | ESR | Label | Employed? | At Work? | Drives POLARIS Worker? |
 | :--- | :--- | :--- | :--- | :--- |
 | `0` | Under 16 | No | No | No |
@@ -217,43 +223,51 @@ Evaluated in strict order using the household's final person composition:
 | `6` | Not in labor force | No | No | No |
 
 ### Crosswalk X-P3: School Grade Level & School Type
-- `0` (GRADE_NA) $\to$ None
-- `1` (Preschool) $\to$ `PREK`
-- `2` (Kindergarten) $\to$ `K-8`
-- `3–10` (Grades 1–8) $\to$ `K-8`
-- `11–14` (Grades 9–12) $\to$ `9-12`
-- `15` (Undergraduate) $\to$ `Higher education`
-- `16` (Graduate) $\to$ `Higher education`
+
+- `0` (GRADE_NA) → None
+- `1` (Preschool) → `PREK`
+- `2` (Kindergarten) → `K-8`
+- `3–10` (Grades 1–8) → `K-8`
+- `11–14` (Grades 9–12) → `9-12`
+- `15` (Undergraduate) → `Higher education`
+- `16` (Graduate) → `Higher education`
 
 ### Crosswalk X-P4: Grade Progression for Continuing Students
-- Grade `1` (Preschool) $\to$ `2` if age $\ge 5$, else `1`.
-- Grades `2–13` $\to$ Previous grade $+ 1$.
-- Grade `14` (Grade 12) $\to$ `15` (Undergraduate).
-- Grade `15` (Undergraduate) $\to$ `16` (Graduate) if DEMOS education rose to $\ge 21$, else `15`.
-- Grade `16` (Graduate) $\to$ `16`.
+
+- Grade `1` (Preschool) → `2` if age ≥ 5, else `1`.
+- Grades `2–13` → Previous grade + 1.
+- Grade `14` (Grade 12) → `15` (Undergraduate).
+- Grade `15` (Undergraduate) → `16` (Graduate) if DEMOS education rose to ≥ 21, else `15`.
+- Grade `16` (Graduate) → `16`.
 
 ### Crosswalk X-P5: Entry Grade for School Entrants
+
 - **Ages 3–17**: Draw from reference distribution of grades among enrolled persons of same age.
 - **Ages 18+**: Draw conditioned on educational attainment:
-  - $\le 15$: Mostly Grade 14.
-  - $16–20$: Mostly Undergraduate (Grade 15).
-  - $\ge 21$: Graduate (Grade 16) or Undergraduate (Grade 15).
+  - ≤ 15: Mostly Grade 14.
+  - 16–20: Mostly Undergraduate (Grade 15).
+  - ≥ 21: Graduate (Grade 16) or Undergraduate (Grade 15).
 
 ### Crosswalk X-P6: K-12 Education Consistency
-For grade code $g \in [1, 14]$:
-- Allowed education: $g$ or $g + 1$.
+
+For grade code g ∈ [1, 14]:
+
+- Allowed education: `g` or `g + 1`.
 - If DEMOS education is outside this range: Set `education = g`.
 
 ### Crosswalk X-P7: Industry Groups & Simple INDP Mapping
+
 Maps Census ACS INDP codes to POLARIS `EMPLOYMENT_INDUSTRY_SIMPLE`:
-- **INDUSTRIAL**: INDP $\le 770$ or $6070–6390$.
-- **MANUFACTURING**: INDP $771–3990$.
-- **RETAIL**: INDP $3991–5790$.
-- **SERVICE**: INDP $5791–7790$ (except $6070–6390$) or $8660–9290$.
-- **GOVERNMENT**: INDP $7860–7890$ or $9370–9870$.
+
+- **INDUSTRIAL**: INDP ≤ 770 or 6070–6390.
+- **MANUFACTURING**: INDP 771–3990.
+- **RETAIL**: INDP 3991–5790.
+- **SERVICE**: INDP 5791–7790 (except 6070–6390) or 8660–9290.
+- **GOVERNMENT**: INDP 7860–7890 or 9370–9870.
 - **OTHER**: All remaining codes.
 
-### Crosswalk X-V1: ATLAS Body Type $\to$ POLARIS Vehicle Class Candidates
+### Crosswalk X-V1: ATLAS Body Type → POLARIS Vehicle Class Candidates
+
 | ATLAS `bodytype` | POLARIS `vehicle_class` Candidates | Base Market Share |
 | :--- | :--- | :--- |
 | `car` | `1` CAR_COMPACT<br/>`2` CAR_MID_SIZE<br/>`3` CAR_FULL_SIZE | 46.9%<br/>43.9%<br/>9.2% |
@@ -261,7 +275,8 @@ Maps Census ACS INDP codes to POLARIS `EMPLOYMENT_INDUSTRY_SIMPLE`:
 | `pickup` | `7` PICKUP_MID_SIZE<br/>`8` PICKUP_FULL_SIZE | 19.5%<br/>80.5% |
 | `van` | `6` SUV_FULL_SIZE | 100.0% (Fixed; seats 7, 5.5m long) |
 
-### Crosswalk X-V2: ATLAS Predicted Powertrain $\to$ Powertrain Type
+### Crosswalk X-V2: ATLAS Predicted Powertrain → Powertrain Type
+
 | ATLAS `pred_power` | POLARIS `powertrain_type` | Description |
 | :--- | :--- | :--- |
 | `ICE` | `0` (`Conventional`) | Standard internal combustion engine (gasoline/diesel). |
@@ -269,19 +284,23 @@ Maps Census ACS INDP codes to POLARIS `EMPLOYMENT_INDUSTRY_SIMPLE`:
 | `PHEV` | `2` (`PHEV`) | Plug-in Hybrid Electric Vehicle. |
 | `AEV` | `3` (`BEV_long`) | All-Electric Battery Electric Vehicle (long range). |
 
-### Crosswalk X-V3: Powertrain Type $\to$ Fuel Type
-- `Conventional` $\to$ Gas (`0`) or Diesel (`1`) via draw **D-V2**.
-- `HEV` $\to$ Gas (`0`).
-- `PHEV` $\to$ Gas (`0`).
-- `BEV_long` $\to$ Electricity (`4`).
+### Crosswalk X-V3: Powertrain Type → Fuel Type
 
-### Crosswalk X-V4: Vehicle Modelyear $\to$ Vintage Type
-Recomputed yearly from vehicle age ($\text{age} = \text{SimulationYear} - \text{modelyear}$):
-- $\text{age} \le 5 \to$ `0` (0–5 years)
-- $6 \le \text{age} \le 10 \to$ `1` (6–10 years)
-- $\text{age} \ge 11 \to$ `2` (10+ years)
+- `Conventional` → Gas (`0`) or Diesel (`1`) via draw **D-V2**.
+- `HEV` → Gas (`0`).
+- `PHEV` → Gas (`0`).
+- `BEV_long` → Electricity (`4`).
+
+### Crosswalk X-V4: Vehicle Modelyear → Vintage Type
+
+Recomputed yearly from vehicle age (`age = SimulationYear - modelyear`):
+
+- age ≤ 5 → `0` (0–5 years)
+- 6 ≤ age ≤ 10 → `1` (6–10 years)
+- age ≥ 11 → `2` (10+ years)
 
 ### Crosswalk X-V5: POLARIS `Vehicle_Type` Composite Key Reference
+
 Every valid vehicle row must resolve to an existing composite key in POLARIS `Vehicle_Type`:
 `(vehicle_class, connectivity_type, powertrain_type, automation_type, fuel_type, vintage_type)`.
 Connectivity is initialized to `0` (No) and automation to `0` (Level 0 / Human driven).
@@ -294,21 +313,21 @@ When attributes are not directly modeled by upstream demographic engines, they a
 
 | Draw ID | Target Entity | Donor Attributes Copied | Stratification / Segmentation | Fallback / Collapse Order |
 | :--- | :--- | :--- | :--- | :--- |
-| **D-H1** | New Households | `location`, `tenure`, `housing_unit_type`, `Has_Residential_Charging` | Census tract $\times$ head age $\times$ size $\times$ income | Income $\to$ size $\to$ head age $\to$ tract alone $\to$ county |
-| **D-H2** | New Households (Interim) | Complete vehicle fleet rows | Tract $\times$ adults $\times$ workers $\times$ income | Income $\to$ workers $\to$ adults $\to$ county |
-| **D-P1** | Persons $\ge 16$ | `worker_class`, `industry`, `work_hours` | County $\times$ sex $\times$ work age group $\times$ education | Education $\to$ age $\to$ sex $\to$ region |
-| **D-P2** | At-work Persons | `journey_to_work_*` (mode, travel time, occupancy, arrival) | Home tract $\times$ industry group $\times$ full-time flag | Full-time $\to$ county $\times$ industry $\to$ county |
-| **D-P3a**| Persons | `marital_status` (fallback for DEMOS code 0) | Sex $\times$ work age $\times$ relp group | Regional sex $\times$ age pool |
-| **D-P3b**| Persons (`relp > 0`) | `race` (non-head household members) | Head's race $\times$ relp group | Head's race alone |
-| **D-P4** | Persons | `disability` status | Sex $\times$ disability age group | Disability age group alone |
-| **D-V1** | New Vehicles | `vehicle_class` within ATLAS body type | County $\times$ income class $\times$ powertrain group | Powertrain $\to$ income $\to$ county |
-| **D-V2** | Conventional Vehicles| `fuel_type` (Gasoline vs. Diesel) | `vehicle_class` $\times$ owner's county | `vehicle_class` regional pool |
+| **D-H1** | New Households | `location`, `tenure`, `housing_unit_type`, `Has_Residential_Charging` | Census tract × head age × size × income | Income → size → head age → tract alone → county |
+| **D-H2** | New Households (Interim) | Complete vehicle fleet rows | Tract × adults × workers × income | Income → workers → adults → county |
+| **D-P1** | Persons ≥ 16 | `worker_class`, `industry`, `work_hours` | County × sex × work age group × education | Education → age → sex → region |
+| **D-P2** | At-work Persons | `journey_to_work_*` (mode, travel time, occupancy, arrival) | Home tract × industry group × full-time flag | Full-time → county × industry → county |
+| **D-P3a**| Persons | `marital_status` (fallback for DEMOS code 0) | Sex × work age × relp group | Regional sex × age pool |
+| **D-P3b**| Persons (`relp > 0`) | `race` (non-head household members) | Head's race × relp group | Head's race alone |
+| **D-P4** | Persons | `disability` status | Sex × disability age group | Disability age group alone |
+| **D-V1** | New Vehicles | `vehicle_class` within ATLAS body type | County × income class × powertrain group | Powertrain → income → county |
+| **D-V2** | Conventional Vehicles| `fuel_type` (Gasoline vs. Diesel) | `vehicle_class` × owner's county | `vehicle_class` regional pool |
 
 ---
 
 ## 6. Process & Settings Pipeline (13 Steps)
 
-1. **Step 1 (Inputs & Classification)**: Read DEMOS year $t$, POLARIS year $t-1$, and reference population. Classify records into Surviving, New, Removed, and Group Quarters (GQ).
+1. **Step 1 (Inputs & Classification)**: Read DEMOS year t, POLARIS year t-1, and reference population. Classify records into Surviving, New, Removed, and Group Quarters (GQ).
 2. **Step 2 (Direct Person Values)**: Apply deflated income, gender, age, relp, employment, and marital status.
 3. **Step 3 (Household Composition)**: Calculate persons, workers (ESR 1/4), income quintiles, and HHT (**X-H1**).
 4. **Step 4 (Dwelling Assignment)**: Carry dwellings for surviving; execute **D-H1** for new households. Compute POLARIS `type` (**X-H2**).

@@ -28,7 +28,7 @@ enums:
       spatial_crosswalk:
         description: Geographic block-to-zone intersection and allocation weights.
       matrix_skims:
-        description: Zone-to-zone (TAZ x TAZ) Open Matrix (.omx) travel impedance matrices.
+        description: Zone-to-zone (TAZ x TAZ) Open Matrix OMX travel impedance matrices.
 
   FieldTransformationMode:
     description: Transformation logic required to map a source field to a target field.

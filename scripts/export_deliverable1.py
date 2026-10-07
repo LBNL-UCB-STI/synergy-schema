@@ -162,11 +162,33 @@ build-backend = "hatchling.build"
 packages = ["schema"]
 """
 
+STANDALONE_MATHJAX_JS = """window.MathJax = {
+  tex: {
+    inlineMath: [["$", "$"], ["\\\\(", "\\\\)"]],
+    displayMath: [["$$", "$$"], ["\\\\[", "\\\\]"]],
+    processEscapes: true,
+    processEnvironments: true
+  },
+  options: {
+    ignoreHtmlClass: ".*|",
+    processHtmlClass: "arithmatex"
+  }
+};
+
+document$.subscribe(() => {
+  MathJax.typesetPromise?.();
+});
+"""
+
 STANDALONE_ZENSICAL = """[project]
 site_name = "SYNERGY Static Cross-Model Schema"
 site_description = "Static cross-model LinkML schemas and categorical crosswalks across UrbanSim, DEMOS, ATLAS, POLARIS, and Travel Skims"
 docs_dir = "docs"
 site_dir = "site"
+extra_javascript = [
+  "javascripts/mathjax.js",
+  "https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js",
+]
 
 nav = [
     { "Overview" = "index.md" },
@@ -300,6 +322,7 @@ This project establishes the authoritative structural contracts, join keys, and 
 ## Deliverable Scope & Structure
 
 This package delivers:
+
 - **LinkML Source Schemas**: Machine-actionable YAML specifications declaring classes, attributes, data types, identifiers, and foreign relationships under `schema/`.
 - **Discrete Categorical Crosswalks**: Definitive mapping rules (**X-H1** through **X-V5**) translating categorical encodings between model domains.
 - **Visual UML Class Diagrams**: Auto-rendered Mermaid entity-relationship diagrams illustrating data structures within each model and cross-model handoffs.
@@ -390,6 +413,11 @@ def export_package(target_dir: Path) -> None:
         print(
             "  Copied authoritative interface workbook: DEMOS_and_ATLAS_to_POLARIS_interface.xlsx"
         )
+
+    # JavaScript assets (MathJax configuration)
+    js_dest = docs_dest / "javascripts"
+    js_dest.mkdir(parents=True, exist_ok=True)
+    (js_dest / "mathjax.js").write_text(STANDALONE_MATHJAX_JS, encoding="utf-8")
 
     # Deliverable 1 UML
     uml_content = render_deliverable_1_uml()
