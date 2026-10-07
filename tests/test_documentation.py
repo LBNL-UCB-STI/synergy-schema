@@ -31,7 +31,6 @@ def test_navigation_has_approved_sections_and_existing_leaves() -> None:
     nav = _nav()
     assert [next(iter(item)) for item in nav] == [
         "Overview",
-        "Bring an existing mapping",
         "Shared structure",
         "Cross-model mappings",
         "Workflow structures",
@@ -40,6 +39,7 @@ def test_navigation_has_approved_sections_and_existing_leaves() -> None:
         "Schema reference",
     ]
     expected = {
+        "Three-step pilot",
         "Day-zero manifest",
         "One-year mapping handshake",
         "Mapping at a glance",

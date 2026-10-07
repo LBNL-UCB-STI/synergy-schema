@@ -6,13 +6,6 @@ site_dir = "site"
 extra_css = ["stylesheets/extra.css"]
 nav = [
     { "Overview" = "index.md" },
-    { "Bring an existing mapping" = [
-        { "Bring an existing mapping" = "bring-an-existing-mapping/index.md" },
-        { "Day-zero manifest" = "bring-an-existing-mapping/day-zero-manifest.md" },
-        { "One-year mapping handshake" = "bring-an-existing-mapping/one-year-mapping-handshake.md" },
-        { "Mapping at a glance" = "bring-an-existing-mapping/contract-at-a-glance.md" },
-        { "Costs and exit" = "bring-an-existing-mapping/costs-and-exit.md" },
-    ] },
     { "Shared structure" = [
         { "How Synergy is organized" = "shared-structure/index.md" },
         { "Scenario definitions and trajectories" = "shared-structure/scenario-definitions-and-trajectories.md" },
@@ -24,9 +17,16 @@ nav = [
     ] },
     { "Cross-model mappings" = [
         { "Cross-model mappings" = "cross-model-mappings/index.md" },
-        { "Population identity" = "cross-model-mappings/population-identity.md" },
         { "Mapping meaning, implementation, and lineage" = "cross-model-mappings/mapping-lineage.md" },
+        { "Population identity" = "cross-model-mappings/population-identity.md" },
         { "Scenario compatibility" = "cross-model-mappings/scenario-compatibility.md" },
+        { "Adoption pilot" = [
+            { "Three-step pilot" = "bring-an-existing-mapping/index.md" },
+            { "Day-zero manifest" = "bring-an-existing-mapping/day-zero-manifest.md" },
+            { "One-year mapping handshake" = "bring-an-existing-mapping/one-year-mapping-handshake.md" },
+            { "Mapping at a glance" = "bring-an-existing-mapping/contract-at-a-glance.md" },
+            { "Costs and exit" = "bring-an-existing-mapping/costs-and-exit.md" },
+        ] },
     ] },
     { "Workflow structures" = [
         { "Workflow structures" = "workflow-structures/index.md" },

@@ -1,9 +1,9 @@
-# Bring an existing mapping
+# Mapping adoption pilot
 
 Most model-to-model exchanges already have a spreadsheet, SQL query, script, or
 column list behind them, often carrying years of hard-won knowledge. Synergy
 starts from that material. Model teams don't have to redesign working files or
-adopt a new runtime.
+adopt a new runtime to bring an existing mapping into the schema.
 
 The goal is a small pilot around one representative year that can be undone
 if it isn't worth it. The existing mapping becomes a versioned description

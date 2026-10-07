@@ -27,8 +27,10 @@ flowchart LR
   synergy -. describes and checks .-> traffic
 ```
 
-**Start here:** the [one-year mapping handshake](bring-an-existing-mapping/one-year-mapping-handshake.md)
-follows a runnable example connecting ATLAS, DEMOS, and POLARIS.
+The sections below introduce the coordination problem and how the schema is
+organized. For a runnable walkthrough, the
+[one-year mapping handshake](bring-an-existing-mapping/one-year-mapping-handshake.md)
+connects real inputs and outputs across ATLAS, DEMOS, and POLARIS.
 
 ## The coordination problem
 
@@ -106,8 +108,9 @@ order.
 | [Shared structure](shared-structure/index.md) | What do the models share, and what stays with each model? |
 | [Cross-model mappings](cross-model-mappings/index.md) | How do IDs, assumptions, and fields line up across models? |
 | [Workflow structures](workflow-structures/index.md) | How do the pieces fit together at real handoffs (PILATES, proposed POLARIS, staged populations)? |
-| [Bring an existing mapping](bring-an-existing-mapping/index.md) | How can an existing spreadsheet, SQL script, or column list become something reviewable? |
+| [Bring an existing mapping](bring-an-existing-mapping/index.md) | How can an existing spreadsheet, SQL script, or column list become something reviewable in an adoption pilot? |
 | [Design rationale](design-rationale/index.md) | Why is it split up this way, and when is something simpler enough? |
+| [Model contract review](model-contracts/index.md) | What does each participating model's interface contract look like? |
 | [Glossary](shared-structure/glossary.md) | What do the recurring terms mean in plain language? |
 | [Generated schema reference](schema/index.md) | What are the exact fields, types, and required values? |
 
