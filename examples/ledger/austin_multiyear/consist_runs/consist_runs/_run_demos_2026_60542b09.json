@@ -1,7 +1,7 @@
 {
   "run": {
-    "id": "_run_demos_2026_e813278a",
-    "parent_run_id": "_run_demos_2025_62ffe6a2",
+    "id": "_run_demos_2026_60542b09",
+    "parent_run_id": "_run_demos_2025_6c47fe0c",
     "status": "completed",
     "model_name": "_run_demos_2026",
     "description": null,
@@ -11,7 +11,7 @@
     "phase": null,
     "tags": [],
     "config_hash": "258bd8852a72f1ef652844910b2498a979fd485c89b077d9b9882196bb75dbfd",
-    "git_hash": "2734aa2db3fc438abda4f046501bfb2c7e89ebbf-dirty-ddc2291e8516",
+    "git_hash": "8b14947614623d6dd93e5a75e1a09ffac5a909b1-dirty-1531061f2614",
     "meta": {
       "code_identity": "repo_git",
       "_physical_run_dir": "/Users/zaneedell/git/synergy-schema/examples/ledger/austin_multiyear/consist_runs",
@@ -27,25 +27,25 @@
         "confidence": "low"
       }
     },
-    "started_at": "2026-10-06T23:32:30.909038Z",
-    "created_at": "2026-10-06T23:32:30.909038Z",
-    "input_hash": "39a544b526e5a0df299fc1de8a32fea766585526c49033ce0721717928e85c4c",
-    "signature": "fa6de6c35413a8d2bfbf354f88ed8ee30ede1afebfa958d2e3be84a6921f7798",
-    "ended_at": "2026-10-06T23:32:31.158621Z",
-    "updated_at": "2026-10-06T23:32:31.158621Z"
+    "started_at": "2026-10-07T19:19:17.415185Z",
+    "created_at": "2026-10-07T19:19:17.415185Z",
+    "input_hash": "fef20bde7a643389f16bd120907c3a3469c73f0c49e4678ae73b471e5b5fce76",
+    "signature": "5dcc99c59ed1911cb17a48bd55c936fc0101ed425f8de3a5eb8696f1d39cfc20",
+    "ended_at": "2026-10-07T19:19:17.568460Z",
+    "updated_at": "2026-10-07T19:19:17.568460Z"
   },
   "inputs": [
     {
-      "id": "53690d4e-04eb-43b9-ab92-cf7ad6f9a158",
+      "id": "37c0dfab-54b6-445c-85fc-d263af4dfefd",
       "key": "households_output",
       "container_uri": "/Users/zaneedell/git/synergy-schema/examples/ledger/austin_multiyear/demos/2025/output/households.parquet",
       "table_path": null,
       "array_path": null,
       "driver": "parquet",
-      "hash": "6344f61a99ef56310455931c49556d354ffd8da0bc99b4b7b27aca3db364ab22",
-      "content_id": "48bf715b-2773-46e3-8376-84906691211e",
+      "hash": "f034ccdeaf44d915822a06874aeef2cb85e8ac2ce64b1b74c6fa5534700b2ddf",
+      "content_id": "e06708d1-8cda-40c1-86cc-232a4625a955",
       "parent_artifact_id": null,
-      "run_id": "_run_demos_2025_62ffe6a2",
+      "run_id": "_run_demos_2025_6c47fe0c",
       "meta": {
         "hash_semantics": {
           "version": 1,
@@ -56,19 +56,19 @@
         },
         "tags": []
       },
-      "created_at": "2026-10-06T23:32:30.491033Z"
+      "created_at": "2026-10-07T19:19:16.636844Z"
     },
     {
-      "id": "68a9689d-afe1-4177-ab87-e985e6f5390f",
+      "id": "5a0f3047-7e06-46b7-8913-db622d870929",
       "key": "persons_output",
       "container_uri": "/Users/zaneedell/git/synergy-schema/examples/ledger/austin_multiyear/demos/2025/output/persons.parquet",
       "table_path": null,
       "array_path": null,
       "driver": "parquet",
-      "hash": "9a1164fbdac6ba647da9ac06ebf3804fa201deb2caa53908956eb20dcbef07a9",
-      "content_id": "475ca332-972f-44c5-87b5-647aed3f413b",
+      "hash": "452058887dd773151401f7728a0357593cee74d13434e061ad322951137de623",
+      "content_id": "6c489232-b2e3-42a1-bc2a-6940a40fe27e",
       "parent_artifact_id": null,
-      "run_id": "_run_demos_2025_62ffe6a2",
+      "run_id": "_run_demos_2025_6c47fe0c",
       "meta": {
         "hash_semantics": {
           "version": 1,
@@ -79,7 +79,7 @@
         },
         "tags": []
       },
-      "created_at": "2026-10-06T23:32:30.510380Z"
+      "created_at": "2026-10-07T19:19:16.656070Z"
     }
   ],
   "outputs": [
@@ -89,9 +89,9 @@
       "table_path": null,
       "array_path": null,
       "driver": "parquet",
-      "hash": "022b5d6c9adb2021321faf2affa761157b96a41f429540bfd1340245e02afa6c",
+      "hash": "f3fa0fdf162bf8ce6f002d34e91e9e446f4fa25c9522c7d906726ad428c08535",
       "parent_artifact_id": null,
-      "run_id": "_run_demos_2026_e813278a",
+      "run_id": "_run_demos_2026_60542b09",
       "meta": {
         "hash_semantics": {
           "version": 1,
@@ -102,9 +102,9 @@
         },
         "tags": []
       },
-      "id": "929c8f88-9a9a-4304-ad53-7c1345f9bf8a",
-      "content_id": "08702e06-ea3d-4a3e-bdfa-a7093af973a6",
-      "created_at": "2026-10-06T23:32:31.045535Z"
+      "id": "934d0f7b-f10e-4ee8-8cf4-e29095c0b8d2",
+      "content_id": "d4af08d4-2d89-4899-8701-731f6b28b9d7",
+      "created_at": "2026-10-07T19:19:17.487907Z"
     },
     {
       "key": "persons_output",
@@ -112,9 +112,9 @@
       "table_path": null,
       "array_path": null,
       "driver": "parquet",
-      "hash": "ba107e48a650fe97d450a17b9b2bb7269d50a20767954a9cac65185973216c1b",
+      "hash": "7cd4352679083e4d66c2bad8cd49a2d0f1e2a3ac8afbe6e6c043986f7ad14805",
       "parent_artifact_id": null,
-      "run_id": "_run_demos_2026_e813278a",
+      "run_id": "_run_demos_2026_60542b09",
       "meta": {
         "hash_semantics": {
           "version": 1,
@@ -125,9 +125,9 @@
         },
         "tags": []
       },
-      "id": "f8b910f6-5a91-4f21-9243-042da5edc8d4",
-      "content_id": "a94491dd-9374-4e4c-a088-add029d23190",
-      "created_at": "2026-10-06T23:32:31.073196Z"
+      "id": "395b9dfa-4c14-4425-8018-378b858b6bef",
+      "content_id": "9bdd1def-a42d-46f7-95ea-54d476fa7136",
+      "created_at": "2026-10-07T19:19:17.508338Z"
     },
     {
       "key": "deaths_output",
@@ -137,7 +137,7 @@
       "driver": "parquet",
       "hash": "909a09654d46b3674e957d9c69ff433f83cc8c9658e4a28f032676c5b86d3de8",
       "parent_artifact_id": null,
-      "run_id": "_run_demos_2026_e813278a",
+      "run_id": "_run_demos_2026_60542b09",
       "meta": {
         "hash_semantics": {
           "version": 1,
@@ -148,9 +148,9 @@
         },
         "tags": []
       },
-      "id": "2f248ada-73b5-4a28-8e07-3d0ebd726a66",
-      "content_id": "b1e90920-3ea9-4a52-8cd1-17aff30fdfb0",
-      "created_at": "2026-10-06T23:32:31.105270Z"
+      "id": "e95a0b3c-a69d-4032-90ce-c95c08500042",
+      "content_id": "c0880e27-8471-43b0-af40-4ea0d40da2ae",
+      "created_at": "2026-10-07T19:19:17.529384Z"
     }
   ],
   "cached_run": null,

@@ -1,17 +1,17 @@
 {
   "run": {
-    "id": "_run_atlas_2026_2ad6cc77",
-    "parent_run_id": "_run_demos_2026_e813278a",
+    "id": "_run_polaris_2026_44d9b1cf",
+    "parent_run_id": "_run_demos_2026_60542b09",
     "status": "completed",
-    "model_name": "_run_atlas_2026",
+    "model_name": "_run_polaris_2026",
     "description": null,
     "year": null,
     "iteration": null,
     "stage": null,
     "phase": null,
     "tags": [],
-    "config_hash": "025cfa035b78548f67e6b06dbe725514802436a0a370b58c00164df6161a33ae",
-    "git_hash": "2734aa2db3fc438abda4f046501bfb2c7e89ebbf-dirty-ddc2291e8516",
+    "config_hash": "9e39acda706dc0019892865727009115febceee9484e11dfb432c43527d234d1",
+    "git_hash": "8b14947614623d6dd93e5a75e1a09ffac5a909b1-dirty-1531061f2614",
     "meta": {
       "code_identity": "repo_git",
       "_physical_run_dir": "/Users/zaneedell/git/synergy-schema/examples/ledger/austin_multiyear/consist_runs",
@@ -27,48 +27,25 @@
         "confidence": "low"
       }
     },
-    "started_at": "2026-10-06T23:32:31.271792Z",
-    "created_at": "2026-10-06T23:32:31.271792Z",
-    "input_hash": "b76c73df19a0e46e4a0e2fb4a4ae2b864631009e04b0cf22d4a0e75d53c6cf2a",
-    "signature": "23cc1db6c088ea3ba77f5f80b7f983f5887a843e1d85dc08c59780b2317de327",
-    "ended_at": "2026-10-06T23:32:31.392668Z",
-    "updated_at": "2026-10-06T23:32:31.392668Z"
+    "started_at": "2026-10-07T19:19:17.961777Z",
+    "created_at": "2026-10-07T19:19:17.961777Z",
+    "input_hash": "c9c9cf4fb4d6ebe384192ecf865f0ef7ea47bf44d34b252f80ae085f02cb3d60",
+    "signature": "56be59538ba81b49af8036aaf86609ec15eae74bc116a29befc12ae2b309f00e",
+    "ended_at": "2026-10-07T19:19:18.164291Z",
+    "updated_at": "2026-10-07T19:19:18.164291Z"
   },
   "inputs": [
     {
-      "id": "929c8f88-9a9a-4304-ad53-7c1345f9bf8a",
-      "key": "households_output",
-      "container_uri": "/Users/zaneedell/git/synergy-schema/examples/ledger/austin_multiyear/demos/2026/output/households.parquet",
-      "table_path": null,
-      "array_path": null,
-      "driver": "parquet",
-      "hash": "022b5d6c9adb2021321faf2affa761157b96a41f429540bfd1340245e02afa6c",
-      "content_id": "08702e06-ea3d-4a3e-bdfa-a7093af973a6",
-      "parent_artifact_id": null,
-      "run_id": "_run_demos_2026_e813278a",
-      "meta": {
-        "hash_semantics": {
-          "version": 1,
-          "algorithm": "sha256",
-          "kind": "file",
-          "digest_contract": "raw_file_bytes",
-          "source": "computed_full"
-        },
-        "tags": []
-      },
-      "created_at": "2026-10-06T23:32:31.045535Z"
-    }
-  ],
-  "outputs": [
-    {
+      "id": "d11ba88b-8310-45f5-97df-3974edbb20e4",
       "key": "vehicles_output",
       "container_uri": "/Users/zaneedell/git/synergy-schema/examples/ledger/austin_multiyear/atlas/2026/output/vehicles.parquet",
       "table_path": null,
       "array_path": null,
       "driver": "parquet",
       "hash": "d8d35e21dc0fa4f5863604db340b93147e85cc591a3652614c17f91484c0659b",
+      "content_id": "7f4104fd-0830-40ca-a67f-324e988c2394",
       "parent_artifact_id": null,
-      "run_id": "_run_atlas_2026_2ad6cc77",
+      "run_id": "_run_atlas_2026_64c1ba33",
       "meta": {
         "hash_semantics": {
           "version": 1,
@@ -79,9 +56,78 @@
         },
         "tags": []
       },
-      "id": "6d750da0-78f6-4ffe-8936-4b7fa1e54382",
-      "content_id": "f54a402a-9392-45dc-8aaf-c3040882edeb",
-      "created_at": "2026-10-06T23:32:31.350859Z"
+      "created_at": "2026-10-07T19:19:17.785519Z"
+    },
+    {
+      "id": "934d0f7b-f10e-4ee8-8cf4-e29095c0b8d2",
+      "key": "households_output",
+      "container_uri": "/Users/zaneedell/git/synergy-schema/examples/ledger/austin_multiyear/demos/2026/output/households.parquet",
+      "table_path": null,
+      "array_path": null,
+      "driver": "parquet",
+      "hash": "f3fa0fdf162bf8ce6f002d34e91e9e446f4fa25c9522c7d906726ad428c08535",
+      "content_id": "d4af08d4-2d89-4899-8701-731f6b28b9d7",
+      "parent_artifact_id": null,
+      "run_id": "_run_demos_2026_60542b09",
+      "meta": {
+        "hash_semantics": {
+          "version": 1,
+          "algorithm": "sha256",
+          "kind": "file",
+          "digest_contract": "raw_file_bytes",
+          "source": "computed_full"
+        },
+        "tags": []
+      },
+      "created_at": "2026-10-07T19:19:17.487907Z"
+    },
+    {
+      "id": "395b9dfa-4c14-4425-8018-378b858b6bef",
+      "key": "persons_output",
+      "container_uri": "/Users/zaneedell/git/synergy-schema/examples/ledger/austin_multiyear/demos/2026/output/persons.parquet",
+      "table_path": null,
+      "array_path": null,
+      "driver": "parquet",
+      "hash": "7cd4352679083e4d66c2bad8cd49a2d0f1e2a3ac8afbe6e6c043986f7ad14805",
+      "content_id": "9bdd1def-a42d-46f7-95ea-54d476fa7136",
+      "parent_artifact_id": null,
+      "run_id": "_run_demos_2026_60542b09",
+      "meta": {
+        "hash_semantics": {
+          "version": 1,
+          "algorithm": "sha256",
+          "kind": "file",
+          "digest_contract": "raw_file_bytes",
+          "source": "computed_full"
+        },
+        "tags": []
+      },
+      "created_at": "2026-10-07T19:19:17.508338Z"
+    }
+  ],
+  "outputs": [
+    {
+      "key": "demand_output",
+      "container_uri": "/Users/zaneedell/git/synergy-schema/examples/ledger/austin_multiyear/polaris/2026/Demand.sqlite",
+      "table_path": null,
+      "array_path": null,
+      "driver": "sqlite",
+      "hash": "2016a73d00cc624dd73b3073846a088efcaacf24714311fe3b1f3af6bb9851be",
+      "parent_artifact_id": null,
+      "run_id": "_run_polaris_2026_44d9b1cf",
+      "meta": {
+        "hash_semantics": {
+          "version": 1,
+          "algorithm": "sha256",
+          "kind": "file",
+          "digest_contract": "raw_file_bytes",
+          "source": "computed_full"
+        },
+        "tags": []
+      },
+      "id": "2bc2b146-2d16-4b98-b212-fe6a94e847f8",
+      "content_id": "c11fcf0c-b145-44b5-8b8f-a2db5f68fdd6",
+      "created_at": "2026-10-07T19:19:18.128535Z"
     }
   ],
   "cached_run": null,

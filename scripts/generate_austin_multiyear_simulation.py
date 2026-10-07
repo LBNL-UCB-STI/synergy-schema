@@ -34,6 +34,7 @@ from synergy_schema.pipeline.derive import (
     CORE_FACET_COLUMNS,
     CORE_FACET_KEY_COLUMNS,
 )
+from synergy_schema.pipeline.polaris_projection import project_core_to_polaris
 
 ROOT = Path(__file__).parents[1]
 LEDGER_DIR = ROOT / "examples" / "ledger"
@@ -125,6 +126,7 @@ def generate_multiyear_ledger(data_dir: Path | None = None) -> Path:
     d_p_path = demos_2025_dir / "persons.parquet"
     d_deaths_path = demos_2025_dir / "deaths.parquet"
 
+    # Expanded DEMOS households with dwelling attributes (housing_unit_type, tenure, residential charging, time in home)
     d_hh_tbl = pa.table(
         {
             "household_id": [101, 102],
@@ -134,10 +136,15 @@ def generate_multiyear_ledger(data_dir: Path | None = None) -> Path:
             "block_group": [1, 2],
             "taz": [10, 20],
             "income": [120000.0, 65000.0],
+            "housing_unit_type": [1, 2],
+            "tenure": [1, 2],
+            "has_residential_charging": [1, 0],
+            "time_in_home": [3.0, 1.0],
         }
     )
     pq.write_table(d_hh_tbl, d_hh_path)
 
+    # Expanded DEMOS persons with demographics, schooling, and employment attributes
     d_p_tbl = pa.table(
         {
             "person_id": [1001, 2001],
@@ -147,6 +154,17 @@ def generate_multiyear_ledger(data_dir: Path | None = None) -> Path:
             "hispanic": [0, 0],
             "relate": [0, 0],
             "household_id": [101, 102],
+            "school_status": [0, 0],
+            "school_location_id": [-1, -1],
+            "education_level": [21, 16],
+            "school_grade_level": [0, 0],
+            "employment_status": [1, 1],
+            "worker_type": [1, 1],
+            "industry": [7380, 7860],
+            "work_location_id": [100, 200],
+            "hours_worked": [40, 35],
+            "commute_mode": [1, 1],
+            "income": [70000.0, 65000.0],
         }
     )
     pq.write_table(d_p_tbl, d_p_path)
@@ -195,12 +213,50 @@ def generate_multiyear_ledger(data_dir: Path | None = None) -> Path:
             "income": [120000.0, 65000.0],
         }
     )
+    dw_tbl_2025 = pa.table(
+        {
+            "household_id": [101, 102],
+            "housing_unit_type": [1, 2],
+            "tenure": [1, 2],
+            "has_residential_charging": [1, 0],
+            "time_in_home": [3.0, 1.0],
+        }
+    )
+    sch_tbl_2025 = pa.table(
+        {
+            "person_id": [1001, 2001],
+            "school_status": [0, 0],
+            "school_location_id": [-1, -1],
+            "education_level": [21, 16],
+            "school_grade_level": [0, 0],
+        }
+    )
+    emp_tbl_2025 = pa.table(
+        {
+            "person_id": [1001, 2001],
+            "employment_status": [1, 1],
+            "worker_type": [1, 1],
+            "industry": [7380, 7860],
+            "work_location_id": [100, 200],
+            "hours_worked": [40, 35],
+            "commute_mode": [1, 1],
+            "income": [70000, 65000],
+        }
+    )
     p_core_2025_d = pa.table({"person_id": [1001, 2001]})
 
     core_dir_2025 = target_data_dir / "synergy" / "2025" / "core"
     core_dir_2025.mkdir(parents=True, exist_ok=True)
     p_stored_path_2025 = core_dir_2025 / "people.parquet"
     pq.write_table(p_core_2025_d, p_stored_path_2025)
+    pq.write_table(hh_core_tbl, core_dir_2025 / "households.parquet")
+    pq.write_table(m_core_tbl, core_dir_2025 / "household_membership.parquet")
+    pq.write_table(demo_tbl, core_dir_2025 / "person_demographics.parquet")
+    pq.write_table(loc_tbl, core_dir_2025 / "household_location.parquet")
+    pq.write_table(inc_tbl, core_dir_2025 / "household_income.parquet")
+    pq.write_table(dw_tbl_2025, core_dir_2025 / "household_dwelling.parquet")
+    pq.write_table(sch_tbl_2025, core_dir_2025 / "person_schooling.parquet")
+    pq.write_table(emp_tbl_2025, core_dir_2025 / "person_employment.parquet")
 
     demo_digest = compute_tabular_digest(
         demo_tbl,
@@ -222,6 +278,21 @@ def generate_multiyear_ledger(data_dir: Path | None = None) -> Path:
         CORE_FACET_COLUMNS["people"],
         CORE_FACET_KEY_COLUMNS["people"],
     )
+    dw_digest_2025 = compute_tabular_digest(
+        dw_tbl_2025,
+        CORE_FACET_COLUMNS["household_dwelling"],
+        CORE_FACET_KEY_COLUMNS["household_dwelling"],
+    )
+    sch_digest_2025 = compute_tabular_digest(
+        sch_tbl_2025,
+        CORE_FACET_COLUMNS["person_schooling"],
+        CORE_FACET_KEY_COLUMNS["person_schooling"],
+    )
+    emp_digest_2025 = compute_tabular_digest(
+        emp_tbl_2025,
+        CORE_FACET_COLUMNS["person_employment"],
+        CORE_FACET_KEY_COLUMNS["person_employment"],
+    )
 
     s1_facets = [
         {"facet": "households", "digest": hh_digest},
@@ -240,6 +311,9 @@ def generate_multiyear_ledger(data_dir: Path | None = None) -> Path:
         {"facet": "person_demographics", "digest": demo_digest},
         {"facet": "household_location", "digest": loc_digest},
         {"facet": "household_income", "digest": inc_digest},
+        {"facet": "household_dwelling", "digest": dw_digest_2025},
+        {"facet": "person_schooling", "digest": sch_digest_2025},
+        {"facet": "person_employment", "digest": emp_digest_2025},
     ]
     s1_state_digest = compute_state_digest(s1_facets)
 
@@ -255,6 +329,7 @@ def generate_multiyear_ledger(data_dir: Path | None = None) -> Path:
         }
     )
     pq.write_table(v_tbl_2025, v_path_2025)
+    pq.write_table(v_tbl_2025, core_dir_2025 / "vehicles.parquet")
 
     def _run_atlas_2025(in_hh: Path) -> dict[str, Path]:
         return {"vehicles_output": v_path_2025}
@@ -275,13 +350,43 @@ def generate_multiyear_ledger(data_dir: Path | None = None) -> Path:
     s2_facets = list(s1_facets) + [{"facet": "vehicles", "digest": v_digest_2025}]
     s2_state_digest = compute_state_digest(s2_facets)
 
-    # 4. DEMOS 2026 Step
+    # 4. POLARIS 2025 Step
+    polaris_2025_dir = target_data_dir / "polaris" / "2025"
+    polaris_2025_dir.mkdir(parents=True, exist_ok=True)
+    polaris_sqlite_2025 = polaris_2025_dir / "Demand.sqlite"
+
+    def _run_polaris_2025(in_v: Path, in_hh: Path, in_p: Path) -> dict[str, Path]:
+        facets_2025 = {
+            "households": hh_core_tbl,
+            "people": p_core_2025_d,
+            "household_membership": m_core_tbl,
+            "person_demographics": demo_tbl,
+            "household_location": loc_tbl,
+            "household_income": inc_tbl,
+            "household_dwelling": dw_tbl_2025,
+            "person_schooling": sch_tbl_2025,
+            "person_employment": emp_tbl_2025,
+            "vehicles": v_tbl_2025,
+        }
+        project_core_to_polaris(facets_2025, polaris_sqlite_2025)
+        return {"demand_output": polaris_sqlite_2025}
+
+    r_polaris_2025 = tracker.run(
+        fn=_run_polaris_2025,
+        inputs={"in_v": v_path_2025, "in_hh": d_hh_path, "in_p": d_p_path},
+        config={"year": 2025},
+        outputs=["demand_output"],
+        execution_options=ExecutionOptions(input_binding="paths"),
+    )
+
+    # 5. DEMOS 2026 Step
     demos_2026_dir = target_data_dir / "demos" / "2026" / "output"
     demos_2026_dir.mkdir(parents=True, exist_ok=True)
     d_hh_path_2026 = demos_2026_dir / "households.parquet"
     d_p_path_2026 = demos_2026_dir / "persons.parquet"
     d_deaths_path_2026 = demos_2026_dir / "deaths.parquet"
 
+    # Evolving households: time_in_home incremented by 1.0 (D-H1 carry forward), income updated
     d_hh_tbl_2026 = pa.table(
         {
             "household_id": [101, 102],
@@ -291,10 +396,15 @@ def generate_multiyear_ledger(data_dir: Path | None = None) -> Path:
             "block_group": [1, 2],
             "taz": [10, 20],
             "income": [125000.0, 68000.0],
+            "housing_unit_type": [1, 2],
+            "tenure": [1, 2],
+            "has_residential_charging": [1, 0],
+            "time_in_home": [4.0, 2.0],
         }
     )
     pq.write_table(d_hh_tbl_2026, d_hh_path_2026)
 
+    # Evolving persons: age incremented by 1, continuing workers preserve jobs with wage drift
     d_p_tbl_2026 = pa.table(
         {
             "person_id": [1001, 2001],
@@ -304,6 +414,17 @@ def generate_multiyear_ledger(data_dir: Path | None = None) -> Path:
             "hispanic": [0, 0],
             "relate": [0, 0],
             "household_id": [101, 102],
+            "school_status": [0, 0],
+            "school_location_id": [-1, -1],
+            "education_level": [21, 16],
+            "school_grade_level": [0, 0],
+            "employment_status": [1, 1],
+            "worker_type": [1, 1],
+            "industry": [7380, 7860],
+            "work_location_id": [100, 200],
+            "hours_worked": [40, 35],
+            "commute_mode": [1, 1],
+            "income": [73000.0, 68000.0],
         }
     )
     pq.write_table(d_p_tbl_2026, d_p_path_2026)
@@ -342,6 +463,50 @@ def generate_multiyear_ledger(data_dir: Path | None = None) -> Path:
             "income": [125000.0, 68000.0],
         }
     )
+    dw_tbl_2026 = pa.table(
+        {
+            "household_id": [101, 102],
+            "housing_unit_type": [1, 2],
+            "tenure": [1, 2],
+            "has_residential_charging": [1, 0],
+            "time_in_home": [4.0, 2.0],
+        }
+    )
+    sch_tbl_2026 = pa.table(
+        {
+            "person_id": [1001, 2001],
+            "school_status": [0, 0],
+            "school_location_id": [-1, -1],
+            "education_level": [21, 16],
+            "school_grade_level": [0, 0],
+        }
+    )
+    emp_tbl_2026 = pa.table(
+        {
+            "person_id": [1001, 2001],
+            "employment_status": [1, 1],
+            "worker_type": [1, 1],
+            "industry": [7380, 7860],
+            "work_location_id": [100, 200],
+            "hours_worked": [40, 35],
+            "commute_mode": [1, 1],
+            "income": [73000, 68000],
+        }
+    )
+
+    core_dir_2026 = target_data_dir / "synergy" / "2026" / "core"
+    core_dir_2026.mkdir(parents=True, exist_ok=True)
+    p_stored_path_2026 = core_dir_2026 / "people.parquet"
+    pq.write_table(p_core_2025_d, p_stored_path_2026)
+    pq.write_table(hh_core_tbl, core_dir_2026 / "households.parquet")
+    pq.write_table(m_core_tbl, core_dir_2026 / "household_membership.parquet")
+    pq.write_table(demo_tbl_2026, core_dir_2026 / "person_demographics.parquet")
+    pq.write_table(loc_tbl, core_dir_2026 / "household_location.parquet")
+    pq.write_table(inc_tbl_2026, core_dir_2026 / "household_income.parquet")
+    pq.write_table(dw_tbl_2026, core_dir_2026 / "household_dwelling.parquet")
+    pq.write_table(sch_tbl_2026, core_dir_2026 / "person_schooling.parquet")
+    pq.write_table(emp_tbl_2026, core_dir_2026 / "person_employment.parquet")
+
     demo_digest_2026 = compute_tabular_digest(
         demo_tbl_2026,
         CORE_FACET_COLUMNS["person_demographics"],
@@ -352,11 +517,21 @@ def generate_multiyear_ledger(data_dir: Path | None = None) -> Path:
         CORE_FACET_COLUMNS["household_income"],
         CORE_FACET_KEY_COLUMNS["household_income"],
     )
-
-    core_dir_2026 = target_data_dir / "synergy" / "2026" / "core"
-    core_dir_2026.mkdir(parents=True, exist_ok=True)
-    p_stored_path_2026 = core_dir_2026 / "people.parquet"
-    pq.write_table(p_core_2025_d, p_stored_path_2026)
+    dw_digest_2026 = compute_tabular_digest(
+        dw_tbl_2026,
+        CORE_FACET_COLUMNS["household_dwelling"],
+        CORE_FACET_KEY_COLUMNS["household_dwelling"],
+    )
+    sch_digest_2026 = compute_tabular_digest(
+        sch_tbl_2026,
+        CORE_FACET_COLUMNS["person_schooling"],
+        CORE_FACET_KEY_COLUMNS["person_schooling"],
+    )
+    emp_digest_2026 = compute_tabular_digest(
+        emp_tbl_2026,
+        CORE_FACET_COLUMNS["person_employment"],
+        CORE_FACET_KEY_COLUMNS["person_employment"],
+    )
 
     s3_facets = [
         {"facet": "households", "digest": hh_digest},
@@ -375,11 +550,14 @@ def generate_multiyear_ledger(data_dir: Path | None = None) -> Path:
         {"facet": "person_demographics", "digest": demo_digest_2026},
         {"facet": "household_location", "digest": loc_digest},
         {"facet": "household_income", "digest": inc_digest_2026},
+        {"facet": "household_dwelling", "digest": dw_digest_2026},
+        {"facet": "person_schooling", "digest": sch_digest_2026},
+        {"facet": "person_employment", "digest": emp_digest_2026},
         {"facet": "vehicles", "digest": v_digest_2025},
     ]
     s3_state_digest = compute_state_digest(s3_facets)
 
-    # 5. ATLAS 2026 Step
+    # 6. ATLAS 2026 Step
     atlas_2026_dir = target_data_dir / "atlas" / "2026" / "output"
     atlas_2026_dir.mkdir(parents=True, exist_ok=True)
     v_path_2026 = atlas_2026_dir / "vehicles.parquet"
@@ -391,6 +569,7 @@ def generate_multiyear_ledger(data_dir: Path | None = None) -> Path:
         }
     )
     pq.write_table(v_tbl_2026, v_path_2026)
+    pq.write_table(v_tbl_2026, core_dir_2026 / "vehicles.parquet")
 
     def _run_atlas_2026(in_hh: Path) -> dict[str, Path]:
         return {"vehicles_output": v_path_2026}
@@ -425,9 +604,41 @@ def generate_multiyear_ledger(data_dir: Path | None = None) -> Path:
         {"facet": "person_demographics", "digest": demo_digest_2026},
         {"facet": "household_location", "digest": loc_digest},
         {"facet": "household_income", "digest": inc_digest_2026},
+        {"facet": "household_dwelling", "digest": dw_digest_2026},
+        {"facet": "person_schooling", "digest": sch_digest_2026},
+        {"facet": "person_employment", "digest": emp_digest_2026},
         {"facet": "vehicles", "digest": v_digest_2026},
     ]
     s4_state_digest = compute_state_digest(s4_facets)
+
+    # 7. POLARIS 2026 Step
+    polaris_2026_dir = target_data_dir / "polaris" / "2026"
+    polaris_2026_dir.mkdir(parents=True, exist_ok=True)
+    polaris_sqlite_2026 = polaris_2026_dir / "Demand.sqlite"
+
+    def _run_polaris_2026(in_v: Path, in_hh: Path, in_p: Path) -> dict[str, Path]:
+        facets_2026 = {
+            "households": hh_core_tbl,
+            "people": p_core_2025_d,
+            "household_membership": m_core_tbl,
+            "person_demographics": demo_tbl_2026,
+            "household_location": loc_tbl,
+            "household_income": inc_tbl_2026,
+            "household_dwelling": dw_tbl_2026,
+            "person_schooling": sch_tbl_2026,
+            "person_employment": emp_tbl_2026,
+            "vehicles": v_tbl_2026,
+        }
+        project_core_to_polaris(facets_2026, polaris_sqlite_2026)
+        return {"demand_output": polaris_sqlite_2026}
+
+    r_polaris_2026 = tracker.run(
+        fn=_run_polaris_2026,
+        inputs={"in_v": v_path_2026, "in_hh": d_hh_path_2026, "in_p": d_p_path_2026},
+        config={"year": 2026},
+        outputs=["demand_output"],
+        execution_options=ExecutionOptions(input_binding="paths"),
+    )
 
     # Compact the DuckDB file
     db_file = target_data_dir / "provenance.duckdb"
@@ -604,6 +815,21 @@ def generate_multiyear_ledger(data_dir: Path | None = None) -> Path:
                             "mapping": "mapping:demos-core/v1#household_income",
                             "views": ["view:demos/households_output:2025"],
                         },
+                        {
+                            "facet": "household_dwelling",
+                            "mapping": "mapping:refine-core/v1#household_dwelling",
+                            "views": ["view:demos/households_output:2025"],
+                        },
+                        {
+                            "facet": "person_schooling",
+                            "mapping": "mapping:refine-core/v1#person_schooling",
+                            "views": ["view:demos/persons_output:2025"],
+                        },
+                        {
+                            "facet": "person_employment",
+                            "mapping": "mapping:refine-core/v1#person_employment",
+                            "views": ["view:demos/persons_output:2025"],
+                        },
                     ],
                 },
                 "core_state": {
@@ -667,8 +893,68 @@ def generate_multiyear_ledger(data_dir: Path | None = None) -> Path:
                 },
             },
             {
-                "snapshot_id": "snapshot:2026:demos",
+                "snapshot_id": "snapshot:2025:polaris",
                 "parent_snapshots": ["snapshot:2025:atlas"],
+                "simulation_year": 2025,
+                "step": {
+                    "model": "polaris",
+                    "producing_run": {
+                        "provider": "consist",
+                        "run_id": r_polaris_2025.run.id,
+                    },
+                    "input_views": [
+                        {
+                            "view_id": "view:polaris/vehicles_input:2025",
+                            "view_kind": "atlas/vehicles_output",
+                            "artifact": {
+                                "artifact_identity": {
+                                    "digest_algorithm": "sha256",
+                                    "content_digest": sha256_file(v_path_2025),
+                                },
+                                "locator": v_path_2025.relative_to(
+                                    target_data_dir
+                                ).as_posix(),
+                            },
+                            "prepared_from_state": s2_state_digest,
+                        }
+                    ],
+                    "output_views": [
+                        {
+                            "view_id": "view:polaris/demand_output:2025",
+                            "view_kind": "polaris/demand_output",
+                            "artifact": {
+                                "artifact_identity": {
+                                    "digest_algorithm": "sha256",
+                                    "content_digest": sha256_file(polaris_sqlite_2025),
+                                },
+                                "locator": polaris_sqlite_2025.relative_to(
+                                    target_data_dir
+                                ).as_posix(),
+                            },
+                        }
+                    ],
+                    "reads": [
+                        "households",
+                        "people",
+                        "household_membership",
+                        "person_demographics",
+                        "household_location",
+                        "household_income",
+                        "household_dwelling",
+                        "person_schooling",
+                        "person_employment",
+                        "vehicles",
+                    ],
+                    "derivations": [],
+                },
+                "core_state": {
+                    "state_digest": s2_state_digest,
+                    "facets": s2_facets,
+                },
+            },
+            {
+                "snapshot_id": "snapshot:2026:demos",
+                "parent_snapshots": ["snapshot:2025:polaris"],
                 "simulation_year": 2026,
                 "step": {
                     "model": "demos",
@@ -679,7 +965,7 @@ def generate_multiyear_ledger(data_dir: Path | None = None) -> Path:
                     "input_views": [
                         {
                             "view_id": "view:demos/households_input:2026",
-                            "view_kind": "demos/households_input",
+                            "view_kind": "demos/households_output",
                             "artifact": {
                                 "artifact_identity": {
                                     "digest_algorithm": "sha256",
@@ -690,7 +976,21 @@ def generate_multiyear_ledger(data_dir: Path | None = None) -> Path:
                                 ).as_posix(),
                             },
                             "prepared_from_state": s2_state_digest,
-                        }
+                        },
+                        {
+                            "view_id": "view:demos/persons_input:2026",
+                            "view_kind": "demos/persons_output",
+                            "artifact": {
+                                "artifact_identity": {
+                                    "digest_algorithm": "sha256",
+                                    "content_digest": sha256_file(d_p_path),
+                                },
+                                "locator": d_p_path.relative_to(
+                                    target_data_dir
+                                ).as_posix(),
+                            },
+                            "prepared_from_state": s2_state_digest,
+                        },
                     ],
                     "output_views": [
                         {
@@ -740,6 +1040,10 @@ def generate_multiyear_ledger(data_dir: Path | None = None) -> Path:
                         "person_demographics",
                         "household_location",
                         "household_income",
+                        "household_dwelling",
+                        "person_schooling",
+                        "person_employment",
+                        "vehicles",
                     ],
                     "derivations": [
                         {
@@ -756,6 +1060,21 @@ def generate_multiyear_ledger(data_dir: Path | None = None) -> Path:
                             "facet": "household_income",
                             "mapping": "mapping:demos-core/v1#household_income",
                             "views": ["view:demos/households_output:2026"],
+                        },
+                        {
+                            "facet": "household_dwelling",
+                            "mapping": "mapping:refine-core/v1#household_dwelling",
+                            "views": ["view:demos/households_output:2026"],
+                        },
+                        {
+                            "facet": "person_schooling",
+                            "mapping": "mapping:refine-core/v1#person_schooling",
+                            "views": ["view:demos/persons_output:2026"],
+                        },
+                        {
+                            "facet": "person_employment",
+                            "mapping": "mapping:refine-core/v1#person_employment",
+                            "views": ["view:demos/persons_output:2026"],
                         },
                     ],
                 },
@@ -819,15 +1138,75 @@ def generate_multiyear_ledger(data_dir: Path | None = None) -> Path:
                     "facets": s4_facets,
                 },
             },
+            {
+                "snapshot_id": "snapshot:2026:polaris",
+                "parent_snapshots": ["snapshot:2026:atlas"],
+                "simulation_year": 2026,
+                "step": {
+                    "model": "polaris",
+                    "producing_run": {
+                        "provider": "consist",
+                        "run_id": r_polaris_2026.run.id,
+                    },
+                    "input_views": [
+                        {
+                            "view_id": "view:polaris/vehicles_input:2026",
+                            "view_kind": "atlas/vehicles_output",
+                            "artifact": {
+                                "artifact_identity": {
+                                    "digest_algorithm": "sha256",
+                                    "content_digest": sha256_file(v_path_2026),
+                                },
+                                "locator": v_path_2026.relative_to(
+                                    target_data_dir
+                                ).as_posix(),
+                            },
+                            "prepared_from_state": s4_state_digest,
+                        }
+                    ],
+                    "output_views": [
+                        {
+                            "view_id": "view:polaris/demand_output:2026",
+                            "view_kind": "polaris/demand_output",
+                            "artifact": {
+                                "artifact_identity": {
+                                    "digest_algorithm": "sha256",
+                                    "content_digest": sha256_file(polaris_sqlite_2026),
+                                },
+                                "locator": polaris_sqlite_2026.relative_to(
+                                    target_data_dir
+                                ).as_posix(),
+                            },
+                        }
+                    ],
+                    "reads": [
+                        "households",
+                        "people",
+                        "household_membership",
+                        "person_demographics",
+                        "household_location",
+                        "household_income",
+                        "household_dwelling",
+                        "person_schooling",
+                        "person_employment",
+                        "vehicles",
+                    ],
+                    "derivations": [],
+                },
+                "core_state": {
+                    "state_digest": s4_state_digest,
+                    "facets": s4_facets,
+                },
+            },
         ],
         "checkpoints": [
             {
                 "simulation_year": 2025,
-                "snapshot": "snapshot:2025:atlas",
+                "snapshot": "snapshot:2025:polaris",
             },
             {
                 "simulation_year": 2026,
-                "snapshot": "snapshot:2026:atlas",
+                "snapshot": "snapshot:2026:polaris",
             },
         ],
     }

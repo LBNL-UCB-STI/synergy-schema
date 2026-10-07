@@ -1,6 +1,6 @@
 {
   "run": {
-    "id": "_run_urbansim_505a942c",
+    "id": "_run_urbansim_24306f8b",
     "parent_run_id": null,
     "status": "completed",
     "model_name": "_run_urbansim",
@@ -11,7 +11,7 @@
     "phase": null,
     "tags": [],
     "config_hash": "a61e516d3f4aecd0cbb84566d0d7ede7cadcfa01fba4e55f0e66de544ea6cf89",
-    "git_hash": "2734aa2db3fc438abda4f046501bfb2c7e89ebbf-dirty-ddc2291e8516",
+    "git_hash": "8b14947614623d6dd93e5a75e1a09ffac5a909b1-dirty-1531061f2614",
     "meta": {
       "code_identity": "repo_git",
       "_physical_run_dir": "/Users/zaneedell/git/synergy-schema/examples/ledger/austin_multiyear/consist_runs",
@@ -27,23 +27,23 @@
         "confidence": "low"
       }
     },
-    "started_at": "2026-10-06T23:32:30.130217Z",
-    "created_at": "2026-10-06T23:32:30.130217Z",
+    "started_at": "2026-10-07T19:19:16.302039Z",
+    "created_at": "2026-10-07T19:19:16.302039Z",
     "input_hash": "547e4c656826c0eb1f45d58318d0d64003838a3a7a9e0d2db3309c4bcbca3a39",
-    "signature": "03d797e847c7721afeecda6d1c747f73ff6a2a7bda253505d6ec27a63beef487",
-    "ended_at": "2026-10-06T23:32:30.227725Z",
-    "updated_at": "2026-10-06T23:32:30.227725Z"
+    "signature": "6aec1d9a128a4392e341d8bfc9af98649e41eb22f1a08dcc50f27060d299c2ac",
+    "ended_at": "2026-10-07T19:19:16.384260Z",
+    "updated_at": "2026-10-07T19:19:16.384260Z"
   },
   "inputs": [
     {
-      "id": "bc94320f-1681-4920-9e10-cf56f013392c",
+      "id": "ab217829-bcb6-48f1-9682-731136962d03",
       "key": "hh_p",
       "container_uri": "/Users/zaneedell/git/synergy-schema/examples/ledger/austin_multiyear/urbansim/2025/households.parquet",
       "table_path": null,
       "array_path": null,
       "driver": "parquet",
       "hash": "e241777a9512faeebc90054ab46985fe2df661f394f293c6b704f852a5ee71a2",
-      "content_id": "09246b5b-19c3-46ad-addc-a50b2988b82e",
+      "content_id": "95ff63d7-7329-4897-9aaa-e50703ccc821",
       "parent_artifact_id": null,
       "run_id": null,
       "meta": {
@@ -56,17 +56,17 @@
         },
         "tags": []
       },
-      "created_at": "2026-10-06T23:32:29.976352Z"
+      "created_at": "2026-10-07T19:19:16.150005Z"
     },
     {
-      "id": "3420cb37-687c-432c-af77-e4271560f4a7",
+      "id": "149962e9-20df-4e4f-ae01-646b5cde9f23",
       "key": "p_p",
       "container_uri": "/Users/zaneedell/git/synergy-schema/examples/ledger/austin_multiyear/urbansim/2025/persons.parquet",
       "table_path": null,
       "array_path": null,
       "driver": "parquet",
       "hash": "b115faf6dc8ac8ff5cbdae4080fb89a9bfa0e37dccdb798502fba3ef2021c9dc",
-      "content_id": "e81e89ac-d499-4e95-8c71-201e8053e6a8",
+      "content_id": "29945911-c244-416f-9915-851792871e00",
       "parent_artifact_id": null,
       "run_id": null,
       "meta": {
@@ -79,7 +79,7 @@
         },
         "tags": []
       },
-      "created_at": "2026-10-06T23:32:30.031447Z"
+      "created_at": "2026-10-07T19:19:16.194894Z"
     }
   ],
   "outputs": [
@@ -91,7 +91,7 @@
       "driver": "parquet",
       "hash": "e241777a9512faeebc90054ab46985fe2df661f394f293c6b704f852a5ee71a2",
       "parent_artifact_id": null,
-      "run_id": "_run_urbansim_505a942c",
+      "run_id": "_run_urbansim_24306f8b",
       "meta": {
         "hash_semantics": {
           "version": 1,
@@ -102,9 +102,9 @@
         },
         "tags": []
       },
-      "id": "0a613836-be26-47d1-8492-8c6d35d213d1",
-      "content_id": "09246b5b-19c3-46ad-addc-a50b2988b82e",
-      "created_at": "2026-10-06T23:32:30.207920Z"
+      "id": "c61138fb-5fc6-47bf-8e46-9caae8e596f5",
+      "content_id": "95ff63d7-7329-4897-9aaa-e50703ccc821",
+      "created_at": "2026-10-07T19:19:16.361532Z"
     },
     {
       "key": "persons",
@@ -114,7 +114,7 @@
       "driver": "parquet",
       "hash": "b115faf6dc8ac8ff5cbdae4080fb89a9bfa0e37dccdb798502fba3ef2021c9dc",
       "parent_artifact_id": null,
-      "run_id": "_run_urbansim_505a942c",
+      "run_id": "_run_urbansim_24306f8b",
       "meta": {
         "hash_semantics": {
           "version": 1,
@@ -125,9 +125,9 @@
         },
         "tags": []
       },
-      "id": "be62529f-9aff-4ca1-9093-4d265ba829cc",
-      "content_id": "e81e89ac-d499-4e95-8c71-201e8053e6a8",
-      "created_at": "2026-10-06T23:32:30.208263Z"
+      "id": "187a64f5-f7ce-4ca9-b257-07f47e5744be",
+      "content_id": "29945911-c244-416f-9915-851792871e00",
+      "created_at": "2026-10-07T19:19:16.361871Z"
     }
   ],
   "cached_run": null,

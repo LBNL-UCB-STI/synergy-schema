@@ -24,24 +24,28 @@ In Synergy's ledger architecture:
 flowchart TD
   subgraph Ledger["PopulationLedger (austin_multiyear_simulation.yaml)"]
     meta["Scenario & Realization Context"]
-    cp2025["Checkpoint 2025\n(tags snap-atlas-2025)"]
-    cp2026["Checkpoint 2026\n(tags snap-atlas-2026)"]
+    cp2025["Checkpoint 2025\n(tags snap-polaris-2025)"]
+    cp2026["Checkpoint 2026\n(tags snap-polaris-2026)"]
 
     subgraph Snapshots["Population Snapshots (DAG)"]
       s1["snap-urbansim-2025\nproducing_run: UrbanSim"]
       s2["snap-demos-2025\nproducing_run: DEMOS"]
       s3["snap-atlas-2025\nproducing_run: ATLAS"]
-      s4["snap-demos-2026\nproducing_run: DEMOS"]
-      s5["snap-atlas-2026\nproducing_run: ATLAS"]
+      s4["snap-polaris-2025\nproducing_run: POLARIS"]
+      s5["snap-demos-2026\nproducing_run: DEMOS"]
+      s6["snap-atlas-2026\nproducing_run: ATLAS"]
+      s7["snap-polaris-2026\nproducing_run: POLARIS"]
 
       s1 --> s2
       s2 --> s3
       s3 --> s4
       s4 --> s5
+      s5 --> s6
+      s6 --> s7
     end
 
-    cp2025 -. points to .-> s3
-    cp2026 -. points to .-> s5
+    cp2025 -. points to .-> s4
+    cp2026 -. points to .-> s7
   end
 ```
 

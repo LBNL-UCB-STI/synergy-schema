@@ -1,7 +1,7 @@
 {
   "run": {
-    "id": "_run_atlas_2026_2ad6cc77",
-    "parent_run_id": "_run_demos_2026_e813278a",
+    "id": "_run_atlas_2026_64c1ba33",
+    "parent_run_id": "_run_demos_2026_60542b09",
     "status": "completed",
     "model_name": "_run_atlas_2026",
     "description": null,
@@ -11,7 +11,7 @@
     "phase": null,
     "tags": [],
     "config_hash": "025cfa035b78548f67e6b06dbe725514802436a0a370b58c00164df6161a33ae",
-    "git_hash": "2734aa2db3fc438abda4f046501bfb2c7e89ebbf-dirty-ddc2291e8516",
+    "git_hash": "8b14947614623d6dd93e5a75e1a09ffac5a909b1-dirty-1531061f2614",
     "meta": {
       "code_identity": "repo_git",
       "_physical_run_dir": "/Users/zaneedell/git/synergy-schema/examples/ledger/austin_multiyear/consist_runs",
@@ -27,25 +27,25 @@
         "confidence": "low"
       }
     },
-    "started_at": "2026-10-06T23:32:31.271792Z",
-    "created_at": "2026-10-06T23:32:31.271792Z",
-    "input_hash": "b76c73df19a0e46e4a0e2fb4a4ae2b864631009e04b0cf22d4a0e75d53c6cf2a",
-    "signature": "23cc1db6c088ea3ba77f5f80b7f983f5887a843e1d85dc08c59780b2317de327",
-    "ended_at": "2026-10-06T23:32:31.392668Z",
-    "updated_at": "2026-10-06T23:32:31.392668Z"
+    "started_at": "2026-10-07T19:19:17.717910Z",
+    "created_at": "2026-10-07T19:19:17.717910Z",
+    "input_hash": "bdcec8886a1525d137bec22de6e5989a3e1c5d15dee1d216b03be5ccd8346354",
+    "signature": "2a5bbd1cac7a046aaf5e485b70c4fea2d468490b8cf222c3b3e8e2eafd88158f",
+    "ended_at": "2026-10-07T19:19:17.828126Z",
+    "updated_at": "2026-10-07T19:19:17.828126Z"
   },
   "inputs": [
     {
-      "id": "929c8f88-9a9a-4304-ad53-7c1345f9bf8a",
+      "id": "934d0f7b-f10e-4ee8-8cf4-e29095c0b8d2",
       "key": "households_output",
       "container_uri": "/Users/zaneedell/git/synergy-schema/examples/ledger/austin_multiyear/demos/2026/output/households.parquet",
       "table_path": null,
       "array_path": null,
       "driver": "parquet",
-      "hash": "022b5d6c9adb2021321faf2affa761157b96a41f429540bfd1340245e02afa6c",
-      "content_id": "08702e06-ea3d-4a3e-bdfa-a7093af973a6",
+      "hash": "f3fa0fdf162bf8ce6f002d34e91e9e446f4fa25c9522c7d906726ad428c08535",
+      "content_id": "d4af08d4-2d89-4899-8701-731f6b28b9d7",
       "parent_artifact_id": null,
-      "run_id": "_run_demos_2026_e813278a",
+      "run_id": "_run_demos_2026_60542b09",
       "meta": {
         "hash_semantics": {
           "version": 1,
@@ -56,7 +56,7 @@
         },
         "tags": []
       },
-      "created_at": "2026-10-06T23:32:31.045535Z"
+      "created_at": "2026-10-07T19:19:17.487907Z"
     }
   ],
   "outputs": [
@@ -68,7 +68,7 @@
       "driver": "parquet",
       "hash": "d8d35e21dc0fa4f5863604db340b93147e85cc591a3652614c17f91484c0659b",
       "parent_artifact_id": null,
-      "run_id": "_run_atlas_2026_2ad6cc77",
+      "run_id": "_run_atlas_2026_64c1ba33",
       "meta": {
         "hash_semantics": {
           "version": 1,
@@ -79,9 +79,9 @@
         },
         "tags": []
       },
-      "id": "6d750da0-78f6-4ffe-8936-4b7fa1e54382",
-      "content_id": "f54a402a-9392-45dc-8aaf-c3040882edeb",
-      "created_at": "2026-10-06T23:32:31.350859Z"
+      "id": "d11ba88b-8310-45f5-97df-3974edbb20e4",
+      "content_id": "7f4104fd-0830-40ca-a67f-324e988c2394",
+      "created_at": "2026-10-07T19:19:17.785519Z"
     }
   ],
   "cached_run": null,

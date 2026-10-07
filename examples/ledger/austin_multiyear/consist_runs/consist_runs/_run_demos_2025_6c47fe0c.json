@@ -1,7 +1,7 @@
 {
   "run": {
-    "id": "_run_demos_2025_62ffe6a2",
-    "parent_run_id": "_run_urbansim_505a942c",
+    "id": "_run_demos_2025_6c47fe0c",
+    "parent_run_id": "_run_urbansim_24306f8b",
     "status": "completed",
     "model_name": "_run_demos_2025",
     "description": null,
@@ -11,7 +11,7 @@
     "phase": null,
     "tags": [],
     "config_hash": "b4002922ae4120b2043cc50009df8673ff036df3106eb100187b289e1c441d97",
-    "git_hash": "2734aa2db3fc438abda4f046501bfb2c7e89ebbf-dirty-ddc2291e8516",
+    "git_hash": "8b14947614623d6dd93e5a75e1a09ffac5a909b1-dirty-1531061f2614",
     "meta": {
       "code_identity": "repo_git",
       "_physical_run_dir": "/Users/zaneedell/git/synergy-schema/examples/ledger/austin_multiyear/consist_runs",
@@ -27,25 +27,25 @@
         "confidence": "low"
       }
     },
-    "started_at": "2026-10-06T23:32:30.414685Z",
-    "created_at": "2026-10-06T23:32:30.414685Z",
-    "input_hash": "f53452de26b6629c3293f3366737e8bb4bf1266b2dc11b26a90becb340feafd0",
-    "signature": "c5c941e9d394074a0634eeac82d5fafe1f03c7ccd085083a03e3ffb1e0629e4f",
-    "ended_at": "2026-10-06T23:32:30.566099Z",
-    "updated_at": "2026-10-06T23:32:30.566099Z"
+    "started_at": "2026-10-07T19:19:16.554647Z",
+    "created_at": "2026-10-07T19:19:16.554647Z",
+    "input_hash": "78ff4bf90058f4c3a48907808b3f175adea59dc116b5ef31ad22806ddc396244",
+    "signature": "93c27650e65a6ae2e36cabce9dc5e4d02c0fdcd17d5c0a0e0a83819ed56b598b",
+    "ended_at": "2026-10-07T19:19:16.715532Z",
+    "updated_at": "2026-10-07T19:19:16.715532Z"
   },
   "inputs": [
     {
-      "id": "0a613836-be26-47d1-8492-8c6d35d213d1",
+      "id": "c61138fb-5fc6-47bf-8e46-9caae8e596f5",
       "key": "households",
       "container_uri": "/Users/zaneedell/git/synergy-schema/examples/ledger/austin_multiyear/urbansim/2025/households.parquet",
       "table_path": null,
       "array_path": null,
       "driver": "parquet",
       "hash": "e241777a9512faeebc90054ab46985fe2df661f394f293c6b704f852a5ee71a2",
-      "content_id": "09246b5b-19c3-46ad-addc-a50b2988b82e",
+      "content_id": "95ff63d7-7329-4897-9aaa-e50703ccc821",
       "parent_artifact_id": null,
-      "run_id": "_run_urbansim_505a942c",
+      "run_id": "_run_urbansim_24306f8b",
       "meta": {
         "hash_semantics": {
           "version": 1,
@@ -56,19 +56,19 @@
         },
         "tags": []
       },
-      "created_at": "2026-10-06T23:32:30.207920Z"
+      "created_at": "2026-10-07T19:19:16.361532Z"
     },
     {
-      "id": "be62529f-9aff-4ca1-9093-4d265ba829cc",
+      "id": "187a64f5-f7ce-4ca9-b257-07f47e5744be",
       "key": "persons",
       "container_uri": "/Users/zaneedell/git/synergy-schema/examples/ledger/austin_multiyear/urbansim/2025/persons.parquet",
       "table_path": null,
       "array_path": null,
       "driver": "parquet",
       "hash": "b115faf6dc8ac8ff5cbdae4080fb89a9bfa0e37dccdb798502fba3ef2021c9dc",
-      "content_id": "e81e89ac-d499-4e95-8c71-201e8053e6a8",
+      "content_id": "29945911-c244-416f-9915-851792871e00",
       "parent_artifact_id": null,
-      "run_id": "_run_urbansim_505a942c",
+      "run_id": "_run_urbansim_24306f8b",
       "meta": {
         "hash_semantics": {
           "version": 1,
@@ -79,7 +79,7 @@
         },
         "tags": []
       },
-      "created_at": "2026-10-06T23:32:30.208263Z"
+      "created_at": "2026-10-07T19:19:16.361871Z"
     }
   ],
   "outputs": [
@@ -89,9 +89,9 @@
       "table_path": null,
       "array_path": null,
       "driver": "parquet",
-      "hash": "6344f61a99ef56310455931c49556d354ffd8da0bc99b4b7b27aca3db364ab22",
+      "hash": "f034ccdeaf44d915822a06874aeef2cb85e8ac2ce64b1b74c6fa5534700b2ddf",
       "parent_artifact_id": null,
-      "run_id": "_run_demos_2025_62ffe6a2",
+      "run_id": "_run_demos_2025_6c47fe0c",
       "meta": {
         "hash_semantics": {
           "version": 1,
@@ -102,9 +102,9 @@
         },
         "tags": []
       },
-      "id": "53690d4e-04eb-43b9-ab92-cf7ad6f9a158",
-      "content_id": "48bf715b-2773-46e3-8376-84906691211e",
-      "created_at": "2026-10-06T23:32:30.491033Z"
+      "id": "37c0dfab-54b6-445c-85fc-d263af4dfefd",
+      "content_id": "e06708d1-8cda-40c1-86cc-232a4625a955",
+      "created_at": "2026-10-07T19:19:16.636844Z"
     },
     {
       "key": "persons_output",
@@ -112,9 +112,9 @@
       "table_path": null,
       "array_path": null,
       "driver": "parquet",
-      "hash": "9a1164fbdac6ba647da9ac06ebf3804fa201deb2caa53908956eb20dcbef07a9",
+      "hash": "452058887dd773151401f7728a0357593cee74d13434e061ad322951137de623",
       "parent_artifact_id": null,
-      "run_id": "_run_demos_2025_62ffe6a2",
+      "run_id": "_run_demos_2025_6c47fe0c",
       "meta": {
         "hash_semantics": {
           "version": 1,
@@ -125,9 +125,9 @@
         },
         "tags": []
       },
-      "id": "68a9689d-afe1-4177-ab87-e985e6f5390f",
-      "content_id": "475ca332-972f-44c5-87b5-647aed3f413b",
-      "created_at": "2026-10-06T23:32:30.510380Z"
+      "id": "5a0f3047-7e06-46b7-8913-db622d870929",
+      "content_id": "6c489232-b2e3-42a1-bc2a-6940a40fe27e",
+      "created_at": "2026-10-07T19:19:16.656070Z"
     },
     {
       "key": "deaths_output",
@@ -137,7 +137,7 @@
       "driver": "parquet",
       "hash": "1fc6a56883c9b993142eca5079cced235b8230175c407a9549ecc64cb5b32c82",
       "parent_artifact_id": null,
-      "run_id": "_run_demos_2025_62ffe6a2",
+      "run_id": "_run_demos_2025_6c47fe0c",
       "meta": {
         "hash_semantics": {
           "version": 1,
@@ -148,9 +148,9 @@
         },
         "tags": []
       },
-      "id": "046c9f5b-d14d-4c1c-bd4f-1d896be0f4b8",
-      "content_id": "f30bbe4f-35b6-4513-93fc-b8e38d5f5841",
-      "created_at": "2026-10-06T23:32:30.530096Z"
+      "id": "400dc1a7-1e03-4cfb-a424-5f5838c72d9f",
+      "content_id": "651d4a1f-e64e-4983-88b0-196f9b93db81",
+      "created_at": "2026-10-07T19:19:16.680566Z"
     }
   ],
   "cached_run": null,

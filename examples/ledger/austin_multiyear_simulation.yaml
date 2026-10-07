@@ -14,7 +14,7 @@ snapshots:
       model: urbansim
       producing_run:
         provider: consist
-        run_id: _run_urbansim_505a942c
+        run_id: _run_urbansim_24306f8b
       output_views:
         - view_id: view:urbansim/households_output:2025
           view_kind: urbansim/households_output
@@ -60,7 +60,7 @@ snapshots:
       model: demos
       producing_run:
         provider: consist
-        run_id: _run_demos_2025_62ffe6a2
+        run_id: _run_demos_2025_6c47fe0c
       input_views:
         - view_id: view:demos/persons_input:2025
           view_kind: demos/persons_input
@@ -76,14 +76,14 @@ snapshots:
           artifact:
             artifact_identity:
               digest_algorithm: sha256
-              content_digest: 6344f61a99ef56310455931c49556d354ffd8da0bc99b4b7b27aca3db364ab22
+              content_digest: f034ccdeaf44d915822a06874aeef2cb85e8ac2ce64b1b74c6fa5534700b2ddf
             locator: demos/2025/output/households.parquet
         - view_id: view:demos/persons_output:2025
           view_kind: demos/persons_output
           artifact:
             artifact_identity:
               digest_algorithm: sha256
-              content_digest: 9a1164fbdac6ba647da9ac06ebf3804fa201deb2caa53908956eb20dcbef07a9
+              content_digest: 452058887dd773151401f7728a0357593cee74d13434e061ad322951137de623
             locator: demos/2025/output/persons.parquet
         - view_id: view:demos/deaths_output:2025
           view_kind: demos/deaths_output
@@ -113,8 +113,20 @@ snapshots:
           mapping: mapping:demos-core/v1#household_income
           views:
             - view:demos/households_output:2025
+        - facet: household_dwelling
+          mapping: mapping:refine-core/v1#household_dwelling
+          views:
+            - view:demos/households_output:2025
+        - facet: person_schooling
+          mapping: mapping:refine-core/v1#person_schooling
+          views:
+            - view:demos/persons_output:2025
+        - facet: person_employment
+          mapping: mapping:refine-core/v1#person_employment
+          views:
+            - view:demos/persons_output:2025
     core_state:
-      state_digest: sha256:3f88fa41efca5d434bd86f97c126a5b90b21ba4189b50fb0346872734e3d049d
+      state_digest: sha256:02490838b7ec4ddfe51dab4ddf01abd8bf1987a466bd82858b38b045ca740f11
       facets:
         - &id001
           facet: households
@@ -139,6 +151,15 @@ snapshots:
         - &id006
           facet: household_income
           digest: sha256:e5a17e9c43d70b36258070f614069fa3c361d03538ff4b5f008b892b35060c99
+        - &id007
+          facet: household_dwelling
+          digest: sha256:ef1f0392fb552fb113370793c33ab5c344cbce21d56e771740f7b6721b354d22
+        - &id008
+          facet: person_schooling
+          digest: sha256:fd7365fb107091a14f45ef1de5f69761340ea2a8c26eaad440d013d86781f8f2
+        - &id009
+          facet: person_employment
+          digest: sha256:2165fabe7bd2c6b19b114fbab1d8dd5f7e3a4bf6f530e6898d5a6a32b61da4cc
   - snapshot_id: snapshot:2025:atlas
     parent_snapshots:
       - snapshot:2025:demos
@@ -147,16 +168,16 @@ snapshots:
       model: atlas
       producing_run:
         provider: consist
-        run_id: _run_atlas_2025_be1ff755
+        run_id: _run_atlas_2025_c48eae11
       input_views:
         - view_id: view:atlas/household_input:2025
           view_kind: atlas/household_input
           artifact:
             artifact_identity:
               digest_algorithm: sha256
-              content_digest: 6344f61a99ef56310455931c49556d354ffd8da0bc99b4b7b27aca3db364ab22
+              content_digest: f034ccdeaf44d915822a06874aeef2cb85e8ac2ce64b1b74c6fa5534700b2ddf
             locator: demos/2025/output/households.parquet
-          prepared_from_state: sha256:3f88fa41efca5d434bd86f97c126a5b90b21ba4189b50fb0346872734e3d049d
+          prepared_from_state: sha256:02490838b7ec4ddfe51dab4ddf01abd8bf1987a466bd82858b38b045ca740f11
       output_views:
         - view_id: view:atlas/vehicles_output:2025
           view_kind: atlas/vehicles_output
@@ -174,48 +195,100 @@ snapshots:
           views:
             - view:atlas/vehicles_output:2025
     core_state:
-      state_digest: sha256:8be82a369ff2b9119da052cfde1d1fdf123fe57e90ae4c33eb5e4d91fdf9eb7e
-      facets:
+      state_digest: sha256:12be08d68fa3d9bc3d06ce2b73395bd736ab11ca8eb42357b37474283f298e3f
+      facets: &id010
         - *id001
         - *id002
         - *id003
         - *id004
         - *id005
         - *id006
+        - *id007
+        - *id008
+        - *id009
         - facet: vehicles
           digest: sha256:700f5cf6433948d5dfddbfc1e6115480c20404099625d4f33c4b0f1e4db891bf
-  - snapshot_id: snapshot:2026:demos
+  - snapshot_id: snapshot:2025:polaris
     parent_snapshots:
       - snapshot:2025:atlas
+    simulation_year: 2025
+    step:
+      model: polaris
+      producing_run:
+        provider: consist
+        run_id: _run_polaris_2025_f7688326
+      input_views:
+        - view_id: view:polaris/vehicles_input:2025
+          view_kind: atlas/vehicles_output
+          artifact:
+            artifact_identity:
+              digest_algorithm: sha256
+              content_digest: 2a022d13bfd15318ff94507e9002d96b7a32a682366520d8a759d4891e581a0a
+            locator: atlas/2025/output/vehicles.parquet
+          prepared_from_state: sha256:12be08d68fa3d9bc3d06ce2b73395bd736ab11ca8eb42357b37474283f298e3f
+      output_views:
+        - view_id: view:polaris/demand_output:2025
+          view_kind: polaris/demand_output
+          artifact:
+            artifact_identity:
+              digest_algorithm: sha256
+              content_digest: 143639fc3858e271c102f16dc6e081e6758aacf71a679764290159c225104d69
+            locator: polaris/2025/Demand.sqlite
+      reads:
+        - households
+        - people
+        - household_membership
+        - person_demographics
+        - household_location
+        - household_income
+        - household_dwelling
+        - person_schooling
+        - person_employment
+        - vehicles
+      derivations: []
+    core_state:
+      state_digest: sha256:12be08d68fa3d9bc3d06ce2b73395bd736ab11ca8eb42357b37474283f298e3f
+      facets: *id010
+  - snapshot_id: snapshot:2026:demos
+    parent_snapshots:
+      - snapshot:2025:polaris
     simulation_year: 2026
     step:
       model: demos
       producing_run:
         provider: consist
-        run_id: _run_demos_2026_e813278a
+        run_id: _run_demos_2026_60542b09
       input_views:
         - view_id: view:demos/households_input:2026
-          view_kind: demos/households_input
+          view_kind: demos/households_output
           artifact:
             artifact_identity:
               digest_algorithm: sha256
-              content_digest: 6344f61a99ef56310455931c49556d354ffd8da0bc99b4b7b27aca3db364ab22
+              content_digest: f034ccdeaf44d915822a06874aeef2cb85e8ac2ce64b1b74c6fa5534700b2ddf
             locator: demos/2025/output/households.parquet
-          prepared_from_state: sha256:8be82a369ff2b9119da052cfde1d1fdf123fe57e90ae4c33eb5e4d91fdf9eb7e
+          prepared_from_state: sha256:12be08d68fa3d9bc3d06ce2b73395bd736ab11ca8eb42357b37474283f298e3f
+        - view_id: view:demos/persons_input:2026
+          view_kind: demos/persons_output
+          artifact:
+            artifact_identity:
+              digest_algorithm: sha256
+              content_digest: 452058887dd773151401f7728a0357593cee74d13434e061ad322951137de623
+            locator: demos/2025/output/persons.parquet
+          prepared_from_state: sha256:12be08d68fa3d9bc3d06ce2b73395bd736ab11ca8eb42357b37474283f298e3f
       output_views:
         - view_id: view:demos/households_output:2026
           view_kind: demos/households_output
           artifact:
             artifact_identity:
               digest_algorithm: sha256
-              content_digest: 022b5d6c9adb2021321faf2affa761157b96a41f429540bfd1340245e02afa6c
+              content_digest: f3fa0fdf162bf8ce6f002d34e91e9e446f4fa25c9522c7d906726ad428c08535
             locator: demos/2026/output/households.parquet
         - view_id: view:demos/persons_output:2026
           view_kind: demos/persons_output
           artifact:
             artifact_identity:
               digest_algorithm: sha256
-              content_digest: ba107e48a650fe97d450a17b9b2bb7269d50a20767954a9cac65185973216c1b
+              content_digest: 7cd4352679083e4d66c2bad8cd49a2d0f1e2a3ac8afbe6e6c043986f7ad14805
             locator: demos/2026/output/persons.parquet
         - view_id: view:demos/deaths_output:2026
           view_kind: demos/deaths_output
@@ -231,6 +304,10 @@ snapshots:
         - person_demographics
         - household_location
         - household_income
+        - household_dwelling
+        - person_schooling
+        - person_employment
+        - vehicles
       derivations:
         - facet: people
           mapping: mapping:demos-core/v1#people
@@ -244,8 +321,20 @@ snapshots:
           mapping: mapping:demos-core/v1#household_income
           views:
             - view:demos/households_output:2026
+        - facet: household_dwelling
+          mapping: mapping:refine-core/v1#household_dwelling
+          views:
+            - view:demos/households_output:2026
+        - facet: person_schooling
+          mapping: mapping:refine-core/v1#person_schooling
+          views:
+            - view:demos/persons_output:2026
+        - facet: person_employment
+          mapping: mapping:refine-core/v1#person_employment
+          views:
+            - view:demos/persons_output:2026
     core_state:
-      state_digest: sha256:da20f32019512b6779dda69bb6f0fa0679e65078e524028af2766effcd7d1611
+      state_digest: sha256:7df1174da0402a79742dd20786d49ccec60a7eef81d4ea337f7e56485cfc4edd
       facets:
         - facet: households
           digest: sha256:1d9dec264aebc0b6f6d4e9e8a62bf9a60a24b85bd587b487ca2bb95a23cf537c
@@ -264,6 +353,12 @@ snapshots:
           digest: sha256:a1344f66bd54c870afe8df2270965fd4b8fc243fcfa1e285c100027dec88f9b2
         - facet: household_income
           digest: sha256:c244b1ce966fa1d64ba35aede24ca4c539a4e958cdcfea667351c2854e1f222b
+        - facet: household_dwelling
+          digest: sha256:c51e9dadc6620d6c6ef01d9bba2a72ce26adf3be1ad20a097c8b3a88aa93f499
+        - facet: person_schooling
+          digest: sha256:fd7365fb107091a14f45ef1de5f69761340ea2a8c26eaad440d013d86781f8f2
+        - facet: person_employment
+          digest: sha256:b78ab4cad33287bdc2a32ca3355162a90ad5e14fc0ff27d43f8357abe715292a
         - facet: vehicles
           digest: sha256:700f5cf6433948d5dfddbfc1e6115480c20404099625d4f33c4b0f1e4db891bf
   - snapshot_id: snapshot:2026:atlas
@@ -274,16 +369,16 @@ snapshots:
       model: atlas
       producing_run:
         provider: consist
-        run_id: _run_atlas_2026_2ad6cc77
+        run_id: _run_atlas_2026_64c1ba33
       input_views:
         - view_id: view:atlas/household_input:2026
           view_kind: atlas/household_input
           artifact:
             artifact_identity:
               digest_algorithm: sha256
-              content_digest: 022b5d6c9adb2021321faf2affa761157b96a41f429540bfd1340245e02afa6c
+              content_digest: f3fa0fdf162bf8ce6f002d34e91e9e446f4fa25c9522c7d906726ad428c08535
             locator: demos/2026/output/households.parquet
-          prepared_from_state: sha256:da20f32019512b6779dda69bb6f0fa0679e65078e524028af2766effcd7d1611
+          prepared_from_state: sha256:7df1174da0402a79742dd20786d49ccec60a7eef81d4ea337f7e56485cfc4edd
       output_views:
         - view_id: view:atlas/vehicles_output:2026
           view_kind: atlas/vehicles_output
@@ -301,8 +396,8 @@ snapshots:
           views:
             - view:atlas/vehicles_output:2026
     core_state:
-      state_digest: sha256:1744ea84a1e8b8f531cdb486535076d58a83db4e83eb8d5dca0fcabfe96a78e2
-      facets:
+      state_digest: sha256:d7c746e668a3992e0e63e6ff867fb24c169aa166ccfd4c3576d11d62b273e051
+      facets: &id011
         - facet: households
           digest: sha256:1d9dec264aebc0b6f6d4e9e8a62bf9a60a24b85bd587b487ca2bb95a23cf537c
         - facet: people
@@ -320,10 +415,57 @@ snapshots:
           digest: sha256:a1344f66bd54c870afe8df2270965fd4b8fc243fcfa1e285c100027dec88f9b2
         - facet: household_income
           digest: sha256:c244b1ce966fa1d64ba35aede24ca4c539a4e958cdcfea667351c2854e1f222b
+        - facet: household_dwelling
+          digest: sha256:c51e9dadc6620d6c6ef01d9bba2a72ce26adf3be1ad20a097c8b3a88aa93f499
+        - facet: person_schooling
+          digest: sha256:fd7365fb107091a14f45ef1de5f69761340ea2a8c26eaad440d013d86781f8f2
+        - facet: person_employment
+          digest: sha256:b78ab4cad33287bdc2a32ca3355162a90ad5e14fc0ff27d43f8357abe715292a
         - facet: vehicles
           digest: sha256:fd41975c1a393c2f6a8cfe55b65aa2036d7e020246f3efefd5b481b0974d8cc6
+  - snapshot_id: snapshot:2026:polaris
+    parent_snapshots:
+      - snapshot:2026:atlas
+    simulation_year: 2026
+    step:
+      model: polaris
+      producing_run:
+        provider: consist
+        run_id: _run_polaris_2026_44d9b1cf
+      input_views:
+        - view_id: view:polaris/vehicles_input:2026
+          view_kind: atlas/vehicles_output
+          artifact:
+            artifact_identity:
+              digest_algorithm: sha256
+              content_digest: d8d35e21dc0fa4f5863604db340b93147e85cc591a3652614c17f91484c0659b
+            locator: atlas/2026/output/vehicles.parquet
+          prepared_from_state: sha256:d7c746e668a3992e0e63e6ff867fb24c169aa166ccfd4c3576d11d62b273e051
+      output_views:
+        - view_id: view:polaris/demand_output:2026
+          view_kind: polaris/demand_output
+          artifact:
+            artifact_identity:
+              digest_algorithm: sha256
+              content_digest: 2016a73d00cc624dd73b3073846a088efcaacf24714311fe3b1f3af6bb9851be
+            locator: polaris/2026/Demand.sqlite
+      reads:
+        - households
+        - people
+        - household_membership
+        - person_demographics
+        - household_location
+        - household_income
+        - household_dwelling
+        - person_schooling
+        - person_employment
+        - vehicles
+      derivations: []
+    core_state:
+      state_digest: sha256:d7c746e668a3992e0e63e6ff867fb24c169aa166ccfd4c3576d11d62b273e051
+      facets: *id011
 checkpoints:
   - simulation_year: 2025
-    snapshot: snapshot:2025:atlas
+    snapshot: snapshot:2025:polaris
   - simulation_year: 2026
-    snapshot: snapshot:2026:atlas
+    snapshot: snapshot:2026:polaris
