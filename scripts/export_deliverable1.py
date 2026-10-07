@@ -15,6 +15,7 @@ import argparse
 import os
 import shutil
 import subprocess
+import tempfile
 from pathlib import Path
 
 from linkml_runtime.utils.schemaview import SchemaView
@@ -317,10 +318,19 @@ This package delivers:
 def export_package(target_dir: Path) -> None:
     print(f"Exporting Deliverable 1 static schema package to: {target_dir}")
 
-    # 1. Clean and initialize directory structure
+    # 1. Clean and initialize directory structure (preserving .git if initialized)
+    git_backup = None
     if target_dir.exists():
+        git_dir = target_dir / ".git"
+        if git_dir.exists():
+            temp_dir = Path(tempfile.mkdtemp())
+            git_backup = temp_dir / ".git"
+            shutil.move(str(git_dir), str(git_backup))
         shutil.rmtree(target_dir)
     target_dir.mkdir(parents=True, exist_ok=True)
+    if git_backup and git_backup.exists():
+        shutil.move(str(git_backup), str(target_dir / ".git"))
+        shutil.rmtree(git_backup.parent, ignore_errors=True)
 
     schema_dest = target_dir / "schema"
     docs_dest = target_dir / "docs"
