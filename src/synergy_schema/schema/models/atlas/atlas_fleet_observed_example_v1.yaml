@@ -64,6 +64,8 @@ classes:
       simulation_year: not_inferred
       conformance_boundary: >-
         Membership and (HOUSEID, VEHID) uniqueness require an external checker.
+      geographic_scope: >-
+        Austin Metropolitan Area (FIPS 48.021, 48.053, 48.055, 48.209, 48.453, 48.491)
     unique_keys:
       atlas_vehicle_fleet_example_v1:
         description: >-
@@ -91,17 +93,52 @@ classes:
           physical_name: VEHID
         description: Observed vehicle identifier within a household.
       bodytype:
-        range: string
+        range: AtlasBodyTypeEnum
         description: Observed bodytype value.
       vintage_category:
-        range: string
+        range: AtlasVintageCategoryEnum
         description: Observed vintage_category value.
       annual_mileage:
         range: float
         description: Observed annual_mileage value.
       pred_power:
-        range: string
+        range: AtlasPowertrainEnum
         description: Observed pred_power value.
       modelyear:
         range: integer
         description: Observed modelyear value.
+
+enums:
+  AtlasBodyTypeEnum:
+    description: Observed vehicle body type categories in ATLAS fleet outputs.
+    permissible_values:
+      car:
+        description: Passenger cars, sedans, hatchbacks, coupes.
+      pickup:
+        description: Pickup trucks.
+      suv:
+        description: Sport utility vehicles and crossovers.
+      van:
+        description: Minivans and passenger vans.
+
+  AtlasVintageCategoryEnum:
+    description: Observed vehicle age / vintage categories in ATLAS fleet outputs.
+    permissible_values:
+      "0~5 years":
+        description: New to 5-year-old vehicles.
+      "6~11 years":
+        description: Mid-age vehicles.
+      "12+ years":
+        description: Older vehicles (12 years or older).
+
+  AtlasPowertrainEnum:
+    description: Observed vehicle powertrain types in ATLAS fleet outputs.
+    permissible_values:
+      AEV:
+        description: All-Electric Vehicle (Battery Electric Vehicle / BEV).
+      Hybrid:
+        description: Hybrid Electric Vehicle (HEV, non-plug-in).
+      ICE:
+        description: Internal Combustion Engine (gasoline / diesel).
+      PHEV:
+        description: Plug-in Hybrid Electric Vehicle.

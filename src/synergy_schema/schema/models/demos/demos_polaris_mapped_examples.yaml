@@ -66,6 +66,15 @@ classes:
         range: boolean
         required: true
         description: Physical household reorganization indicator column.
+      serialno_pums:
+        range: string
+        required: false
+        annotations:
+          physical_name: SERIALNO_PUMS
+          observed_value_gap: >-
+            Blank values occur in the supplied examples for reorganized households
+            or unlinked synthetic records.
+        description: Physical Census PUMS seed household identifier column.
 
   DemosPolarisMappedPersonExampleV1:
     description: >-
@@ -127,3 +136,21 @@ classes:
         range: float
         required: true
         description: Physical school-enrollment code column.
+      serialno_pums:
+        range: string
+        required: false
+        annotations:
+          physical_name: SERIALNO_PUMS
+          observed_value_gap: >-
+            Blank values occur in the supplied examples for newborn agents or
+            unlinked synthetic records.
+        description: Physical Census PUMS seed household identifier column.
+      sporder:
+        range: float
+        required: false
+        annotations:
+          physical_name: SPORDER
+          observed_value_gap: >-
+            Blank values occur in the supplied examples for newborn agents or
+            unlinked synthetic records.
+        description: Physical Census PUMS seed person sequence order column.

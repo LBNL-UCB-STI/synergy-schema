@@ -31,6 +31,7 @@ def test_demos_candidate_schema_has_exact_observed_example_roots_and_headers() -
         "income",
         "persons",
         "is_reorg_household",
+        "serialno_pums",
     ]
     assert list(view.get_class("DemosPolarisMappedPersonExampleV1").attributes) == [
         "person",
@@ -44,6 +45,8 @@ def test_demos_candidate_schema_has_exact_observed_example_roots_and_headers() -
         "marital_status",
         "employment",
         "school_enrollment",
+        "serialno_pums",
+        "sporder",
     ]
 
 
