@@ -264,6 +264,22 @@ jobs:
         uses: actions/deploy-pages@v4
 """
 
+STANDALONE_GITIGNORE = """# Python environments & cache
+__pycache__/
+*.py[cod]
+.venv/
+.uv/
+.pytest_cache/
+.ruff_cache/
+
+# Zensical / MkDocs caches & build output
+.cache/
+site/
+
+# Operating system
+.DS_Store
+"""
+
 STANDALONE_INDEX_MD = """# SYNERGY Static Cross-Model Schema Specification (Deliverable 1)
 
 Welcome to the official specification and reference documentation for **Deliverable #1: Static Single-Year Cross-Model Schema**.
@@ -334,6 +350,7 @@ def export_package(target_dir: Path) -> None:
     # 3. Write Root Files
     (target_dir / "README.md").write_text(STANDALONE_README, encoding="utf-8")
     (target_dir / "LICENSE").write_text(STANDALONE_LICENSE, encoding="utf-8")
+    (target_dir / ".gitignore").write_text(STANDALONE_GITIGNORE, encoding="utf-8")
     (target_dir / "pyproject.toml").write_text(STANDALONE_PYPROJECT, encoding="utf-8")
     (target_dir / "zensical.toml").write_text(STANDALONE_ZENSICAL, encoding="utf-8")
     (github_dest / "deploy-pages.yml").write_text(STANDALONE_WORKFLOW, encoding="utf-8")

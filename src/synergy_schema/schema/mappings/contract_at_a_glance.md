@@ -180,6 +180,15 @@ Maps Census PUMS `relp` codes to POLARIS Person relationship categories:
 - `1` $\to$ `1` (Male)
 - `2` $\to$ `2` (Female)
 
+### Crosswalk X-P3: Race of Head
+Maps Census PUMS race (`race_of_head` / `RAC1P`) to POLARIS race integer categories:
+- `1` (White alone) $\to$ `1` (White)
+- `2` (Black or African American alone) $\to$ `2` (Black)
+- `3..5` (American Indian / Alaska Native) $\to$ `3` (American Indian / Alaska Native)
+- `6` (Asian alone) $\to$ `4` (Asian)
+- `7` (Native Hawaiian and Other Pacific Islander) $\to$ `5` (Pacific Islander)
+- `8..9` (Some other race / Two or more races) $\to$ `6` (Other / Multiracial)
+
 ### Crosswalk X-P4: Educational Attainment
 Maps PUMS educational attainment (`education`) to POLARIS educational tiers:
 - `1..15` (Less than high school diploma) $\to$ `1` (Less than HS)
