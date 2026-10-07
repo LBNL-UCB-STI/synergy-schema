@@ -180,6 +180,12 @@ document$.subscribe(() => {
 });
 """
 
+STANDALONE_EXTRA_CSS = """/* Maximize horizontal reading width for tables and architecture diagrams */
+.md-grid {
+  max-width: 85rem;
+}
+"""
+
 STANDALONE_ZENSICAL = """[project]
 site_name = "SYNERGY Static Cross-Model Schema"
 site_description = "Static cross-model LinkML schemas and categorical crosswalks across UrbanSim, DEMOS, ATLAS, POLARIS, and Travel Skims"
@@ -188,6 +194,9 @@ site_dir = "site"
 extra_javascript = [
   "javascripts/mathjax.js",
   "https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js",
+]
+extra_css = [
+  "stylesheets/extra.css",
 ]
 
 nav = [
@@ -201,7 +210,7 @@ nav = [
 
 [project.theme]
 language = "en"
-features = ["content.code.copy", "navigation.indexes", "navigation.top", "search.highlight", "toc.follow"]
+features = ["content.code.copy", "navigation.indexes", "navigation.top", "search.highlight", "toc.integrate"]
 
 [project.markdown_extensions.pymdownx.superfences]
 custom_fences = [
@@ -414,10 +423,14 @@ def export_package(target_dir: Path) -> None:
             "  Copied authoritative interface workbook: DEMOS_and_ATLAS_to_POLARIS_interface.xlsx"
         )
 
-    # JavaScript assets (MathJax configuration)
+    # JavaScript & CSS assets (MathJax & layout configuration)
     js_dest = docs_dest / "javascripts"
     js_dest.mkdir(parents=True, exist_ok=True)
     (js_dest / "mathjax.js").write_text(STANDALONE_MATHJAX_JS, encoding="utf-8")
+
+    css_dest = docs_dest / "stylesheets"
+    css_dest.mkdir(parents=True, exist_ok=True)
+    (css_dest / "extra.css").write_text(STANDALONE_EXTRA_CSS, encoding="utf-8")
 
     # Deliverable 1 UML
     uml_content = render_deliverable_1_uml()
@@ -473,13 +486,13 @@ def export_package(target_dir: Path) -> None:
         "UrbanSimBlockMarginals",
         "BlockToTazMapping",
         "UrbanSimZonalTotals",
-        "DemosPolarisMappedHouseholdExampleV1",
-        "DemosPolarisMappedPersonExampleV1",
-        "AtlasHouseholdFleetOutputExampleV1",
-        "AtlasVehicleFleetOutputExampleV1",
-        "PolarisDemandDatabaseV1Household",
-        "PolarisDemandDatabaseV1Person",
-        "PolarisDemandDatabaseV1Vehicle",
+        "DemosPolarisMappedHousehold",
+        "DemosPolarisMappedPerson",
+        "AtlasHouseholdFleetOutput",
+        "AtlasVehicleFleetOutput",
+        "PolarisDemandDatabaseHousehold",
+        "PolarisDemandDatabasePerson",
+        "PolarisDemandDatabaseVehicle",
         "InputNetworkSkims",
         "NextYearNetworkSkims",
         "SingleYearModelHandoffPackage",

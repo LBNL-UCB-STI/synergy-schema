@@ -20,19 +20,20 @@ def test_provisional_fleet_output_roots_and_annotations() -> None:
     view = SchemaView(str(SCHEMA_PATH))
 
     assert set(view.all_classes()) == {
-        "AtlasHouseholdFleetOutputExampleV1",
-        "AtlasVehicleFleetOutputExampleV1",
+        "AtlasHouseholdFleetOutput",
+        "AtlasVehicleFleetOutput",
     }
     for class_name in view.all_classes():
         cls = view.induced_class(class_name)
-        assert cls.annotations["contract_family"].value == "provisional_fleet_output"
-        assert cls.annotations["status"].value == "provisional"
+        assert cls.annotations["contract_family"].value == "fleet_output"
+        assert cls.annotations["status"].value == "active"
+        assert cls.annotations["schema_status"].value == "authoritative"
 
 
 def test_physical_headers_identity_and_external_vehicle_key() -> None:
     view = SchemaView(str(SCHEMA_PATH))
-    household = view.induced_class("AtlasHouseholdFleetOutputExampleV1")
-    vehicle = view.induced_class("AtlasVehicleFleetOutputExampleV1")
+    household = view.induced_class("AtlasHouseholdFleetOutput")
+    vehicle = view.induced_class("AtlasVehicleFleetOutput")
 
     assert list(household.attributes) == ["houseid", "nvehicles"]
     assert list(vehicle.attributes) == [
@@ -49,13 +50,13 @@ def test_physical_headers_identity_and_external_vehicle_key() -> None:
         household.attributes["houseid"].annotations["physical_name"].value == "HOUSEID"
     )
     assert vehicle.attributes["vehid"].annotations["physical_name"].value == "VEHID"
-    assert vehicle.unique_keys["atlas_vehicle_fleet_example_v1"].unique_key_slots == [
+    assert vehicle.unique_keys["atlas_vehicle_fleet"].unique_key_slots == [
         "houseid",
         "vehid",
     ]
     assert (
         vehicle.attributes["houseid"].annotations["relationship_target"].value
-        == "AtlasHouseholdFleetOutputExampleV1"
+        == "AtlasHouseholdFleetOutput"
     )
 
 

@@ -22,17 +22,17 @@ def test_deliverable_1_schema_contains_all_models_and_channels() -> None:
     assert "UrbanSimZonalTotals" in classes
 
     # DEMOS
-    assert "DemosPolarisMappedHouseholdExampleV1" in classes
-    assert "DemosPolarisMappedPersonExampleV1" in classes
+    assert "DemosPolarisMappedHousehold" in classes
+    assert "DemosPolarisMappedPerson" in classes
 
     # ATLAS
-    assert "AtlasHouseholdFleetOutputExampleV1" in classes
-    assert "AtlasVehicleFleetOutputExampleV1" in classes
+    assert "AtlasHouseholdFleetOutput" in classes
+    assert "AtlasVehicleFleetOutput" in classes
 
     # POLARIS Demand & Skims
-    assert "PolarisDemandDatabaseV1Household" in classes
-    assert "PolarisDemandDatabaseV1Person" in classes
-    assert "PolarisDemandDatabaseV1Vehicle" in classes
+    assert "PolarisDemandDatabaseHousehold" in classes
+    assert "PolarisDemandDatabasePerson" in classes
+    assert "PolarisDemandDatabaseVehicle" in classes
     assert "InputNetworkSkims" in classes
     assert "NextYearNetworkSkims" in classes
 

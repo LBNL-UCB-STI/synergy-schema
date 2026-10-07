@@ -18,10 +18,10 @@ def test_demos_candidate_schema_has_exact_observed_example_roots_and_headers() -
     view = SchemaView(str(SCHEMA_PATH))
 
     assert set(view.all_classes()) == {
-        "DemosPolarisMappedHouseholdExampleV1",
-        "DemosPolarisMappedPersonExampleV1",
+        "DemosPolarisMappedHousehold",
+        "DemosPolarisMappedPerson",
     }
-    assert list(view.get_class("DemosPolarisMappedHouseholdExampleV1").attributes) == [
+    assert list(view.get_class("DemosPolarisMappedHousehold").attributes) == [
         "household",
         "block_id",
         "lcm_county_id",
@@ -33,7 +33,7 @@ def test_demos_candidate_schema_has_exact_observed_example_roots_and_headers() -
         "is_reorg_household",
         "serialno_pums",
     ]
-    assert list(view.get_class("DemosPolarisMappedPersonExampleV1").attributes) == [
+    assert list(view.get_class("DemosPolarisMappedPerson").attributes) == [
         "person",
         "relp",
         "gender",
@@ -54,12 +54,12 @@ def test_demos_provisional_schema_marks_status_and_conservative_required_types()
     None
 ):
     view = SchemaView(str(SCHEMA_PATH))
-    household = view.get_class("DemosPolarisMappedHouseholdExampleV1")
-    person = view.get_class("DemosPolarisMappedPersonExampleV1")
+    household = view.get_class("DemosPolarisMappedHousehold")
+    person = view.get_class("DemosPolarisMappedPerson")
 
     for cls in (household, person):
-        assert str(cls.annotations["evidence_status"].value) == "observed_example"
-        assert str(cls.annotations["schema_status"].value) == "provisional"
+        assert str(cls.annotations["schema_status"].value) == "authoritative"
+        assert str(cls.annotations["status"].value) == "active"
 
     assert household.attributes["household"].range == "integer"
     assert household.attributes["persons"].range == "integer"

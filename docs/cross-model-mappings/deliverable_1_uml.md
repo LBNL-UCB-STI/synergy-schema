@@ -126,7 +126,7 @@ traceability (`SERIALNO_PUMS`, `SPORDER`) while providing microdata agents to AT
 
 ```mermaid
 classDiagram
-    class DemosPolarisMappedHouseholdExampleV1 {
+    class DemosPolarisMappedHousehold {
         +int household [PK]
         +int block_id
         +int lcm_county_id
@@ -138,7 +138,7 @@ classDiagram
         +bool is_reorg_household
         +string serialno_pums [PUMS Trace]
     }
-    class DemosPolarisMappedPersonExampleV1 {
+    class DemosPolarisMappedPerson {
         +int person
         +int household [FK]
         +float id [Ordinal]
@@ -153,7 +153,7 @@ classDiagram
         +string serialno_pums [PUMS Trace]
         +float sporder [PUMS Order]
     }
-    DemosPolarisMappedHouseholdExampleV1 "1" --> "1..*" DemosPolarisMappedPersonExampleV1 : contains
+    DemosPolarisMappedHousehold "1" --> "1..*" DemosPolarisMappedPerson : contains
 ```
 
 ---
@@ -165,11 +165,11 @@ predicting body types and powertrains (ICE, HEV, PHEV, AEV).
 
 ```mermaid
 classDiagram
-    class AtlasHouseholdFleetOutputExampleV1 {
+    class AtlasHouseholdFleetOutput {
         +int houseid [PK]
         +int nvehicles
     }
-    class AtlasVehicleFleetOutputExampleV1 {
+    class AtlasVehicleFleetOutput {
         +int houseid [FK]
         +int vehid [Ordinal]
         +AtlasBodyTypeEnum bodytype
@@ -192,9 +192,9 @@ classDiagram
         PHEV
         AEV
     }
-    AtlasHouseholdFleetOutputExampleV1 "1" --> "0..*" AtlasVehicleFleetOutputExampleV1 : owns
-    AtlasVehicleFleetOutputExampleV1 ..> AtlasBodyTypeEnum : classified_by
-    AtlasVehicleFleetOutputExampleV1 ..> AtlasPowertrainEnum : powered_by
+    AtlasHouseholdFleetOutput "1" --> "0..*" AtlasVehicleFleetOutput : owns
+    AtlasVehicleFleetOutput ..> AtlasBodyTypeEnum : classified_by
+    AtlasVehicleFleetOutput ..> AtlasPowertrainEnum : powered_by
 ```
 
 ---
@@ -207,7 +207,7 @@ dynamic network skims.
 
 ```mermaid
 classDiagram
-    class PolarisDemandDatabaseV1Household {
+    class PolarisDemandDatabaseHousehold {
         +int household [PK]
         +int size
         +int income
@@ -217,7 +217,7 @@ classDiagram
         +int location [FK]
         +int county
     }
-    class PolarisDemandDatabaseV1Person {
+    class PolarisDemandDatabasePerson {
         +int household [FK]
         +int id [Ordinal]
         +int age
@@ -228,7 +228,7 @@ classDiagram
         +int student_status [Crosswalk X-P6]
         +int income
     }
-    class PolarisDemandDatabaseV1Vehicle {
+    class PolarisDemandDatabaseVehicle {
         +int household [FK]
         +int id [Ordinal]
         +int type [Crosswalk X-V1]
@@ -254,6 +254,6 @@ classDiagram
         +float sov_time_pm
         +float congestion_index
     }
-    PolarisDemandDatabaseV1Household "1" --> "1..*" PolarisDemandDatabaseV1Person : members
-    PolarisDemandDatabaseV1Household "1" --> "0..*" PolarisDemandDatabaseV1Vehicle : vehicles
+    PolarisDemandDatabaseHousehold "1" --> "1..*" PolarisDemandDatabasePerson : members
+    PolarisDemandDatabaseHousehold "1" --> "0..*" PolarisDemandDatabaseVehicle : vehicles
 ```

@@ -1,0 +1,4 @@
+/* Maximize horizontal reading width for tables and architecture diagrams */
+.md-grid {
+  max-width: 85rem;
+}

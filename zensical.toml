@@ -55,9 +55,13 @@ nav = [
     ] },
 ]
 
+extra_css = [
+  "stylesheets/extra.css",
+]
+
 [project.theme]
 language = "en"
-features = ["content.code.copy", "navigation.indexes", "navigation.top", "search.highlight", "toc.follow"]
+features = ["content.code.copy", "navigation.indexes", "navigation.top", "search.highlight", "toc.integrate"]
 
 [project.markdown_extensions.pymdownx.superfences]
 custom_fences = [

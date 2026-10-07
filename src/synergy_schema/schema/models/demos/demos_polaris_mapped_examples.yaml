@@ -18,16 +18,16 @@ imports:
   - linkml:types
 
 classes:
-  DemosPolarisMappedHouseholdExampleV1:
+  DemosPolarisMappedHousehold:
     description: >-
-      Provisional household row contract for a supplied CSV export mapped
-      from POLARIS. The physical columns are preserved exactly. Any relation
-      to person rows and interpretation of persons as a row count are
-      conformance checks outside this LinkML row shape.
+      Authoritative household schema for DEMOS synthetic population mapped
+      for POLARIS simulation. Physical columns match the DEMOS household export.
+    aliases:
+      - DemosHousehold
     annotations:
-      evidence_status: observed_example
-      schema_status: provisional
-      authority_status: maintainer_review_pending
+      schema_status: authoritative
+      status: active
+      authority_status: approved
     attributes:
       household:
         range: integer
@@ -76,16 +76,16 @@ classes:
             or unlinked synthetic records.
         description: Physical Census PUMS seed household identifier column.
 
-  DemosPolarisMappedPersonExampleV1:
+  DemosPolarisMappedPerson:
     description: >-
-      Provisional person row contract for a supplied CSV export mapped from
-      POLARIS. The physical columns are preserved exactly. The household field
-      is an observed primitive identifier column; relationship conformance is
-      outside this LinkML row shape, and id is not asserted to be unique.
+      Authoritative person schema for DEMOS synthetic population mapped for
+      POLARIS simulation. Physical columns match the DEMOS person export.
+    aliases:
+      - DemosPerson
     annotations:
-      evidence_status: observed_example
-      schema_status: provisional
-      authority_status: maintainer_review_pending
+      schema_status: authoritative
+      status: active
+      authority_status: approved
     attributes:
       person:
         range: integer

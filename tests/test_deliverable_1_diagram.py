@@ -10,13 +10,13 @@ def test_deliverable_1_uml_contains_all_models_and_diagrams() -> None:
     assert "UrbanSimBlockMarginals" in rendered
     assert "BlockToTazMapping" in rendered
     assert "UrbanSimZonalTotals" in rendered
-    assert "DemosPolarisMappedHouseholdExampleV1" in rendered
-    assert "DemosPolarisMappedPersonExampleV1" in rendered
-    assert "AtlasHouseholdFleetOutputExampleV1" in rendered
-    assert "AtlasVehicleFleetOutputExampleV1" in rendered
-    assert "PolarisDemandDatabaseV1Household" in rendered
-    assert "PolarisDemandDatabaseV1Person" in rendered
-    assert "PolarisDemandDatabaseV1Vehicle" in rendered
+    assert "DemosPolarisMappedHousehold" in rendered
+    assert "DemosPolarisMappedPerson" in rendered
+    assert "AtlasHouseholdFleetOutput" in rendered
+    assert "AtlasVehicleFleetOutput" in rendered
+    assert "PolarisDemandDatabaseHousehold" in rendered
+    assert "PolarisDemandDatabasePerson" in rendered
+    assert "PolarisDemandDatabaseVehicle" in rendered
     assert "InputNetworkSkims" in rendered
     assert "NextYearNetworkSkims" in rendered
 

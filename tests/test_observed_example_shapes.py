@@ -72,11 +72,11 @@ def test_candidate_rows_validate_after_explicit_physical_header_binding() -> Non
         "housing_unit_type": 1,
     }
 
-    assert _messages(demos_household, "DemosPolarisMappedHouseholdExampleV1") == []
-    assert _messages(demos_person_without_id, "DemosPolarisMappedPersonExampleV1") == []
-    assert _messages(atlas_household, "AtlasHouseholdFleetOutputExampleV1") == []
-    assert _messages(atlas_vehicle, "AtlasVehicleFleetOutputExampleV1") == []
-    assert _messages(polaris_household, "PolarisDemandDatabaseV1Household") == []
+    assert _messages(demos_household, "DemosPolarisMappedHousehold") == []
+    assert _messages(demos_person_without_id, "DemosPolarisMappedPerson") == []
+    assert _messages(atlas_household, "AtlasHouseholdFleetOutput") == []
+    assert _messages(atlas_vehicle, "AtlasVehicleFleetOutput") == []
+    assert _messages(polaris_household, "PolarisDemandDatabaseHousehold") == []
 
 
 def test_candidate_shape_rejects_missing_required_or_unobserved_columns() -> None:
@@ -95,10 +95,8 @@ def test_candidate_shape_rejects_missing_required_or_unobserved_columns() -> Non
         "hhold": 1,
     }
 
-    assert _messages(missing_atlas_household_key, "AtlasHouseholdFleetOutputExampleV1")
-    assert _messages(
-        demos_person_with_unobserved_hhold, "DemosPolarisMappedPersonExampleV1"
-    )
+    assert _messages(missing_atlas_household_key, "AtlasHouseholdFleetOutput")
+    assert _messages(demos_person_with_unobserved_hhold, "DemosPolarisMappedPerson")
     invalid_atlas_vehicle = {
         "houseid": 527120,
         "vehid": 1,
@@ -108,4 +106,4 @@ def test_candidate_shape_rejects_missing_required_or_unobserved_columns() -> Non
         "pred_power": "warp_drive",
         "modelyear": 2020,
     }
-    assert _messages(invalid_atlas_vehicle, "AtlasVehicleFleetOutputExampleV1")
+    assert _messages(invalid_atlas_vehicle, "AtlasVehicleFleetOutput")
