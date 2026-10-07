@@ -13,6 +13,7 @@ def test_dist_contains_all_deliverable_schemas_and_files() -> None:
     assert (DIST_DIR / "LICENSE").exists()
     assert (DIST_DIR / ".gitignore").exists()
     assert (DIST_DIR / "pyproject.toml").exists()
+    assert (DIST_DIR / "uv.lock").exists()
     assert (DIST_DIR / "zensical.toml").exists()
     assert (DIST_DIR / ".github" / "workflows" / "deploy-pages.yml").exists()
 

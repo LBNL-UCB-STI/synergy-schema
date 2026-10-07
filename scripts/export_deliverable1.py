@@ -355,6 +355,9 @@ def export_package(target_dir: Path) -> None:
     (target_dir / "zensical.toml").write_text(STANDALONE_ZENSICAL, encoding="utf-8")
     (github_dest / "deploy-pages.yml").write_text(STANDALONE_WORKFLOW, encoding="utf-8")
 
+    print("  Locking dependencies with uv lock...")
+    subprocess.run(["uv", "lock"], check=True, cwd=target_dir)
+
     # 4. Generate Documentation Pages
     (docs_dest / "index.md").write_text(STANDALONE_INDEX_MD, encoding="utf-8")
 
