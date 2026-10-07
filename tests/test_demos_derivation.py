@@ -2,8 +2,11 @@
 
 from __future__ import annotations
 
+from pathlib import Path
+
 import duckdb
 import pyarrow as pa
+import pytest
 
 from synergy_schema.conformance.tabular_digest import compute_tabular_digest
 from synergy_schema.pipeline.derive import (
@@ -207,20 +210,26 @@ def test_demos_derivation_writes_and_recomputes_digests(tmp_path):
         assert recomputed == result["digests"][name]
 
 
-def test_demos_derivation_with_real_demos_sample(tmp_path):
+def test_demos_derivation_with_real_demos_sample(tmp_path: Path) -> None:
     """Verify derivation against a sample extracted from real DEMOS CSV outputs."""
+    real_hh = Path("evidence/demos_outputs/Household2018_POLARIS_mapped.csv")
+    real_p = Path("evidence/demos_outputs/Person2018_POLARIS_mapped.csv")
+
+    if not (real_hh.exists() and real_p.exists()):
+        pytest.skip("Evidence DEMOS files not available")
+
     hh_csv = tmp_path / "real_sample_hh.csv"
     p_csv = tmp_path / "real_sample_p.csv"
 
     # Extract 20 households and matching persons from evidence/demos_outputs
     con = duckdb.connect()
-    con.execute("""
+    con.execute(f"""
         CREATE TABLE sample_hh AS
-        SELECT * FROM read_csv_auto('evidence/demos_outputs/Household2018_POLARIS_mapped.csv')
+        SELECT * FROM read_csv_auto('{real_hh.as_posix()}')
         LIMIT 20;
 
         CREATE TABLE sample_p AS
-        SELECT p.* FROM read_csv_auto('evidence/demos_outputs/Person2018_POLARIS_mapped.csv') p
+        SELECT p.* FROM read_csv_auto('{real_p.as_posix()}') p
         WHERE p.household IN (SELECT household FROM sample_hh);
     """)
 
