@@ -31,6 +31,9 @@ def test_dist_contains_all_deliverable_schemas_and_files() -> None:
     ).exists()
     assert (schema_dir / "models" / "polaris" / "polaris_skims.yaml").exists()
     assert (schema_dir / "mappings" / "single_year_handoff.yaml").exists()
+    assert (
+        DIST_DIR / "docs" / "resources" / "DEMOS_and_ATLAS_to_POLARIS_interface.xlsx"
+    ).exists()
 
 
 def test_dist_site_is_compiled_with_all_sections() -> None:
@@ -40,11 +43,17 @@ def test_dist_site_is_compiled_with_all_sections() -> None:
     assert (site_dir / "deliverable_1_uml" / "index.html").exists()
     assert (site_dir / "schema" / "index.html").exists()
     assert (site_dir / "search.json").exists()
+    assert (
+        site_dir / "resources" / "DEMOS_and_ATLAS_to_POLARIS_interface.xlsx"
+    ).exists()
 
 
 def test_dist_isolation_from_fy27_longitudinal_ledger() -> None:
     """Strictly assert no FY27 longitudinal ledger code or core population assembly is in dist."""
     for root, dirs, files in os.walk(DIST_DIR):
+        dirs[:] = [
+            d for d in dirs if d not in {".venv", ".git", ".cache", "__pycache__"}
+        ]
         for name in files:
             p = Path(root) / name
             assert "population_trajectory" not in name, (
