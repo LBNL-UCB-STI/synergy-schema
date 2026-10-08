@@ -78,6 +78,7 @@ classes:
         annotations:
           physical_name: HOUSEID
           relationship_target: AtlasHouseholdFleetOutput
+          foreign_key: AtlasHouseholdFleetOutput.houseid
         description: Household identifier joining to AtlasHouseholdFleetOutput.
       vehid:
         range: integer

@@ -20,6 +20,7 @@ from pathlib import Path
 
 from linkml_runtime.utils.schemaview import SchemaView
 from synergy_schema.deliverable_1_diagram import render_deliverable_1_uml
+from synergy_schema.interactive_diagram import generate_interactive_diagram
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_DIST = REPO_ROOT / "dist" / "synergy-static-schema"
@@ -194,6 +195,7 @@ site_dir = "site"
 extra_javascript = [
   "javascripts/mathjax.js",
   "https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js",
+  "javascripts/interactive_schema.js",
 ]
 extra_css = [
   "stylesheets/extra.css",
@@ -201,6 +203,7 @@ extra_css = [
 
 nav = [
     { "Overview" = "index.md" },
+    { "Interactive Schema Explorer" = "interactive-schema.md" },
     { "Architecture & UML" = "deliverable_1_uml.md" },
     { "Contract at a Glance" = "contract-at-a-glance.md" },
     { "Schema Reference" = [
@@ -423,18 +426,33 @@ def export_package(target_dir: Path) -> None:
             "  Copied authoritative interface workbook: DEMOS_and_ATLAS_to_POLARIS_interface.xlsx"
         )
 
-    # JavaScript & CSS assets (MathJax & layout configuration)
+    # JavaScript & CSS assets (MathJax, interactive explorer, and layout configuration)
     js_dest = docs_dest / "javascripts"
     js_dest.mkdir(parents=True, exist_ok=True)
     (js_dest / "mathjax.js").write_text(STANDALONE_MATHJAX_JS, encoding="utf-8")
+    interactive_js_src = REPO_ROOT / "docs" / "javascripts" / "interactive_schema.js"
+    if interactive_js_src.exists():
+        shutil.copy2(interactive_js_src, js_dest / "interactive_schema.js")
 
     css_dest = docs_dest / "stylesheets"
     css_dest.mkdir(parents=True, exist_ok=True)
-    (css_dest / "extra.css").write_text(STANDALONE_EXTRA_CSS, encoding="utf-8")
+    extra_css_src = REPO_ROOT / "docs" / "stylesheets" / "extra.css"
+    if extra_css_src.exists():
+        shutil.copy2(extra_css_src, css_dest / "extra.css")
+    else:
+        (css_dest / "extra.css").write_text(STANDALONE_EXTRA_CSS, encoding="utf-8")
 
     # Deliverable 1 UML
     uml_content = render_deliverable_1_uml()
     (docs_dest / "deliverable_1_uml.md").write_text(uml_content, encoding="utf-8")
+
+    # Interactive Schema Explorer page
+    master_yaml = schema_dest / "deliverable_1_static_schema.yaml"
+    generate_interactive_diagram(
+        schema_path=master_yaml,
+        output_path=docs_dest / "interactive-schema.md",
+        js_src="javascripts/interactive_schema.js",
+    )
 
     # LinkML gen-doc
     gen_doc_dir = docs_dest / "schema"

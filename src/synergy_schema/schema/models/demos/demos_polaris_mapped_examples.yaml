@@ -37,6 +37,8 @@ classes:
       block_id:
         range: integer
         required: true
+        annotations:
+          foreign_key: UrbanSimBlockMarginals.block_id
         description: Physical block identifier column.
       lcm_county_id:
         range: integer
@@ -94,14 +96,20 @@ classes:
       relp:
         range: integer
         required: true
+        annotations:
+          crosswalk: X-P1
         description: Physical relationship-to-household code column.
       gender:
         range: integer
         required: true
+        annotations:
+          crosswalk: X-P2
         description: Physical gender code column.
       education:
         range: integer
         required: true
+        annotations:
+          crosswalk: X-P4
         description: Physical education code column.
       income:
         range: float
@@ -123,6 +131,8 @@ classes:
       household:
         range: integer
         required: true
+        annotations:
+          foreign_key: DemosPolarisMappedHousehold.household
         description: Physical household identifier column.
       marital_status:
         range: integer
@@ -131,10 +141,14 @@ classes:
       employment:
         range: float
         required: true
+        annotations:
+          crosswalk: X-P5
         description: Physical employment code column.
       school_enrollment:
         range: float
         required: true
+        annotations:
+          crosswalk: X-P6
         description: Physical school-enrollment code column.
       serialno_pums:
         range: string

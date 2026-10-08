@@ -114,10 +114,14 @@ classes:
       block_id:
         range: string
         required: true
+        annotations:
+          foreign_key: UrbanSimBlockMarginals.block_id
         description: Census block identifier referencing UrbanSimBlockMarginals.
       zone_id:
         range: integer
         required: true
+        annotations:
+          foreign_key: UrbanSimZonalTotals.zone_id
         description: Macro-zone / Traffic Analysis Zone (TAZ) identifier.
       area_share:
         range: float

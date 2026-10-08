@@ -58,6 +58,7 @@ classes:
         required: true
         annotations:
           physical_name: location
+          foreign_key: UrbanSimZonalTotals.zone_id
         description: Physical household location identifier.
       persons:
         range: integer
@@ -120,6 +121,7 @@ classes:
         annotations:
           physical_name: household
           relationship_target: PolarisDemandDatabaseHousehold.household
+          foreign_key: PolarisDemandDatabaseHousehold.household
           validation_boundary: external conformance check, not a SQLite foreign key
         description: Physical household join value checked externally against Household.household.
       id:
@@ -153,6 +155,7 @@ classes:
         annotations:
           physical_name: hhold
           relationship_target: PolarisDemandDatabaseHousehold.household
+          foreign_key: PolarisDemandDatabaseHousehold.household
           validation_boundary: external conformance check, not a SQLite foreign key
         description: Physical household join value checked externally against Household.household.
       type:
