@@ -21,6 +21,8 @@ imports:
   - models/atlas/atlas_fleet_observed_example_v1
   - models/polaris/polaris_demand_database_v1
   - models/polaris/polaris_skims
+  - models/activitysim/activitysim_population
+  - models/beam/beam
   - mappings/single_year_handoff
 
 annotations:

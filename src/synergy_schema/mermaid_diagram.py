@@ -31,6 +31,13 @@ REGIONAL_CLASSES = [
     "PolarisDemandDatabaseVehicle",
     "InputNetworkSkims",
     "NextYearNetworkSkims",
+    "ActivitySimHouseholdInputRecord",
+    "ActivitySimPersonInputRecord",
+    "BeamHouseholdRecord",
+    "BeamPersonRecord",
+    "BeamVehicleRecord",
+    "BeamPlanRecord",
+    "BeamNetworkSkims",
 ]
 
 
@@ -53,7 +60,13 @@ def _clean_type(range_val: str | None) -> str:
 
 def _clean_comment(comment: str) -> str:
     """Escape comments for Mermaid ER diagram string literals."""
-    return comment.replace('"', "'").replace("\n", " ").strip()
+    return (
+        comment.replace('"', "'")
+        .replace("{", "")
+        .replace("}", "")
+        .replace("\n", " ")
+        .strip()
+    )
 
 
 def generate_mermaid_erd(
@@ -172,6 +185,84 @@ def generate_mermaid_erd(
             '    UrbanSimZonalTotals ||--o{ NextYearNetworkSkims : "TAZ dimension"'
         )
 
+    # ActivitySim intra-model & cross-model
+    if (
+        "ActivitySimHouseholdInputRecord" in target_classes
+        and "ActivitySimPersonInputRecord" in target_classes
+    ):
+        lines.append(
+            '    ActivitySimHouseholdInputRecord ||--|{ ActivitySimPersonInputRecord : "contains"'
+        )
+
+    if (
+        "DemosPolarisMappedHousehold" in target_classes
+        and "ActivitySimHouseholdInputRecord" in target_classes
+    ):
+        lines.append(
+            '    DemosPolarisMappedHousehold ||--|| ActivitySimHouseholdInputRecord : "pop lineage"'
+        )
+
+    if (
+        "UrbanSimZonalTotals" in target_classes
+        and "ActivitySimHouseholdInputRecord" in target_classes
+    ):
+        lines.append(
+            '    UrbanSimZonalTotals ||--o{ ActivitySimHouseholdInputRecord : "TAZ location"'
+        )
+
+    # BEAM intra-model & cross-model
+    if "BeamHouseholdRecord" in target_classes and "BeamPersonRecord" in target_classes:
+        lines.append('    BeamHouseholdRecord ||--|{ BeamPersonRecord : "contains"')
+
+    if (
+        "BeamHouseholdRecord" in target_classes
+        and "BeamVehicleRecord" in target_classes
+    ):
+        lines.append('    BeamHouseholdRecord ||--|{ BeamVehicleRecord : "owns"')
+
+    if "BeamPersonRecord" in target_classes and "BeamVehicleRecord" in target_classes:
+        lines.append('    BeamPersonRecord ||--o{ BeamVehicleRecord : "drives"')
+
+    if "BeamPersonRecord" in target_classes and "BeamPlanRecord" in target_classes:
+        lines.append('    BeamPersonRecord ||--|{ BeamPlanRecord : "executes"')
+
+    if (
+        "DemosPolarisMappedHousehold" in target_classes
+        and "BeamHouseholdRecord" in target_classes
+    ):
+        lines.append(
+            '    DemosPolarisMappedHousehold ||--|| BeamHouseholdRecord : "pop lineage"'
+        )
+
+    if (
+        "AtlasVehicleFleetOutput" in target_classes
+        and "BeamVehicleRecord" in target_classes
+    ):
+        lines.append(
+            '    AtlasVehicleFleetOutput ||--|| BeamVehicleRecord : "vehicle staging"'
+        )
+
+    if (
+        "UrbanSimBlockMarginals" in target_classes
+        and "BeamHouseholdRecord" in target_classes
+    ):
+        lines.append(
+            '    UrbanSimBlockMarginals ||--o{ BeamHouseholdRecord : "block control"'
+        )
+
+    if (
+        "UrbanSimZonalTotals" in target_classes
+        and "BeamHouseholdRecord" in target_classes
+    ):
+        lines.append(
+            '    UrbanSimZonalTotals ||--o{ BeamHouseholdRecord : "TAZ location"'
+        )
+
+    if "UrbanSimZonalTotals" in target_classes and "BeamNetworkSkims" in target_classes:
+        lines.append(
+            '    UrbanSimZonalTotals ||--o{ BeamNetworkSkims : "TAZ dimension"'
+        )
+
     lines.append("")
 
     # 2. Define Entities with Attributes
@@ -242,6 +333,57 @@ def generate_mermaid_erd(
                 cls_name in {"InputNetworkSkims", "NextYearNetworkSkims"}
                 and slot.name == "zone_count"
             ):
+                is_fk = True
+            elif (
+                cls_name == "ActivitySimHouseholdInputRecord"
+                and slot.name == "household_id"
+            ):
+                is_pk = True
+            elif cls_name == "ActivitySimHouseholdInputRecord" and slot.name == "TAZ":
+                is_fk = True
+            elif (
+                cls_name == "ActivitySimPersonInputRecord" and slot.name == "member_id"
+            ):
+                is_pk = True
+            elif cls_name == "ActivitySimPersonInputRecord" and slot.name in {
+                "household_id",
+                "work_zone_id",
+                "school_zone_id",
+            }:
+                is_fk = True
+            elif cls_name == "BeamHouseholdRecord" and slot.name == "household_id":
+                is_pk = True
+            elif cls_name == "BeamHouseholdRecord" and slot.name in {
+                "block_id",
+                "home_zone_id",
+            }:
+                is_fk = True
+            elif cls_name == "BeamPersonRecord" and slot.name == "person_id":
+                is_pk = True
+            elif cls_name == "BeamPersonRecord" and slot.name in {
+                "household_id",
+                "home_zone_id",
+                "workplace_zone_id",
+                "school_zone_id",
+            }:
+                is_fk = True
+            elif cls_name == "BeamVehicleRecord" and slot.name == "vehicle_id":
+                is_pk = True
+            elif cls_name == "BeamVehicleRecord" and slot.name in {
+                "household_id",
+                "maindriver_id",
+                "source_vehicle_id",
+            }:
+                is_fk = True
+            elif cls_name == "BeamPlanRecord" and slot.name in {
+                "person_id",
+                "tour_id",
+                "trip_id",
+            }:
+                is_fk = True
+            elif cls_name == "BeamNetworkSkims" and slot.name == "file_path":
+                is_pk = True
+            elif cls_name == "BeamNetworkSkims" and slot.name == "zone_count":
                 is_fk = True
 
             if is_pk:

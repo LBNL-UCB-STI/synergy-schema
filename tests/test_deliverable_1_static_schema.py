@@ -36,6 +36,17 @@ def test_deliverable_1_schema_contains_all_models_and_channels() -> None:
     assert "InputNetworkSkims" in classes
     assert "NextYearNetworkSkims" in classes
 
+    # ActivitySim
+    assert "ActivitySimHouseholdInputRecord" in classes
+    assert "ActivitySimPersonInputRecord" in classes
+
+    # BEAM
+    assert "BeamHouseholdRecord" in classes
+    assert "BeamPersonRecord" in classes
+    assert "BeamVehicleRecord" in classes
+    assert "BeamPlanRecord" in classes
+    assert "BeamNetworkSkims" in classes
+
     # Handoff contracts
     assert "SingleYearModelHandoffPackage" in classes
     assert "ModelHandoffChannel" in classes

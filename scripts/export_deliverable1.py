@@ -65,9 +65,15 @@ The full interactive schema reference, searchable dictionary, and visual UML dia
 │   │   ├── urbansim/urbansim_land_use.yaml
 │   │   ├── demos/demos_polaris_mapped_examples.yaml
 │   │   ├── atlas/atlas_fleet_observed_example_v1.yaml
-│   │   └── polaris/
-│   │       ├── polaris_demand_database_v1.yaml
-│   │       └── polaris_skims.yaml
+│   │   ├── polaris/
+│   │   │   ├── polaris_demand_database_v1.yaml
+│   │   │   └── polaris_skims.yaml
+│   │   ├── activitysim/activitysim_population.yaml
+│   │   └── beam/
+│   │       ├── beam.yaml
+│   │       ├── beam_population.yaml
+│   │       ├── beam_plans.yaml
+│   │       └── beam_skims.yaml
 │   └── mappings/
 │       └── single_year_handoff.yaml
 ├── pyproject.toml             # Python configuration & dependencies for LinkML & Zensical
@@ -381,6 +387,11 @@ def export_package(target_dir: Path) -> None:
         "models/atlas/atlas_fleet_observed_example_v1.yaml",
         "models/polaris/polaris_demand_database_v1.yaml",
         "models/polaris/polaris_skims.yaml",
+        "models/activitysim/activitysim_population.yaml",
+        "models/beam/beam.yaml",
+        "models/beam/beam_population.yaml",
+        "models/beam/beam_plans.yaml",
+        "models/beam/beam_skims.yaml",
         "mappings/single_year_handoff.yaml",
     ]
 

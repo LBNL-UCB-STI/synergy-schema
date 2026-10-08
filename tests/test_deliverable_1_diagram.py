@@ -19,11 +19,25 @@ def test_deliverable_1_uml_contains_all_models_and_diagrams() -> None:
     assert "PolarisDemandDatabaseVehicle" in rendered
     assert "InputNetworkSkims" in rendered
     assert "NextYearNetworkSkims" in rendered
+    assert "ActivitySimHouseholdInputRecord" in rendered
+    assert "ActivitySimPersonInputRecord" in rendered
+    assert "BeamHouseholdRecord" in rendered
+    assert "BeamPersonRecord" in rendered
+    assert "BeamVehicleRecord" in rendered
+    assert "BeamPlanRecord" in rendered
+    assert "BeamNetworkSkims" in rendered
+
+    # Workflow tabs
+    assert '=== "Primary Workflow: POLARIS Dynamic Traffic Assignment"' in rendered
+    assert (
+        '=== "LBL Counterpart Workflow: ActivitySim Demand & BEAM Dynamic Simulation"'
+        in rendered
+    )
 
     # Diagram blocks
-    assert rendered.count("classDiagram") == 4
-    assert rendered.count("flowchart TD") == 1
-    assert rendered.count("```mermaid") == 5
+    assert rendered.count("classDiagram") == 6
+    assert rendered.count("flowchart TD") == 2
+    assert rendered.count("```mermaid") == 8
 
     # Crosswalk annotations
     assert "Crosswalk X-P1" in rendered
