@@ -5,8 +5,11 @@ from __future__ import annotations
 from pathlib import Path
 
 from synergy_schema.mermaid_diagram import (
+    BEAM_AS_REGIONAL_CLASSES,
+    POLARIS_REGIONAL_CLASSES,
     POPULATION_CLASSES,
     REGIONAL_CLASSES,
+    SPATIAL_SKIM_CLASSES,
     generate_mermaid_erd,
 )
 
@@ -15,10 +18,13 @@ def render_database_erd_markdown(schema_path: Path) -> str:
     """Generate Markdown page with Mermaid ER diagrams and LinkML foreign key reference table."""
     pop_mermaid = generate_mermaid_erd(schema_path, POPULATION_CLASSES)
     reg_mermaid = generate_mermaid_erd(schema_path, REGIONAL_CLASSES)
+    polaris_reg_mermaid = generate_mermaid_erd(schema_path, POLARIS_REGIONAL_CLASSES)
+    beam_as_reg_mermaid = generate_mermaid_erd(schema_path, BEAM_AS_REGIONAL_CLASSES)
+    spatial_skim_mermaid = generate_mermaid_erd(schema_path, SPATIAL_SKIM_CLASSES)
 
     return f"""# Database Schema & Entity-Relationship Diagrams
 
-This page presents the compiled Entity-Relationship (ER) diagrams and foreign key contracts linking the multi-model population, vehicle fleet, land-use, and network skim tables across **UrbanSim**, **DEMOS**, **ATLAS**, **POLARIS**, and **OMX Skims** for Deliverable #1.
+This page presents the compiled Entity-Relationship (ER) diagrams and foreign key contracts linking the multi-model population, vehicle fleet, land-use, and network skim tables across **UrbanSim**, **DEMOS**, **ATLAS**, **POLARIS**, **ActivitySim**, **BEAM**, and **OMX Skims** for Deliverable #1.
 
 All tables, column definitions, primary keys, foreign keys, and cross-model handoff relationships are **generated directly from the LinkML schema contracts** (`src/synergy_schema/schema/deliverable_1_static_schema.yaml`).
 
@@ -36,11 +42,31 @@ The diagram below isolates the synthetic agent tables across DEMOS, ATLAS, and P
 
 ## 2. Complete Multi-Model Regional Architecture ERD
 
-The regional architecture diagram links all 19 tables across the modeling suite, including UrbanSim Census Block marginals, Block-to-TAZ aggregation tables, DEMOS synthetic population, ATLAS vehicle fleet, POLARIS demand/supply, ActivitySim demand inputs, BEAM dynamic simulation inputs/outputs, and travel impedance skims:
+The regional architecture diagrams link the tables across the modeling suite. To provide both a unified multi-tier architecture and focused subsystem layouts that fit comfortably on vertical viewports without horizontal sprawl, four tabbed perspectives are provided:
 
-```mermaid
+=== "Complete Regional Architecture (Cascaded Vertical Flow)"
+
+    ```mermaid
 {reg_mermaid}
-```
+    ```
+
+=== "Primary POLARIS Regional Flow"
+
+    ```mermaid
+{polaris_reg_mermaid}
+    ```
+
+=== "ActivitySim & BEAM Multi-Agent Flow"
+
+    ```mermaid
+{beam_as_reg_mermaid}
+    ```
+
+=== "Spatial Aggregation & Skim Feedback"
+
+    ```mermaid
+{spatial_skim_mermaid}
+    ```
 
 ---
 
@@ -63,6 +89,7 @@ The table below documents every intra-model foreign key and cross-model handoff 
 | `DemosPolarisMappedHousehold` | `block_id` `[FK]` | `UrbanSimBlockMarginals` | `block_id` `[PK]` | $N:1$ | Cross-Model Spatial | Controls demographic synthesis by Census Block marginals |
 | `InputNetworkSkims` | `zone_count` `[FK]` | `UrbanSimZonalTotals` | `zone_id` `[PK]` | $N:1$ | Cross-Model Spatial | Confirms skim matrix dimensions match active TAZ zones |
 | `NextYearNetworkSkims` | `zone_count` `[FK]` | `UrbanSimZonalTotals` | `zone_id` `[PK]` | $N:1$ | Cross-Model Spatial | Confirms iterative skim matrix dimensions match active TAZ zones |
+| `NextYearNetworkSkims` | `zone_count` `[FK]` | `PolarisDemandDatabaseVehicle` | `vehicle_id` `[PK]` | $N:1$ | Cross-Model Simulation | Dynamic traffic assignment simulates next-year travel skims |
 | `ActivitySimPersonInputRecord` | `household_id` `[FK]` | `ActivitySimHouseholdInputRecord` | `household_id` `[PK]` | $N:1$ | Intra-Model FK | Enforces person membership in ActivitySim households |
 | `ActivitySimHouseholdInputRecord` | `TAZ` `[FK]` | `UrbanSimZonalTotals` | `zone_id` `[PK]` | $N:1$ | Cross-Model Spatial | Associates ActivitySim household residence with TAZ zones |
 | `ActivitySimHouseholdInputRecord` | `block_id` `[FK]` | `UrbanSimBlockMarginals` | `block_id` `[PK]` | $N:1$ | Cross-Model Spatial | Anchors ActivitySim households to Census Block marginals |
@@ -72,11 +99,13 @@ The table below documents every intra-model foreign key and cross-model handoff 
 | `BeamVehicleRecord` | `household_id` `[FK]` | `BeamHouseholdRecord` | `household_id` `[PK]` | $N:1$ | Intra-Model FK | Associates BEAM staged vehicles with households |
 | `BeamVehicleRecord` | `maindriver_id` `[FK]` | `BeamPersonRecord` | `person_id` `[PK]` | $N:1$ | Intra-Model FK | Assigns primary driver to household vehicle |
 | `BeamPlanRecord` | `person_id` `[FK]` | `BeamPersonRecord` | `person_id` `[PK]` | $N:1$ | Intra-Model FK | Sequences activity elements and legs for simulated agent |
+| `BeamPlanRecord` | `person_id` `[FK]` | `ActivitySimPersonInputRecord` | `person_id` `[PK]` | $1:1$ | Cross-Model Schedule | Populates BEAM agent travel plans from ActivitySim schedule |
 | `BeamHouseholdRecord` | `household_id` `[FK]` | `DemosPolarisMappedHousehold` | `household` `[PK]` | $1:1$ | Cross-Model Lineage | Lineage tracking from DEMOS base population to BEAM agents |
 | `BeamVehicleRecord` | `vehicle_id` `[FK]` | `AtlasVehicleFleetOutput` | `vehid` `[PK]` | $1:1$ | Cross-Model Lineage | Stages ATLAS vehicle fleet with powertrains into BEAM |
 | `BeamHouseholdRecord` | `home_zone_id` `[FK]` | `UrbanSimZonalTotals` | `zone_id` `[PK]` | $N:1$ | Cross-Model Spatial | Places BEAM households in regional TAZ zones |
 | `BeamHouseholdRecord` | `block_id` `[FK]` | `UrbanSimBlockMarginals` | `block_id` `[PK]` | $N:1$ | Cross-Model Spatial | Anchors BEAM agents to Census Block marginals |
 | `BeamNetworkSkims` | `zone_count` `[FK]` | `UrbanSimZonalTotals` | `zone_id` `[PK]` | $N:1$ | Cross-Model Spatial | Confirms BEAM multi-modal skim matrix dimensions match active TAZ zones |
+| `BeamNetworkSkims` | `zone_count` `[FK]` | `BeamPlanRecord` | `plan_id` `[PK]` | $N:1$ | Cross-Model Simulation | BEAM multi-agent dynamic simulation produces converged skim matrices |
 """
 
 

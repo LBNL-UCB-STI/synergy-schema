@@ -40,6 +40,47 @@ REGIONAL_CLASSES = [
     "BeamNetworkSkims",
 ]
 
+POLARIS_REGIONAL_CLASSES = [
+    "UrbanSimBlockMarginals",
+    "BlockToTazMapping",
+    "UrbanSimZonalTotals",
+    "DemosPolarisMappedHousehold",
+    "DemosPolarisMappedPerson",
+    "AtlasHouseholdFleetOutput",
+    "AtlasVehicleFleetOutput",
+    "PolarisDemandDatabaseHousehold",
+    "PolarisDemandDatabasePerson",
+    "PolarisDemandDatabaseVehicle",
+    "InputNetworkSkims",
+    "NextYearNetworkSkims",
+]
+
+BEAM_AS_REGIONAL_CLASSES = [
+    "UrbanSimBlockMarginals",
+    "UrbanSimZonalTotals",
+    "DemosPolarisMappedHousehold",
+    "DemosPolarisMappedPerson",
+    "AtlasHouseholdFleetOutput",
+    "AtlasVehicleFleetOutput",
+    "ActivitySimHouseholdInputRecord",
+    "ActivitySimPersonInputRecord",
+    "BeamHouseholdRecord",
+    "BeamPersonRecord",
+    "BeamVehicleRecord",
+    "BeamPlanRecord",
+    "InputNetworkSkims",
+    "BeamNetworkSkims",
+]
+
+SPATIAL_SKIM_CLASSES = [
+    "InputNetworkSkims",
+    "UrbanSimBlockMarginals",
+    "BlockToTazMapping",
+    "UrbanSimZonalTotals",
+    "NextYearNetworkSkims",
+    "BeamNetworkSkims",
+]
+
 
 def _clean_type(range_val: str | None) -> str:
     """Normalize LinkML range types to clean alphanumeric types for Mermaid."""
@@ -80,6 +121,7 @@ def generate_mermaid_erd(
 
     lines: list[str] = [
         "erDiagram",
+        "    direction TB",
     ]
 
     # 1. Define Relationships
@@ -277,6 +319,26 @@ def generate_mermaid_erd(
     if "UrbanSimZonalTotals" in target_classes and "BeamNetworkSkims" in target_classes:
         lines.append(
             '    UrbanSimZonalTotals ||--o{ BeamNetworkSkims : "TAZ dimension"'
+        )
+
+    # Downstream dynamic simulation outputs and travel schedule execution
+    if (
+        "PolarisDemandDatabaseVehicle" in target_classes
+        and "NextYearNetworkSkims" in target_classes
+    ):
+        lines.append(
+            '    PolarisDemandDatabaseVehicle ||--o{ NextYearNetworkSkims : "simulates skims"'
+        )
+
+    if "BeamPlanRecord" in target_classes and "BeamNetworkSkims" in target_classes:
+        lines.append('    BeamPlanRecord ||--o{ BeamNetworkSkims : "simulates skims"')
+
+    if (
+        "ActivitySimPersonInputRecord" in target_classes
+        and "BeamPlanRecord" in target_classes
+    ):
+        lines.append(
+            '    ActivitySimPersonInputRecord ||--|{ BeamPlanRecord : "travel schedule"'
         )
 
     lines.append("")
