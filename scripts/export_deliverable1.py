@@ -35,6 +35,7 @@ and outputs of the integrated regional modeling suite:
 - **DEMOS**: Agent-level demographic synthesis, evolution, and Census PUMS seed lineage.
 - **ATLAS**: Household vehicle fleet composition, body type, and discrete powertrain adoption (ICE, HEV, PHEV, AEV).
 - **POLARIS**: Activity-based demand microdata (Demand.sqlite) and network supply infrastructure (Supply.sqlite).
+- **ActivitySim & BEAM**: Parallel demand specification and dynamic multi-agent simulation counterpart interfaces.
 - **Network Travel Skims (.omx)**: Open Matrix zone-to-zone highway and transit travel impedance.
 
 ---
@@ -192,7 +193,7 @@ STANDALONE_EXTRA_CSS = """/* Custom styling for Synergy Schema documentation */
 
 STANDALONE_ZENSICAL = """[project]
 site_name = "SYNERGY Static Cross-Model Schema"
-site_description = "Static cross-model LinkML schemas and categorical crosswalks across UrbanSim, DEMOS, ATLAS, POLARIS, and Travel Skims"
+site_description = "Static cross-model LinkML schemas and categorical crosswalks across UrbanSim, DEMOS, ATLAS, POLARIS, ActivitySim, BEAM, and Travel Skims"
 docs_dir = "docs"
 site_dir = "site"
 extra_javascript = [
