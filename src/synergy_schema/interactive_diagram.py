@@ -14,6 +14,14 @@ from synergy_schema.mermaid_diagram import (
 )
 
 
+def _indent(text: str, spaces: int = 4) -> str:
+    """Indent all non-empty lines in text by the specified number of spaces."""
+    prefix = " " * spaces
+    return "\n".join(
+        f"{prefix}{line}" if line.strip() else "" for line in text.splitlines()
+    )
+
+
 def render_database_erd_markdown(schema_path: Path) -> str:
     """Generate Markdown page with Mermaid ER diagrams and LinkML foreign key reference table."""
     pop_mermaid = generate_mermaid_erd(schema_path, POPULATION_CLASSES)
@@ -21,6 +29,11 @@ def render_database_erd_markdown(schema_path: Path) -> str:
     polaris_reg_mermaid = generate_mermaid_erd(schema_path, POLARIS_REGIONAL_CLASSES)
     beam_as_reg_mermaid = generate_mermaid_erd(schema_path, BEAM_AS_REGIONAL_CLASSES)
     spatial_skim_mermaid = generate_mermaid_erd(schema_path, SPATIAL_SKIM_CLASSES)
+
+    reg_indented = _indent(reg_mermaid, 4)
+    polaris_indented = _indent(polaris_reg_mermaid, 4)
+    beam_as_indented = _indent(beam_as_reg_mermaid, 4)
+    spatial_skim_indented = _indent(spatial_skim_mermaid, 4)
 
     return f"""# Database Schema & Entity-Relationship Diagrams
 
@@ -47,26 +60,27 @@ The regional architecture diagrams link the tables across the modeling suite. To
 === "Complete Regional Architecture (Cascaded Vertical Flow)"
 
     ```mermaid
-{reg_mermaid}
+{reg_indented}
     ```
 
 === "Primary POLARIS Regional Flow"
 
     ```mermaid
-{polaris_reg_mermaid}
+{polaris_indented}
     ```
 
 === "ActivitySim & BEAM Multi-Agent Flow"
 
     ```mermaid
-{beam_as_reg_mermaid}
+{beam_as_indented}
     ```
 
 === "Spatial Aggregation & Skim Feedback"
 
     ```mermaid
-{spatial_skim_mermaid}
+{spatial_skim_indented}
     ```
+
 
 ---
 
