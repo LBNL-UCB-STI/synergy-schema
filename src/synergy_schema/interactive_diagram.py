@@ -287,18 +287,64 @@ def render_interactive_markdown(
     graph_data = extract_schema_graph(schema_path)
     data_json = json.dumps(graph_data)
 
-    return f"""# Interactive Cross-Model Population Schema Explorer
+    return f"""# Database Schema & Entity-Relationship Diagrams
 
-This interactive explorer links all multi-model population, vehicle, land-use, and network skim tables
-across **UrbanSim**, **DEMOS**, **ATLAS**, **POLARIS**, and **OMX Skims** for Deliverable #1.
-All entities, columns, primary keys, foreign keys, and crosswalk rules below are **compiled directly from the LinkML schema contracts**.
+This page presents the compiled Entity-Relationship (ER) diagrams and foreign key contracts linking the multi-model population, vehicle fleet, land-use, and network skim tables across **UrbanSim**, **DEMOS**, **ATLAS**, **POLARIS**, and **OMX Skims** for Deliverable #1.
 
-> [!TIP]
-> **Navigation Controls**:
-> - **Pan**: Click and drag anywhere on the canvas.
-> - **Zoom**: Use mouse wheel, trackpad, or click the **+** / **-** buttons.
-> - **Inspect**: Click on any table or column to view LinkML definitions, constraints, and incoming/outgoing connections.
-> - **Search**: Type column or table names to highlight matching nodes.
+All tables, column definitions, primary keys, foreign keys, and cross-model handoff relationships are **generated directly from the LinkML schema contracts** (`src/synergy_schema/schema/deliverable_1_static_schema.yaml`).
+
+---
+
+## 1. Core Population & Vehicle Fleet ERD
+
+The diagram below isolates the synthetic agent tables across DEMOS, ATLAS, and POLARIS. Edges link directly between the corresponding key attributes:
+
+- **Solid Blue Edges ($N:1$)**: Strict intra-model relational foreign keys (e.g., person-to-household membership, vehicle-to-household ownership).
+- **Dashed Colored Edges ($1:1$ or $N:1$)**: Cross-model pipeline joins and translation lineages (e.g., ATLAS vehicle fleet assignment to DEMOS synthetic households, POLARIS demand database recoding).
+
+<div class="erd-diagram-card">
+  <p><a href="../assets/images/deliverable_1_population_erd.svg" target="_blank" class="md-button md-button--primary">Open High-Resolution Population ERD (Vector SVG)</a></p>
+  <img src="../assets/images/deliverable_1_population_erd.svg" alt="Core Synthetic Population and Vehicle Fleet ER Diagram" class="erd-diagram-img" />
+</div>
+
+---
+
+## 2. Complete 5-Model Regional Architecture ERD
+
+The regional architecture diagram links all 12 tables across the 5 models, including UrbanSim Census Block marginals, Block-to-TAZ aggregation tables, and Open Matrix (`.omx`) travel impedance matrices.
+
+<div class="erd-diagram-card">
+  <p><a href="../assets/images/deliverable_1_erd.svg" target="_blank" class="md-button md-button--primary">Open High-Resolution Regional ERD (Vector SVG)</a></p>
+  <img src="../assets/images/deliverable_1_erd.svg" alt="Complete 5-Model Regional Architecture ER Diagram" class="erd-diagram-img" />
+</div>
+
+---
+
+## 3. Foreign Key & Pipeline Linkage Reference Table
+
+The table below documents every intra-model foreign key and cross-model handoff contract compiled from the schema:
+
+| Child Table | Child Column | Parent Table | Parent Column | Cardinality | Link Type | Pipeline Purpose |
+| :--- | :--- | :--- | :--- | :---: | :--- | :--- |
+| `BlockToTazMapping` | `block_id` `[FK]` | `UrbanSimBlockMarginals` | `block_id` `[PK]` | $N:1$ | Intra-Model FK | Associates Census Blocks with regional marginal controls |
+| `BlockToTazMapping` | `zone_id` `[FK]` | `UrbanSimZonalTotals` | `zone_id` `[PK]` | $N:1$ | Intra-Model FK | Maps Census Blocks into POLARIS-compatible TAZ zones |
+| `DemosPolarisMappedPerson` | `household` `[FK]` | `DemosPolarisMappedHousehold` | `household` `[PK]` | $N:1$ | Intra-Model FK | Enforces person membership in synthetic households |
+| `AtlasVehicleFleetOutput` | `houseid` `[FK]` | `AtlasHouseholdFleetOutput` | `houseid` `[PK]` | $N:1$ | Intra-Model FK | Associates discrete vehicles with synthesized household fleets |
+| `PolarisDemandDatabasePerson` | `household` `[FK]` | `PolarisDemandDatabaseHousehold` | `household` `[PK]` | $N:1$ | Intra-Model FK | Enforces POLARIS traveler membership in households |
+| `PolarisDemandDatabaseVehicle` | `hhold` `[FK]` | `PolarisDemandDatabaseHousehold` | `household` `[PK]` | $N:1$ | Intra-Model FK | Associates POLARIS vehicles with households |
+| `AtlasHouseholdFleetOutput` | `houseid` `[FK]` | `DemosPolarisMappedHousehold` | `household` `[PK]` | $1:1$ | Cross-Model Join | Joins ATLAS synthesized vehicle counts to DEMOS households |
+| `PolarisDemandDatabaseHousehold` | `household` `[FK]` | `DemosPolarisMappedHousehold` | `household` `[PK]` | $1:1$ | Cross-Model Lineage | Lineage tracking from DEMOS base population to POLARIS demand |
+| `PolarisDemandDatabaseVehicle` | `vehicle_id` `[FK]` | `AtlasVehicleFleetOutput` | `vehid` `[PK]` | $1:1$ | Cross-Model Lineage | Recodes ATLAS discrete vehicles to POLARIS vehicle types |
+| `PolarisDemandDatabaseHousehold` | `location` `[FK]` | `UrbanSimZonalTotals` | `zone_id` `[PK]` | $N:1$ | Cross-Model Spatial | Assigns household residence to UrbanSim TAZ zones |
+| `DemosPolarisMappedHousehold` | `block_id` `[FK]` | `UrbanSimBlockMarginals` | `block_id` `[PK]` | $N:1$ | Cross-Model Spatial | Controls demographic synthesis by Census Block marginals |
+| `InputNetworkSkims` | `zone_count` `[FK]` | `UrbanSimZonalTotals` | `zone_id` `[PK]` | $N:1$ | Cross-Model Spatial | Confirms skim matrix dimensions match active TAZ zones |
+| `NextYearNetworkSkims` | `zone_count` `[FK]` | `UrbanSimZonalTotals` | `zone_id` `[PK]` | $N:1$ | Cross-Model Spatial | Confirms iterative skim matrix dimensions match active TAZ zones |
+
+---
+
+## 4. Interactive Schema Inspector
+
+The interactive canvas below provides dynamic filtering and metadata inspection for individual tables and columns:
 
 <div class="schema-explorer-outer">
   <!-- Controls Bar -->
@@ -307,6 +353,7 @@ All entities, columns, primary keys, foreign keys, and crosswalk rules below are
       <span class="schema-toolbar-label">Model:</span>
       <button class="schema-filter-btn active" data-model="ALL">All Models</button>
       <button class="schema-filter-btn" data-model="UrbanSim">UrbanSim</button>
+
       <button class="schema-filter-btn" data-model="DEMOS">DEMOS</button>
       <button class="schema-filter-btn" data-model="ATLAS">ATLAS</button>
       <button class="schema-filter-btn" data-model="POLARIS">POLARIS</button>

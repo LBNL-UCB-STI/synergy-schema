@@ -20,6 +20,10 @@ from pathlib import Path
 
 from linkml_runtime.utils.schemaview import SchemaView
 from synergy_schema.deliverable_1_diagram import render_deliverable_1_uml
+from synergy_schema.graphviz_diagram import (
+    generate_graphviz_erd,
+    generate_population_erd,
+)
 from synergy_schema.interactive_diagram import generate_interactive_diagram
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
@@ -446,8 +450,17 @@ def export_package(target_dir: Path) -> None:
     uml_content = render_deliverable_1_uml()
     (docs_dest / "deliverable_1_uml.md").write_text(uml_content, encoding="utf-8")
 
-    # Interactive Schema Explorer page
+    # Graphviz ER diagrams (SVG and PNG)
+    print("  Generating Graphviz ER diagrams...")
+    images_dest = docs_dest / "assets" / "images"
+    images_dest.mkdir(parents=True, exist_ok=True)
     master_yaml = schema_dest / "deliverable_1_static_schema.yaml"
+    generate_graphviz_erd(master_yaml, images_dest / "deliverable_1_erd", rankdir="TB")
+    generate_population_erd(
+        master_yaml, images_dest / "deliverable_1_population_erd", rankdir="LR"
+    )
+
+    # Interactive Schema Explorer page
     generate_interactive_diagram(
         schema_path=master_yaml,
         output_path=docs_dest / "interactive-schema.md",
