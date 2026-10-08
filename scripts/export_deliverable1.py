@@ -181,10 +181,7 @@ document$.subscribe(() => {
 });
 """
 
-STANDALONE_EXTRA_CSS = """/* Maximize horizontal reading width for tables and architecture diagrams */
-.md-grid {
-  max-width: 85rem;
-}
+STANDALONE_EXTRA_CSS = """/* Custom styling for Synergy Schema documentation */
 """
 
 STANDALONE_ZENSICAL = """[project]
@@ -195,6 +192,7 @@ site_dir = "site"
 extra_javascript = [
   "javascripts/mathjax.js",
   "https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js",
+  "javascripts/fullscreen.js",
 ]
 extra_css = [
   "stylesheets/extra.css",
@@ -425,10 +423,13 @@ def export_package(target_dir: Path) -> None:
             "  Copied authoritative interface workbook: DEMOS_and_ATLAS_to_POLARIS_interface.xlsx"
         )
 
-    # JavaScript & CSS assets (MathJax and layout configuration)
+    # JavaScript & CSS assets (MathJax, fullscreen, and layout configuration)
     js_dest = docs_dest / "javascripts"
     js_dest.mkdir(parents=True, exist_ok=True)
     (js_dest / "mathjax.js").write_text(STANDALONE_MATHJAX_JS, encoding="utf-8")
+    fullscreen_js_src = REPO_ROOT / "docs" / "javascripts" / "fullscreen.js"
+    if fullscreen_js_src.exists():
+        shutil.copy2(fullscreen_js_src, js_dest / "fullscreen.js")
 
     css_dest = docs_dest / "stylesheets"
     css_dest.mkdir(parents=True, exist_ok=True)

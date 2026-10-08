@@ -3,6 +3,7 @@ site_name = "Synergy Schema"
 site_description = "Shared definitions and evidence for coordinated modeling workflows"
 docs_dir = "docs"
 site_dir = "site"
+
 nav = [
     { "Overview" = "index.md" },
     { "Proof of concept" = [
@@ -58,6 +59,10 @@ nav = [
 
 extra_css = [
   "stylesheets/extra.css",
+]
+
+extra_javascript = [
+  "javascripts/fullscreen.js",
 ]
 
 [project.theme]
