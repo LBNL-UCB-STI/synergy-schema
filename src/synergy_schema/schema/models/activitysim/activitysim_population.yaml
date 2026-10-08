@@ -39,6 +39,24 @@ classes:
           physical_name: TAZ
           relationship_target: ActivitySimLandUseZoneRecord
         description: Optional household traffic-analysis-zone reference.
+      cars:
+        range: integer
+        minimum_value: 0
+        description: >-
+          Number of cars owned by the household. In PILATES / ActivitySim, this is updated
+          by ATLAS (AtlasHouseholdFleetOutput.nvehicles) to reflect simulated vehicle
+          ownership and discrete adoption for auto-sufficiency and mode choice.
+        annotations:
+          physical_name: cars
+          source_table: AtlasHouseholdFleetOutput
+          source_column: nvehicles
+      auto_ownership:
+        range: integer
+        minimum_value: 0
+        description: >-
+          Auto ownership level or vehicle count retained for ActivitySim model specifications.
+        annotations:
+          physical_name: auto_ownership
 
   ActivitySimPersonInputRecord:
     description: ActivitySim person input identity and household-join fields.

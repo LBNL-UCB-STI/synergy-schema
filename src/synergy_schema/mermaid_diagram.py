@@ -203,6 +203,22 @@ def generate_mermaid_erd(
         )
 
     if (
+        "AtlasHouseholdFleetOutput" in target_classes
+        and "ActivitySimHouseholdInputRecord" in target_classes
+    ):
+        lines.append(
+            '    AtlasHouseholdFleetOutput ||--|| ActivitySimHouseholdInputRecord : "updates cars"'
+        )
+
+    if (
+        "UrbanSimBlockMarginals" in target_classes
+        and "ActivitySimHouseholdInputRecord" in target_classes
+    ):
+        lines.append(
+            '    UrbanSimBlockMarginals ||--o{ ActivitySimHouseholdInputRecord : "block control"'
+        )
+
+    if (
         "UrbanSimZonalTotals" in target_classes
         and "ActivitySimHouseholdInputRecord" in target_classes
     ):
@@ -339,7 +355,12 @@ def generate_mermaid_erd(
                 and slot.name == "household_id"
             ):
                 is_pk = True
-            elif cls_name == "ActivitySimHouseholdInputRecord" and slot.name == "TAZ":
+            elif cls_name == "ActivitySimHouseholdInputRecord" and slot.name in {
+                "TAZ",
+                "taz",
+                "block_id",
+                "cars",
+            }:
                 is_fk = True
             elif (
                 cls_name == "ActivitySimPersonInputRecord" and slot.name == "member_id"

@@ -99,7 +99,7 @@ POLARIS, and Travel Network Skims (.omx).
         end
 
         subgraph ActivitySim ["ActivitySim (Activity-Based Demand)"]
-            AS_Pop["ActivitySim Population<br/><i>Households & Persons</i>"]
+            AS_Pop["ActivitySim Population<br/><i>Households (with ATLAS cars) & Persons</i>"]
             AS_Core["Core Demand Models<br/><i>Tours, Mandatory/Non-Mandatory Trips</i>"]
             AS_Plans["Activity-Travel Schedules<br/><i>Activity Types, Times & Modes</i>"]
         end
@@ -133,6 +133,7 @@ POLARIS, and Travel Network Skims (.omx).
         DEMOS_P_B -->|Person Records| AS_Pop
 
         ATLAS_HH_B --> ATLAS_V_B
+        ATLAS_HH_B ==>|Updates cars per household| AS_Pop
         ATLAS_V_B -->|Staged Vehicle Fleet| BEAM_Veh
 
         AS_Pop --> AS_Core
@@ -356,28 +357,32 @@ travel demand modeling and BEAM multi-agent dynamic traffic, transit, and chargi
 
 ActivitySim consumes synthetic households and persons staged from DEMOS, coupled with zonal
 land-use totals from UrbanSim, to model activity schedules, tour generation, destination choice,
-and mode selection.
+and mode selection. ATLAS modifies the input household table by updating the number of cars per
+household (`cars`), providing authoritative auto ownership for mode choice modeling.
 
 ```mermaid
 classDiagram
     class ActivitySimHouseholdInputRecord {
         +int household_id [PK]
         +int TAZ [FK]
-        +int income
-        +int autos
-        +int size
-        +int workers
+        +string block_id [FK]
+        +int cars [from ATLAS]
+        +int auto_ownership
     }
     class ActivitySimPersonInputRecord {
-        +int member_id [PK]
+        +int person_id [PK]
         +int household_id [FK]
+        +int member_id
+        +int TAZ [FK]
         +int work_zone_id [FK]
         +int school_zone_id [FK]
-        +int age
-        +string worker_status
-        +string student_status
+    }
+    class AtlasHouseholdFleetOutput {
+        +int houseid [PK]
+        +int nvehicles
     }
     ActivitySimHouseholdInputRecord "1" --> "1..*" ActivitySimPersonInputRecord : members
+    AtlasHouseholdFleetOutput "1" ..> "1" ActivitySimHouseholdInputRecord : updates cars (nvehicles)
 ```
 
 ### BEAM Multi-Agent Population, Fleet, Plans & Skims Schema

@@ -113,6 +113,8 @@ erDiagram
     UrbanSimZonalTotals ||--o{ NextYearNetworkSkims : "TAZ dimension"
     ActivitySimHouseholdInputRecord ||--|{ ActivitySimPersonInputRecord : "contains"
     DemosPolarisMappedHousehold ||--|| ActivitySimHouseholdInputRecord : "pop lineage"
+    AtlasHouseholdFleetOutput ||--|| ActivitySimHouseholdInputRecord : "updates cars"
+    UrbanSimBlockMarginals ||--o{ ActivitySimHouseholdInputRecord : "block control"
     UrbanSimZonalTotals ||--o{ ActivitySimHouseholdInputRecord : "TAZ location"
     BeamHouseholdRecord ||--|{ BeamPersonRecord : "contains"
     BeamHouseholdRecord ||--|{ BeamVehicleRecord : "owns"
@@ -126,8 +128,10 @@ erDiagram
 
     ActivitySimHouseholdInputRecord {
         int household_id PK "ActivitySim household identifier"
-        string block_id "Census block identifier for the..."
-        string taz "Optional household traffic-analysis-..."
+        string block_id FK "Census block identifier for the..."
+        string taz FK "Optional household traffic-analysis-..."
+        int cars FK "Number of cars owned by the household"
+        int auto_ownership "Auto ownership level or vehicle count..."
     }
 
     ActivitySimPersonInputRecord {
@@ -476,6 +480,8 @@ The table below documents every intra-model foreign key and cross-model handoff 
 | `NextYearNetworkSkims` | `zone_count` `[FK]` | `UrbanSimZonalTotals` | `zone_id` `[PK]` | $N:1$ | Cross-Model Spatial | Confirms iterative skim matrix dimensions match active TAZ zones |
 | `ActivitySimPersonInputRecord` | `household_id` `[FK]` | `ActivitySimHouseholdInputRecord` | `household_id` `[PK]` | $N:1$ | Intra-Model FK | Enforces person membership in ActivitySim households |
 | `ActivitySimHouseholdInputRecord` | `TAZ` `[FK]` | `UrbanSimZonalTotals` | `zone_id` `[PK]` | $N:1$ | Cross-Model Spatial | Associates ActivitySim household residence with TAZ zones |
+| `ActivitySimHouseholdInputRecord` | `block_id` `[FK]` | `UrbanSimBlockMarginals` | `block_id` `[PK]` | $N:1$ | Cross-Model Spatial | Anchors ActivitySim households to Census Block marginals |
+| `ActivitySimHouseholdInputRecord` | `cars` `[FK]` | `AtlasHouseholdFleetOutput` | `houseid` `[PK]` | $1:1$ | Cross-Model Update | Updates household car count (`cars`) from ATLAS vehicle ownership (`nvehicles`) for mode choice |
 | `ActivitySimHouseholdInputRecord` | `household_id` `[FK]` | `DemosPolarisMappedHousehold` | `household` `[PK]` | $1:1$ | Cross-Model Lineage | Lineage tracking from DEMOS base population to ActivitySim |
 | `BeamPersonRecord` | `household_id` `[FK]` | `BeamHouseholdRecord` | `household_id` `[PK]` | $N:1$ | Intra-Model FK | Enforces person membership in BEAM simulated households |
 | `BeamVehicleRecord` | `household_id` `[FK]` | `BeamHouseholdRecord` | `household_id` `[PK]` | $N:1$ | Intra-Model FK | Associates BEAM staged vehicles with households |

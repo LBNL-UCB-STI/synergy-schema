@@ -39,6 +39,13 @@ def test_deliverable_1_uml_contains_all_models_and_diagrams() -> None:
     assert rendered.count("flowchart TD") == 2
     assert rendered.count("```mermaid") == 8
 
+    # ATLAS updating ActivitySim cars
+    assert "ATLAS_HH_B ==>|Updates cars per household| AS_Pop" in rendered
+    assert (
+        'AtlasHouseholdFleetOutput "1" ..> "1" ActivitySimHouseholdInputRecord : updates cars'
+        in rendered
+    )
+
     # Crosswalk annotations
     assert "Crosswalk X-P1" in rendered
     assert "Crosswalk X-P2" in rendered

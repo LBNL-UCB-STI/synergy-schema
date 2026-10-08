@@ -187,7 +187,13 @@ def test_population_projection_shapes_expose_only_identity_join_fields() -> None
             "work_zone_id",
             "school_zone_id",
         },
-        "ActivitySimHouseholdInputRecord": {"household_id", "block_id", "taz"},
+        "ActivitySimHouseholdInputRecord": {
+            "household_id",
+            "block_id",
+            "taz",
+            "cars",
+            "auto_ownership",
+        },
         "ActivitySimPersonInputRecord": {
             "person_id",
             "household_id",

@@ -90,6 +90,14 @@ def test_generate_mermaid_regional_erd() -> None:
     assert (
         'UrbanSimZonalTotals ||--o{ BeamNetworkSkims : "TAZ dimension"' in mermaid_str
     )
+    assert (
+        'AtlasHouseholdFleetOutput ||--|| ActivitySimHouseholdInputRecord : "updates cars"'
+        in mermaid_str
+    )
+    assert (
+        'UrbanSimBlockMarginals ||--o{ ActivitySimHouseholdInputRecord : "block control"'
+        in mermaid_str
+    )
 
 
 def test_render_database_erd_markdown() -> None:
