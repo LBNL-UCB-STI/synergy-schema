@@ -29,14 +29,16 @@ annotations:
     foreign keys.
 
 classes:
-  PolarisDemandDatabaseV1Household:
+  PolarisDemandDatabaseHousehold:
     description: >-
-      Provisional Household table row description. The listed fields are
-      physical columns, not a complete native POLARIS contract.
+      Authoritative Household table schema for the POLARIS Demand SQLite database.
+    aliases:
+      - PolarisHousehold
     annotations:
       table_name: Household
       model_association: POLARIS demand database
-      coverage: provisional observed record set
+      schema_status: authoritative
+      status: active
     attributes:
       household:
         range: integer
@@ -56,6 +58,7 @@ classes:
         required: true
         annotations:
           physical_name: location
+          foreign_key: UrbanSimZonalTotals.zone_id
         description: Physical household location identifier.
       persons:
         range: integer
@@ -94,12 +97,16 @@ classes:
           physical_name: housing_unit_type
         description: Physical housing-unit-type field; code semantics are not asserted here.
 
-  PolarisDemandDatabaseV1Person:
-    description: Provisional Person table row description.
+  PolarisDemandDatabasePerson:
+    description: >-
+      Authoritative Person table schema for the POLARIS Demand SQLite database.
+    aliases:
+      - PolarisPerson
     annotations:
       table_name: Person
       model_association: POLARIS demand database
-      coverage: provisional observed record set
+      schema_status: authoritative
+      status: active
     attributes:
       person:
         range: integer
@@ -113,7 +120,8 @@ classes:
         required: true
         annotations:
           physical_name: household
-          relationship_target: PolarisDemandDatabaseV1Household.household
+          relationship_target: PolarisDemandDatabaseHousehold.household
+          foreign_key: PolarisDemandDatabaseHousehold.household
           validation_boundary: external conformance check, not a SQLite foreign key
         description: Physical household join value checked externally against Household.household.
       id:
@@ -123,12 +131,16 @@ classes:
           physical_name: id
         description: Physical within-household person identifier.
 
-  PolarisDemandDatabaseV1Vehicle:
-    description: Provisional Vehicle table row description.
+  PolarisDemandDatabaseVehicle:
+    description: >-
+      Authoritative Vehicle table schema for the POLARIS Demand SQLite database.
+    aliases:
+      - PolarisVehicle
     annotations:
       table_name: Vehicle
       model_association: POLARIS demand database
-      coverage: provisional observed record set
+      schema_status: authoritative
+      status: active
     attributes:
       vehicle_id:
         range: integer
@@ -142,7 +154,8 @@ classes:
         required: true
         annotations:
           physical_name: hhold
-          relationship_target: PolarisDemandDatabaseV1Household.household
+          relationship_target: PolarisDemandDatabaseHousehold.household
+          foreign_key: PolarisDemandDatabaseHousehold.household
           validation_boundary: external conformance check, not a SQLite foreign key
         description: Physical household join value checked externally against Household.household.
       type:

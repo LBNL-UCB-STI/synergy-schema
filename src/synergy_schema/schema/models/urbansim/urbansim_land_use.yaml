@@ -1,0 +1,284 @@
+id: https://w3id.org/LBNL-UCB-STI/synergy-schema/models/urbansim/land-use
+name: urbansim_land_use
+title: UrbanSim land use, employment, and zonal marginal totals schema
+description: >-
+  Notional schema representing the land use, employment allocation, and marginal
+  population targets forecasted by UrbanSim for a single simulation year.
+  UrbanSim operates as a macro-spatial provider of control totals at the atomic
+  census block level, aggregated to macro-zones (TAZ) via an explicit spatial
+  mapping crosswalk. It does not generate synthetic individual micro-population records.
+
+prefixes:
+  synergy_schema: https://w3id.org/LBNL-UCB-STI/synergy-schema/
+  linkml: https://w3id.org/linkml/
+
+default_prefix: synergy_schema
+default_range: string
+
+imports:
+  - linkml:types
+
+classes:
+  UrbanSimBlockMarginals:
+    description: >-
+      Atomic census block / block-group marginal control totals and land-use
+      capacities forecasted by UrbanSim. These totals act as demographic and
+      housing targets for downstream micro-population synthesis and evolution.
+    annotations:
+      model_association: UrbanSim
+      contract_family: land_use_marginals
+      spatial_granularity: census_block
+      status: notional
+    attributes:
+      block_id:
+        range: string
+        identifier: true
+        required: true
+        description: >-
+          15-digit Census Block FIPS identifier or 11-digit Block Group FIPS,
+          preserving leading zeros (e.g. 484530018041002).
+      county_id:
+        range: integer
+        required: true
+        description: 5-digit State and County FIPS identifier (e.g. 48453 for Travis County).
+      tract_id:
+        range: string
+        description: 11-digit Census Tract identifier.
+      total_households:
+        range: integer
+        minimum_value: 0
+        required: true
+        description: Target marginal count of occupied households in this block.
+      total_population:
+        range: integer
+        minimum_value: 0
+        required: true
+        description: Target marginal count of total residents in this block.
+      total_workers:
+        range: integer
+        minimum_value: 0
+        description: Target marginal count of resident workers.
+      residential_units:
+        range: integer
+        minimum_value: 0
+        required: true
+        description: Total residential dwelling unit capacity in this block.
+      single_family_units:
+        range: integer
+        minimum_value: 0
+        description: Count of detached single-family residential units.
+      multi_family_units:
+        range: integer
+        minimum_value: 0
+        description: Count of multi-family residential units (apartments, condos).
+      commercial_sqft:
+        range: float
+        minimum_value: 0.0
+        description: Commercial real estate floor space (square feet).
+      vacancy_rate:
+        range: float
+        minimum_value: 0.0
+        maximum_value: 1.0
+        description: Residential vacancy rate in this block.
+      jobs_total:
+        range: integer
+        minimum_value: 0
+        description: Total employment located in this block.
+      jobs_retail:
+        range: integer
+        minimum_value: 0
+        description: Retail employment located in this block.
+      jobs_service:
+        range: integer
+        minimum_value: 0
+        description: Service-sector employment located in this block.
+      jobs_office:
+        range: integer
+        minimum_value: 0
+        description: Office/professional employment located in this block.
+
+  BlockToTazMapping:
+    description: >-
+      Spatial crosswalk relationship mapping atomic Census Blocks to macro-zones
+      (TAZs), supporting deterministic rollup and aggregation.
+    annotations:
+      model_association: UrbanSim
+      contract_family: spatial_crosswalk
+      status: notional
+    unique_keys:
+      block_taz_pair:
+        unique_key_slots:
+          - block_id
+          - zone_id
+    attributes:
+      block_id:
+        range: string
+        required: true
+        annotations:
+          foreign_key: UrbanSimBlockMarginals.block_id
+        description: Census block identifier referencing UrbanSimBlockMarginals.
+      zone_id:
+        range: integer
+        required: true
+        annotations:
+          foreign_key: UrbanSimZonalTotals.zone_id
+        description: Macro-zone / Traffic Analysis Zone (TAZ) identifier.
+      area_share:
+        range: float
+        minimum_value: 0.0
+        maximum_value: 1.0
+        description: Proportion of block area intersecting the TAZ (1.0 for coterminous boundaries).
+      housing_share:
+        range: float
+        minimum_value: 0.0
+        maximum_value: 1.0
+        description: Proportion of block housing units allocated to this TAZ.
+      job_share:
+        range: float
+        minimum_value: 0.0
+        maximum_value: 1.0
+        description: Proportion of block employment allocated to this TAZ.
+
+  UrbanSimZonalTotals:
+    description: >-
+      Aggregated macro-zone (TAZ) land use, marginal population, and employment
+      totals matching POLARIS Supply.sqlite Zone table attributes.
+    annotations:
+      model_association: UrbanSim
+      contract_family: zonal_supply_forecast
+      spatial_granularity: taz_zone
+      status: notional
+      target_sqlite_table: Zone
+    attributes:
+      zone_id:
+        range: integer
+        identifier: true
+        required: true
+        annotations:
+          physical_name: zone
+        description: Traffic Analysis Zone (TAZ) identifier matching POLARIS Zone.zone.
+      area_type:
+        range: integer
+        description: Urban form / density classification (e.g. 1=CBD, 2=Urban, 3=Suburban, 4=Rural).
+      residential_area:
+        range: float
+        minimum_value: 0.0
+        annotations:
+          physical_name: residential_area
+        description: Total residential floor or lot area.
+      commercial_area:
+        range: float
+        minimum_value: 0.0
+        annotations:
+          physical_name: commercial_area
+        description: Total commercial floor or lot area.
+      office_area:
+        range: float
+        minimum_value: 0.0
+        annotations:
+          physical_name: office_area
+        description: Total office floor area.
+      retail_area:
+        range: float
+        minimum_value: 0.0
+        annotations:
+          physical_name: retail_area
+        description: Total retail floor area.
+      industrial_area:
+        range: float
+        minimum_value: 0.0
+        annotations:
+          physical_name: industrial_area
+        description: Total industrial/warehouse floor area.
+      institutional_area:
+        range: float
+        minimum_value: 0.0
+        annotations:
+          physical_name: institutional_area
+        description: Institutional / medical / civic land area.
+      mixed_use_area:
+        range: float
+        minimum_value: 0.0
+        annotations:
+          physical_name: mixed_use_area
+        description: Mixed-use development area.
+      pop_households:
+        range: integer
+        minimum_value: 0
+        annotations:
+          physical_name: pop_households
+        description: Zonal total households matching POLARIS Zone.pop_households.
+      pop_persons:
+        range: integer
+        minimum_value: 0
+        annotations:
+          physical_name: pop_persons
+        description: Zonal total persons matching POLARIS Zone.pop_persons.
+      pop_group_quarters:
+        range: integer
+        minimum_value: 0
+        annotations:
+          physical_name: pop_group_quarters
+        description: Group quarters population (dorms, barracks, correctional).
+      employment_total:
+        range: integer
+        minimum_value: 0
+        annotations:
+          physical_name: employment_total
+        description: Total zonal employment matching POLARIS Zone.employment_total.
+      employment_retail:
+        range: integer
+        minimum_value: 0
+        annotations:
+          physical_name: employment_retail
+        description: Retail employment.
+      employment_services:
+        range: integer
+        minimum_value: 0
+        annotations:
+          physical_name: employment_services
+        description: Service industry employment.
+      employment_government:
+        range: integer
+        minimum_value: 0
+        annotations:
+          physical_name: employment_government
+        description: Government/civic employment.
+      employment_manufacturing:
+        range: integer
+        minimum_value: 0
+        annotations:
+          physical_name: employment_manufacturing
+        description: Manufacturing employment.
+      employment_industrial:
+        range: integer
+        minimum_value: 0
+        annotations:
+          physical_name: employment_industrial
+        description: Industrial employment.
+      employment_other:
+        range: integer
+        minimum_value: 0
+        annotations:
+          physical_name: employment_other
+        description: Other employment categories.
+      hh_inc_avg:
+        range: float
+        minimum_value: 0.0
+        annotations:
+          physical_name: hh_inc_avg
+        description: Average household income within the zone.
+      percent_white:
+        range: float
+        minimum_value: 0.0
+        maximum_value: 1.0
+        annotations:
+          physical_name: percent_white
+        description: Proportion of Caucasian population.
+      percent_black:
+        range: float
+        minimum_value: 0.0
+        maximum_value: 1.0
+        annotations:
+          physical_name: percent_black
+        description: Proportion of African American population.

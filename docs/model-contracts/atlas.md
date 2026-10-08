@@ -18,10 +18,10 @@ These are separate from the established records above. They provisionally model
 the supplied paired CSV structure as an ATLAS fleet-output contract, while the
 owner confirms its release/export context and field semantics.
 
-| Physical example role | Provisional class | Owner question |
+| Physical example role | LinkML class | Owner question |
 | --- | --- | --- |
-| Household fleet summary | [AtlasHouseholdFleetOutputExampleV1](../schema/observed-examples/AtlasHouseholdFleetOutputExampleV1.md) | Is this a native export, and what release/export context produced it? |
-| Vehicle fleet rows | [AtlasVehicleFleetOutputExampleV1](../schema/observed-examples/AtlasVehicleFleetOutputExampleV1.md) | Confirm export status, `annual_mileage` units, and omitted year/geography semantics. |
+| Household fleet summary | [AtlasHouseholdFleetOutput](../schema/AtlasHouseholdFleetOutput.md) | Is this a native export, and what release/export context produced it? |
+| Vehicle fleet rows | [AtlasVehicleFleetOutput](../schema/AtlasVehicleFleetOutput.md) | Confirm export status, `annual_mileage` units, and omitted year/geography semantics. |
 
 Do not use aliases to represent an adapter rename or a prospective mapping.
 An alias is appropriate only after ATLAS confirms that it is an exact, durable

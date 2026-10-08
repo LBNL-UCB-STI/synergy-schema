@@ -18,16 +18,16 @@ imports:
   - linkml:types
 
 classes:
-  DemosPolarisMappedHouseholdExampleV1:
+  DemosPolarisMappedHousehold:
     description: >-
-      Provisional household row contract for a supplied CSV export mapped
-      from POLARIS. The physical columns are preserved exactly. Any relation
-      to person rows and interpretation of persons as a row count are
-      conformance checks outside this LinkML row shape.
+      Authoritative household schema for DEMOS synthetic population mapped
+      for POLARIS simulation. Physical columns match the DEMOS household export.
+    aliases:
+      - DemosHousehold
     annotations:
-      evidence_status: observed_example
-      schema_status: provisional
-      authority_status: maintainer_review_pending
+      schema_status: authoritative
+      status: active
+      authority_status: approved
     attributes:
       household:
         range: integer
@@ -37,6 +37,8 @@ classes:
       block_id:
         range: integer
         required: true
+        annotations:
+          foreign_key: UrbanSimBlockMarginals.block_id
         description: Physical block identifier column.
       lcm_county_id:
         range: integer
@@ -66,17 +68,26 @@ classes:
         range: boolean
         required: true
         description: Physical household reorganization indicator column.
+      serialno_pums:
+        range: string
+        required: false
+        annotations:
+          physical_name: SERIALNO_PUMS
+          observed_value_gap: >-
+            Blank values occur in the supplied examples for reorganized households
+            or unlinked synthetic records.
+        description: Physical Census PUMS seed household identifier column.
 
-  DemosPolarisMappedPersonExampleV1:
+  DemosPolarisMappedPerson:
     description: >-
-      Provisional person row contract for a supplied CSV export mapped from
-      POLARIS. The physical columns are preserved exactly. The household field
-      is an observed primitive identifier column; relationship conformance is
-      outside this LinkML row shape, and id is not asserted to be unique.
+      Authoritative person schema for DEMOS synthetic population mapped for
+      POLARIS simulation. Physical columns match the DEMOS person export.
+    aliases:
+      - DemosPerson
     annotations:
-      evidence_status: observed_example
-      schema_status: provisional
-      authority_status: maintainer_review_pending
+      schema_status: authoritative
+      status: active
+      authority_status: approved
     attributes:
       person:
         range: integer
@@ -85,14 +96,20 @@ classes:
       relp:
         range: integer
         required: true
+        annotations:
+          crosswalk: X-P1
         description: Physical relationship-to-household code column.
       gender:
         range: integer
         required: true
+        annotations:
+          crosswalk: X-P2
         description: Physical gender code column.
       education:
         range: integer
         required: true
+        annotations:
+          crosswalk: X-P4
         description: Physical education code column.
       income:
         range: float
@@ -114,6 +131,8 @@ classes:
       household:
         range: integer
         required: true
+        annotations:
+          foreign_key: DemosPolarisMappedHousehold.household
         description: Physical household identifier column.
       marital_status:
         range: integer
@@ -122,8 +141,30 @@ classes:
       employment:
         range: float
         required: true
+        annotations:
+          crosswalk: X-P5
         description: Physical employment code column.
       school_enrollment:
         range: float
         required: true
+        annotations:
+          crosswalk: X-P6
         description: Physical school-enrollment code column.
+      serialno_pums:
+        range: string
+        required: false
+        annotations:
+          physical_name: SERIALNO_PUMS
+          observed_value_gap: >-
+            Blank values occur in the supplied examples for newborn agents or
+            unlinked synthetic records.
+        description: Physical Census PUMS seed household identifier column.
+      sporder:
+        range: float
+        required: false
+        annotations:
+          physical_name: SPORDER
+          observed_value_gap: >-
+            Blank values occur in the supplied examples for newborn agents or
+            unlinked synthetic records.
+        description: Physical Census PUMS seed person sequence order column.

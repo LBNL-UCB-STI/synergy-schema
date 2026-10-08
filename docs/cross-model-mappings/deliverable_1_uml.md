@@ -1,0 +1,259 @@
+# Deliverable 1 - Static Cross-Model Schema UML & Architecture
+
+This document renders the visual entity-relationship class diagrams and multi-model
+data-flow maps for the static single-year integration across UrbanSim, DEMOS, ATLAS,
+POLARIS, and Travel Network Skims (.omx).
+
+---
+
+## 1. Multi-Model Architecture & Data Exchange Pipeline
+
+```mermaid
+flowchart TD
+    subgraph Inputs ["Exogenous Inputs & Skims"]
+        SkimsIn["Input Network Skims (.omx)<br/><i>Peak/Off-Peak Times & Distances</i>"]
+        PUMS["Census PUMS Microdata<br/><i>Seed Demographic Distributions</i>"]
+    end
+
+    subgraph UrbanSim ["UrbanSim (Land Use & Marginals)"]
+        US_Block["UrbanSimBlockMarginals<br/><i>Atomic Census Block FIPS</i>"]
+        US_Map["BlockToTazMapping<br/><i>Spatial Crosswalk</i>"]
+        US_Zone["UrbanSimZonalTotals<br/><i>Macro-Zone (TAZ) Totals</i>"]
+    end
+
+    subgraph DEMOS ["DEMOS (Demographic Synthesis)"]
+        DEMOS_HH["DemosHousehold<br/><i>Income, Workers, Size, Head Age</i>"]
+        DEMOS_P["DemosPerson<br/><i>Age, Gender, Relate, Edu, Work</i>"]
+    end
+
+    subgraph ATLAS ["ATLAS (Household Fleet Synthesis)"]
+        ATLAS_HH["AtlasHousehold<br/><i>nvehicles</i>"]
+        ATLAS_V["AtlasVehicle<br/><i>Body Type, Powertrain (ICE/HEV/PHEV/AEV)</i>"]
+    end
+
+    subgraph POLARIS ["POLARIS (Activity-Based Demand & Supply)"]
+        POL_Supply["Supply.sqlite<br/><i>Zone & Location Tables</i>"]
+        POL_Demand["Demand.sqlite<br/><i>Household, Person, Vehicle</i>"]
+        POL_DTA["Dynamic Traffic Assignment (DTA)"]
+    end
+
+    subgraph Outputs ["Downstream Outputs"]
+        SkimsOut["Next-Year Network Skims (.omx)<br/><i>Simulated Highway/Transit Impedance</i>"]
+    end
+
+    %% Connections
+    SkimsIn -->|Accessibility Logsums| US_Block
+    SkimsIn -->|Commute Times/Distances| ATLAS_V
+    PUMS -->|Seed Lineage| DEMOS_HH
+    PUMS -->|Seed Lineage| DEMOS_P
+
+    US_Block -->|Area/Housing Allocation| US_Map
+    US_Map --> US_Zone
+    US_Zone -->|Zonal Capacity & Employment| POL_Supply
+    US_Block -.->|Zonal Marginal Controls| DEMOS_HH
+
+    DEMOS_HH -->|Household Identifiers & Income| ATLAS_HH
+    DEMOS_HH -->|Demographic Agent Records| POL_Demand
+    DEMOS_P -->|Person Agent Records| POL_Demand
+
+    ATLAS_HH --> ATLAS_V
+    ATLAS_V -->|Vehicle Inventory & Powertrains| POL_Demand
+
+    POL_Supply --> POL_DTA
+    POL_Demand --> POL_DTA
+    POL_DTA --> SkimsOut
+```
+
+---
+
+## 2. UrbanSim Land Use & Zonal Marginals Schema
+
+UrbanSim operates as a macro-spatial forecasting model. It predicts marginal household/population
+totals and land-use capacities at the atomic Census Block level, aggregated to macro-zones (TAZ)
+via an explicit spatial crosswalk.
+
+```mermaid
+classDiagram
+    class UrbanSimBlockMarginals {
+        +string block_id [PK]
+        +int county_id
+        +string tract_id
+        +int total_households
+        +int total_population
+        +int total_workers
+        +int residential_units
+        +int single_family_units
+        +int multi_family_units
+        +float commercial_sqft
+        +float vacancy_rate
+        +int jobs_total
+        +int jobs_retail
+        +int jobs_service
+    }
+    class BlockToTazMapping {
+        +string block_id [FK]
+        +int zone_id [FK]
+        +float area_share
+        +float housing_share
+        +float job_share
+    }
+    class UrbanSimZonalTotals {
+        +int zone_id [PK]
+        +int area_type
+        +float residential_area
+        +float commercial_area
+        +float office_area
+        +float retail_area
+        +float industrial_area
+        +int pop_households
+        +int pop_persons
+        +int employment_total
+        +int employment_retail
+        +int employment_services
+        +int employment_manufacturing
+        +float hh_inc_avg
+    }
+    UrbanSimBlockMarginals "1" --> "0..*" BlockToTazMapping : spatial_weights
+    BlockToTazMapping "0..*" --> "1" UrbanSimZonalTotals : rolls_up_to
+```
+
+---
+
+## 3. DEMOS Synthetic Population Schema
+
+DEMOS models the demographic evolution of synthetic agents. It preserves Census PUMS seed
+traceability (`SERIALNO_PUMS`, `SPORDER`) while providing microdata agents to ATLAS and POLARIS.
+
+```mermaid
+classDiagram
+    class DemosPolarisMappedHousehold {
+        +int household [PK]
+        +int block_id
+        +int lcm_county_id
+        +float income
+        +int persons
+        +float workers
+        +float age_of_head
+        +float race_of_head
+        +bool is_reorg_household
+        +string serialno_pums [PUMS Trace]
+    }
+    class DemosPolarisMappedPerson {
+        +int person
+        +int household [FK]
+        +float id [Ordinal]
+        +int age
+        +int gender [Crosswalk X-P2]
+        +int relp [Crosswalk X-P1]
+        +int education [Crosswalk X-P4]
+        +float employment [Crosswalk X-P5]
+        +float school_enrollment [Crosswalk X-P6]
+        +float income
+        +int marital_status
+        +string serialno_pums [PUMS Trace]
+        +float sporder [PUMS Order]
+    }
+    DemosPolarisMappedHousehold "1" --> "1..*" DemosPolarisMappedPerson : contains
+```
+
+---
+
+## 4. ATLAS Vehicle Fleet Synthesis Schema
+
+ATLAS models household vehicle ownership and technology adoption across the 6-county Austin region,
+predicting body types and powertrains (ICE, HEV, PHEV, AEV).
+
+```mermaid
+classDiagram
+    class AtlasHouseholdFleetOutput {
+        +int houseid [PK]
+        +int nvehicles
+    }
+    class AtlasVehicleFleetOutput {
+        +int houseid [FK]
+        +int vehid [Ordinal]
+        +AtlasBodyTypeEnum bodytype
+        +AtlasVintageCategoryEnum vintage_category
+        +AtlasPowertrainEnum pred_power
+        +int modelyear
+        +float annual_mileage
+    }
+    class AtlasBodyTypeEnum {
+        <<enumeration>>
+        car
+        pickup
+        suv
+        van
+    }
+    class AtlasPowertrainEnum {
+        <<enumeration>>
+        ICE
+        Hybrid
+        PHEV
+        AEV
+    }
+    AtlasHouseholdFleetOutput "1" --> "0..*" AtlasVehicleFleetOutput : owns
+    AtlasVehicleFleetOutput ..> AtlasBodyTypeEnum : classified_by
+    AtlasVehicleFleetOutput ..> AtlasPowertrainEnum : powered_by
+```
+
+---
+
+## 5. POLARIS Activity-Based Demand & Network Skims Schema
+
+POLARIS consumes the integrated demographic, land-use, and vehicle microdata into its Demand.sqlite
+and Supply.sqlite relational databases, runs activity-based traffic simulation, and emits updated
+dynamic network skims.
+
+```mermaid
+classDiagram
+    class PolarisDemandDatabaseHousehold {
+        +int household [PK]
+        +int size
+        +int income
+        +int workers
+        +int vehicles
+        +int housing_type [Crosswalk X-H1]
+        +int location [FK]
+        +int county
+    }
+    class PolarisDemandDatabasePerson {
+        +int household [FK]
+        +int id [Ordinal]
+        +int age
+        +int gender [Crosswalk X-P2]
+        +int relate [Crosswalk X-P1]
+        +int education [Crosswalk X-P4]
+        +int worker_type [Crosswalk X-P5]
+        +int student_status [Crosswalk X-P6]
+        +int income
+    }
+    class PolarisDemandDatabaseVehicle {
+        +int household [FK]
+        +int id [Ordinal]
+        +int type [Crosswalk X-V1]
+        +int class [Crosswalk X-V2]
+        +int modelyear
+        +int odometer
+    }
+    class InputNetworkSkims {
+        +string file_path [PK]
+        +int zone_count
+        +float sov_time_am
+        +float sov_time_pm
+        +float sov_time_md
+        +float sov_distance
+        +float transit_travel_time
+    }
+    class NextYearNetworkSkims {
+        +string file_path [PK]
+        +int zone_count
+        +int iteration_count
+        +float gap_metric
+        +float sov_time_am
+        +float sov_time_pm
+        +float congestion_index
+    }
+    PolarisDemandDatabaseHousehold "1" --> "1..*" PolarisDemandDatabasePerson : members
+    PolarisDemandDatabaseHousehold "1" --> "0..*" PolarisDemandDatabaseVehicle : vehicles
+```

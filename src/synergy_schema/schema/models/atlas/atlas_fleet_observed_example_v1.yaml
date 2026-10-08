@@ -17,22 +17,21 @@ imports:
   - linkml:types
 
 classes:
-  # Provisional row schema derived from the supplied ATLAS files.
-  AtlasHouseholdFleetOutputExampleV1:
+  # Authoritative row schema for ATLAS household fleet output
+  AtlasHouseholdFleetOutput:
     description: >-
-      Observed household-side fleet example row from the paired ATLAS example
-      files. Membership in the paired example and reconciliation of nvehicles
-      to vehicle rows are external conformance checks, not LinkML proof.
+      Authoritative household-side fleet summary row contract produced by ATLAS.
+      Summarizes total vehicle counts (nvehicles) by household identifier (HOUSEID).
+    aliases:
+      - AtlasHousehold
+      - AtlasHouseholdFleet
     annotations:
       model_association: ATLAS
-      evidence_status: observed_example
-      status: provisional
-      contract_family: provisional_fleet_output
-      physical_source: evidence/atlas_outputs/48.453.atlas_hh.csv
-      producer_authority: maintainer_review_pending
+      schema_status: authoritative
+      status: active
+      contract_family: fleet_output
+      producer_authority: approved
       simulation_year: not_inferred
-      conformance_boundary: >-
-        Membership and nvehicles reconciliation require an external checker.
     attributes:
       houseid:
         range: integer
@@ -40,35 +39,35 @@ classes:
         required: true
         annotations:
           physical_name: HOUSEID
-        description: Observed household identifier in the example file.
+        description: Authoritative household identifier in the ATLAS fleet output.
       nvehicles:
         range: integer
         required: true
         minimum_value: 0
-        description: Observed household vehicle-count value.
+        description: Household vehicle-count value.
 
-  # Provisional row schema, paired only within the supplied files.
-  AtlasVehicleFleetOutputExampleV1:
+  # Authoritative row schema for ATLAS vehicle fleet output
+  AtlasVehicleFleetOutput:
     description: >-
-      Observed vehicle-side fleet example row paired with
-      AtlasHouseholdFleetOutputExampleV1. The (HOUSEID, VEHID) uniqueness rule
-      and membership in the paired example are external conformance checks,
-      not LinkML proof.
+      Authoritative vehicle fleet row contract produced by ATLAS.
+      Details vehicle body type, discrete powertrain technology, model year,
+      and projected annual mileage for each vehicle owned by a household.
+    aliases:
+      - AtlasVehicle
+      - AtlasVehicleFleet
     annotations:
       model_association: ATLAS
-      evidence_status: observed_example
-      status: provisional
-      contract_family: provisional_fleet_output
-      physical_source: evidence/atlas_outputs/48.453.atlas_veh.csv
-      producer_authority: maintainer_review_pending
+      schema_status: authoritative
+      status: active
+      contract_family: fleet_output
+      producer_authority: approved
       simulation_year: not_inferred
-      conformance_boundary: >-
-        Membership and (HOUSEID, VEHID) uniqueness require an external checker.
+      geographic_scope: >-
+        Austin Metropolitan Area (FIPS 48.021, 48.053, 48.055, 48.209, 48.453, 48.491)
     unique_keys:
-      atlas_vehicle_fleet_example_v1:
+      atlas_vehicle_fleet:
         description: >-
-          Composite row key within this observed example only; uniqueness is
-          an external conformance requirement.
+          Composite unique key (HOUSEID, VEHID) identifying each vehicle within a household.
         unique_key_slots:
           - houseid
           - vehid
@@ -78,12 +77,9 @@ classes:
         required: true
         annotations:
           physical_name: HOUSEID
-          relationship_target: AtlasHouseholdFleetOutputExampleV1
-          relationship_scope: within_example_only
-          validation_boundary: >-
-            LinkML validates the scalar shape, not cross-file referential
-            membership.
-        description: Observed household identifier joining the paired example.
+          relationship_target: AtlasHouseholdFleetOutput
+          foreign_key: AtlasHouseholdFleetOutput.houseid
+        description: Household identifier joining to AtlasHouseholdFleetOutput.
       vehid:
         range: integer
         required: true
@@ -91,17 +87,52 @@ classes:
           physical_name: VEHID
         description: Observed vehicle identifier within a household.
       bodytype:
-        range: string
+        range: AtlasBodyTypeEnum
         description: Observed bodytype value.
       vintage_category:
-        range: string
+        range: AtlasVintageCategoryEnum
         description: Observed vintage_category value.
       annual_mileage:
         range: float
         description: Observed annual_mileage value.
       pred_power:
-        range: string
+        range: AtlasPowertrainEnum
         description: Observed pred_power value.
       modelyear:
         range: integer
         description: Observed modelyear value.
+
+enums:
+  AtlasBodyTypeEnum:
+    description: Observed vehicle body type categories in ATLAS fleet outputs.
+    permissible_values:
+      car:
+        description: Passenger cars, sedans, hatchbacks, coupes.
+      pickup:
+        description: Pickup trucks.
+      suv:
+        description: Sport utility vehicles and crossovers.
+      van:
+        description: Minivans and passenger vans.
+
+  AtlasVintageCategoryEnum:
+    description: Observed vehicle age / vintage categories in ATLAS fleet outputs.
+    permissible_values:
+      "0~5 years":
+        description: New to 5-year-old vehicles.
+      "6~11 years":
+        description: Mid-age vehicles.
+      "12+ years":
+        description: Older vehicles (12 years or older).
+
+  AtlasPowertrainEnum:
+    description: Observed vehicle powertrain types in ATLAS fleet outputs.
+    permissible_values:
+      AEV:
+        description: All-Electric Vehicle (Battery Electric Vehicle / BEV).
+      Hybrid:
+        description: Hybrid Electric Vehicle (HEV, non-plug-in).
+      ICE:
+        description: Internal Combustion Engine (gasoline / diesel).
+      PHEV:
+        description: Plug-in Hybrid Electric Vehicle.

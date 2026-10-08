@@ -20,11 +20,11 @@ using the specific exporter/importer context.
 
 ## Provisional demand-database population rows
 
-| Physical table role | Provisional class | Owner question |
+| Physical table role | LinkML class | Owner question |
 | --- | --- | --- |
-| Household seed-shaped table | [PolarisDemandDatabaseV1Household](../schema/observed-examples/PolarisDemandDatabaseV1Household.md) | What does non-unique raw `hhold` mean, and which table roles are inputs? |
-| Person seed-shaped table | [PolarisDemandDatabaseV1Person](../schema/observed-examples/PolarisDemandDatabaseV1Person.md) | Confirm person/household key scope and importer semantics. |
-| Vehicle seed-shaped table | [PolarisDemandDatabaseV1Vehicle](../schema/observed-examples/PolarisDemandDatabaseV1Vehicle.md) | Confirm vehicle type/codebook version and demand/supply dependency. |
+| Household seed-shaped table | [PolarisDemandDatabaseHousehold](../schema/PolarisDemandDatabaseHousehold.md) | What does non-unique raw `hhold` mean, and which table roles are inputs? |
+| Person seed-shaped table | [PolarisDemandDatabasePerson](../schema/PolarisDemandDatabasePerson.md) | Confirm person/household key scope and importer semantics. |
+| Vehicle seed-shaped table | [PolarisDemandDatabaseVehicle](../schema/PolarisDemandDatabaseVehicle.md) | Confirm vehicle type/codebook version and demand/supply dependency. |
 
 The provisional records make no shared release, snapshot, or round-trip claim
 until POLARIS supplies the corresponding manifest and importer/exporter

@@ -9,13 +9,13 @@ SCHEMA_DIR = Path(__file__).parents[1] / "src" / "synergy_schema" / "schema"
 OBSERVED_EXAMPLES_PATH = SCHEMA_DIR / "observed_examples.yaml"
 AGGREGATE_SCHEMA_PATH = SCHEMA_DIR / "synergy_schema.yaml"
 OBSERVED_ROOTS = {
-    "AtlasHouseholdFleetOutputExampleV1",
-    "AtlasVehicleFleetOutputExampleV1",
-    "DemosPolarisMappedHouseholdExampleV1",
-    "DemosPolarisMappedPersonExampleV1",
-    "PolarisDemandDatabaseV1Household",
-    "PolarisDemandDatabaseV1Person",
-    "PolarisDemandDatabaseV1Vehicle",
+    "AtlasHouseholdFleetOutput",
+    "AtlasVehicleFleetOutput",
+    "DemosPolarisMappedHousehold",
+    "DemosPolarisMappedPerson",
+    "PolarisDemandDatabaseHousehold",
+    "PolarisDemandDatabasePerson",
+    "PolarisDemandDatabaseVehicle",
 }
 
 
