@@ -84,3 +84,20 @@ def test_generate_mermaid_regional_erd() -> None:
         'UrbanSimZonalTotals ||--o{ NextYearNetworkSkims : "TAZ dimension"'
         in mermaid_str
     )
+
+
+def test_render_database_erd_markdown() -> None:
+    from synergy_schema.interactive_diagram import render_database_erd_markdown
+
+    rendered = render_database_erd_markdown(SCHEMA_PATH)
+
+    assert "# Database Schema & Entity-Relationship Diagrams" in rendered
+    assert "## 1. Core Population & Vehicle Fleet ERD" in rendered
+    assert "## 2. Complete 5-Model Regional Architecture ERD" in rendered
+    assert "## 3. Foreign Key & Pipeline Linkage Reference Table" in rendered
+
+    # Verify Mermaid erDiagrams are embedded directly without tabs or graphviz
+    assert rendered.count("```mermaid\nerDiagram") == 2
+    assert "Graphviz" not in rendered
+    assert "schema-explorer" not in rendered
+    assert "Interactive Schema Inspector" not in rendered

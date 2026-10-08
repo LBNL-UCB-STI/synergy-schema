@@ -26,7 +26,7 @@ nav = [
     ] },
     { "Cross-model mappings" = [
         { "Cross-model mappings" = "cross-model-mappings/index.md" },
-        { "Interactive Schema Explorer" = "cross-model-mappings/interactive-schema.md" },
+        { "Database ER Diagrams" = "cross-model-mappings/interactive-schema.md" },
         { "Population identity" = "cross-model-mappings/population-identity.md" },
         { "Mapping meaning, implementation, and lineage" = "cross-model-mappings/mapping-lineage.md" },
         { "Scenario compatibility" = "cross-model-mappings/scenario-compatibility.md" },
@@ -58,10 +58,6 @@ nav = [
 
 extra_css = [
   "stylesheets/extra.css",
-]
-
-extra_javascript = [
-  "javascripts/interactive_schema.js",
 ]
 
 [project.theme]
