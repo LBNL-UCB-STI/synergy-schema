@@ -8,6 +8,12 @@ from typing import Any
 
 from linkml_runtime.utils.schemaview import SchemaView
 
+from synergy_schema.mermaid_diagram import (
+    generate_mermaid_erd,
+    POPULATION_CLASSES,
+    REGIONAL_CLASSES,
+)
+
 # Default table layout positions in the 2D coordinate space (pixels)
 TABLE_POSITIONS: dict[str, dict[str, int]] = {
     # Exogenous / Network Skims (Left / Top)
@@ -287,6 +293,17 @@ def render_interactive_markdown(
     graph_data = extract_schema_graph(schema_path)
     data_json = json.dumps(graph_data)
 
+    pop_mermaid = generate_mermaid_erd(schema_path, POPULATION_CLASSES)
+    reg_mermaid = generate_mermaid_erd(schema_path, REGIONAL_CLASSES)
+
+    # Indent Mermaid blocks by 4 spaces for MkDocs tab blocks
+    pop_mermaid_indented = "\n".join(
+        "    " + line if line.strip() else "" for line in pop_mermaid.splitlines()
+    )
+    reg_mermaid_indented = "\n".join(
+        "    " + line if line.strip() else "" for line in reg_mermaid.splitlines()
+    )
+
     return f"""# Database Schema & Entity-Relationship Diagrams
 
 This page presents the compiled Entity-Relationship (ER) diagrams and foreign key contracts linking the multi-model population, vehicle fleet, land-use, and network skim tables across **UrbanSim**, **DEMOS**, **ATLAS**, **POLARIS**, and **OMX Skims** for Deliverable #1.
@@ -297,15 +314,20 @@ All tables, column definitions, primary keys, foreign keys, and cross-model hand
 
 ## 1. Core Population & Vehicle Fleet ERD
 
-The diagram below isolates the synthetic agent tables across DEMOS, ATLAS, and POLARIS. Edges link directly between the corresponding key attributes:
+The diagram below isolates the synthetic agent tables across DEMOS, ATLAS, and POLARIS with explicit relational cardinalities:
 
-- **Solid Blue Edges ($N:1$)**: Strict intra-model relational foreign keys (e.g., person-to-household membership, vehicle-to-household ownership).
-- **Dashed Colored Edges ($1:1$ or $N:1$)**: Cross-model pipeline joins and translation lineages (e.g., ATLAS vehicle fleet assignment to DEMOS synthetic households, POLARIS demand database recoding).
+=== "Mermaid ER Diagram (Standard Crows-Feet)"
 
-<div class="erd-diagram-card">
-  <p><a href="../assets/images/deliverable_1_population_erd.svg" target="_blank" class="md-button md-button--primary">Open High-Resolution Population ERD (Vector SVG)</a></p>
-  <img src="../assets/images/deliverable_1_population_erd.svg" alt="Core Synthetic Population and Vehicle Fleet ER Diagram" class="erd-diagram-img" />
-</div>
+    ```mermaid
+{pop_mermaid_indented}
+    ```
+
+=== "Graphviz Diagram (Attribute Ports)"
+
+    <div class="erd-diagram-card">
+      <p><a href="../assets/images/deliverable_1_population_erd.svg" target="_blank" class="md-button md-button--primary">Open High-Resolution Population ERD (Vector SVG)</a></p>
+      <img src="../assets/images/deliverable_1_population_erd.svg" alt="Core Synthetic Population and Vehicle Fleet ER Diagram" class="erd-diagram-img" />
+    </div>
 
 ---
 
@@ -313,10 +335,18 @@ The diagram below isolates the synthetic agent tables across DEMOS, ATLAS, and P
 
 The regional architecture diagram links all 12 tables across the 5 models, including UrbanSim Census Block marginals, Block-to-TAZ aggregation tables, and Open Matrix (`.omx`) travel impedance matrices.
 
-<div class="erd-diagram-card">
-  <p><a href="../assets/images/deliverable_1_erd.svg" target="_blank" class="md-button md-button--primary">Open High-Resolution Regional ERD (Vector SVG)</a></p>
-  <img src="../assets/images/deliverable_1_erd.svg" alt="Complete 5-Model Regional Architecture ER Diagram" class="erd-diagram-img" />
-</div>
+=== "Mermaid ER Diagram (Standard Crows-Feet)"
+
+    ```mermaid
+{reg_mermaid_indented}
+    ```
+
+=== "Graphviz Diagram (Attribute Ports)"
+
+    <div class="erd-diagram-card">
+      <p><a href="../assets/images/deliverable_1_erd.svg" target="_blank" class="md-button md-button--primary">Open High-Resolution Regional ERD (Vector SVG)</a></p>
+      <img src="../assets/images/deliverable_1_erd.svg" alt="Complete 5-Model Regional Architecture ER Diagram" class="erd-diagram-img" />
+    </div>
 
 ---
 
