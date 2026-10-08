@@ -250,7 +250,7 @@ Evaluated in strict order using the household's final person composition:
 
 ### Crosswalk X-P6: K-12 Education Consistency
 
-For grade code g ∈ [1, 14]:
+For grade code `g ∈ [1, 14]`:
 
 - Allowed education: `g` or `g + 1`.
 - If DEMOS education is outside this range: Set `education = g`.
