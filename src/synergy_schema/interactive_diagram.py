@@ -98,28 +98,29 @@ The table below documents every intra-model foreign key and cross-model handoff 
 | `PolarisDemandDatabaseVehicle` | `hhold` `[FK]` | `PolarisDemandDatabaseHousehold` | `household` `[PK]` | $N:1$ | Intra-Model FK | Associates POLARIS vehicles with households |
 | `AtlasHouseholdFleetOutput` | `houseid` `[FK]` | `DemosPolarisMappedHousehold` | `household` `[PK]` | $1:1$ | Cross-Model Join | Joins ATLAS synthesized vehicle counts to DEMOS households |
 | `PolarisDemandDatabaseHousehold` | `household` `[FK]` | `DemosPolarisMappedHousehold` | `household` `[PK]` | $1:1$ | Cross-Model Lineage | Lineage tracking from DEMOS base population to POLARIS demand |
+| `PolarisDemandDatabasePerson` | `person` `[FK]` | `DemosPolarisMappedPerson` | `person` `[PK]` | $1:1$ | Cross-Model Lineage | Lineage tracking & direct attribute translation from DEMOS synthetic persons to POLARIS demand persons |
 | `PolarisDemandDatabaseVehicle` | `vehicle_id` `[FK]` | `AtlasVehicleFleetOutput` | `vehid` `[PK]` | $1:1$ | Cross-Model Lineage | Recodes ATLAS discrete vehicles to POLARIS vehicle types |
 | `PolarisDemandDatabaseHousehold` | `location` `[FK]` | `UrbanSimZonalTotals` | `zone_id` `[PK]` | $N:1$ | Cross-Model Spatial | Assigns household residence to UrbanSim TAZ zones |
 | `DemosPolarisMappedHousehold` | `block_id` `[FK]` | `UrbanSimBlockMarginals` | `block_id` `[PK]` | $N:1$ | Cross-Model Spatial | Controls demographic synthesis by Census Block marginals |
 | `InputNetworkSkims` | `zone_count` `[FK]` | `UrbanSimZonalTotals` | `zone_id` `[PK]` | $N:1$ | Cross-Model Spatial | Confirms skim matrix dimensions match active TAZ zones |
 | `NextYearNetworkSkims` | `zone_count` `[FK]` | `UrbanSimZonalTotals` | `zone_id` `[PK]` | $N:1$ | Cross-Model Spatial | Confirms iterative skim matrix dimensions match active TAZ zones |
-| `NextYearNetworkSkims` | `zone_count` `[FK]` | `PolarisDemandDatabaseVehicle` | `vehicle_id` `[PK]` | $N:1$ | Cross-Model Simulation | Dynamic traffic assignment simulates next-year travel skims |
 | `ActivitySimPersonInputRecord` | `household_id` `[FK]` | `ActivitySimHouseholdInputRecord` | `household_id` `[PK]` | $N:1$ | Intra-Model FK | Enforces person membership in ActivitySim households |
 | `ActivitySimHouseholdInputRecord` | `TAZ` `[FK]` | `UrbanSimZonalTotals` | `zone_id` `[PK]` | $N:1$ | Cross-Model Spatial | Associates ActivitySim household residence with TAZ zones |
 | `ActivitySimHouseholdInputRecord` | `block_id` `[FK]` | `UrbanSimBlockMarginals` | `block_id` `[PK]` | $N:1$ | Cross-Model Spatial | Anchors ActivitySim households to Census Block marginals |
 | `ActivitySimHouseholdInputRecord` | `cars` `[FK]` | `AtlasHouseholdFleetOutput` | `houseid` `[PK]` | $1:1$ | Cross-Model Update | Updates household car count (`cars`) from ATLAS vehicle ownership (`nvehicles`) for mode choice |
 | `ActivitySimHouseholdInputRecord` | `household_id` `[FK]` | `DemosPolarisMappedHousehold` | `household` `[PK]` | $1:1$ | Cross-Model Lineage | Lineage tracking from DEMOS base population to ActivitySim |
+| `ActivitySimPersonInputRecord` | `person_id` `[FK]` | `DemosPolarisMappedPerson` | `person` `[PK]` | $1:1$ | Cross-Model Lineage | Lineage tracking from DEMOS synthetic persons to ActivitySim |
 | `BeamPersonRecord` | `household_id` `[FK]` | `BeamHouseholdRecord` | `household_id` `[PK]` | $N:1$ | Intra-Model FK | Enforces person membership in BEAM simulated households |
 | `BeamVehicleRecord` | `household_id` `[FK]` | `BeamHouseholdRecord` | `household_id` `[PK]` | $N:1$ | Intra-Model FK | Associates BEAM staged vehicles with households |
 | `BeamVehicleRecord` | `maindriver_id` `[FK]` | `BeamPersonRecord` | `person_id` `[PK]` | $N:1$ | Intra-Model FK | Assigns primary driver to household vehicle |
 | `BeamPlanRecord` | `person_id` `[FK]` | `BeamPersonRecord` | `person_id` `[PK]` | $N:1$ | Intra-Model FK | Sequences activity elements and legs for simulated agent |
-| `BeamPlanRecord` | `person_id` `[FK]` | `ActivitySimPersonInputRecord` | `person_id` `[PK]` | $1:1$ | Cross-Model Schedule | Populates BEAM agent travel plans from ActivitySim schedule |
+| `BeamPlanRecord` | `person_id` `[FK]` | `ActivitySimPersonInputRecord` | `person_id` `[PK]` | $N:1$ | Cross-Model Schedule | Populates BEAM agent travel plans from ActivitySim schedule |
 | `BeamHouseholdRecord` | `household_id` `[FK]` | `DemosPolarisMappedHousehold` | `household` `[PK]` | $1:1$ | Cross-Model Lineage | Lineage tracking from DEMOS base population to BEAM agents |
+| `BeamPersonRecord` | `person_id` `[FK]` | `DemosPolarisMappedPerson` | `person` `[PK]` | $1:1$ | Cross-Model Lineage | Lineage tracking from DEMOS synthetic persons to BEAM agents |
 | `BeamVehicleRecord` | `vehicle_id` `[FK]` | `AtlasVehicleFleetOutput` | `vehid` `[PK]` | $1:1$ | Cross-Model Lineage | Stages ATLAS vehicle fleet with powertrains into BEAM |
 | `BeamHouseholdRecord` | `home_zone_id` `[FK]` | `UrbanSimZonalTotals` | `zone_id` `[PK]` | $N:1$ | Cross-Model Spatial | Places BEAM households in regional TAZ zones |
 | `BeamHouseholdRecord` | `block_id` `[FK]` | `UrbanSimBlockMarginals` | `block_id` `[PK]` | $N:1$ | Cross-Model Spatial | Anchors BEAM agents to Census Block marginals |
 | `BeamNetworkSkims` | `zone_count` `[FK]` | `UrbanSimZonalTotals` | `zone_id` `[PK]` | $N:1$ | Cross-Model Spatial | Confirms BEAM multi-modal skim matrix dimensions match active TAZ zones |
-| `BeamNetworkSkims` | `zone_count` `[FK]` | `BeamPlanRecord` | `plan_id` `[PK]` | $N:1$ | Cross-Model Simulation | BEAM multi-agent dynamic simulation produces converged skim matrices |
 """
 
 

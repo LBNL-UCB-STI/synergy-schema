@@ -121,7 +121,6 @@ def generate_mermaid_erd(
 
     lines: list[str] = [
         "erDiagram",
-        "    direction TB",
     ]
 
     # 1. Define Relationships
@@ -188,6 +187,14 @@ def generate_mermaid_erd(
         )
 
     if (
+        "DemosPolarisMappedPerson" in target_classes
+        and "PolarisDemandDatabasePerson" in target_classes
+    ):
+        lines.append(
+            '    DemosPolarisMappedPerson ||--|| PolarisDemandDatabasePerson : "pop recode lineage"'
+        )
+
+    if (
         "AtlasVehicleFleetOutput" in target_classes
         and "PolarisDemandDatabaseVehicle" in target_classes
     ):
@@ -245,6 +252,14 @@ def generate_mermaid_erd(
         )
 
     if (
+        "DemosPolarisMappedPerson" in target_classes
+        and "ActivitySimPersonInputRecord" in target_classes
+    ):
+        lines.append(
+            '    DemosPolarisMappedPerson ||--|| ActivitySimPersonInputRecord : "pop lineage"'
+        )
+
+    if (
         "AtlasHouseholdFleetOutput" in target_classes
         and "ActivitySimHouseholdInputRecord" in target_classes
     ):
@@ -293,6 +308,14 @@ def generate_mermaid_erd(
         )
 
     if (
+        "DemosPolarisMappedPerson" in target_classes
+        and "BeamPersonRecord" in target_classes
+    ):
+        lines.append(
+            '    DemosPolarisMappedPerson ||--|| BeamPersonRecord : "pop lineage"'
+        )
+
+    if (
         "AtlasVehicleFleetOutput" in target_classes
         and "BeamVehicleRecord" in target_classes
     ):
@@ -321,18 +344,7 @@ def generate_mermaid_erd(
             '    UrbanSimZonalTotals ||--o{ BeamNetworkSkims : "TAZ dimension"'
         )
 
-    # Downstream dynamic simulation outputs and travel schedule execution
-    if (
-        "PolarisDemandDatabaseVehicle" in target_classes
-        and "NextYearNetworkSkims" in target_classes
-    ):
-        lines.append(
-            '    PolarisDemandDatabaseVehicle ||--o{ NextYearNetworkSkims : "simulates skims"'
-        )
-
-    if "BeamPlanRecord" in target_classes and "BeamNetworkSkims" in target_classes:
-        lines.append('    BeamPlanRecord ||--o{ BeamNetworkSkims : "simulates skims"')
-
+    # ActivitySim schedule handoff to BEAM dynamic multi-agent execution
     if (
         "ActivitySimPersonInputRecord" in target_classes
         and "BeamPlanRecord" in target_classes
@@ -425,7 +437,7 @@ def generate_mermaid_erd(
             }:
                 is_fk = True
             elif (
-                cls_name == "ActivitySimPersonInputRecord" and slot.name == "member_id"
+                cls_name == "ActivitySimPersonInputRecord" and slot.name == "person_id"
             ):
                 is_pk = True
             elif cls_name == "ActivitySimPersonInputRecord" and slot.name in {

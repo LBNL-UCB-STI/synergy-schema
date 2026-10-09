@@ -15,5 +15,6 @@ jobs:
       - uses: astral-sh/setup-uv@v5
       - run: uv sync --group dev
       - run: uv run linkml-lint src/synergy_schema/schema/synergy_schema.yaml
+      - run: uv run python scripts/export_deliverable1.py
       - run: uv run pytest -q
       - run: UV_CACHE_DIR=/tmp/synergy-schema-uv-cache scripts/preview-schema-docs build
