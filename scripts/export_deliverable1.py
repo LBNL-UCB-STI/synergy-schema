@@ -425,8 +425,12 @@ def export_package(target_dir: Path) -> None:
     resources_dest = docs_dest / "resources"
     resources_dest.mkdir(parents=True, exist_ok=True)
     excel_src = (
-        REPO_ROOT / "docs-internal" / "DEMOS_and_ATLAS_to_POLARIS_interface.xlsx"
+        REPO_ROOT / "docs" / "resources" / "DEMOS_and_ATLAS_to_POLARIS_interface.xlsx"
     )
+    if not excel_src.exists():
+        excel_src = (
+            REPO_ROOT / "docs-internal" / "DEMOS_and_ATLAS_to_POLARIS_interface.xlsx"
+        )
     if excel_src.exists():
         shutil.copy2(
             excel_src, resources_dest / "DEMOS_and_ATLAS_to_POLARIS_interface.xlsx"
