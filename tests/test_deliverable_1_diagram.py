@@ -60,6 +60,22 @@ def test_deliverable_1_uml_contains_all_models_and_diagrams() -> None:
     assert "Crosswalk X-V1" in rendered
     assert "Crosswalk X-V2" in rendered
 
+    # Clickable LinkML schema links
+    assert 'click SF_Firm "../schema/SynthFirmEstablishmentRecord/"' in rendered
+    assert 'click DEMOS_HH "../schema/DemosPolarisMappedHousehold/"' in rendered
+    assert (
+        'link SynthFirmEstablishmentRecord "../schema/SynthFirmEstablishmentRecord/"'
+        in rendered
+    )
+    assert (
+        'link PolarisDemandDatabaseHousehold "../schema/PolarisDemandDatabaseHousehold/"'
+        in rendered
+    )
+    assert (
+        "[`SynthFirmEstablishmentRecord`](../schema/SynthFirmEstablishmentRecord.md)"
+        in rendered
+    )
+
 
 def test_deliverable_1_uml_deterministic() -> None:
     assert render_deliverable_1_uml() == render_deliverable_1_uml()
