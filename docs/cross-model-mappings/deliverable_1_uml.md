@@ -8,61 +8,148 @@ POLARIS, and Travel Network Skims (.omx).
 
 ## 1. Multi-Model Architecture & Data Exchange Pipeline
 
-```mermaid
-flowchart TD
-    subgraph Inputs ["Exogenous Inputs & Skims"]
-        SkimsIn["Input Network Skims (.omx)<br/><i>Peak/Off-Peak Times & Distances</i>"]
-        PUMS["Census PUMS Microdata<br/><i>Seed Demographic Distributions</i>"]
-    end
+=== "Primary Workflow: POLARIS Dynamic Traffic Assignment"
 
-    subgraph UrbanSim ["UrbanSim (Land Use & Marginals)"]
-        US_Block["UrbanSimBlockMarginals<br/><i>Atomic Census Block FIPS</i>"]
-        US_Map["BlockToTazMapping<br/><i>Spatial Crosswalk</i>"]
-        US_Zone["UrbanSimZonalTotals<br/><i>Macro-Zone (TAZ) Totals</i>"]
-    end
+    The primary Year 1 deliverable centers on the core Synergy workflow with POLARIS
+    as the activity-based travel demand and dynamic traffic assignment engine:
 
-    subgraph DEMOS ["DEMOS (Demographic Synthesis)"]
-        DEMOS_HH["DemosHousehold<br/><i>Income, Workers, Size, Head Age</i>"]
-        DEMOS_P["DemosPerson<br/><i>Age, Gender, Relate, Edu, Work</i>"]
-    end
+    ```mermaid
+    flowchart TD
+        subgraph Inputs ["Exogenous Inputs & Skims"]
+            SkimsIn["Input Network Skims (.omx)<br/><i>Peak/Off-Peak Times & Distances</i>"]
+            PUMS["Census PUMS Microdata<br/><i>Seed Demographic Distributions</i>"]
+        end
 
-    subgraph ATLAS ["ATLAS (Household Fleet Synthesis)"]
-        ATLAS_HH["AtlasHousehold<br/><i>nvehicles</i>"]
-        ATLAS_V["AtlasVehicle<br/><i>Body Type, Powertrain (ICE/HEV/PHEV/AEV)</i>"]
-    end
+        subgraph UrbanSim ["UrbanSim (Land Use & Marginals)"]
+            US_Block["UrbanSimBlockMarginals<br/><i>Atomic Census Block FIPS</i>"]
+            US_Map["BlockToTazMapping<br/><i>Spatial Crosswalk</i>"]
+            US_Zone["UrbanSimZonalTotals<br/><i>Macro-Zone (TAZ) Totals</i>"]
+        end
 
-    subgraph POLARIS ["POLARIS (Activity-Based Demand & Supply)"]
-        POL_Supply["Supply.sqlite<br/><i>Zone & Location Tables</i>"]
-        POL_Demand["Demand.sqlite<br/><i>Household, Person, Vehicle</i>"]
-        POL_DTA["Dynamic Traffic Assignment (DTA)"]
-    end
+        subgraph DEMOS ["DEMOS (Demographic Synthesis)"]
+            DEMOS_HH["DemosHousehold<br/><i>Income, Workers, Size, Head Age</i>"]
+            DEMOS_P["DemosPerson<br/><i>Age, Gender, Relate, Edu, Work</i>"]
+        end
 
-    subgraph Outputs ["Downstream Outputs"]
-        SkimsOut["Next-Year Network Skims (.omx)<br/><i>Simulated Highway/Transit Impedance</i>"]
-    end
+        subgraph ATLAS ["ATLAS (Household Fleet Synthesis)"]
+            ATLAS_HH["AtlasHousehold<br/><i>nvehicles</i>"]
+            ATLAS_V["AtlasVehicle<br/><i>Body Type, Powertrain (ICE/HEV/PHEV/AEV)</i>"]
+        end
 
-    %% Connections
-    SkimsIn -->|Accessibility Logsums| US_Block
-    SkimsIn -->|Commute Times/Distances| ATLAS_V
-    PUMS -->|Seed Lineage| DEMOS_HH
-    PUMS -->|Seed Lineage| DEMOS_P
+        subgraph POLARIS ["POLARIS (Activity-Based Demand & Supply)"]
+            POL_Supply["Supply.sqlite<br/><i>Zone & Location Tables</i>"]
+            POL_Demand["Demand.sqlite<br/><i>Household, Person, Vehicle</i>"]
+            POL_DTA["Dynamic Traffic Assignment (DTA)"]
+        end
 
-    US_Block -->|Area/Housing Allocation| US_Map
-    US_Map --> US_Zone
-    US_Zone -->|Zonal Capacity & Employment| POL_Supply
-    US_Block -.->|Zonal Marginal Controls| DEMOS_HH
+        subgraph Outputs ["Downstream Outputs"]
+            SkimsOut["Next-Year Network Skims (.omx)<br/><i>Simulated Highway/Transit Impedance</i>"]
+        end
 
-    DEMOS_HH -->|Household Identifiers & Income| ATLAS_HH
-    DEMOS_HH -->|Demographic Agent Records| POL_Demand
-    DEMOS_P -->|Person Agent Records| POL_Demand
+        %% Connections
+        SkimsIn -->|Accessibility Logsums| US_Block
+        SkimsIn -->|Commute Times/Distances| ATLAS_V
+        PUMS -->|Seed Lineage| DEMOS_HH
+        PUMS -->|Seed Lineage| DEMOS_P
 
-    ATLAS_HH --> ATLAS_V
-    ATLAS_V -->|Vehicle Inventory & Powertrains| POL_Demand
+        US_Block -->|Area/Housing Allocation| US_Map
+        US_Map --> US_Zone
+        US_Zone -->|Zonal Capacity & Employment| POL_Supply
+        US_Block -.->|Zonal Marginal Controls| DEMOS_HH
 
-    POL_Supply --> POL_DTA
-    POL_Demand --> POL_DTA
-    POL_DTA --> SkimsOut
-```
+        DEMOS_HH -->|Household Identifiers & Income| ATLAS_HH
+        DEMOS_HH -->|Demographic Agent Records| POL_Demand
+        DEMOS_P -->|Person Agent Records| POL_Demand
+
+        ATLAS_HH --> ATLAS_V
+        ATLAS_V -->|Vehicle Inventory & Powertrains| POL_Demand
+
+        POL_Supply --> POL_DTA
+        POL_Demand --> POL_DTA
+        POL_DTA --> SkimsOut
+    ```
+
+=== "LBL Counterpart Workflow: ActivitySim Demand & BEAM Dynamic Simulation"
+
+    Synergy also supports LBL-maintained tools—ActivitySim and BEAM—demonstrating that
+    the upstream scenario state (UrbanSim land use, DEMOS population, and ATLAS vehicle fleet)
+    can seamlessly drive alternative demand and simulation engines:
+
+    ```mermaid
+    flowchart TD
+        subgraph Inputs_B ["Exogenous Inputs & Skims"]
+            SkimsIn_B["Input Network Skims (.omx / Zarr)<br/><i>Peak/Off-Peak Times & Distances</i>"]
+            PUMS_B["Census PUMS Microdata<br/><i>Seed Demographic Distributions</i>"]
+        end
+
+        subgraph UrbanSim_B ["UrbanSim (Land Use & Marginals)"]
+            US_Block_B["UrbanSimBlockMarginals<br/><i>Atomic Census Block FIPS</i>"]
+            US_Map_B["BlockToTazMapping<br/><i>Spatial Crosswalk</i>"]
+            US_Zone_B["UrbanSimZonalTotals<br/><i>Macro-Zone (TAZ) Totals</i>"]
+        end
+
+        subgraph DEMOS_B ["DEMOS (Demographic Synthesis)"]
+            DEMOS_HH_B["DemosHousehold<br/><i>Income, Workers, Size, Head Age</i>"]
+            DEMOS_P_B["DemosPerson<br/><i>Age, Gender, Relate, Edu, Work</i>"]
+        end
+
+        subgraph ATLAS_B ["ATLAS (Household Fleet Synthesis)"]
+            ATLAS_HH_B["AtlasHousehold<br/><i>nvehicles</i>"]
+            ATLAS_V_B["AtlasVehicle<br/><i>Body Type, Powertrain (ICE/HEV/PHEV/AEV)</i>"]
+        end
+
+        subgraph ActivitySim ["ActivitySim (Activity-Based Demand)"]
+            AS_Pop["ActivitySim Population<br/><i>Households (with ATLAS cars) & Persons</i>"]
+            AS_Core["Core Demand Models<br/><i>Tours, Mandatory/Non-Mandatory Trips</i>"]
+            AS_Plans["Activity-Travel Schedules<br/><i>Activity Types, Times & Modes</i>"]
+        end
+
+        subgraph BEAM ["BEAM (Dynamic Multi-Agent Simulation)"]
+            BEAM_Pop["BeamHouseholdRecord & BeamPersonRecord<br/><i>Demographics & Values of Time</i>"]
+            BEAM_Veh["BeamVehicleRecord<br/><i>Staged ATLAS Fleet with Powertrains</i>"]
+            BEAM_Plans["BeamPlanRecord<br/><i>Sequenced Activities & Travel Legs</i>"]
+            BEAM_Sim["Dynamic Multi-Agent Simulation<br/><i>Router, Transit & EV Charging</i>"]
+        end
+
+        subgraph Outputs_B ["Downstream Outputs & Feedback"]
+            BEAM_Out["BeamPlanOutputRecord<br/><i>Executed Agent Plans</i>"]
+            BEAM_Skims["BeamNetworkSkims (.omx / Zarr)<br/><i>Simulated Highway/Transit Impedance</i>"]
+        end
+
+        %% Connections
+        SkimsIn_B -->|Accessibility Logsums| US_Block_B
+        SkimsIn_B -->|Travel Skims| AS_Core
+        SkimsIn_B -->|Commute Times/Distances| ATLAS_V_B
+        PUMS_B -->|Seed Lineage| DEMOS_HH_B
+        PUMS_B -->|Seed Lineage| DEMOS_P_B
+
+        US_Block_B -->|Area/Housing Allocation| US_Map_B
+        US_Map_B --> US_Zone_B
+        US_Zone_B -->|Zonal Land Use & Employment| AS_Pop
+        US_Block_B -.->|Zonal Marginal Controls| DEMOS_HH_B
+
+        DEMOS_HH_B -->|Household Identifiers & Income| ATLAS_HH_B
+        DEMOS_HH_B -->|Household Records| AS_Pop
+        DEMOS_P_B -->|Person Records| AS_Pop
+
+        ATLAS_HH_B --> ATLAS_V_B
+        ATLAS_HH_B ==>|Updates cars per household| AS_Pop
+        ATLAS_V_B -->|Staged Vehicle Fleet| BEAM_Veh
+
+        AS_Pop --> AS_Core
+        AS_Core --> AS_Plans
+
+        DEMOS_HH_B -->|Household Records & Attributes| BEAM_Pop
+        DEMOS_P_B -->|Person Demographics & VOT| BEAM_Pop
+        AS_Plans -->|Activity & Leg Sequences| BEAM_Plans
+
+        BEAM_Pop --> BEAM_Sim
+        BEAM_Veh --> BEAM_Sim
+        BEAM_Plans --> BEAM_Sim
+
+        BEAM_Sim --> BEAM_Out
+        BEAM_Sim --> BEAM_Skims
+    ```
 
 ---
 
@@ -256,4 +343,105 @@ classDiagram
     }
     PolarisDemandDatabaseHousehold "1" --> "1..*" PolarisDemandDatabasePerson : members
     PolarisDemandDatabaseHousehold "1" --> "0..*" PolarisDemandDatabaseVehicle : vehicles
+```
+
+---
+
+## 6. LBL Tool Integration: ActivitySim & BEAM Schemas
+
+To ensure that scenarios generated for the core Synergy workflow can translate into
+LBL-maintained tools, the schema provides direct contracts for ActivitySim activity-based
+travel demand modeling and BEAM multi-agent dynamic traffic, transit, and charging simulation.
+
+### ActivitySim Demand & Population Schema
+
+ActivitySim consumes synthetic households and persons staged from DEMOS, coupled with zonal
+land-use totals from UrbanSim, to model activity schedules, tour generation, destination choice,
+and mode selection. ATLAS modifies the input household table by updating the number of cars per
+household (`cars`), providing authoritative auto ownership for mode choice modeling.
+
+```mermaid
+classDiagram
+    class ActivitySimHouseholdInputRecord {
+        +int household_id [PK]
+        +int TAZ [FK]
+        +string block_id [FK]
+        +int cars [from ATLAS]
+        +int auto_ownership
+    }
+    class ActivitySimPersonInputRecord {
+        +int person_id [PK]
+        +int household_id [FK]
+        +int member_id
+        +int TAZ [FK]
+        +int work_zone_id [FK]
+        +int school_zone_id [FK]
+    }
+    class AtlasHouseholdFleetOutput {
+        +int houseid [PK]
+        +int nvehicles
+    }
+    ActivitySimHouseholdInputRecord "1" --> "1..*" ActivitySimPersonInputRecord : members
+    AtlasHouseholdFleetOutput "1" ..> "1" ActivitySimHouseholdInputRecord : updates cars (nvehicles)
+```
+
+### BEAM Multi-Agent Population, Fleet, Plans & Skims Schema
+
+BEAM receives enriched demographic agents, the ATLAS-synthesized vehicle fleet with powertrain
+classifications, and ActivitySim-generated daily activity-travel plans. It simulates microscopic
+agent interactions, congestion, and energy/charging profiles.
+
+```mermaid
+classDiagram
+    class BeamHouseholdRecord {
+        +int household_id [PK]
+        +string block_id [FK]
+        +int home_zone_id [FK]
+        +float income
+        +int hhsize
+        +int cars
+        +int num_workers
+        +float value_of_time
+    }
+    class BeamPersonRecord {
+        +int person_id [PK]
+        +int household_id [FK]
+        +int age
+        +string sex
+        +float value_of_time
+        +int home_zone_id [FK]
+        +int workplace_zone_id [FK]
+        +int school_zone_id [FK]
+    }
+    class BeamVehicleRecord {
+        +string vehicle_id [PK]
+        +int household_id [FK]
+        +int maindriver_id [FK]
+        +string bodytype
+        +string pred_power
+        +string adopt_fuel
+        +int modelyear
+    }
+    class BeamPlanRecord {
+        +int person_id [FK]
+        +int planelementindex
+        +string activityelement
+        +string activitytype
+        +float departure_time
+        +string tour_mode
+        +string trip_mode
+        +float legtraveltime
+    }
+    class BeamNetworkSkims {
+        +string file_path [PK]
+        +int zone_count [FK]
+        +float sov_time_am
+        +float sov_distance
+        +float transit_in_vehicle_time
+        +float transit_fare
+        +float ridehail_solo_cost
+    }
+    BeamHouseholdRecord "1" --> "1..*" BeamPersonRecord : members
+    BeamHouseholdRecord "1" --> "0..*" BeamVehicleRecord : vehicles
+    BeamPersonRecord "1" --> "0..*" BeamPlanRecord : plans
 ```

@@ -2,9 +2,17 @@
 
 import os
 from pathlib import Path
+import pytest
 from linkml_runtime.utils.schemaview import SchemaView
+from scripts.export_deliverable1 import export_package
 
 DIST_DIR = Path(__file__).parents[1] / "dist" / "synergy-static-schema"
+
+
+@pytest.fixture(scope="session", autouse=True)
+def ensure_dist_exists() -> None:
+    if not DIST_DIR.exists():
+        export_package(DIST_DIR)
 
 
 def test_dist_contains_all_deliverable_schemas_and_files() -> None:

@@ -16,6 +16,8 @@ The model-owned population slices are:
 - [`atlas/atlas_fleet_observed_example_v1.yaml`](atlas/atlas_fleet_observed_example_v1.yaml),
   a provisional model-contract shape for observed fleet-output tables; it is
   not a shared-handoff profile.
+- [`beam/`](beam/), the BEAM household, person, and travel plans input classes
+  plus network travel skims output observed in the PILATES reference implementation.
 - [`demos/`](demos/), provisional row contracts for observed DEMOS
   `POLARIS_mapped` exports; their publisher and target-ingest status remain
   unconfirmed.

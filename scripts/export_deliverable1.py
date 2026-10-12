@@ -35,6 +35,7 @@ and outputs of the integrated regional modeling suite:
 - **DEMOS**: Agent-level demographic synthesis, evolution, and Census PUMS seed lineage.
 - **ATLAS**: Household vehicle fleet composition, body type, and discrete powertrain adoption (ICE, HEV, PHEV, AEV).
 - **POLARIS**: Activity-based demand microdata (Demand.sqlite) and network supply infrastructure (Supply.sqlite).
+- **ActivitySim & BEAM**: Parallel demand specification and dynamic multi-agent simulation counterpart interfaces.
 - **Network Travel Skims (.omx)**: Open Matrix zone-to-zone highway and transit travel impedance.
 
 ---
@@ -65,9 +66,15 @@ The full interactive schema reference, searchable dictionary, and visual UML dia
 │   │   ├── urbansim/urbansim_land_use.yaml
 │   │   ├── demos/demos_polaris_mapped_examples.yaml
 │   │   ├── atlas/atlas_fleet_observed_example_v1.yaml
-│   │   └── polaris/
-│   │       ├── polaris_demand_database_v1.yaml
-│   │       └── polaris_skims.yaml
+│   │   ├── polaris/
+│   │   │   ├── polaris_demand_database_v1.yaml
+│   │   │   └── polaris_skims.yaml
+│   │   ├── activitysim/activitysim_population.yaml
+│   │   └── beam/
+│   │       ├── beam.yaml
+│   │       ├── beam_population.yaml
+│   │       ├── beam_plans.yaml
+│   │       └── beam_skims.yaml
 │   └── mappings/
 │       └── single_year_handoff.yaml
 ├── pyproject.toml             # Python configuration & dependencies for LinkML & Zensical
@@ -186,7 +193,7 @@ STANDALONE_EXTRA_CSS = """/* Custom styling for Synergy Schema documentation */
 
 STANDALONE_ZENSICAL = """[project]
 site_name = "SYNERGY Static Cross-Model Schema"
-site_description = "Static cross-model LinkML schemas and categorical crosswalks across UrbanSim, DEMOS, ATLAS, POLARIS, and Travel Skims"
+site_description = "Static cross-model LinkML schemas and categorical crosswalks across UrbanSim, DEMOS, ATLAS, POLARIS, ActivitySim, BEAM, and Travel Skims"
 docs_dir = "docs"
 site_dir = "site"
 extra_javascript = [
@@ -381,6 +388,11 @@ def export_package(target_dir: Path) -> None:
         "models/atlas/atlas_fleet_observed_example_v1.yaml",
         "models/polaris/polaris_demand_database_v1.yaml",
         "models/polaris/polaris_skims.yaml",
+        "models/activitysim/activitysim_population.yaml",
+        "models/beam/beam.yaml",
+        "models/beam/beam_population.yaml",
+        "models/beam/beam_plans.yaml",
+        "models/beam/beam_skims.yaml",
         "mappings/single_year_handoff.yaml",
     ]
 
@@ -413,8 +425,12 @@ def export_package(target_dir: Path) -> None:
     resources_dest = docs_dest / "resources"
     resources_dest.mkdir(parents=True, exist_ok=True)
     excel_src = (
-        REPO_ROOT / "docs-internal" / "DEMOS_and_ATLAS_to_POLARIS_interface.xlsx"
+        REPO_ROOT / "docs" / "resources" / "DEMOS_and_ATLAS_to_POLARIS_interface.xlsx"
     )
+    if not excel_src.exists():
+        excel_src = (
+            REPO_ROOT / "docs-internal" / "DEMOS_and_ATLAS_to_POLARIS_interface.xlsx"
+        )
     if excel_src.exists():
         shutil.copy2(
             excel_src, resources_dest / "DEMOS_and_ATLAS_to_POLARIS_interface.xlsx"

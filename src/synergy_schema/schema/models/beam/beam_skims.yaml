@@ -1,0 +1,234 @@
+id: https://w3id.org/LBNL-UCB-STI/synergy-schema/models/beam/skims
+name: beam_skims
+title: BEAM network travel skims schema (Open Matrix .omx and Zarr)
+description: >-
+  Schema defining transportation network travel skim matrices and tabular OD skims
+  produced by BEAM dynamic traffic simulation. Network skims quantify zone-to-zone
+  (TAZ x TAZ) travel impedance across multiple time periods (Early AM, AM peak,
+  Midday, PM peak, Evening) and modes (auto SOV/HOV, transit, active, and ridehail/TNC).
+  In integrated workflows (such as PILATES or Synergy), BEAM skims serve as the
+  transportation system feedback consumed by land use models (UrbanSim), vehicle fleet
+  allocation models (ATLAS), and activity-based travel demand models (ActivitySim/POLARIS).
+
+prefixes:
+  synergy_schema: https://w3id.org/LBNL-UCB-STI/synergy-schema/
+  linkml: https://w3id.org/linkml/
+
+default_prefix: synergy_schema
+default_range: string
+
+imports:
+  - linkml:types
+
+classes:
+  BeamNetworkSkims:
+    description: >-
+      Multi-modal, multi-period zone-to-zone impedance matrix container emitted
+      by BEAM simulation, packaged in Open Matrix (.omx) or Zarr format.
+      Contains 2D non-motorized distance matrices and 3D mode/measure/period
+      matrices for auto, transit, and ridehail.
+    aliases:
+      - BeamSkims
+      - BeamSkimsOutput
+    annotations:
+      owner: BEAM
+      model_association: BEAM
+      contract_family: network_skims
+      format: "omx, zarr"
+      status: formal_contract
+      producer_model: BEAM
+      consumer_models: "UrbanSim, ATLAS, ActivitySim, POLARIS"
+      enforcement_status: PILATES-observed
+    attributes:
+      file_path:
+        range: string
+        identifier: true
+        required: true
+        description: Relative path to the .omx or .zarr matrix storage archive.
+      format:
+        range: string
+        description: Storage format indicator ('omx' or 'zarr').
+      zone_count:
+        range: integer
+        required: true
+        minimum_value: 1
+        description: Number of Traffic Analysis Zones (TAZ) in square matrix dimension.
+      time_periods:
+        range: string
+        description: Modeled time-of-day periods represented in matrix slices (e.g. 'EA,AM,MD,PM,EV').
+      iteration_number:
+        range: integer
+        minimum_value: 0
+        description: BEAM simulation iteration count at which skims were extracted.
+      converged:
+        range: boolean
+        description: Indicates whether dynamic traffic assignment achieved equilibrium convergence.
+      sov_time_am:
+        range: float
+        minimum_value: 0.0
+        description: Single-occupant auto highway travel time in minutes during morning peak (AM).
+      sov_time_pm:
+        range: float
+        minimum_value: 0.0
+        description: Single-occupant auto highway travel time in minutes during evening peak (PM).
+      sov_time_md:
+        range: float
+        minimum_value: 0.0
+        description: Single-occupant auto highway travel time in minutes during midday off-peak (MD).
+      sov_distance:
+        range: float
+        minimum_value: 0.0
+        description: Single-occupant vehicle highway travel distance in miles.
+      sov_toll_cost:
+        range: float
+        minimum_value: 0.0
+        description: Single-occupant vehicle highway bridge and value toll costs ($).
+      hov2_time_am:
+        range: float
+        minimum_value: 0.0
+        description: High-occupancy vehicle (2 person) travel time in minutes during morning peak (AM).
+      hov3_time_am:
+        range: float
+        minimum_value: 0.0
+        description: High-occupancy vehicle (3+ person) travel time in minutes during morning peak (AM).
+      hov2_distance:
+        range: float
+        minimum_value: 0.0
+        description: High-occupancy vehicle (2 person) travel distance in miles.
+      hov3_distance:
+        range: float
+        minimum_value: 0.0
+        description: High-occupancy vehicle (3+ person) travel distance in miles.
+      transit_in_vehicle_time:
+        range: float
+        minimum_value: 0.0
+        annotations:
+          matrix_name: WLK_TRN_WLK_TOTIVT
+        description: Total transit in-vehicle travel time in minutes.
+      transit_initial_wait_time:
+        range: float
+        minimum_value: 0.0
+        annotations:
+          matrix_name: WLK_EXP_WLK_IWAIT
+        description: Transit initial waiting time in minutes.
+      transit_transfer_wait_time:
+        range: float
+        minimum_value: 0.0
+        description: Transit transfer waiting time in minutes.
+      transit_fare:
+        range: float
+        minimum_value: 0.0
+        annotations:
+          matrix_name: WLK_TRN_WLK_FAR
+        description: Transit monetary fare cost in dollars ($).
+      transit_failures:
+        range: float
+        minimum_value: 0.0
+        annotations:
+          matrix_name: WLK_TRN_WLK_FAILURES
+        description: Count or probability of transit routing or boarding capacity failures.
+      walk_distance:
+        range: float
+        minimum_value: 0.0
+        annotations:
+          matrix_name: DISTWALK
+        description: Zone-to-zone walking network distance in miles (2D matrix).
+      bike_distance:
+        range: float
+        minimum_value: 0.0
+        annotations:
+          matrix_name: DISTBIKE
+        description: Zone-to-zone bicycling network distance in miles (2D matrix).
+      ridehail_solo_wait_time:
+        range: float
+        minimum_value: 0.0
+        annotations:
+          matrix_name: RH_SOLO_WAIT
+        description: Average passenger wait time for solo ridehail/TNC pickup in minutes.
+      ridehail_solo_cost:
+        range: float
+        minimum_value: 0.0
+        annotations:
+          matrix_name: RH_SOLO_COST
+        description: Average monetary fare for solo ridehail/TNC trip in dollars ($).
+      ridehail_pooled_wait_time:
+        range: float
+        minimum_value: 0.0
+        annotations:
+          matrix_name: RH_POOLED_WAIT
+        description: Average passenger wait time for pooled ridehail/TNC pickup in minutes.
+      ridehail_pooled_cost:
+        range: float
+        minimum_value: 0.0
+        annotations:
+          matrix_name: RH_POOLED_COST
+        description: Average monetary fare for pooled ridehail/TNC trip in dollars ($).
+      ridehail_pooled_rejection_prob:
+        range: float
+        minimum_value: 0.0
+        maximum_value: 1.0
+        annotations:
+          matrix_name: RH_POOLED_REJECTIONPROB
+        description: Probability of pooled ridehail ride request rejection or unavailability (0.0 to 1.0).
+      ridehail_solo_trips:
+        range: float
+        minimum_value: 0.0
+        annotations:
+          matrix_name: RH_SOLO_TRIPS
+        description: Total simulated solo ridehail trip volume between zone pairs.
+      ridehail_pooled_trips:
+        range: float
+        minimum_value: 0.0
+        annotations:
+          matrix_name: RH_POOLED_TRIPS
+        description: Total simulated pooled ridehail trip volume between zone pairs.
+
+  BeamODSkimsRecord:
+    description: >-
+      Direct router origin-destination record schema emitted by BEAM router
+      (e.g. skimsActivitySimOD_current.csv.gz) prior to multi-dimensional
+      matrix aggregation into Open Matrix (.omx) or Zarr.
+    aliases:
+      - BeamActivitySimODSkimsRecord
+    annotations:
+      owner: BEAM
+      table_name: skimsActivitySimOD_current
+      model_association: BEAM
+      schema_status: authoritative
+      status: active
+      enforcement_status: PILATES-observed
+    attributes:
+      time_period:
+        range: string
+        required: true
+        description: Modeled time-of-day period (EA, AM, MD, PM, EV).
+      orig_taz:
+        range: integer
+        required: true
+        description: Origin Traffic Analysis Zone (TAZ).
+      dest_taz:
+        range: integer
+        required: true
+        description: Destination Traffic Analysis Zone (TAZ).
+      path_type:
+        range: string
+        required: true
+        description: Modal path category (e.g. SOV, HOV2, HOV3, Transit, Ridehail).
+      travel_time_minutes:
+        range: float
+        required: true
+        minimum_value: 0.0
+        description: Zone-to-zone door-to-door travel time in minutes.
+      distance_miles:
+        range: float
+        required: true
+        minimum_value: 0.0
+        description: Network route travel distance in miles.
+      generalized_cost:
+        range: float
+        minimum_value: 0.0
+        description: Generalized travel cost incorporating time, toll, and operating cost.
+      toll_cost:
+        range: float
+        minimum_value: 0.0
+        description: Direct bridge and highway toll charges in dollars ($).

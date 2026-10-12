@@ -84,6 +84,20 @@ def test_generate_mermaid_regional_erd() -> None:
         'UrbanSimZonalTotals ||--o{ NextYearNetworkSkims : "TAZ dimension"'
         in mermaid_str
     )
+    assert (
+        'UrbanSimZonalTotals ||--o{ BeamHouseholdRecord : "TAZ location"' in mermaid_str
+    )
+    assert (
+        'UrbanSimZonalTotals ||--o{ BeamNetworkSkims : "TAZ dimension"' in mermaid_str
+    )
+    assert (
+        'AtlasHouseholdFleetOutput ||--|| ActivitySimHouseholdInputRecord : "updates cars"'
+        in mermaid_str
+    )
+    assert (
+        'UrbanSimBlockMarginals ||--o{ ActivitySimHouseholdInputRecord : "block control"'
+        in mermaid_str
+    )
 
 
 def test_render_database_erd_markdown() -> None:
@@ -93,11 +107,15 @@ def test_render_database_erd_markdown() -> None:
 
     assert "# Database Schema & Entity-Relationship Diagrams" in rendered
     assert "## 1. Core Population & Vehicle Fleet ERD" in rendered
-    assert "## 2. Complete 5-Model Regional Architecture ERD" in rendered
+    assert "## 2. Complete Multi-Model Regional Architecture ERD" in rendered
     assert "## 3. Foreign Key & Pipeline Linkage Reference Table" in rendered
 
-    # Verify Mermaid erDiagrams are embedded directly without tabs or graphviz
-    assert rendered.count("```mermaid\nerDiagram") == 2
+    # Verify Mermaid erDiagrams are embedded for core population and tabbed regional views
+    assert rendered.count("erDiagram") == 5
+    assert '=== "Complete Regional Architecture (Cascaded Vertical Flow)"' in rendered
+    assert '=== "Primary POLARIS Regional Flow"' in rendered
+    assert '=== "ActivitySim & BEAM Multi-Agent Flow"' in rendered
+    assert '=== "Spatial Aggregation & Skim Feedback"' in rendered
     assert "Graphviz" not in rendered
     assert "schema-explorer" not in rendered
     assert "Interactive Schema Inspector" not in rendered
