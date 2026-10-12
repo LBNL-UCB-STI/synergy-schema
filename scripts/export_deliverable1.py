@@ -70,11 +70,13 @@ The full interactive schema reference, searchable dictionary, and visual UML dia
 │   │   │   ├── polaris_demand_database_v1.yaml
 │   │   │   └── polaris_skims.yaml
 │   │   ├── activitysim/activitysim_population.yaml
-│   │   └── beam/
-│   │       ├── beam.yaml
-│   │       ├── beam_population.yaml
-│   │       ├── beam_plans.yaml
-│   │       └── beam_skims.yaml
+│   │   ├── beam/
+│   │   │   ├── beam.yaml
+│   │   │   ├── beam_population.yaml
+│   │   │   ├── beam_plans.yaml
+│   │   │   └── beam_skims.yaml
+│   │   └── synthfirm/
+│   │       └── synthfirm.yaml
 │   └── mappings/
 │       └── single_year_handoff.yaml
 ├── pyproject.toml             # Python configuration & dependencies for LinkML & Zensical
@@ -328,13 +330,15 @@ STANDALONE_INDEX_MD = """# SYNERGY Static Cross-Model Schema Specification (Deli
 
 Welcome to the official specification and reference documentation for **Deliverable #1: Static Single-Year Cross-Model Schema**.
 
-This project establishes the authoritative structural contracts, join keys, and categorical crosswalks governing data exchange between four primary transportation, land use, and demographic models:
+This project establishes the authoritative structural contracts, join keys, and categorical crosswalks governing data exchange between primary transportation, land use, demographic, and freight models:
 
 1. **UrbanSim** — Land use, residential capacity, employment allocation, and atomic Census Block marginals.
 2. **DEMOS** — Dynamic demographic simulation, household synthesis, person attribute evolution, and Census PUMS seed lineage.
 3. **ATLAS** — Household vehicle fleet synthesis, ownership counts, body types, and discrete powertrain adoption (ICE, Hybrid, PHEV, AEV).
 4. **POLARIS** — Activity-based demand modeling (`Demand.sqlite`), multi-modal network supply (`Supply.sqlite`), and dynamic traffic assignment (DTA).
 5. **Open Matrix Network Skims (`.omx`)** — Zone-to-zone highway and transit travel times, distances, and toll impedances.
+6. **ActivitySim & BEAM** — Tour-based travel demand synthesis and multi-agent dynamic simulation with depot charging infrastructure.
+7. **SynthFirm** — Synthetic business establishments, commercial carrier licensing, private/for-hire fleets, and B2B freight commodity flows.
 
 ---
 
@@ -396,6 +400,7 @@ def export_package(target_dir: Path) -> None:
         "models/beam/beam_population.yaml",
         "models/beam/beam_plans.yaml",
         "models/beam/beam_skims.yaml",
+        "models/synthfirm/synthfirm.yaml",
         "mappings/single_year_handoff.yaml",
     ]
 

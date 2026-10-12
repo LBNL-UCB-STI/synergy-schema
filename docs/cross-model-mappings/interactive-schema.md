@@ -1,8 +1,8 @@
 # Database Schema & Entity-Relationship Diagrams
 
-This page presents the compiled Entity-Relationship (ER) diagrams and foreign key contracts linking the multi-model population, vehicle fleet, land-use, and network skim tables across **UrbanSim**, **DEMOS**, **ATLAS**, **POLARIS**, **ActivitySim**, **BEAM**, and **OMX Skims** for Deliverable #1.
+This page presents the compiled Entity-Relationship (ER) diagrams and foreign key contracts linking the multi-model population, vehicle fleet, land-use, freight commodity flows, and network skim tables across **UrbanSim**, **DEMOS**, **ATLAS**, **POLARIS**, **ActivitySim**, **BEAM**, **SynthFirm**, and **OMX Skims** for Deliverable #1.
 
-All tables, column definitions, primary keys, foreign keys, and cross-model handoff relationships are **generated directly from the LinkML schema contracts** (`src/synergy_schema/schema/deliverable_1_static_schema.yaml`).
+All tables, column definitions, primary keys, foreign keys, and cross-model handoff relationships are **generated directly from the LinkML schema contracts** (`schema/deliverable_1_static_schema.yaml`).
 
 ---
 
@@ -132,6 +132,13 @@ The regional architecture diagrams link the tables across the modeling suite. To
         UrbanSimZonalTotals ||--o{ BeamHouseholdRecord : "TAZ location"
         UrbanSimZonalTotals ||--o{ BeamNetworkSkims : "TAZ dimension"
         ActivitySimPersonInputRecord ||--|{ BeamPlanRecord : "travel schedule"
+        SynthFirmEstablishmentRecord ||--o{ SynthFirmB2BShipmentRecord : "seller / buyer"
+        SynthFirmEstablishmentRecord ||--|| SynthFirmCarrierRecord : "for-hire carrier"
+        SynthFirmEstablishmentRecord ||--o{ SynthFirmInternationalFreightRecord : "gateway trade"
+        UrbanSimBlockMarginals ||--o{ SynthFirmEstablishmentRecord : "zonal employment"
+        SynthFirmEstablishmentRecord ||--o{ PolarisDemandDatabaseVehicle : "commercial fleet"
+        SynthFirmEstablishmentRecord ||--o{ BeamVehicleRecord : "freight fleet"
+        InputNetworkSkims ||--o{ SynthFirmB2BShipmentRecord : "travel skims"
 
         ActivitySimHouseholdInputRecord {
             int household_id PK "ActivitySim household identifier"
@@ -417,6 +424,120 @@ The regional architecture diagrams link the tables across the modeling suite. To
             int vehicle_id PK "Physical Vehicle primary-key column"
             int hhold FK "Physical household join value checked..."
             int type "Physical vehicle type field; code..."
+        }
+
+        SynthFirmB2BShipmentRecord {
+            int shipment_id PK "Unique freight shipment identifier"
+            int BuyerID FK "Unique business identifier of the..."
+            int SellerID FK "Unique business identifier of the..."
+            int orig_FAFID FK "Federal Freight Analysis Framework..."
+            int dest_FAFID FK "Federal Freight Analysis Framework..."
+            int fleet_id FK "Optional sub-fleet index for private..."
+            string BuyerZone "Census Block Group FIPS or external..."
+            string BuyerNAICS "NAICS industry classification code of..."
+            string SellerZone "Census Block Group FIPS or external..."
+            string SellerNAICS "NAICS industry classification code of..."
+            float TruckLoad "Total freight shipment payload weight..."
+            int Commodity_SCTG "2-digit Standard Classification of..."
+            int SCTG_Group "Aggregated commodity group category..."
+            float UnitCost "Commodity unit value / cost in..."
+            string mode_choice "Chosen transportation mode (For-hire..."
+            float probability "Mode choice model probability of..."
+            float Distance "Highway network routing distance in..."
+            float Travel_time "Highway network travel time impedance"
+        }
+
+        SynthFirmCarrierRecord {
+            int BusID PK "Unique synthetic business..."
+            int CBPZONE FK "County Business Patterns zone..."
+            int FAFZONE FK "Federal Freight Analysis Framework..."
+            string MESOZONE FK "Micro-zone spatial identifier..."
+            int SCTG1 "Binary flag indicating..."
+            int SCTG2 "Binary flag indicating..."
+            int SCTG3 "Binary flag indicating..."
+            int SCTG4 "Binary flag indicating..."
+            int SCTG5 "Binary flag indicating..."
+            int fleet_id "Sub-fleet category index within the..."
+            int esizecat "Establishment employment size..."
+            string Industry_NAICS6_Make "6-digit NAICS industry classification..."
+            int Commodity_SCTG "Primary 2-digit Standard..."
+            float Emp "Total employment count (number of..."
+            float lat "Centroid latitude coordinate (WGS84)"
+            float lon "Centroid longitude coordinate (WGS84)"
+            string state_abbr "Two-letter US state abbreviation (e"
+            string EV_powertrain "Alternative fuel powertrain assigned..."
+            float diesel_class_1_2a "Count of Diesel Class 1 & 2A..."
+            float diesel_class_2b_3 "Count of Diesel Class 2B & 3..."
+            float diesel_class_4_6 "Count of Diesel Class 4-6 vocational..."
+            float diesel_class_7_8_tractor "Count of Diesel Class 7 & 8 tractor-..."
+            float diesel_class_7_8_vocational "Count of Diesel Class 7 & 8..."
+            float gasoline_class_1_2a "Count of Gasoline Class 1 & 2A..."
+            float gasoline_class_2b_3 "Count of Gasoline Class 2B & 3..."
+            float gasoline_class_4_6 "Count of Gasoline Class 4-6..."
+            float electric_class_1_2a "Count of Electric Class 1 & 2A..."
+            float electric_class_2b_3 "Count of Electric Class 2B & 3..."
+            float electric_class_4_6 "Count of Electric Class 4-6..."
+            float electric_class_7_8_tractor "Count of Electric Class 7 & 8 tractor..."
+            float electric_class_7_8_vocational "Count of Electric Class 7 & 8..."
+            float n_trucks "Total count of commercial vehicles..."
+        }
+
+        SynthFirmEstablishmentRecord {
+            int BusID PK "Unique synthetic business..."
+            int CBPZONE FK "County Business Patterns zone..."
+            int FAFZONE FK "Federal Freight Analysis Framework..."
+            string MESOZONE FK "Micro-zone spatial identifier..."
+            int fleet_id "Sub-fleet category index within the..."
+            int esizecat "Establishment employment size..."
+            string Industry_NAICS6_Make "6-digit NAICS industry classification..."
+            int Commodity_SCTG "Primary 2-digit Standard..."
+            float Emp "Total employment count (number of..."
+            float lat "Centroid latitude coordinate (WGS84)"
+            float lon "Centroid longitude coordinate (WGS84)"
+            string state_abbr "Two-letter US state abbreviation (e"
+            string EV_powertrain "Alternative fuel powertrain assigned..."
+            float diesel_class_1_2a "Count of Diesel Class 1 & 2A..."
+            float diesel_class_2b_3 "Count of Diesel Class 2B & 3..."
+            float diesel_class_4_6 "Count of Diesel Class 4-6 vocational..."
+            float diesel_class_7_8_tractor "Count of Diesel Class 7 & 8 tractor-..."
+            float diesel_class_7_8_vocational "Count of Diesel Class 7 & 8..."
+            float gasoline_class_1_2a "Count of Gasoline Class 1 & 2A..."
+            float gasoline_class_2b_3 "Count of Gasoline Class 2B & 3..."
+            float gasoline_class_4_6 "Count of Gasoline Class 4-6..."
+            float electric_class_1_2a "Count of Electric Class 1 & 2A..."
+            float electric_class_2b_3 "Count of Electric Class 2B & 3..."
+            float electric_class_4_6 "Count of Electric Class 4-6..."
+            float electric_class_7_8_tractor "Count of Electric Class 7 & 8 tractor..."
+            float electric_class_7_8_vocational "Count of Electric Class 7 & 8..."
+            float n_trucks "Total count of commercial vehicles..."
+        }
+
+        SynthFirmInternationalFreightRecord {
+            int bundle_id PK "Unique international freight shipment..."
+            int PORTID FK "Unique federal port of entry or..."
+            string PORTZONE FK "Census Block Group FIPS of the..."
+            int BuyerID FK "Domestic purchasing establishment..."
+            int SellerID FK "Domestic shipping establishment..."
+            string port_location "Human-readable port or airport name..."
+            int FAF "FAF5 zone of the port facility"
+            int CBPZONE "County Business Patterns zone of the..."
+            string port_type "Gateway facility classification..."
+            int is_airport "Binary flag indicating airport..."
+            string CFS_CODE "Commodity Flow Survey international..."
+            string CFS_NAME "Commodity Flow Survey international..."
+            int dms_orig "Domestic origin zone for export..."
+            int dms_dest "Domestic destination zone for import..."
+            int Commodity_SCTG "SCTG commodity code (1-43)"
+            int SCTG_Group "SCTG commodity group category (1-5)"
+            float TruckLoad "Payload weight in short tons"
+            string mode_choice "Freight transport mode (e"
+            int shipments "Annualized count of truck shipments..."
+            float Distance "Highway drayage distance between port..."
+            float tmiles "Total ton-miles of freight movement"
+            string BuyerZone "Domestic buyer Census Block Group..."
+            string BuyerNAICS "Domestic buyer NAICS industry code..."
+            string SellerZone "Domestic seller Census Block Group..."
+            string SellerNAICS "Domestic seller NAICS industry code..."
         }
 
         UrbanSimBlockMarginals {
@@ -1059,6 +1180,214 @@ The regional architecture diagrams link the tables across the modeling suite. To
         }
     ```
 
+=== "SynthFirm Freight & Commercial Flow"
+
+    ```mermaid
+    erDiagram
+        UrbanSimZonalTotals ||--o{ InputNetworkSkims : "TAZ dimension"
+        SynthFirmEstablishmentRecord ||--o{ SynthFirmB2BShipmentRecord : "seller / buyer"
+        SynthFirmEstablishmentRecord ||--|| SynthFirmCarrierRecord : "for-hire carrier"
+        SynthFirmEstablishmentRecord ||--o{ SynthFirmInternationalFreightRecord : "gateway trade"
+        UrbanSimBlockMarginals ||--o{ SynthFirmEstablishmentRecord : "zonal employment"
+        SynthFirmEstablishmentRecord ||--o{ PolarisDemandDatabaseVehicle : "commercial fleet"
+        SynthFirmEstablishmentRecord ||--o{ BeamVehicleRecord : "freight fleet"
+        InputNetworkSkims ||--o{ SynthFirmB2BShipmentRecord : "travel skims"
+
+        BeamVehicleRecord {
+            string vehicle_id PK "Unique vehicle identifier used by..."
+            int household_id FK "Foreign key linking vehicle to owning..."
+            int source_vehicle_id FK "Original ATLAS vehicle identifier..."
+            int maindriver_id FK "Foreign key identifying primary..."
+            string vehicletypeid "BEAM vehicle type identifier mapping..."
+            string bodytype "Vehicle body type category (e"
+            string pred_power "Predicted powertrain technology (ICE,..."
+            string ownlease "Ownership or lease status"
+            int modelyear "Vehicle model year"
+            string adopt_fuel "Adopted fuel type"
+            string adopt_veh "Vehicle technology adoption..."
+            string acquire_year "Vehicle acquisition year"
+            string vehicle_tag "Vehicle tag or identifier label"
+            int year "Simulation calendar year"
+            string newhhflag "New household indicator flag"
+            string vintage_category "Vehicle age or vintage bracket"
+        }
+
+        InputNetworkSkims {
+            string file_path PK "Relative path to the"
+            int zone_count FK "Number of Traffic Analysis Zones..."
+            float sov_time_am "Single-occupant auto highway travel..."
+            float sov_time_pm "Single-occupant auto highway travel..."
+            float sov_time_md "Single-occupant auto highway travel..."
+            float sov_distance "Network highway travel distance (in..."
+            float sov_toll_cost "Monetary toll cost for auto travel..."
+            float transit_travel_time "Total transit travel time including..."
+            float transit_accessibility_index "Composite regional accessibility..."
+        }
+
+        PolarisDemandDatabaseVehicle {
+            int vehicle_id PK "Physical Vehicle primary-key column"
+            int hhold FK "Physical household join value checked..."
+            int type "Physical vehicle type field; code..."
+        }
+
+        SynthFirmB2BShipmentRecord {
+            int shipment_id PK "Unique freight shipment identifier"
+            int BuyerID FK "Unique business identifier of the..."
+            int SellerID FK "Unique business identifier of the..."
+            int orig_FAFID FK "Federal Freight Analysis Framework..."
+            int dest_FAFID FK "Federal Freight Analysis Framework..."
+            int fleet_id FK "Optional sub-fleet index for private..."
+            string BuyerZone "Census Block Group FIPS or external..."
+            string BuyerNAICS "NAICS industry classification code of..."
+            string SellerZone "Census Block Group FIPS or external..."
+            string SellerNAICS "NAICS industry classification code of..."
+            float TruckLoad "Total freight shipment payload weight..."
+            int Commodity_SCTG "2-digit Standard Classification of..."
+            int SCTG_Group "Aggregated commodity group category..."
+            float UnitCost "Commodity unit value / cost in..."
+            string mode_choice "Chosen transportation mode (For-hire..."
+            float probability "Mode choice model probability of..."
+            float Distance "Highway network routing distance in..."
+            float Travel_time "Highway network travel time impedance"
+        }
+
+        SynthFirmCarrierRecord {
+            int BusID PK "Unique synthetic business..."
+            int CBPZONE FK "County Business Patterns zone..."
+            int FAFZONE FK "Federal Freight Analysis Framework..."
+            string MESOZONE FK "Micro-zone spatial identifier..."
+            int SCTG1 "Binary flag indicating..."
+            int SCTG2 "Binary flag indicating..."
+            int SCTG3 "Binary flag indicating..."
+            int SCTG4 "Binary flag indicating..."
+            int SCTG5 "Binary flag indicating..."
+            int fleet_id "Sub-fleet category index within the..."
+            int esizecat "Establishment employment size..."
+            string Industry_NAICS6_Make "6-digit NAICS industry classification..."
+            int Commodity_SCTG "Primary 2-digit Standard..."
+            float Emp "Total employment count (number of..."
+            float lat "Centroid latitude coordinate (WGS84)"
+            float lon "Centroid longitude coordinate (WGS84)"
+            string state_abbr "Two-letter US state abbreviation (e"
+            string EV_powertrain "Alternative fuel powertrain assigned..."
+            float diesel_class_1_2a "Count of Diesel Class 1 & 2A..."
+            float diesel_class_2b_3 "Count of Diesel Class 2B & 3..."
+            float diesel_class_4_6 "Count of Diesel Class 4-6 vocational..."
+            float diesel_class_7_8_tractor "Count of Diesel Class 7 & 8 tractor-..."
+            float diesel_class_7_8_vocational "Count of Diesel Class 7 & 8..."
+            float gasoline_class_1_2a "Count of Gasoline Class 1 & 2A..."
+            float gasoline_class_2b_3 "Count of Gasoline Class 2B & 3..."
+            float gasoline_class_4_6 "Count of Gasoline Class 4-6..."
+            float electric_class_1_2a "Count of Electric Class 1 & 2A..."
+            float electric_class_2b_3 "Count of Electric Class 2B & 3..."
+            float electric_class_4_6 "Count of Electric Class 4-6..."
+            float electric_class_7_8_tractor "Count of Electric Class 7 & 8 tractor..."
+            float electric_class_7_8_vocational "Count of Electric Class 7 & 8..."
+            float n_trucks "Total count of commercial vehicles..."
+        }
+
+        SynthFirmEstablishmentRecord {
+            int BusID PK "Unique synthetic business..."
+            int CBPZONE FK "County Business Patterns zone..."
+            int FAFZONE FK "Federal Freight Analysis Framework..."
+            string MESOZONE FK "Micro-zone spatial identifier..."
+            int fleet_id "Sub-fleet category index within the..."
+            int esizecat "Establishment employment size..."
+            string Industry_NAICS6_Make "6-digit NAICS industry classification..."
+            int Commodity_SCTG "Primary 2-digit Standard..."
+            float Emp "Total employment count (number of..."
+            float lat "Centroid latitude coordinate (WGS84)"
+            float lon "Centroid longitude coordinate (WGS84)"
+            string state_abbr "Two-letter US state abbreviation (e"
+            string EV_powertrain "Alternative fuel powertrain assigned..."
+            float diesel_class_1_2a "Count of Diesel Class 1 & 2A..."
+            float diesel_class_2b_3 "Count of Diesel Class 2B & 3..."
+            float diesel_class_4_6 "Count of Diesel Class 4-6 vocational..."
+            float diesel_class_7_8_tractor "Count of Diesel Class 7 & 8 tractor-..."
+            float diesel_class_7_8_vocational "Count of Diesel Class 7 & 8..."
+            float gasoline_class_1_2a "Count of Gasoline Class 1 & 2A..."
+            float gasoline_class_2b_3 "Count of Gasoline Class 2B & 3..."
+            float gasoline_class_4_6 "Count of Gasoline Class 4-6..."
+            float electric_class_1_2a "Count of Electric Class 1 & 2A..."
+            float electric_class_2b_3 "Count of Electric Class 2B & 3..."
+            float electric_class_4_6 "Count of Electric Class 4-6..."
+            float electric_class_7_8_tractor "Count of Electric Class 7 & 8 tractor..."
+            float electric_class_7_8_vocational "Count of Electric Class 7 & 8..."
+            float n_trucks "Total count of commercial vehicles..."
+        }
+
+        SynthFirmInternationalFreightRecord {
+            int bundle_id PK "Unique international freight shipment..."
+            int PORTID FK "Unique federal port of entry or..."
+            string PORTZONE FK "Census Block Group FIPS of the..."
+            int BuyerID FK "Domestic purchasing establishment..."
+            int SellerID FK "Domestic shipping establishment..."
+            string port_location "Human-readable port or airport name..."
+            int FAF "FAF5 zone of the port facility"
+            int CBPZONE "County Business Patterns zone of the..."
+            string port_type "Gateway facility classification..."
+            int is_airport "Binary flag indicating airport..."
+            string CFS_CODE "Commodity Flow Survey international..."
+            string CFS_NAME "Commodity Flow Survey international..."
+            int dms_orig "Domestic origin zone for export..."
+            int dms_dest "Domestic destination zone for import..."
+            int Commodity_SCTG "SCTG commodity code (1-43)"
+            int SCTG_Group "SCTG commodity group category (1-5)"
+            float TruckLoad "Payload weight in short tons"
+            string mode_choice "Freight transport mode (e"
+            int shipments "Annualized count of truck shipments..."
+            float Distance "Highway drayage distance between port..."
+            float tmiles "Total ton-miles of freight movement"
+            string BuyerZone "Domestic buyer Census Block Group..."
+            string BuyerNAICS "Domestic buyer NAICS industry code..."
+            string SellerZone "Domestic seller Census Block Group..."
+            string SellerNAICS "Domestic seller NAICS industry code..."
+        }
+
+        UrbanSimBlockMarginals {
+            string block_id PK "15-digit Census Block FIPS identifier..."
+            int county_id "5-digit State and County FIPS..."
+            string tract_id "11-digit Census Tract identifier"
+            int total_households "Target marginal count of occupied..."
+            int total_population "Target marginal count of total..."
+            int total_workers "Target marginal count of resident..."
+            int residential_units "Total residential dwelling unit..."
+            int single_family_units "Count of detached single-family..."
+            int multi_family_units "Count of multi-family residential..."
+            float commercial_sqft "Commercial real estate floor space..."
+            float vacancy_rate "Residential vacancy rate in this block"
+            int jobs_total "Total employment located in this block"
+            int jobs_retail "Retail employment located in this block"
+            int jobs_service "Service-sector employment located in..."
+            int jobs_office "Office/professional employment..."
+        }
+
+        UrbanSimZonalTotals {
+            int zone_id PK "Traffic Analysis Zone (TAZ)..."
+            int area_type "Urban form / density classification (e"
+            float residential_area "Total residential floor or lot area"
+            float commercial_area "Total commercial floor or lot area"
+            float office_area "Total office floor area"
+            float retail_area "Total retail floor area"
+            float industrial_area "Total industrial/warehouse floor area"
+            float institutional_area "Institutional / medical / civic land..."
+            float mixed_use_area "Mixed-use development area"
+            int pop_households "Zonal total households matching..."
+            int pop_persons "Zonal total persons matching POLARIS..."
+            int pop_group_quarters "Group quarters population (dorms,..."
+            int employment_total "Total zonal employment matching..."
+            int employment_retail "Retail employment"
+            int employment_services "Service industry employment"
+            int employment_government "Government/civic employment"
+            int employment_manufacturing "Manufacturing employment"
+            int employment_industrial "Industrial employment"
+            int employment_other "Other employment categories"
+            float hh_inc_avg "Average household income within the zone"
+            float percent_white "Proportion of Caucasian population"
+            float percent_black "Proportion of African American..."
+        }
+    ```
+
 
 ---
 
@@ -1099,3 +1428,12 @@ The table below documents every intra-model foreign key and cross-model handoff 
 | `BeamHouseholdRecord` | `home_zone_id` `[FK]` | `UrbanSimZonalTotals` | `zone_id` `[PK]` | $N:1$ | Cross-Model Spatial | Places BEAM households in regional TAZ zones |
 | `BeamHouseholdRecord` | `block_id` `[FK]` | `UrbanSimBlockMarginals` | `block_id` `[PK]` | $N:1$ | Cross-Model Spatial | Anchors BEAM agents to Census Block marginals |
 | `BeamNetworkSkims` | `zone_count` `[FK]` | `UrbanSimZonalTotals` | `zone_id` `[PK]` | $N:1$ | Cross-Model Spatial | Confirms BEAM multi-modal skim matrix dimensions match active TAZ zones |
+| `SynthFirmEstablishmentRecord` | `MESOZONE` `[FK]` | `UrbanSimBlockMarginals` | `block_id` `[PK]` | $N:1$ | Cross-Model Spatial | Anchors synthetic establishment to Census Block Group / marginal employment |
+| `SynthFirmCarrierRecord` | `BusID` `[PK, FK]` | `SynthFirmEstablishmentRecord` | `BusID` `[PK]` | $1:1$ | Subtype Specialization | Specializes business establishment as for-hire commercial trucking carrier |
+| `SynthFirmB2BShipmentRecord` | `BuyerID` `[FK]` | `SynthFirmEstablishmentRecord` | `BusID` `[PK]` | $N:1$ | Intra-Model FK | Identifies buyer establishment for B2B commodity shipment |
+| `SynthFirmB2BShipmentRecord` | `SellerID` `[FK]` | `SynthFirmEstablishmentRecord` | `BusID` `[PK]` | $N:1$ | Intra-Model FK | Identifies origin shipper establishment for B2B commodity shipment |
+| `SynthFirmB2BShipmentRecord` | `fleet_id` `[FK]` | `SynthFirmEstablishmentRecord` | `fleet_id` `[FK]` | $N:1$ | Intra-Model FK | Associates private truck shipment with seller's private fleet allocation |
+| `SynthFirmInternationalFreightRecord` | `BuyerID` `[FK]` | `SynthFirmEstablishmentRecord` | `BusID` `[PK]` | $N:1$ | Intra-Model FK | Connects port/airport import drayage flow to domestic buyer |
+| `SynthFirmInternationalFreightRecord` | `SellerID` `[FK]` | `SynthFirmEstablishmentRecord` | `BusID` `[PK]` | $N:1$ | Intra-Model FK | Connects domestic seller to port/airport export drayage flow |
+| `PolarisDemandDatabaseVehicle` | `vehicle_id` `[FK]` | `SynthFirmEstablishmentRecord` | `BusID` `[PK]` | $N:1$ | Cross-Model Fleet | Stages SynthFirm commercial vehicle fleet into POLARIS commercial vehicle demand |
+| `BeamVehicleRecord` | `vehicle_id` `[FK]` | `SynthFirmEstablishmentRecord` | `BusID` `[PK]` | $N:1$ | Cross-Model Fleet | Stages SynthFirm commercial trucks into BEAM freight agent fleet |

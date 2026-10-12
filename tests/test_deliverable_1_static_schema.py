@@ -47,6 +47,12 @@ def test_deliverable_1_schema_contains_all_models_and_channels() -> None:
     assert "BeamPlanRecord" in classes
     assert "BeamNetworkSkims" in classes
 
+    # SynthFirm
+    assert "SynthFirmEstablishmentRecord" in classes
+    assert "SynthFirmCarrierRecord" in classes
+    assert "SynthFirmB2BShipmentRecord" in classes
+    assert "SynthFirmInternationalFreightRecord" in classes
+
     # Handoff contracts
     assert "SingleYearModelHandoffPackage" in classes
     assert "ModelHandoffChannel" in classes
@@ -60,6 +66,9 @@ def test_deliverable_1_enums() -> None:
     assert "AtlasPowertrainEnum" in enums
     assert "AtlasBodyTypeEnum" in enums
     assert "AtlasVintageCategoryEnum" in enums
+    assert "SynthFirmModeChoiceEnum" in enums
+    assert "SynthFirmPowertrainEnum" in enums
+    assert "SynthFirmPortTypeEnum" in enums
     assert "HandoffChannelType" in enums
     assert "FieldTransformationMode" in enums
     assert "ResidueKind" in enums

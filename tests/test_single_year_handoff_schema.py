@@ -117,6 +117,24 @@ def test_single_year_package_instance_validates() -> None:
                 ],
                 "residues": [],
             },
+            {
+                "channel_id": "SYNTHFIRM_TO_POLARIS_CV",
+                "source_model": "SynthFirm",
+                "source_artifact": "synthetic_firms.csv",
+                "target_model": "POLARIS",
+                "target_artifact": "Demand.sqlite/Vehicle",
+                "channel_type": "tabular_microdata",
+                "join_keys": ["BusID", "fleet_id"],
+                "field_mappings": [
+                    {
+                        "source_field": "n_trucks",
+                        "target_field": "commercial_fleet_count",
+                        "transformation_mode": "direct",
+                        "description": "Commercial fleet vehicles allocated to firm depot",
+                    }
+                ],
+                "residues": [],
+            },
         ],
         "crosswalks": [
             {

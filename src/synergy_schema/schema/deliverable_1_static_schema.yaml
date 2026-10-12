@@ -23,6 +23,7 @@ imports:
   - models/polaris/polaris_skims
   - models/activitysim/activitysim_population
   - models/beam/beam
+  - models/synthfirm/synthfirm
   - mappings/single_year_handoff
 
 annotations:

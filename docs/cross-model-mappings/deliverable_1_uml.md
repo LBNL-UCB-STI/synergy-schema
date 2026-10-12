@@ -151,6 +151,52 @@ POLARIS, and Travel Network Skims (.omx).
         BEAM_Sim --> BEAM_Skims
     ```
 
+=== "Freight & Commercial Demand Pipeline: SynthFirm to POLARIS & BEAM"
+
+    SynthFirm synthesizes regional business establishments, carrier licensing, and B2B freight flows
+    from macro-economic trade projections and UrbanSim zonal employment. It provides commercial vehicle
+    fleets and trip demands to POLARIS and BEAM:
+
+    ```mermaid
+    flowchart TD
+        subgraph Inputs_F ["Macro & Network Inputs"]
+            SkimsIn_F["Input Network Skims (.omx)<br/><i>Zone-to-Zone Impedance & Distances</i>"]
+            FAF5["FAF5 Commodity Trade Data<br/><i>Inter-Regional Baseline Flows</i>"]
+        end
+
+        subgraph UrbanSim_F ["UrbanSim (Zonal Marginals)"]
+            US_Marg_F["UrbanSimBlockMarginals<br/><i>Census Block Group Employment</i>"]
+            US_Zone_F["UrbanSimZonalTotals<br/><i>TAZ Employment & Floor Space</i>"]
+        end
+
+        subgraph SynthFirm ["SynthFirm (Freight & Firm Synthesis)"]
+            SF_Firm["SynthFirmEstablishmentRecord<br/><i>Firms, Depots & Private Fleets</i>"]
+            SF_Carrier["SynthFirmCarrierRecord<br/><i>For-Hire Trucking Operators</i>"]
+            SF_B2B["SynthFirmB2BShipmentRecord<br/><i>B2B Commodity Flows (SCTG 1-5)</i>"]
+            SF_Intl["SynthFirmInternationalFreightRecord<br/><i>Port & Airport Drayage Flows</i>"]
+        end
+
+        subgraph Consumers ["Demand & Traffic Simulators"]
+            POL_CV["POLARIS Demand.sqlite<br/><i>Commercial Vehicle Fleet & Cordon Trips</i>"]
+            BEAM_Freight["BEAM Simulation<br/><i>Freight Plans, Tours & Depot Charging</i>"]
+        end
+
+        %% Connections
+        US_Marg_F -->|Employment by Industry / Zone| SF_Firm
+        US_Zone_F -->|Zonal Commercial Space| SF_Firm
+        FAF5 -->|Inter-Regional Control Totals| SF_B2B
+        SkimsIn_F -->|Distance & Travel Time| SF_B2B
+
+        SF_Firm --> SF_Carrier
+        SF_Firm -->|Shipper / Receiver Depots| SF_B2B
+        SF_Firm -->|Import / Export Facilities| SF_Intl
+
+        SF_Firm -->|Commercial Vehicle Allocations| POL_CV
+        SF_B2B -->|Truck Tour Generation & DTA| POL_CV
+        SF_Firm -->|Depot Locations & EV Powertrains| BEAM_Freight
+        SF_B2B -->|Freight Plans & Multi-Stop Tours| BEAM_Freight
+    ```
+
 ---
 
 ## 2. UrbanSim Land Use & Zonal Marginals Schema
@@ -444,4 +490,61 @@ classDiagram
     BeamHouseholdRecord "1" --> "1..*" BeamPersonRecord : members
     BeamHouseholdRecord "1" --> "0..*" BeamVehicleRecord : vehicles
     BeamPersonRecord "1" --> "0..*" BeamPlanRecord : plans
+```
+
+---
+
+## 7. SynthFirm Synthetic Firm, Fleet, and Freight Flow Schema
+
+SynthFirm models synthetic business establishments, commercial carrier licensing, private and
+for-hire vehicle fleets, and business-to-business (B2B) commodity shipments. It translates
+macro-economic Freight Analysis Framework (FAF5) trade forecasts into microscopic freight
+movement and commercial vehicle tours.
+
+```mermaid
+classDiagram
+    class SynthFirmEstablishmentRecord {
+        +int BusID [PK]
+        +string MESOZONE [FK]
+        +string Industry_NAICS6_Make
+        +int Emp
+        +float Gross_Output
+        +int fleet_id [Depot Fleet]
+        +int n_trucks
+        +int n_diesel
+        +int n_electric
+    }
+    class SynthFirmCarrierRecord {
+        +int BusID [PK, FK]
+        +int CarrierType
+        +int SCTG1 [Licensing]
+        +int SCTG2 [Licensing]
+        +int SCTG3 [Licensing]
+        +int SCTG4 [Licensing]
+        +int SCTG5 [Licensing]
+    }
+    class SynthFirmB2BShipmentRecord {
+        +int shipment_id [PK]
+        +int SellerID [FK]
+        +int BuyerID [FK]
+        +int Commodity_SCTG
+        +float TruckLoad [Tons]
+        +int CarrierType
+        +int fleet_id [FK]
+        +int Mode
+        +float Distance [Miles]
+    }
+    class SynthFirmInternationalFreightRecord {
+        +int bundle_id [PK]
+        +int PORTID [FK]
+        +string PORTZONE [FK]
+        +int SellerID [FK]
+        +int BuyerID [FK]
+        +int Direction [Import / Export]
+        +float DrayageTons
+    }
+    SynthFirmEstablishmentRecord "1" --> "0..*" SynthFirmB2BShipmentRecord : produces / ships
+    SynthFirmEstablishmentRecord "1" --> "0..*" SynthFirmB2BShipmentRecord : consumes / receives
+    SynthFirmEstablishmentRecord "1" --> "0..1" SynthFirmCarrierRecord : specializes as for-hire
+    SynthFirmEstablishmentRecord "1" --> "0..*" SynthFirmInternationalFreightRecord : gateway trade
 ```

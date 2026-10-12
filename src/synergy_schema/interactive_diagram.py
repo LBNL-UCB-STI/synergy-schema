@@ -10,6 +10,7 @@ from synergy_schema.mermaid_diagram import (
     POPULATION_CLASSES,
     REGIONAL_CLASSES,
     SPATIAL_SKIM_CLASSES,
+    SYNTHFIRM_REGIONAL_CLASSES,
     generate_mermaid_erd,
 )
 
@@ -29,15 +30,19 @@ def render_database_erd_markdown(schema_path: Path) -> str:
     polaris_reg_mermaid = generate_mermaid_erd(schema_path, POLARIS_REGIONAL_CLASSES)
     beam_as_reg_mermaid = generate_mermaid_erd(schema_path, BEAM_AS_REGIONAL_CLASSES)
     spatial_skim_mermaid = generate_mermaid_erd(schema_path, SPATIAL_SKIM_CLASSES)
+    synthfirm_reg_mermaid = generate_mermaid_erd(
+        schema_path, SYNTHFIRM_REGIONAL_CLASSES
+    )
 
     reg_indented = _indent(reg_mermaid, 4)
     polaris_indented = _indent(polaris_reg_mermaid, 4)
     beam_as_indented = _indent(beam_as_reg_mermaid, 4)
     spatial_skim_indented = _indent(spatial_skim_mermaid, 4)
+    synthfirm_indented = _indent(synthfirm_reg_mermaid, 4)
 
     return f"""# Database Schema & Entity-Relationship Diagrams
 
-This page presents the compiled Entity-Relationship (ER) diagrams and foreign key contracts linking the multi-model population, vehicle fleet, land-use, and network skim tables across **UrbanSim**, **DEMOS**, **ATLAS**, **POLARIS**, **ActivitySim**, **BEAM**, and **OMX Skims** for Deliverable #1.
+This page presents the compiled Entity-Relationship (ER) diagrams and foreign key contracts linking the multi-model population, vehicle fleet, land-use, freight commodity flows, and network skim tables across **UrbanSim**, **DEMOS**, **ATLAS**, **POLARIS**, **ActivitySim**, **BEAM**, **SynthFirm**, and **OMX Skims** for Deliverable #1.
 
 All tables, column definitions, primary keys, foreign keys, and cross-model handoff relationships are **generated directly from the LinkML schema contracts** (`schema/deliverable_1_static_schema.yaml`).
 
@@ -81,6 +86,12 @@ The regional architecture diagrams link the tables across the modeling suite. To
 {spatial_skim_indented}
     ```
 
+=== "SynthFirm Freight & Commercial Flow"
+
+    ```mermaid
+{synthfirm_indented}
+    ```
+
 
 ---
 
@@ -121,6 +132,15 @@ The table below documents every intra-model foreign key and cross-model handoff 
 | `BeamHouseholdRecord` | `home_zone_id` `[FK]` | `UrbanSimZonalTotals` | `zone_id` `[PK]` | $N:1$ | Cross-Model Spatial | Places BEAM households in regional TAZ zones |
 | `BeamHouseholdRecord` | `block_id` `[FK]` | `UrbanSimBlockMarginals` | `block_id` `[PK]` | $N:1$ | Cross-Model Spatial | Anchors BEAM agents to Census Block marginals |
 | `BeamNetworkSkims` | `zone_count` `[FK]` | `UrbanSimZonalTotals` | `zone_id` `[PK]` | $N:1$ | Cross-Model Spatial | Confirms BEAM multi-modal skim matrix dimensions match active TAZ zones |
+| `SynthFirmEstablishmentRecord` | `MESOZONE` `[FK]` | `UrbanSimBlockMarginals` | `block_id` `[PK]` | $N:1$ | Cross-Model Spatial | Anchors synthetic establishment to Census Block Group / marginal employment |
+| `SynthFirmCarrierRecord` | `BusID` `[PK, FK]` | `SynthFirmEstablishmentRecord` | `BusID` `[PK]` | $1:1$ | Subtype Specialization | Specializes business establishment as for-hire commercial trucking carrier |
+| `SynthFirmB2BShipmentRecord` | `BuyerID` `[FK]` | `SynthFirmEstablishmentRecord` | `BusID` `[PK]` | $N:1$ | Intra-Model FK | Identifies buyer establishment for B2B commodity shipment |
+| `SynthFirmB2BShipmentRecord` | `SellerID` `[FK]` | `SynthFirmEstablishmentRecord` | `BusID` `[PK]` | $N:1$ | Intra-Model FK | Identifies origin shipper establishment for B2B commodity shipment |
+| `SynthFirmB2BShipmentRecord` | `fleet_id` `[FK]` | `SynthFirmEstablishmentRecord` | `fleet_id` `[FK]` | $N:1$ | Intra-Model FK | Associates private truck shipment with seller's private fleet allocation |
+| `SynthFirmInternationalFreightRecord` | `BuyerID` `[FK]` | `SynthFirmEstablishmentRecord` | `BusID` `[PK]` | $N:1$ | Intra-Model FK | Connects port/airport import drayage flow to domestic buyer |
+| `SynthFirmInternationalFreightRecord` | `SellerID` `[FK]` | `SynthFirmEstablishmentRecord` | `BusID` `[PK]` | $N:1$ | Intra-Model FK | Connects domestic seller to port/airport export drayage flow |
+| `PolarisDemandDatabaseVehicle` | `vehicle_id` `[FK]` | `SynthFirmEstablishmentRecord` | `BusID` `[PK]` | $N:1$ | Cross-Model Fleet | Stages SynthFirm commercial vehicle fleet into POLARIS commercial vehicle demand |
+| `BeamVehicleRecord` | `vehicle_id` `[FK]` | `SynthFirmEstablishmentRecord` | `BusID` `[PK]` | $N:1$ | Cross-Model Fleet | Stages SynthFirm commercial trucks into BEAM freight agent fleet |
 """
 
 

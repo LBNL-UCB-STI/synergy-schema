@@ -22,6 +22,10 @@ It reflects the authoritative specification established in the multi-agency inte
 | **DEMOS-AT-H** | `DEMOS` Household | **ATLAS** `atlas_hh` | Tabular Microdata | `household` ↔ `HOUSEID` | Household identity, composition, and income |
 | **AT-POL-V** | `ATLAS` Vehicle | **POLARIS** `Demand.sqlite/Vehicle` | Tabular Microdata | `(HOUSEID, VEHID)` ↔ `(household, id)` | `bodytype`, `pred_power`, `modelyear`, `annual_mileage` |
 | **POL-SKIM-OUT**| **POLARIS** DTA Solver | `NextYearNetworkSkims` (.omx) | Matrix Skims | Zone (i, j) | `sov_time_am`, `sov_time_pm`, `congestion_index` |
+| **US-SF-EMP** | `UrbanSimBlockMarginals` | **SynthFirm** `synthetic_firms.csv` | Zonal Control | `block_id` ↔ `MESOZONE` | Zonal employment by NAICS industry, commercial/industrial floor space |
+| **SF-B2B** | **SynthFirm** Establishments | **SynthFirm** `b2b_flows.csv` | Freight Contracts | `BusID` ↔ `SellerID`/`BuyerID` | Commodity SCTG 1–5, shipment tonnage, truckload, private/for-hire carrier |
+| **SF-POL-CV** | **SynthFirm** Fleets | **POLARIS** `Demand.sqlite/Vehicle` | Commercial Fleets | `BusID` ↔ `location` | Commercial truck fleet inventory, class, and depot locations |
+| **SF-BEAM-FR**| **SynthFirm** Shipments | **BEAM** `freight-plans.xml` | Freight Tours | `BusID` ↔ `depot_id` | Commercial multi-stop tours, payload, and depot charging profiles |
 
 ---
 
@@ -100,6 +104,38 @@ It reflects the authoritative specification established in the multi-agency inte
     | `employment_government`| `employment_government`| `direct`| Public administration & government employment. |
     | `employment_manufacturing`| `employment_manufacturing`| `direct`| Manufacturing sector employment. |
     | `hh_inc_avg` | `hh_inc_avg` | `direct` | Mean household income within zone. |
+
+=== "UrbanSim → SynthFirm Establishments"
+
+    | UrbanSim Column | SynthFirm Column | Mode | Description & Allocation Handling |
+    | :--- | :--- | :--- | :--- |
+    | `block_id` | `MESOZONE` | `direct` | 11-digit Census Block Group FIPS identifier anchoring the establishment. |
+    | `county_id` | `CBPZONE` | `derived` | County identifier used for CBP marginal employment scaling. |
+    | `jobs_total` | `Emp` | `derived` | Establishment synthetic employment scaled to match zonal total employment controls. |
+    | `commercial_sqft`| — | *Residue* | Floor space capacity constraint used during spatial firm synthesis. |
+    | `jobs_retail` | — | *Residue* | Subsector retail employment control total. |
+    | `jobs_service` | — | *Residue* | Subsector service employment control total. |
+
+=== "SynthFirm Fleets → POLARIS Commercial Vehicles"
+
+    | SynthFirm Column | POLARIS Column | Mode | Rule / Crosswalk | Description & Residue Handling |
+    | :--- | :--- | :--- | :--- | :--- |
+    | `BusID` | `location` | `derived` | Depot TAZ | Firm location mapped to POLARIS TAZ zone to define vehicle depot. |
+    | `fleet_id` | `vehicle_id` | `derived` | Sequence | Unique commercial vehicle ID assigned within firm fleet. |
+    | `veh_type` | `vehicle_class` | `derived` | **X-V1** | Vocational truck or tractor trailer mapped to POLARIS commercial vehicle class. |
+    | `fuel` | `fuel_type` | `enum_crosswalk`| **X-V3** | Diesel, Gasoline, or Electric powertrain mapping. |
+    | `n_trucks` | — | *Residue* | Fleet Size | Aggregate depot fleet size used for tour sampling. |
+
+=== "SynthFirm B2B Shipments → BEAM Freight Plans"
+
+    | SynthFirm Column | BEAM Column | Mode | Rule / Crosswalk | Description & Residue Handling |
+    | :--- | :--- | :--- | :--- | :--- |
+    | `shipment_id` | `payload_id` | `direct` | — | Unique shipment payload identifier. |
+    | `SellerID` | `origin_depot` | `derived` | Depot Lookup | Seller business establishment depot location (lat/lon). |
+    | `BuyerID` | `destination` | `derived` | Facility Lookup | Buyer business establishment receiving location (lat/lon). |
+    | `Commodity_SCTG`| `commodity_type`| `direct` | SCTG 1–5 | Commodity class (1=Ag/Mining, 2=Mfg, 3=Chemical, 4=Equip, 5=Misc). |
+    | `TruckLoad` | `payload_tons` | `direct` | Tons | Weight of shipment in US short tons. |
+    | `Mode` | `mode` | `enum_crosswalk`| Mode Choice | Private Truck, For-Hire Truck, or Rail drayage. |
 
 ---
 

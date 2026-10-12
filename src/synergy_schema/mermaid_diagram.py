@@ -38,6 +38,29 @@ REGIONAL_CLASSES = [
     "BeamVehicleRecord",
     "BeamPlanRecord",
     "BeamNetworkSkims",
+    "SynthFirmEstablishmentRecord",
+    "SynthFirmCarrierRecord",
+    "SynthFirmB2BShipmentRecord",
+    "SynthFirmInternationalFreightRecord",
+]
+
+SYNTHFIRM_CLASSES = [
+    "SynthFirmEstablishmentRecord",
+    "SynthFirmCarrierRecord",
+    "SynthFirmB2BShipmentRecord",
+    "SynthFirmInternationalFreightRecord",
+]
+
+SYNTHFIRM_REGIONAL_CLASSES = [
+    "UrbanSimBlockMarginals",
+    "UrbanSimZonalTotals",
+    "SynthFirmEstablishmentRecord",
+    "SynthFirmCarrierRecord",
+    "SynthFirmB2BShipmentRecord",
+    "SynthFirmInternationalFreightRecord",
+    "PolarisDemandDatabaseVehicle",
+    "BeamVehicleRecord",
+    "InputNetworkSkims",
 ]
 
 POLARIS_REGIONAL_CLASSES = [
@@ -353,6 +376,63 @@ def generate_mermaid_erd(
             '    ActivitySimPersonInputRecord ||--|{ BeamPlanRecord : "travel schedule"'
         )
 
+    # SynthFirm intra-model & cross-model relationships
+    if (
+        "SynthFirmEstablishmentRecord" in target_classes
+        and "SynthFirmB2BShipmentRecord" in target_classes
+    ):
+        lines.append(
+            '    SynthFirmEstablishmentRecord ||--o{ SynthFirmB2BShipmentRecord : "seller / buyer"'
+        )
+
+    if (
+        "SynthFirmEstablishmentRecord" in target_classes
+        and "SynthFirmCarrierRecord" in target_classes
+    ):
+        lines.append(
+            '    SynthFirmEstablishmentRecord ||--|| SynthFirmCarrierRecord : "for-hire carrier"'
+        )
+
+    if (
+        "SynthFirmEstablishmentRecord" in target_classes
+        and "SynthFirmInternationalFreightRecord" in target_classes
+    ):
+        lines.append(
+            '    SynthFirmEstablishmentRecord ||--o{ SynthFirmInternationalFreightRecord : "gateway trade"'
+        )
+
+    if (
+        "UrbanSimBlockMarginals" in target_classes
+        and "SynthFirmEstablishmentRecord" in target_classes
+    ):
+        lines.append(
+            '    UrbanSimBlockMarginals ||--o{ SynthFirmEstablishmentRecord : "zonal employment"'
+        )
+
+    if (
+        "SynthFirmEstablishmentRecord" in target_classes
+        and "PolarisDemandDatabaseVehicle" in target_classes
+    ):
+        lines.append(
+            '    SynthFirmEstablishmentRecord ||--o{ PolarisDemandDatabaseVehicle : "commercial fleet"'
+        )
+
+    if (
+        "SynthFirmEstablishmentRecord" in target_classes
+        and "BeamVehicleRecord" in target_classes
+    ):
+        lines.append(
+            '    SynthFirmEstablishmentRecord ||--o{ BeamVehicleRecord : "freight fleet"'
+        )
+
+    if (
+        "InputNetworkSkims" in target_classes
+        and "SynthFirmB2BShipmentRecord" in target_classes
+    ):
+        lines.append(
+            '    InputNetworkSkims ||--o{ SynthFirmB2BShipmentRecord : "travel skims"'
+        )
+
     lines.append("")
 
     # 2. Define Entities with Attributes
@@ -479,6 +559,40 @@ def generate_mermaid_erd(
             elif cls_name == "BeamNetworkSkims" and slot.name == "file_path":
                 is_pk = True
             elif cls_name == "BeamNetworkSkims" and slot.name == "zone_count":
+                is_fk = True
+            elif (
+                cls_name in {"SynthFirmEstablishmentRecord", "SynthFirmCarrierRecord"}
+                and slot.name == "BusID"
+            ):
+                is_pk = True
+            elif cls_name in {
+                "SynthFirmEstablishmentRecord",
+                "SynthFirmCarrierRecord",
+            } and slot.name in {"MESOZONE", "CBPZONE", "FAFZONE"}:
+                is_fk = True
+            elif (
+                cls_name == "SynthFirmB2BShipmentRecord" and slot.name == "shipment_id"
+            ):
+                is_pk = True
+            elif cls_name == "SynthFirmB2BShipmentRecord" and slot.name in {
+                "BuyerID",
+                "SellerID",
+                "fleet_id",
+                "orig_FAFID",
+                "dest_FAFID",
+            }:
+                is_fk = True
+            elif (
+                cls_name == "SynthFirmInternationalFreightRecord"
+                and slot.name == "bundle_id"
+            ):
+                is_pk = True
+            elif cls_name == "SynthFirmInternationalFreightRecord" and slot.name in {
+                "PORTID",
+                "PORTZONE",
+                "BuyerID",
+                "SellerID",
+            }:
                 is_fk = True
 
             if is_pk:
