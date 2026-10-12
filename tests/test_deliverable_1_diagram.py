@@ -79,3 +79,13 @@ def test_deliverable_1_uml_contains_all_models_and_diagrams() -> None:
 
 def test_deliverable_1_uml_deterministic() -> None:
     assert render_deliverable_1_uml() == render_deliverable_1_uml()
+
+
+def test_deliverable_1_uml_schema_prefix() -> None:
+    rendered = render_deliverable_1_uml(schema_prefix="schema")
+    assert (
+        "[`SynthFirmEstablishmentRecord`](schema/SynthFirmEstablishmentRecord.md)"
+        in rendered
+    )
+    # Mermaid links should still use ../schema/
+    assert 'click SF_Firm "../schema/SynthFirmEstablishmentRecord/"' in rendered

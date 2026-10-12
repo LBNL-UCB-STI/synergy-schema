@@ -427,7 +427,10 @@ def export_package(target_dir: Path) -> None:
 
     # Contract at a glance
     glance_src = REPO_ROOT / "docs" / "cross-model-mappings" / "contract-at-a-glance.md"
-    shutil.copy2(glance_src, docs_dest / "contract-at-a-glance.md")
+    glance_content = glance_src.read_text(encoding="utf-8").replace(
+        "](../schema/", "](schema/"
+    )
+    (docs_dest / "contract-at-a-glance.md").write_text(glance_content, encoding="utf-8")
 
     # Authoritative mapping interface workbook
     resources_dest = docs_dest / "resources"
@@ -464,7 +467,7 @@ def export_package(target_dir: Path) -> None:
         (css_dest / "extra.css").write_text(STANDALONE_EXTRA_CSS, encoding="utf-8")
 
     # Deliverable 1 UML
-    uml_content = render_deliverable_1_uml()
+    uml_content = render_deliverable_1_uml(schema_prefix="schema")
     (docs_dest / "deliverable_1_uml.md").write_text(uml_content, encoding="utf-8")
 
     # Database ER Diagram page (Mermaid)
@@ -472,6 +475,7 @@ def export_package(target_dir: Path) -> None:
     generate_interactive_diagram(
         schema_path=master_yaml,
         output_path=docs_dest / "interactive-schema.md",
+        schema_prefix="schema",
     )
 
     # LinkML gen-doc

@@ -23,7 +23,10 @@ def _indent(text: str, spaces: int = 4) -> str:
     )
 
 
-def render_database_erd_markdown(schema_path: Path) -> str:
+def render_database_erd_markdown(
+    schema_path: Path,
+    schema_prefix: str = "../schema",
+) -> str:
     """Generate Markdown page with Mermaid ER diagrams and LinkML foreign key reference table."""
     pop_mermaid = generate_mermaid_erd(schema_path, POPULATION_CLASSES)
     reg_mermaid = generate_mermaid_erd(schema_path, REGIONAL_CLASSES)
@@ -101,61 +104,63 @@ The table below documents every intra-model foreign key and cross-model handoff 
 
 | Child Table | Child Column | Parent Table | Parent Column | Cardinality | Link Type | Pipeline Purpose |
 | :--- | :--- | :--- | :--- | :---: | :--- | :--- |
-| [`BlockToTazMapping`](../schema/BlockToTazMapping.md) | `block_id` `[FK]` | [`UrbanSimBlockMarginals`](../schema/UrbanSimBlockMarginals.md) | `block_id` `[PK]` | $N:1$ | Intra-Model FK | Associates Census Blocks with regional marginal controls |
-| [`BlockToTazMapping`](../schema/BlockToTazMapping.md) | `zone_id` `[FK]` | [`UrbanSimZonalTotals`](../schema/UrbanSimZonalTotals.md) | `zone_id` `[PK]` | $N:1$ | Intra-Model FK | Maps Census Blocks into POLARIS-compatible TAZ zones |
-| [`DemosPolarisMappedPerson`](../schema/DemosPolarisMappedPerson.md) | `household` `[FK]` | [`DemosPolarisMappedHousehold`](../schema/DemosPolarisMappedHousehold.md) | `household` `[PK]` | $N:1$ | Intra-Model FK | Enforces person membership in synthetic households |
-| [`AtlasVehicleFleetOutput`](../schema/AtlasVehicleFleetOutput.md) | `houseid` `[FK]` | [`AtlasHouseholdFleetOutput`](../schema/AtlasHouseholdFleetOutput.md) | `houseid` `[PK]` | $N:1$ | Intra-Model FK | Associates discrete vehicles with synthesized household fleets |
-| [`PolarisDemandDatabasePerson`](../schema/PolarisDemandDatabasePerson.md) | `household` `[FK]` | [`PolarisDemandDatabaseHousehold`](../schema/PolarisDemandDatabaseHousehold.md) | `household` `[PK]` | $N:1$ | Intra-Model FK | Enforces POLARIS traveler membership in households |
-| [`PolarisDemandDatabaseVehicle`](../schema/PolarisDemandDatabaseVehicle.md) | `hhold` `[FK]` | [`PolarisDemandDatabaseHousehold`](../schema/PolarisDemandDatabaseHousehold.md) | `household` `[PK]` | $N:1$ | Intra-Model FK | Associates POLARIS vehicles with households |
-| [`AtlasHouseholdFleetOutput`](../schema/AtlasHouseholdFleetOutput.md) | `houseid` `[FK]` | [`DemosPolarisMappedHousehold`](../schema/DemosPolarisMappedHousehold.md) | `household` `[PK]` | $1:1$ | Cross-Model Join | Joins ATLAS synthesized vehicle counts to DEMOS households |
-| [`PolarisDemandDatabaseHousehold`](../schema/PolarisDemandDatabaseHousehold.md) | `household` `[FK]` | [`DemosPolarisMappedHousehold`](../schema/DemosPolarisMappedHousehold.md) | `household` `[PK]` | $1:1$ | Cross-Model Lineage | Lineage tracking from DEMOS base population to POLARIS demand |
-| [`PolarisDemandDatabasePerson`](../schema/PolarisDemandDatabasePerson.md) | `person` `[FK]` | [`DemosPolarisMappedPerson`](../schema/DemosPolarisMappedPerson.md) | `person` `[PK]` | $1:1$ | Cross-Model Lineage | Lineage tracking & direct attribute translation from DEMOS synthetic persons to POLARIS demand persons |
-| [`PolarisDemandDatabaseVehicle`](../schema/PolarisDemandDatabaseVehicle.md) | `vehicle_id` `[FK]` | [`AtlasVehicleFleetOutput`](../schema/AtlasVehicleFleetOutput.md) | `vehid` `[PK]` | $1:1$ | Cross-Model Lineage | Recodes ATLAS discrete vehicles to POLARIS vehicle types |
-| [`PolarisDemandDatabaseHousehold`](../schema/PolarisDemandDatabaseHousehold.md) | `location` `[FK]` | [`UrbanSimZonalTotals`](../schema/UrbanSimZonalTotals.md) | `zone_id` `[PK]` | $N:1$ | Cross-Model Spatial | Assigns household residence to UrbanSim TAZ zones |
-| [`DemosPolarisMappedHousehold`](../schema/DemosPolarisMappedHousehold.md) | `block_id` `[FK]` | [`UrbanSimBlockMarginals`](../schema/UrbanSimBlockMarginals.md) | `block_id` `[PK]` | $N:1$ | Cross-Model Spatial | Controls demographic synthesis by Census Block marginals |
-| [`InputNetworkSkims`](../schema/InputNetworkSkims.md) | `zone_count` `[FK]` | [`UrbanSimZonalTotals`](../schema/UrbanSimZonalTotals.md) | `zone_id` `[PK]` | $N:1$ | Cross-Model Spatial | Confirms skim matrix dimensions match active TAZ zones |
-| [`NextYearNetworkSkims`](../schema/NextYearNetworkSkims.md) | `zone_count` `[FK]` | [`UrbanSimZonalTotals`](../schema/UrbanSimZonalTotals.md) | `zone_id` `[PK]` | $N:1$ | Cross-Model Spatial | Confirms iterative skim matrix dimensions match active TAZ zones |
-| [`ActivitySimPersonInputRecord`](../schema/ActivitySimPersonInputRecord.md) | `household_id` `[FK]` | [`ActivitySimHouseholdInputRecord`](../schema/ActivitySimHouseholdInputRecord.md) | `household_id` `[PK]` | $N:1$ | Intra-Model FK | Enforces person membership in ActivitySim households |
-| [`ActivitySimHouseholdInputRecord`](../schema/ActivitySimHouseholdInputRecord.md) | `TAZ` `[FK]` | [`UrbanSimZonalTotals`](../schema/UrbanSimZonalTotals.md) | `zone_id` `[PK]` | $N:1$ | Cross-Model Spatial | Associates ActivitySim household residence with TAZ zones |
-| [`ActivitySimHouseholdInputRecord`](../schema/ActivitySimHouseholdInputRecord.md) | `block_id` `[FK]` | [`UrbanSimBlockMarginals`](../schema/UrbanSimBlockMarginals.md) | `block_id` `[PK]` | $N:1$ | Cross-Model Spatial | Anchors ActivitySim households to Census Block marginals |
-| [`ActivitySimHouseholdInputRecord`](../schema/ActivitySimHouseholdInputRecord.md) | `cars` `[FK]` | [`AtlasHouseholdFleetOutput`](../schema/AtlasHouseholdFleetOutput.md) | `houseid` `[PK]` | $1:1$ | Cross-Model Update | Updates household car count (`cars`) from ATLAS vehicle ownership (`nvehicles`) for mode choice |
-| [`ActivitySimHouseholdInputRecord`](../schema/ActivitySimHouseholdInputRecord.md) | `household_id` `[FK]` | [`DemosPolarisMappedHousehold`](../schema/DemosPolarisMappedHousehold.md) | `household` `[PK]` | $1:1$ | Cross-Model Lineage | Lineage tracking from DEMOS base population to ActivitySim |
-| [`ActivitySimPersonInputRecord`](../schema/ActivitySimPersonInputRecord.md) | `person_id` `[FK]` | [`DemosPolarisMappedPerson`](../schema/DemosPolarisMappedPerson.md) | `person` `[PK]` | $1:1$ | Cross-Model Lineage | Lineage tracking from DEMOS synthetic persons to ActivitySim |
-| [`BeamPersonRecord`](../schema/BeamPersonRecord.md) | `household_id` `[FK]` | [`BeamHouseholdRecord`](../schema/BeamHouseholdRecord.md) | `household_id` `[PK]` | $N:1$ | Intra-Model FK | Enforces person membership in BEAM simulated households |
-| [`BeamVehicleRecord`](../schema/BeamVehicleRecord.md) | `household_id` `[FK]` | [`BeamHouseholdRecord`](../schema/BeamHouseholdRecord.md) | `household_id` `[PK]` | $N:1$ | Intra-Model FK | Associates BEAM staged vehicles with households |
-| [`BeamVehicleRecord`](../schema/BeamVehicleRecord.md) | `maindriver_id` `[FK]` | [`BeamPersonRecord`](../schema/BeamPersonRecord.md) | `person_id` `[PK]` | $N:1$ | Intra-Model FK | Assigns primary driver to household vehicle |
-| [`BeamPlanRecord`](../schema/BeamPlanRecord.md) | `person_id` `[FK]` | [`BeamPersonRecord`](../schema/BeamPersonRecord.md) | `person_id` `[PK]` | $N:1$ | Intra-Model FK | Sequences activity elements and legs for simulated agent |
-| [`BeamPlanRecord`](../schema/BeamPlanRecord.md) | `person_id` `[FK]` | [`ActivitySimPersonInputRecord`](../schema/ActivitySimPersonInputRecord.md) | `person_id` `[PK]` | $N:1$ | Cross-Model Schedule | Populates BEAM agent travel plans from ActivitySim schedule |
-| [`BeamHouseholdRecord`](../schema/BeamHouseholdRecord.md) | `household_id` `[FK]` | [`DemosPolarisMappedHousehold`](../schema/DemosPolarisMappedHousehold.md) | `household` `[PK]` | $1:1$ | Cross-Model Lineage | Lineage tracking from DEMOS base population to BEAM agents |
-| [`BeamPersonRecord`](../schema/BeamPersonRecord.md) | `person_id` `[FK]` | [`DemosPolarisMappedPerson`](../schema/DemosPolarisMappedPerson.md) | `person` `[PK]` | $1:1$ | Cross-Model Lineage | Lineage tracking from DEMOS synthetic persons to BEAM agents |
-| [`BeamVehicleRecord`](../schema/BeamVehicleRecord.md) | `vehicle_id` `[FK]` | [`AtlasVehicleFleetOutput`](../schema/AtlasVehicleFleetOutput.md) | `vehid` `[PK]` | $1:1$ | Cross-Model Lineage | Stages ATLAS vehicle fleet with powertrains into BEAM |
-| [`BeamHouseholdRecord`](../schema/BeamHouseholdRecord.md) | `home_zone_id` `[FK]` | [`UrbanSimZonalTotals`](../schema/UrbanSimZonalTotals.md) | `zone_id` `[PK]` | $N:1$ | Cross-Model Spatial | Places BEAM households in regional TAZ zones |
-| [`BeamHouseholdRecord`](../schema/BeamHouseholdRecord.md) | `block_id` `[FK]` | [`UrbanSimBlockMarginals`](../schema/UrbanSimBlockMarginals.md) | `block_id` `[PK]` | $N:1$ | Cross-Model Spatial | Anchors BEAM agents to Census Block marginals |
-| [`BeamNetworkSkims`](../schema/BeamNetworkSkims.md) | `zone_count` `[FK]` | [`UrbanSimZonalTotals`](../schema/UrbanSimZonalTotals.md) | `zone_id` `[PK]` | $N:1$ | Cross-Model Spatial | Confirms BEAM multi-modal skim matrix dimensions match active TAZ zones |
-| [`SynthFirmEstablishmentRecord`](../schema/SynthFirmEstablishmentRecord.md) | `MESOZONE` `[FK]` | [`UrbanSimBlockMarginals`](../schema/UrbanSimBlockMarginals.md) | `block_id` `[PK]` | $N:1$ | Cross-Model Spatial | Anchors synthetic establishment to Census Block Group / marginal employment |
-| [`SynthFirmCarrierRecord`](../schema/SynthFirmCarrierRecord.md) | `BusID` `[PK, FK]` | [`SynthFirmEstablishmentRecord`](../schema/SynthFirmEstablishmentRecord.md) | `BusID` `[PK]` | $1:1$ | Subtype Specialization | Specializes business establishment as for-hire commercial trucking carrier |
-| [`SynthFirmB2BShipmentRecord`](../schema/SynthFirmB2BShipmentRecord.md) | `BuyerID` `[FK]` | [`SynthFirmEstablishmentRecord`](../schema/SynthFirmEstablishmentRecord.md) | `BusID` `[PK]` | $N:1$ | Intra-Model FK | Identifies buyer establishment for B2B commodity shipment |
-| [`SynthFirmB2BShipmentRecord`](../schema/SynthFirmB2BShipmentRecord.md) | `SellerID` `[FK]` | [`SynthFirmEstablishmentRecord`](../schema/SynthFirmEstablishmentRecord.md) | `BusID` `[PK]` | $N:1$ | Intra-Model FK | Identifies origin shipper establishment for B2B commodity shipment |
-| [`SynthFirmB2BShipmentRecord`](../schema/SynthFirmB2BShipmentRecord.md) | `fleet_id` `[FK]` | [`SynthFirmEstablishmentRecord`](../schema/SynthFirmEstablishmentRecord.md) | `fleet_id` `[FK]` | $N:1$ | Intra-Model FK | Associates private truck shipment with seller's private fleet allocation |
-| [`SynthFirmInternationalFreightRecord`](../schema/SynthFirmInternationalFreightRecord.md) | `BuyerID` `[FK]` | [`SynthFirmEstablishmentRecord`](../schema/SynthFirmEstablishmentRecord.md) | `BusID` `[PK]` | $N:1$ | Intra-Model FK | Connects port/airport import drayage flow to domestic buyer |
-| [`SynthFirmInternationalFreightRecord`](../schema/SynthFirmInternationalFreightRecord.md) | `SellerID` `[FK]` | [`SynthFirmEstablishmentRecord`](../schema/SynthFirmEstablishmentRecord.md) | `BusID` `[PK]` | $N:1$ | Intra-Model FK | Connects domestic seller to port/airport export drayage flow |
-| [`PolarisDemandDatabaseVehicle`](../schema/PolarisDemandDatabaseVehicle.md) | `vehicle_id` `[FK]` | [`SynthFirmEstablishmentRecord`](../schema/SynthFirmEstablishmentRecord.md) | `BusID` `[PK]` | $N:1$ | Cross-Model Fleet | Stages SynthFirm commercial vehicle fleet into POLARIS commercial vehicle demand |
-| [`BeamVehicleRecord`](../schema/BeamVehicleRecord.md) | `vehicle_id` `[FK]` | [`SynthFirmEstablishmentRecord`](../schema/SynthFirmEstablishmentRecord.md) | `BusID` `[PK]` | $N:1$ | Cross-Model Fleet | Stages SynthFirm commercial trucks into BEAM freight agent fleet |
+| [`BlockToTazMapping`]({schema_prefix}/BlockToTazMapping.md) | `block_id` `[FK]` | [`UrbanSimBlockMarginals`]({schema_prefix}/UrbanSimBlockMarginals.md) | `block_id` `[PK]` | $N:1$ | Intra-Model FK | Associates Census Blocks with regional marginal controls |
+| [`BlockToTazMapping`]({schema_prefix}/BlockToTazMapping.md) | `zone_id` `[FK]` | [`UrbanSimZonalTotals`]({schema_prefix}/UrbanSimZonalTotals.md) | `zone_id` `[PK]` | $N:1$ | Intra-Model FK | Maps Census Blocks into POLARIS-compatible TAZ zones |
+| [`DemosPolarisMappedPerson`]({schema_prefix}/DemosPolarisMappedPerson.md) | `household` `[FK]` | [`DemosPolarisMappedHousehold`]({schema_prefix}/DemosPolarisMappedHousehold.md) | `household` `[PK]` | $N:1$ | Intra-Model FK | Enforces person membership in synthetic households |
+| [`AtlasVehicleFleetOutput`]({schema_prefix}/AtlasVehicleFleetOutput.md) | `houseid` `[FK]` | [`AtlasHouseholdFleetOutput`]({schema_prefix}/AtlasHouseholdFleetOutput.md) | `houseid` `[PK]` | $N:1$ | Intra-Model FK | Associates discrete vehicles with synthesized household fleets |
+| [`PolarisDemandDatabasePerson`]({schema_prefix}/PolarisDemandDatabasePerson.md) | `household` `[FK]` | [`PolarisDemandDatabaseHousehold`]({schema_prefix}/PolarisDemandDatabaseHousehold.md) | `household` `[PK]` | $N:1$ | Intra-Model FK | Enforces POLARIS traveler membership in households |
+| [`PolarisDemandDatabaseVehicle`]({schema_prefix}/PolarisDemandDatabaseVehicle.md) | `hhold` `[FK]` | [`PolarisDemandDatabaseHousehold`]({schema_prefix}/PolarisDemandDatabaseHousehold.md) | `household` `[PK]` | $N:1$ | Intra-Model FK | Associates POLARIS vehicles with households |
+| [`AtlasHouseholdFleetOutput`]({schema_prefix}/AtlasHouseholdFleetOutput.md) | `houseid` `[FK]` | [`DemosPolarisMappedHousehold`]({schema_prefix}/DemosPolarisMappedHousehold.md) | `household` `[PK]` | $1:1$ | Cross-Model Join | Joins ATLAS synthesized vehicle counts to DEMOS households |
+| [`PolarisDemandDatabaseHousehold`]({schema_prefix}/PolarisDemandDatabaseHousehold.md) | `household` `[FK]` | [`DemosPolarisMappedHousehold`]({schema_prefix}/DemosPolarisMappedHousehold.md) | `household` `[PK]` | $1:1$ | Cross-Model Lineage | Lineage tracking from DEMOS base population to POLARIS demand |
+| [`PolarisDemandDatabasePerson`]({schema_prefix}/PolarisDemandDatabasePerson.md) | `person` `[FK]` | [`DemosPolarisMappedPerson`]({schema_prefix}/DemosPolarisMappedPerson.md) | `person` `[PK]` | $1:1$ | Cross-Model Lineage | Lineage tracking & direct attribute translation from DEMOS synthetic persons to POLARIS demand persons |
+| [`PolarisDemandDatabaseVehicle`]({schema_prefix}/PolarisDemandDatabaseVehicle.md) | `vehicle_id` `[FK]` | [`AtlasVehicleFleetOutput`]({schema_prefix}/AtlasVehicleFleetOutput.md) | `vehid` `[PK]` | $1:1$ | Cross-Model Lineage | Recodes ATLAS discrete vehicles to POLARIS vehicle types |
+| [`PolarisDemandDatabaseHousehold`]({schema_prefix}/PolarisDemandDatabaseHousehold.md) | `location` `[FK]` | [`UrbanSimZonalTotals`]({schema_prefix}/UrbanSimZonalTotals.md) | `zone_id` `[PK]` | $N:1$ | Cross-Model Spatial | Assigns household residence to UrbanSim TAZ zones |
+| [`DemosPolarisMappedHousehold`]({schema_prefix}/DemosPolarisMappedHousehold.md) | `block_id` `[FK]` | [`UrbanSimBlockMarginals`]({schema_prefix}/UrbanSimBlockMarginals.md) | `block_id` `[PK]` | $N:1$ | Cross-Model Spatial | Controls demographic synthesis by Census Block marginals |
+| [`InputNetworkSkims`]({schema_prefix}/InputNetworkSkims.md) | `zone_count` `[FK]` | [`UrbanSimZonalTotals`]({schema_prefix}/UrbanSimZonalTotals.md) | `zone_id` `[PK]` | $N:1$ | Cross-Model Spatial | Confirms skim matrix dimensions match active TAZ zones |
+| [`NextYearNetworkSkims`]({schema_prefix}/NextYearNetworkSkims.md) | `zone_count` `[FK]` | [`UrbanSimZonalTotals`]({schema_prefix}/UrbanSimZonalTotals.md) | `zone_id` `[PK]` | $N:1$ | Cross-Model Spatial | Confirms iterative skim matrix dimensions match active TAZ zones |
+| [`ActivitySimPersonInputRecord`]({schema_prefix}/ActivitySimPersonInputRecord.md) | `household_id` `[FK]` | [`ActivitySimHouseholdInputRecord`]({schema_prefix}/ActivitySimHouseholdInputRecord.md) | `household_id` `[PK]` | $N:1$ | Intra-Model FK | Enforces person membership in ActivitySim households |
+| [`ActivitySimHouseholdInputRecord`]({schema_prefix}/ActivitySimHouseholdInputRecord.md) | `TAZ` `[FK]` | [`UrbanSimZonalTotals`]({schema_prefix}/UrbanSimZonalTotals.md) | `zone_id` `[PK]` | $N:1$ | Cross-Model Spatial | Associates ActivitySim household residence with TAZ zones |
+| [`ActivitySimHouseholdInputRecord`]({schema_prefix}/ActivitySimHouseholdInputRecord.md) | `block_id` `[FK]` | [`UrbanSimBlockMarginals`]({schema_prefix}/UrbanSimBlockMarginals.md) | `block_id` `[PK]` | $N:1$ | Cross-Model Spatial | Anchors ActivitySim households to Census Block marginals |
+| [`ActivitySimHouseholdInputRecord`]({schema_prefix}/ActivitySimHouseholdInputRecord.md) | `cars` `[FK]` | [`AtlasHouseholdFleetOutput`]({schema_prefix}/AtlasHouseholdFleetOutput.md) | `houseid` `[PK]` | $1:1$ | Cross-Model Update | Updates household car count (`cars`) from ATLAS vehicle ownership (`nvehicles`) for mode choice |
+| [`ActivitySimHouseholdInputRecord`]({schema_prefix}/ActivitySimHouseholdInputRecord.md) | `household_id` `[FK]` | [`DemosPolarisMappedHousehold`]({schema_prefix}/DemosPolarisMappedHousehold.md) | `household` `[PK]` | $1:1$ | Cross-Model Lineage | Lineage tracking from DEMOS base population to ActivitySim |
+| [`ActivitySimPersonInputRecord`]({schema_prefix}/ActivitySimPersonInputRecord.md) | `person_id` `[FK]` | [`DemosPolarisMappedPerson`]({schema_prefix}/DemosPolarisMappedPerson.md) | `person` `[PK]` | $1:1$ | Cross-Model Lineage | Lineage tracking from DEMOS synthetic persons to ActivitySim |
+| [`BeamPersonRecord`]({schema_prefix}/BeamPersonRecord.md) | `household_id` `[FK]` | [`BeamHouseholdRecord`]({schema_prefix}/BeamHouseholdRecord.md) | `household_id` `[PK]` | $N:1$ | Intra-Model FK | Enforces person membership in BEAM simulated households |
+| [`BeamVehicleRecord`]({schema_prefix}/BeamVehicleRecord.md) | `household_id` `[FK]` | [`BeamHouseholdRecord`]({schema_prefix}/BeamHouseholdRecord.md) | `household_id` `[PK]` | $N:1$ | Intra-Model FK | Associates BEAM staged vehicles with households |
+| [`BeamVehicleRecord`]({schema_prefix}/BeamVehicleRecord.md) | `maindriver_id` `[FK]` | [`BeamPersonRecord`]({schema_prefix}/BeamPersonRecord.md) | `person_id` `[PK]` | $N:1$ | Intra-Model FK | Assigns primary driver to household vehicle |
+| [`BeamPlanRecord`]({schema_prefix}/BeamPlanRecord.md) | `person_id` `[FK]` | [`BeamPersonRecord`]({schema_prefix}/BeamPersonRecord.md) | `person_id` `[PK]` | $N:1$ | Intra-Model FK | Sequences activity elements and legs for simulated agent |
+| [`BeamPlanRecord`]({schema_prefix}/BeamPlanRecord.md) | `person_id` `[FK]` | [`ActivitySimPersonInputRecord`]({schema_prefix}/ActivitySimPersonInputRecord.md) | `person_id` `[PK]` | $N:1$ | Cross-Model Schedule | Populates BEAM agent travel plans from ActivitySim schedule |
+| [`BeamHouseholdRecord`]({schema_prefix}/BeamHouseholdRecord.md) | `household_id` `[FK]` | [`DemosPolarisMappedHousehold`]({schema_prefix}/DemosPolarisMappedHousehold.md) | `household` `[PK]` | $1:1$ | Cross-Model Lineage | Lineage tracking from DEMOS base population to BEAM agents |
+| [`BeamPersonRecord`]({schema_prefix}/BeamPersonRecord.md) | `person_id` `[FK]` | [`DemosPolarisMappedPerson`]({schema_prefix}/DemosPolarisMappedPerson.md) | `person` `[PK]` | $1:1$ | Cross-Model Lineage | Lineage tracking from DEMOS synthetic persons to BEAM agents |
+| [`BeamVehicleRecord`]({schema_prefix}/BeamVehicleRecord.md) | `vehicle_id` `[FK]` | [`AtlasVehicleFleetOutput`]({schema_prefix}/AtlasVehicleFleetOutput.md) | `vehid` `[PK]` | $1:1$ | Cross-Model Lineage | Stages ATLAS vehicle fleet with powertrains into BEAM |
+| [`BeamHouseholdRecord`]({schema_prefix}/BeamHouseholdRecord.md) | `home_zone_id` `[FK]` | [`UrbanSimZonalTotals`]({schema_prefix}/UrbanSimZonalTotals.md) | `zone_id` `[PK]` | $N:1$ | Cross-Model Spatial | Places BEAM households in regional TAZ zones |
+| [`BeamHouseholdRecord`]({schema_prefix}/BeamHouseholdRecord.md) | `block_id` `[FK]` | [`UrbanSimBlockMarginals`]({schema_prefix}/UrbanSimBlockMarginals.md) | `block_id` `[PK]` | $N:1$ | Cross-Model Spatial | Anchors BEAM agents to Census Block marginals |
+| [`BeamNetworkSkims`]({schema_prefix}/BeamNetworkSkims.md) | `zone_count` `[FK]` | [`UrbanSimZonalTotals`]({schema_prefix}/UrbanSimZonalTotals.md) | `zone_id` `[PK]` | $N:1$ | Cross-Model Spatial | Confirms BEAM multi-modal skim matrix dimensions match active TAZ zones |
+| [`SynthFirmEstablishmentRecord`]({schema_prefix}/SynthFirmEstablishmentRecord.md) | `MESOZONE` `[FK]` | [`UrbanSimBlockMarginals`]({schema_prefix}/UrbanSimBlockMarginals.md) | `block_id` `[PK]` | $N:1$ | Cross-Model Spatial | Anchors synthetic establishment to Census Block Group / marginal employment |
+| [`SynthFirmCarrierRecord`]({schema_prefix}/SynthFirmCarrierRecord.md) | `BusID` `[PK, FK]` | [`SynthFirmEstablishmentRecord`]({schema_prefix}/SynthFirmEstablishmentRecord.md) | `BusID` `[PK]` | $1:1$ | Subtype Specialization | Specializes business establishment as for-hire commercial trucking carrier |
+| [`SynthFirmB2BShipmentRecord`]({schema_prefix}/SynthFirmB2BShipmentRecord.md) | `BuyerID` `[FK]` | [`SynthFirmEstablishmentRecord`]({schema_prefix}/SynthFirmEstablishmentRecord.md) | `BusID` `[PK]` | $N:1$ | Intra-Model FK | Identifies buyer establishment for B2B commodity shipment |
+| [`SynthFirmB2BShipmentRecord`]({schema_prefix}/SynthFirmB2BShipmentRecord.md) | `SellerID` `[FK]` | [`SynthFirmEstablishmentRecord`]({schema_prefix}/SynthFirmEstablishmentRecord.md) | `BusID` `[PK]` | $N:1$ | Intra-Model FK | Identifies origin shipper establishment for B2B commodity shipment |
+| [`SynthFirmB2BShipmentRecord`]({schema_prefix}/SynthFirmB2BShipmentRecord.md) | `fleet_id` `[FK]` | [`SynthFirmEstablishmentRecord`]({schema_prefix}/SynthFirmEstablishmentRecord.md) | `fleet_id` `[FK]` | $N:1$ | Intra-Model FK | Associates private truck shipment with seller's private fleet allocation |
+| [`SynthFirmInternationalFreightRecord`]({schema_prefix}/SynthFirmInternationalFreightRecord.md) | `BuyerID` `[FK]` | [`SynthFirmEstablishmentRecord`]({schema_prefix}/SynthFirmEstablishmentRecord.md) | `BusID` `[PK]` | $N:1$ | Intra-Model FK | Connects port/airport import drayage flow to domestic buyer |
+| [`SynthFirmInternationalFreightRecord`]({schema_prefix}/SynthFirmInternationalFreightRecord.md) | `SellerID` `[FK]` | [`SynthFirmEstablishmentRecord`]({schema_prefix}/SynthFirmEstablishmentRecord.md) | `BusID` `[PK]` | $N:1$ | Intra-Model FK | Connects domestic seller to port/airport export drayage flow |
+| [`PolarisDemandDatabaseVehicle`]({schema_prefix}/PolarisDemandDatabaseVehicle.md) | `vehicle_id` `[FK]` | [`SynthFirmEstablishmentRecord`]({schema_prefix}/SynthFirmEstablishmentRecord.md) | `BusID` `[PK]` | $N:1$ | Cross-Model Fleet | Stages SynthFirm commercial vehicle fleet into POLARIS commercial vehicle demand |
+| [`BeamVehicleRecord`]({schema_prefix}/BeamVehicleRecord.md) | `vehicle_id` `[FK]` | [`SynthFirmEstablishmentRecord`]({schema_prefix}/SynthFirmEstablishmentRecord.md) | `BusID` `[PK]` | $N:1$ | Cross-Model Fleet | Stages SynthFirm commercial trucks into BEAM freight agent fleet |
 """
 
 
 def render_interactive_markdown(
     schema_path: Path,
     js_src: str = "",
+    schema_prefix: str = "../schema",
 ) -> str:
     """Backwards-compatible alias for render_database_erd_markdown."""
-    return render_database_erd_markdown(schema_path)
+    return render_database_erd_markdown(schema_path, schema_prefix=schema_prefix)
 
 
 def generate_interactive_diagram(
     schema_path: Path | None = None,
     output_path: Path | None = None,
     js_src: str = "",
+    schema_prefix: str = "../schema",
 ) -> Path:
     """Generate and write database ER diagram documentation page."""
     base_dir = Path(__file__).resolve().parents[2]
@@ -173,7 +178,7 @@ def generate_interactive_diagram(
         )
 
     output_path.parent.mkdir(parents=True, exist_ok=True)
-    content = render_database_erd_markdown(schema_path)
+    content = render_database_erd_markdown(schema_path, schema_prefix=schema_prefix)
     output_path.write_text(content, encoding="utf-8")
     return output_path
 

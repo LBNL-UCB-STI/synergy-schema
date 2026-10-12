@@ -73,6 +73,19 @@ def test_dist_site_is_compiled_with_all_sections() -> None:
     ).read_text(encoding="utf-8")
     assert "Open Matrix OMX travel impedance matrices" in channel_type_md
 
+    # Verify no link escapes above repository root via ../../schema/
+    for html_file in site_dir.rglob("*.html"):
+        content = html_file.read_text(encoding="utf-8")
+        assert 'href="../../schema/' not in content, (
+            f"Found broken root-escaping schema link in {html_file.relative_to(site_dir)}"
+        )
+
+    # Verify interactive-schema link resolves correctly to ../schema/
+    interactive_html = (site_dir / "interactive-schema" / "index.html").read_text(
+        encoding="utf-8"
+    )
+    assert '<a href="../schema/BlockToTazMapping/">' in interactive_html
+
 
 def test_dist_isolation_from_fy27_longitudinal_ledger() -> None:
     """Strictly assert no FY27 longitudinal ledger code or core population assembly is in dist."""
@@ -113,5 +126,9 @@ def test_dist_schema_resolves_cleanly() -> None:
         "SingleYearModelHandoffPackage",
         "ModelHandoffChannel",
         "CategoricalCrosswalkRule",
+        "SynthFirmEstablishmentRecord",
+        "SynthFirmCarrierRecord",
+        "SynthFirmB2BShipmentRecord",
+        "SynthFirmInternationalFreightRecord",
     }
     assert expected.issubset(classes)
