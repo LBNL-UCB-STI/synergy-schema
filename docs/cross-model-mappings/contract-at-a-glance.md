@@ -11,21 +11,21 @@ It reflects the authoritative specification established in the multi-agency inte
 
 ## 1. Table-to-Table Exchange Summary Matrix
 
-| Channel ID | Source Model & Artifact | Target Model & Artifact | Channel Type | Join / Reference Key | Core Attributes Transferred |
-| :--- | :--- | :--- | :--- | :--- | :--- |
-| **SKIM-IN-US** | [`InputNetworkSkims`](../schema/InputNetworkSkims.md) (.omx) | **UrbanSim** (`input_skims`) | Matrix Skims | Zone (i, j) | `sov_time_am`, `sov_distance`, transit accessibility |
-| **SKIM-IN-AT** | [`InputNetworkSkims`](../schema/InputNetworkSkims.md) (.omx) | **ATLAS** (`input_skims`) | Matrix Skims | Zone (i, j) | `sov_time_am`, `sov_time_md`, `sov_distance` |
-| **US-SUPPLY** | [`UrbanSimZonalTotals`](../schema/UrbanSimZonalTotals.md) | **POLARIS** `Supply.sqlite/Zone` | Zonal Aggregation | `zone_id` ↔ `zone` | `residential_area`, `commercial_area`, `pop_households`, `employment_*` |
-| **US-DEMOS** | [`UrbanSimBlockMarginals`](../schema/UrbanSimBlockMarginals.md) | **DEMOS** (`marginal_targets`) | Control Totals | `block_id` | `total_households`, `total_population`, `total_workers` |
-| **DEMOS-POL-H**| `DEMOS` Household ([`DemosPolarisMappedHousehold`](../schema/DemosPolarisMappedHousehold.md)) | **POLARIS** `Demand.sqlite/Household` ([`PolarisDemandDatabaseHousehold`](../schema/PolarisDemandDatabaseHousehold.md)) | Tabular Microdata | `household` | `income`, `workers`, `persons`, `age_of_head`, `race_of_head`, `type`, `location` |
-| **DEMOS-POL-P**| `DEMOS` Person ([`DemosPolarisMappedPerson`](../schema/DemosPolarisMappedPerson.md)) | **POLARIS** `Demand.sqlite/Person` ([`PolarisDemandDatabasePerson`](../schema/PolarisDemandDatabasePerson.md)) | Tabular Microdata | `(household, id)` | `age`, `gender`, `relp`, `education`, `employment`, `school_enrollment` |
-| **DEMOS-AT-H** | `DEMOS` Household ([`DemosPolarisMappedHousehold`](../schema/DemosPolarisMappedHousehold.md)) | **ATLAS** `atlas_hh` | Tabular Microdata | `household` ↔ `HOUSEID` | Household identity, composition, and income |
-| **AT-POL-V** | `ATLAS` Vehicle ([`AtlasVehicleFleetOutput`](../schema/AtlasVehicleFleetOutput.md)) | **POLARIS** `Demand.sqlite/Vehicle` ([`PolarisDemandDatabaseVehicle`](../schema/PolarisDemandDatabaseVehicle.md)) | Tabular Microdata | `(HOUSEID, VEHID)` ↔ `(household, id)` | `bodytype`, `pred_power`, `modelyear`, `annual_mileage` |
-| **POL-SKIM-OUT**| **POLARIS** DTA Solver | [`NextYearNetworkSkims`](../schema/NextYearNetworkSkims.md) (.omx) | Matrix Skims | Zone (i, j) | `sov_time_am`, `sov_time_pm`, `congestion_index` |
-| **US-SF-EMP** | [`UrbanSimBlockMarginals`](../schema/UrbanSimBlockMarginals.md) | **SynthFirm** [`SynthFirmEstablishmentRecord`](../schema/SynthFirmEstablishmentRecord.md) | Zonal Control | `block_id` ↔ `MESOZONE` | Zonal employment by NAICS industry, commercial/industrial floor space |
-| **SF-B2B** | **SynthFirm** Establishments | **SynthFirm** [`SynthFirmB2BShipmentRecord`](../schema/SynthFirmB2BShipmentRecord.md) | Freight Contracts | `BusID` ↔ `SellerID`/`BuyerID` | Commodity SCTG 1–5, shipment tonnage, truckload, private/for-hire carrier |
-| **SF-POL-CV** | **SynthFirm** Fleets | **POLARIS** `Demand.sqlite/Vehicle` ([`PolarisDemandDatabaseVehicle`](../schema/PolarisDemandDatabaseVehicle.md)) | Commercial Fleets | `BusID` ↔ `location` | Commercial truck fleet inventory, class, and depot locations |
-| **SF-BEAM-FR**| **SynthFirm** Shipments | **BEAM** `freight-plans.xml` ([`BeamPlanRecord`](../schema/BeamPlanRecord.md)) | Freight Tours | `BusID` ↔ `depot_id` | Commercial multi-stop tours, payload, and depot charging profiles |
+| Source Model & Artifact | Target Model & Artifact | Exchange Type | Join / Reference Key | Core Attributes Transferred |
+| :--- | :--- | :--- | :--- | :--- |
+| [`InputNetworkSkims`](../schema/InputNetworkSkims.md) (.omx) | **UrbanSim** (`input_skims`) | Matrix Skims | Zone (i, j) | `sov_time_am`, `sov_distance`, transit accessibility |
+| [`InputNetworkSkims`](../schema/InputNetworkSkims.md) (.omx) | **ATLAS** (`input_skims`) | Matrix Skims | Zone (i, j) | `sov_time_am`, `sov_time_md`, `sov_distance` |
+| [`UrbanSimZonalTotals`](../schema/UrbanSimZonalTotals.md) | **POLARIS** `Supply.sqlite/Zone` | Zonal Aggregation | `zone_id` ↔ `zone` | `residential_area`, `commercial_area`, `pop_households`, `employment_*` |
+| [`UrbanSimBlockMarginals`](../schema/UrbanSimBlockMarginals.md) | **DEMOS** (`marginal_targets`) | Control Totals | `block_id` | `total_households`, `total_population`, `total_workers` |
+| `DEMOS` Household ([`DemosPolarisMappedHousehold`](../schema/DemosPolarisMappedHousehold.md)) | **POLARIS** `Demand.sqlite/Household` ([`PolarisDemandDatabaseHousehold`](../schema/PolarisDemandDatabaseHousehold.md)) | Tabular Microdata | `household` | `income`, `workers`, `persons`, `age_of_head`, `race_of_head`, `type`, `location` |
+| `DEMOS` Person ([`DemosPolarisMappedPerson`](../schema/DemosPolarisMappedPerson.md)) | **POLARIS** `Demand.sqlite/Person` ([`PolarisDemandDatabasePerson`](../schema/PolarisDemandDatabasePerson.md)) | Tabular Microdata | `(household, id)` | `age`, `gender`, `relp`, `education`, `employment`, `school_enrollment` |
+| `DEMOS` Household ([`DemosPolarisMappedHousehold`](../schema/DemosPolarisMappedHousehold.md)) | **ATLAS** `atlas_hh` | Tabular Microdata | `household` ↔ `HOUSEID` | Household identity, composition, and income |
+| `ATLAS` Vehicle ([`AtlasVehicleFleetOutput`](../schema/AtlasVehicleFleetOutput.md)) | **POLARIS** `Demand.sqlite/Vehicle` ([`PolarisDemandDatabaseVehicle`](../schema/PolarisDemandDatabaseVehicle.md)) | Tabular Microdata | `(HOUSEID, VEHID)` ↔ `(household, id)` | `bodytype`, `pred_power`, `modelyear`, `annual_mileage` |
+| **POLARIS** DTA Solver | [`NextYearNetworkSkims`](../schema/NextYearNetworkSkims.md) (.omx) | Matrix Skims | Zone (i, j) | `sov_time_am`, `sov_time_pm`, `congestion_index` |
+| [`UrbanSimBlockMarginals`](../schema/UrbanSimBlockMarginals.md) | **SynthFirm** [`SynthFirmEstablishmentRecord`](../schema/SynthFirmEstablishmentRecord.md) | Zonal Control | `block_id` ↔ `MESOZONE` | Zonal employment by NAICS industry, commercial/industrial floor space |
+| **SynthFirm** Establishments | **SynthFirm** [`SynthFirmB2BShipmentRecord`](../schema/SynthFirmB2BShipmentRecord.md) | Freight Contracts | `BusID` ↔ `SellerID`/`BuyerID` | Commodity SCTG 1–5, shipment tonnage, truckload, private/for-hire carrier |
+| **SynthFirm** Fleets | **POLARIS** `Demand.sqlite/Vehicle` ([`PolarisDemandDatabaseVehicle`](../schema/PolarisDemandDatabaseVehicle.md)) | Commercial Fleets | `BusID` ↔ `location` | Commercial truck fleet inventory, class, and depot locations |
+| **SynthFirm** Shipments | **BEAM** `freight-plans.xml` ([`BeamPlanRecord`](../schema/BeamPlanRecord.md)) | Freight Tours | `BusID` ↔ `depot_id` | Commercial multi-stop tours, payload, and depot charging profiles |
 
 ---
 
