@@ -394,37 +394,58 @@ runs activity-based traffic simulation, and emits post-run population state upda
 classDiagram
     class PolarisDemandDatabaseHousehold {
         +int household [PK]
-        +int size
-        +int income
+        +int hhold
+        +int location [FK]
+        +int persons
         +int workers
         +int vehicles
-        +int housing_type [Crosswalk X-H1]
-        +int location [FK]
-        +int county
+        +int type [Crosswalk D-H2]
+        +int income
+        +int housing_unit_type [Crosswalk D-H1]
+        +float time_in_home
     }
     class PolarisDemandDatabasePerson {
+        +int person [PK]
         +int household [FK]
         +int id [Ordinal]
         +int age
         +int gender [Crosswalk X-P1]
-        +int relate [Crosswalk X-P1]
+        +int race [Crosswalk D-P1]
         +int education [Crosswalk X-P1, X-P6]
         +int employment [Crosswalk X-P1, X-P2]
         +int school_enrollment [Crosswalk X-P1]
         +int school_grade_level [Crosswalk X-P3..X-P5]
+        +int work_location_id [FK]
+        +int school_location_id [FK]
         +int income
     }
     class PolarisDemandDatabaseVehicle {
-        +int household [FK]
-        +int id [Ordinal]
-        +int type [Crosswalk X-V1]
-        +int class [Crosswalk X-V2]
-        +int modelyear
-        +int odometer
+        +int vehicle_id [PK]
+        +int hhold [FK]
+        +int type [FK, Crosswalk X-V1..X-V5]
+        +int parking
+        +int year_purchased
+        +int is_leased
+        +string tag
+        +int subtype
+    }
+    class PolarisDemandDatabaseVehicleClass {
+        +int class_id [PK, Crosswalk X-V2]
+        +string description
+    }
+    class PolarisDemandDatabaseVehicleType {
+        +int type_id [PK, Crosswalk X-V5]
+        +int vehicle_class [FK, Crosswalk X-V2]
+        +int powertrain_type [Crosswalk X-V1]
+        +int automation_type [Crosswalk X-V3]
+        +int fuel_type [Crosswalk X-V1]
+        +int vintage_type [Crosswalk X-V4]
     }
     class PolarisHouseholdStateOutput {
         +int household [PK]
         +int location [FK]
+        +int vehicles
+        +int autonomous_vehicles
         +float time_in_home
         +int ecom
         +float delRat
@@ -468,11 +489,15 @@ classDiagram
     }
     PolarisDemandDatabaseHousehold "1" --> "1..*" PolarisDemandDatabasePerson : members
     PolarisDemandDatabaseHousehold "1" --> "0..*" PolarisDemandDatabaseVehicle : vehicles
+    PolarisDemandDatabaseVehicle "*" --> "1" PolarisDemandDatabaseVehicleType : type
+    PolarisDemandDatabaseVehicleType "*" --> "1" PolarisDemandDatabaseVehicleClass : vehicle_class
     PolarisDemandDatabaseHousehold "1" ..> "0..1" PolarisHouseholdStateOutput : post_run_state
     PolarisDemandDatabasePerson "1" ..> "0..1" PolarisPersonStateOutput : post_run_state
     link PolarisDemandDatabaseHousehold "../schema/PolarisDemandDatabaseHousehold/" "View PolarisDemandDatabaseHousehold LinkML documentation"
     link PolarisDemandDatabasePerson "../schema/PolarisDemandDatabasePerson/" "View PolarisDemandDatabasePerson LinkML documentation"
     link PolarisDemandDatabaseVehicle "../schema/PolarisDemandDatabaseVehicle/" "View PolarisDemandDatabaseVehicle LinkML documentation"
+    link PolarisDemandDatabaseVehicleClass "../schema/PolarisDemandDatabaseVehicleClass/" "View PolarisDemandDatabaseVehicleClass LinkML documentation"
+    link PolarisDemandDatabaseVehicleType "../schema/PolarisDemandDatabaseVehicleType/" "View PolarisDemandDatabaseVehicleType LinkML documentation"
     link PolarisHouseholdStateOutput "../schema/PolarisHouseholdStateOutput/" "View PolarisHouseholdStateOutput LinkML documentation"
     link PolarisPersonStateOutput "../schema/PolarisPersonStateOutput/" "View PolarisPersonStateOutput LinkML documentation"
     link InputNetworkSkims "../schema/InputNetworkSkims/" "View InputNetworkSkims LinkML documentation"
