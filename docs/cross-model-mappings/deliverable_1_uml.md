@@ -42,7 +42,8 @@ POLARIS, and Travel Network Skims (.omx).
             POL_DTA["Dynamic Traffic Assignment (DTA)"]
         end
 
-        subgraph Outputs ["Downstream Outputs"]
+        subgraph Outputs ["Downstream Outputs & Feedback"]
+            POL_StateOut["PolarisPersonStateOutput & PolarisHouseholdStateOutput<br/><i>Resolved Work/School Locations & Long-Term Choices (A23, A30)</i>"]
             SkimsOut["Next-Year Network Skims (.omx)<br/><i>Simulated Highway/Transit Impedance</i>"]
         end
 
@@ -66,6 +67,7 @@ POLARIS, and Travel Network Skims (.omx).
 
         POL_Supply --> POL_DTA
         POL_Demand --> POL_DTA
+        POL_DTA --> POL_StateOut
         POL_DTA --> SkimsOut
 
         %% Interactive Clickable Schema Links
@@ -78,6 +80,7 @@ POLARIS, and Travel Network Skims (.omx).
         click ATLAS_HH "../schema/AtlasHouseholdFleetOutput/" "View AtlasHouseholdFleetOutput LinkML documentation"
         click ATLAS_V "../schema/AtlasVehicleFleetOutput/" "View AtlasVehicleFleetOutput LinkML documentation"
         click POL_Demand "../schema/PolarisDemandDatabaseHousehold/" "View POLARIS Demand Database LinkML documentation"
+        click POL_StateOut "../schema/PolarisPersonStateOutput/" "View PolarisPersonStateOutput LinkML documentation"
         click SkimsOut "../schema/NextYearNetworkSkims/" "View NextYearNetworkSkims LinkML documentation"
     ```
 
@@ -176,7 +179,7 @@ POLARIS, and Travel Network Skims (.omx).
         click BEAM_Veh "../schema/BeamVehicleRecord/" "View BEAM Vehicle LinkML documentation"
         click BEAM_Plans "../schema/BeamPlanRecord/" "View BeamPlanRecord LinkML documentation"
         click BEAM_Out "../schema/BeamPlanOutputRecord/" "View BeamPlanOutputRecord LinkML documentation"
-        click BEAM_Skims "../schema/BeamODSkimsRecord/" "View BeamODSkimsRecord LinkML documentation"
+        click BEAM_Skims "../schema/BeamNetworkSkims/" "View BeamNetworkSkims LinkML documentation"
     ```
 
 === "Freight & Commercial Demand Pipeline: SynthFirm to POLARIS & BEAM"
@@ -385,7 +388,7 @@ classDiagram
 
 POLARIS consumes the integrated demographic, land-use, and vehicle microdata into its [`PolarisDemandDatabaseHousehold`](../schema/PolarisDemandDatabaseHousehold.md),
 [`PolarisDemandDatabasePerson`](../schema/PolarisDemandDatabasePerson.md), [`PolarisDemandDatabaseVehicle`](../schema/PolarisDemandDatabaseVehicle.md), [`PolarisDemandDatabaseVehicleClass`](../schema/PolarisDemandDatabaseVehicleClass.md), and [`PolarisDemandDatabaseVehicleType`](../schema/PolarisDemandDatabaseVehicleType.md) relational tables,
-runs activity-based traffic simulation, and emits updated dynamic network skims ([`NextYearNetworkSkims`](../schema/NextYearNetworkSkims.md)).
+runs activity-based traffic simulation, and emits post-run population state updates ([`PolarisHouseholdStateOutput`](../schema/PolarisHouseholdStateOutput.md), [`PolarisPersonStateOutput`](../schema/PolarisPersonStateOutput.md)) alongside updated dynamic network skims ([`NextYearNetworkSkims`](../schema/NextYearNetworkSkims.md)).
 
 ```mermaid
 classDiagram
@@ -419,29 +422,59 @@ classDiagram
         +int modelyear
         +int odometer
     }
+    class PolarisHouseholdStateOutput {
+        +int household [PK]
+        +int location [FK]
+        +float time_in_home
+        +int ecom
+        +float delRat
+        +int dispose_veh
+        +int num_groceries
+        +int num_meals
+    }
+    class PolarisPersonStateOutput {
+        +int person [PK]
+        +int household [FK]
+        +int work_location_id
+        +int school_location_id
+        +int journey_to_work_mode
+        +int journey_to_work_travel_time
+        +int journey_to_work_arrival_time
+        +int journey_to_work_vehicle_occupancy
+        +int telecommute_level
+        +int transit_pass
+        +int escooter_use_level
+        +float time_in_job
+        +int is_long_term_chooser
+    }
     class InputNetworkSkims {
         +string file_path [PK]
         +int zone_count
-        +float sov_time_am
-        +float sov_time_pm
-        +float sov_time_md
-        +float sov_distance
-        +float transit_travel_time
+        +float_2D sov_time_am [origin_zone, destination_zone]
+        +float_2D sov_time_pm [origin_zone, destination_zone]
+        +float_2D sov_time_md [origin_zone, destination_zone]
+        +float_2D sov_distance [origin_zone, destination_zone]
+        +float_2D transit_travel_time [origin_zone, destination_zone]
+        +float_1D transit_accessibility_index [origin_zone]
     }
     class NextYearNetworkSkims {
         +string file_path [PK]
         +int zone_count
         +int iteration_count
         +float gap_metric
-        +float sov_time_am
-        +float sov_time_pm
-        +float congestion_index
+        +float_2D sov_time_am [origin_zone, destination_zone]
+        +float_2D sov_time_pm [origin_zone, destination_zone]
+        +float_2D congestion_index [origin_zone, destination_zone]
     }
     PolarisDemandDatabaseHousehold "1" --> "1..*" PolarisDemandDatabasePerson : members
     PolarisDemandDatabaseHousehold "1" --> "0..*" PolarisDemandDatabaseVehicle : vehicles
+    PolarisDemandDatabaseHousehold "1" ..> "0..1" PolarisHouseholdStateOutput : post_run_state
+    PolarisDemandDatabasePerson "1" ..> "0..1" PolarisPersonStateOutput : post_run_state
     link PolarisDemandDatabaseHousehold "../schema/PolarisDemandDatabaseHousehold/" "View PolarisDemandDatabaseHousehold LinkML documentation"
     link PolarisDemandDatabasePerson "../schema/PolarisDemandDatabasePerson/" "View PolarisDemandDatabasePerson LinkML documentation"
     link PolarisDemandDatabaseVehicle "../schema/PolarisDemandDatabaseVehicle/" "View PolarisDemandDatabaseVehicle LinkML documentation"
+    link PolarisHouseholdStateOutput "../schema/PolarisHouseholdStateOutput/" "View PolarisHouseholdStateOutput LinkML documentation"
+    link PolarisPersonStateOutput "../schema/PolarisPersonStateOutput/" "View PolarisPersonStateOutput LinkML documentation"
     link InputNetworkSkims "../schema/InputNetworkSkims/" "View InputNetworkSkims LinkML documentation"
     link NextYearNetworkSkims "../schema/NextYearNetworkSkims/" "View NextYearNetworkSkims LinkML documentation"
 ```
@@ -494,7 +527,7 @@ classDiagram
 BEAM receives enriched demographic agents ([`BeamHouseholdRecord`](../schema/BeamHouseholdRecord.md), [`BeamPersonRecord`](../schema/BeamPersonRecord.md)),
 the ATLAS-synthesized vehicle fleet with powertrain classifications ([`BeamVehicleRecord`](../schema/BeamVehicleRecord.md)), and ActivitySim-generated
 daily activity-travel plans ([`BeamPlanRecord`](../schema/BeamPlanRecord.md), [`BeamPlanOutputRecord`](../schema/BeamPlanOutputRecord.md)). It simulates microscopic
-agent interactions, congestion, and energy/charging profiles.
+agent interactions, congestion, and energy/charging profiles, emitting [`BeamNetworkSkims`](../schema/BeamNetworkSkims.md) (`.omx` / `.zarr` multi-dimensional LinkML arrays) as the default skim representation.
 
 ```mermaid
 classDiagram
@@ -539,12 +572,13 @@ classDiagram
     }
     class BeamNetworkSkims {
         +string file_path [PK]
+        +string format [default=omx]
         +int zone_count [FK]
-        +float sov_time_am
-        +float sov_distance
-        +float transit_in_vehicle_time
-        +float transit_fare
-        +float ridehail_solo_cost
+        +float_2D sov_time_am [origin_zone, destination_zone]
+        +float_2D sov_distance [origin_zone, destination_zone]
+        +float_3D transit_in_vehicle_time [time_period, origin_zone, destination_zone]
+        +float_3D transit_fare [time_period, origin_zone, destination_zone]
+        +float_3D ridehail_solo_cost [time_period, origin_zone, destination_zone]
     }
     BeamHouseholdRecord "1" --> "1..*" BeamPersonRecord : members
     BeamHouseholdRecord "1" --> "0..*" BeamVehicleRecord : vehicles

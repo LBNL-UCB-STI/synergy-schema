@@ -131,6 +131,8 @@ def test_dist_schema_resolves_cleanly() -> None:
         "PolarisDemandDatabaseVehicle",
         "PolarisDemandDatabaseVehicleClass",
         "PolarisDemandDatabaseVehicleType",
+        "PolarisHouseholdStateOutput",
+        "PolarisPersonStateOutput",
         "InputNetworkSkims",
         "NextYearNetworkSkims",
         "SingleYearModelHandoffPackage",

@@ -37,7 +37,8 @@ flowchart TD
         POL_DTA["Dynamic Traffic Assignment (DTA)"]
     end
 
-    subgraph Downstream ["Downstream Outputs"]
+    subgraph Downstream ["Downstream Outputs & Feedback"]
+        POL_StateOut["PolarisPersonStateOutput & PolarisHouseholdStateOutput<br/><i>Resolved Work/School Locations & Long-Term Choices (A23, A30)</i>"]
         SkimsOut["Next-Year Network Skims (.omx)<br/><i>Simulated Highway & Transit Equilibrium</i>"]
     end
 
@@ -60,6 +61,7 @@ flowchart TD
 
     POL_Supply --> POL_DTA
     POL_Demand --> POL_DTA
+    POL_DTA --> POL_StateOut
     POL_DTA --> SkimsOut
 ```
 
@@ -69,15 +71,17 @@ flowchart TD
 
 | Source Model & Artifact | Target Model & Artifact | Exchange Type | Join / Reference Key | Core Attributes Transferred |
 | :--- | :--- | :--- | :--- | :--- |
-| `InputNetworkSkims` (.omx) | **UrbanSim** (`input_skims`) | Matrix Skims | Zone (i, j) | `sov_time_am`, `sov_distance`, transit accessibility |
-| `InputNetworkSkims` (.omx) | **ATLAS** (`input_skims`) | Matrix Skims | Zone (i, j) | `sov_time_am`, `sov_time_md`, `sov_distance` |
+| `InputNetworkSkims` (.omx) | **UrbanSim** (`input_skims`) | Matrix Skims (1D/2D `array`) | `[origin_zone, destination_zone]` / `[origin_zone]` | `sov_time_am`, `sov_distance`, `transit_accessibility_index` |
+| `InputNetworkSkims` (.omx) | **ATLAS** (`input_skims`) | Matrix Skims (2D `array`) | `[origin_zone, destination_zone]` | `sov_time_am`, `sov_time_md`, `sov_distance` |
 | `UrbanSimZonalTotals` | **POLARIS** `Supply.sqlite/Zone` | Zonal Aggregation | `zone_id` ↔ `zone` | `residential_area`, `commercial_area`, `pop_households`, `employment_*` |
 | `UrbanSimBlockMarginals` | **DEMOS** (`marginal_targets`) | Control Totals | `block_id` | `total_households`, `total_population`, `total_workers` |
 | `DEMOS` Household | **POLARIS** `Demand.sqlite/Household` | Tabular Microdata | `household` | `income`, `workers`, `persons`, `age_of_head`, `race_of_head`, `type`, `location` |
 | `DEMOS` Person | **POLARIS** `Demand.sqlite/Person` | Tabular Microdata | `(household, id)` | `age`, `gender`, `relp`, `education`, `employment`, `school_enrollment` |
 | `DEMOS` Household | **ATLAS** `atlas_hh` | Tabular Microdata | `household` ↔ `HOUSEID` | Household identity, composition, and income |
 | `ATLAS` Vehicle | **POLARIS** `Demand.sqlite/Vehicle` | Tabular Microdata | `(HOUSEID, VEHID)` ↔ `(household, id)` | `bodytype`, `pred_power`, `modelyear`, `annual_mileage` |
-| **POLARIS** DTA Solver | `NextYearNetworkSkims` (.omx) | Matrix Skims | Zone (i, j) | `sov_time_am`, `sov_time_pm`, `congestion_index` |
+| **POLARIS** DTA Solver | `NextYearNetworkSkims` (.omx) | Matrix Skims (2D `array`) | `[origin_zone, destination_zone]` | `sov_time_am`, `sov_time_pm`, `congestion_index` |
+| **POLARIS** Post-Run State (`PolarisHouseholdStateOutput`, `PolarisPersonStateOutput`) | **Year t+1 Core Population** (`Demand.sqlite` / `Result.sqlite`, provisional) | Longitudinal State Feedback | `household`, `person` | `location`, `time_in_home`, `ecom`, `work_location_id`, `school_location_id`, `journey_to_work_*`, `telecommute_level`, `transit_pass`, `escooter_use_level`, `time_in_job`, `is_long_term_chooser` (A20, A21, A23, A30, A31) |
+| **BEAM** Dynamic Simulation | `BeamNetworkSkims` (.omx / .zarr, default) | Matrix Skims (2D/3D `array`) | `[time_period, origin_zone, destination_zone]` | `sov_time_*`, `transit_*`, `ridehail_*`, `walk_distance`, `bike_distance` |
 | `UrbanSimBlockMarginals` | **SynthFirm** `SynthFirmEstablishmentRecord` | Zonal Control | `block_id` ↔ `MESOZONE` | Zonal employment by NAICS industry, commercial/industrial floor space |
 | **SynthFirm** Establishments | **SynthFirm** `SynthFirmB2BShipmentRecord` | Freight Contracts | `BusID` ↔ `SellerID`/`BuyerID` | Commodity SCTG 1–5, shipment tonnage, truckload, private/for-hire carrier |
 | **SynthFirm** Fleets (`SynthFirmEstablishmentRecord`) | **POLARIS** `Demand.sqlite/Vehicle` | Commercial Fleets (`wide_to_long`) | `BusID` ↔ `hhold` / `fleet_id` ↔ `fleet` | Wide fleet counts (`diesel_class_1_2a`..`electric_class_7_8_vocational`, `EV_powertrain`) unpivoted to discrete vehicles (`vehicle_id`, `fleet`, `type` via `Vehicle_Type`) |

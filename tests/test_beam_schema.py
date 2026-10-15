@@ -192,11 +192,14 @@ def test_beam_skims_schema_structure() -> None:
     assert "BeamNetworkSkims" in classes
     assert "BeamODSkimsRecord" in classes
 
-    # Test BeamNetworkSkims
+    # Test BeamNetworkSkims (default OMX/Zarr skim representation)
     skims = view.induced_class("BeamNetworkSkims")
     assert skims.attributes["file_path"].identifier is True
     assert skims.attributes["zone_count"].required is True
+    assert skims.attributes["format"].ifabsent == "string(omx)"
     assert skims.annotations["contract_family"].value == "network_skims"
+    assert skims.annotations["default_skim_representation"].value is True
+    assert skims.annotations["schema_status"].value == "authoritative"
     assert "BeamSkims" in skims.aliases
 
     expected_skims_fields = {
@@ -213,6 +216,8 @@ def test_beam_skims_schema_structure() -> None:
         "sov_toll_cost",
         "hov2_time_am",
         "hov3_time_am",
+        "hov2_distance",
+        "hov3_distance",
         "transit_in_vehicle_time",
         "transit_initial_wait_time",
         "transit_transfer_wait_time",
@@ -230,8 +235,53 @@ def test_beam_skims_schema_structure() -> None:
     }
     assert expected_skims_fields <= set(skims.attributes.keys())
 
-    # Test BeamODSkimsRecord
+    # Verify 2D [origin_zone, destination_zone] matrices
+    for slot_name in (
+        "sov_time_am",
+        "sov_time_pm",
+        "sov_time_md",
+        "sov_distance",
+        "sov_toll_cost",
+        "hov2_time_am",
+        "hov3_time_am",
+        "hov2_distance",
+        "hov3_distance",
+        "walk_distance",
+        "bike_distance",
+    ):
+        slot = skims.attributes[slot_name]
+        assert slot.array is not None, f"Expected 2D array on {slot_name}"
+        assert [d.alias for d in slot.array.dimensions] == [
+            "origin_zone",
+            "destination_zone",
+        ]
+
+    # Verify 3D [time_period, origin_zone, destination_zone] tensors
+    for slot_name in (
+        "transit_in_vehicle_time",
+        "transit_initial_wait_time",
+        "transit_transfer_wait_time",
+        "transit_fare",
+        "transit_failures",
+        "ridehail_solo_wait_time",
+        "ridehail_solo_cost",
+        "ridehail_pooled_wait_time",
+        "ridehail_pooled_cost",
+        "ridehail_pooled_rejection_prob",
+        "ridehail_solo_trips",
+        "ridehail_pooled_trips",
+    ):
+        slot = skims.attributes[slot_name]
+        assert slot.array is not None, f"Expected 3D array on {slot_name}"
+        assert [d.alias for d in slot.array.dimensions] == [
+            "time_period",
+            "origin_zone",
+            "destination_zone",
+        ]
+
+    # Test BeamODSkimsRecord (secondary intermediate router CSV record)
     od_rec = view.induced_class("BeamODSkimsRecord")
+    assert od_rec.annotations["default_skim_representation"].value is False
     assert od_rec.attributes["time_period"].required is True
     assert od_rec.attributes["orig_taz"].required is True
     assert od_rec.attributes["dest_taz"].required is True
@@ -358,28 +408,59 @@ def test_beam_skims_instances_validate() -> None:
     valid_skims = {
         "file_path": "output/beam/skims.omx",
         "format": "omx",
-        "zone_count": 1454,
-        "time_periods": "EA,AM,MD,PM,EV",
+        "zone_count": 2,
+        "time_periods": "EA,AM",
         "iteration_number": 10,
         "converged": True,
-        "sov_time_am": 24.5,
-        "sov_time_pm": 26.2,
-        "sov_distance": 12.3,
-        "sov_toll_cost": 5.0,
-        "walk_distance": 1.2,
-        "bike_distance": 3.4,
-        "ridehail_solo_wait_time": 4.5,
-        "ridehail_solo_cost": 15.0,
-        "ridehail_pooled_rejection_prob": 0.05,
+        "sov_time_am": [[10.0, 24.5], [25.1, 9.5]],
+        "sov_time_pm": [[11.0, 26.2], [27.0, 10.2]],
+        "sov_distance": [[3.2, 12.3], [12.4, 3.0]],
+        "sov_toll_cost": [[0.0, 5.0], [5.0, 0.0]],
+        "walk_distance": [[0.4, 1.2], [1.2, 0.4]],
+        "bike_distance": [[1.0, 3.4], [3.4, 1.0]],
+        "transit_in_vehicle_time": [
+            [[12.0, 35.0], [36.0, 11.5]],
+            [[14.0, 38.0], [39.0, 13.0]],
+        ],
+        "ridehail_solo_wait_time": [
+            [[3.0, 4.5], [4.2, 2.9]],
+            [[3.5, 5.1], [4.8, 3.2]],
+        ],
+        "ridehail_solo_cost": [
+            [[8.0, 15.0], [15.5, 7.5]],
+            [[9.0, 16.5], [17.0, 8.2]],
+        ],
+        "ridehail_pooled_rejection_prob": [
+            [[0.01, 0.05], [0.04, 0.01]],
+            [[0.02, 0.08], [0.07, 0.02]],
+        ],
     }
     report = validator.validate(valid_skims, "BeamNetworkSkims")
     assert len(report.results) == 0
 
-    # Test invalid: negative minimum value
+    # Test invalid: negative minimum value inside 2D matrix
     invalid_skims = {
         "file_path": "output/beam/skims.omx",
-        "zone_count": 1454,
-        "sov_time_am": -5.0,
+        "zone_count": 2,
+        "sov_time_am": [[10.0, -5.0], [25.1, 9.5]],
     }
     report = validator.validate(invalid_skims, "BeamNetworkSkims")
+    assert len(report.results) > 0
+
+    # Test invalid: probability > 1.0 inside 3D tensor
+    invalid_prob = {
+        "file_path": "output/beam/skims.omx",
+        "zone_count": 2,
+        "ridehail_pooled_rejection_prob": [[[0.01, 1.25], [0.04, 0.01]]],
+    }
+    report = validator.validate(invalid_prob, "BeamNetworkSkims")
+    assert len(report.results) > 0
+
+    # Test invalid: wrong rank (2D passed to 3D tensor)
+    invalid_rank = {
+        "file_path": "output/beam/skims.omx",
+        "zone_count": 2,
+        "transit_in_vehicle_time": [[12.0, 35.0], [36.0, 11.5]],
+    }
+    report = validator.validate(invalid_rank, "BeamNetworkSkims")
     assert len(report.results) > 0

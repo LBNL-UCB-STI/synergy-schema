@@ -35,6 +35,8 @@ def test_deliverable_1_schema_contains_all_models_and_channels() -> None:
     assert "PolarisDemandDatabaseVehicle" in classes
     assert "PolarisDemandDatabaseVehicleClass" in classes
     assert "PolarisDemandDatabaseVehicleType" in classes
+    assert "PolarisHouseholdStateOutput" in classes
+    assert "PolarisPersonStateOutput" in classes
     assert "InputNetworkSkims" in classes
     assert "NextYearNetworkSkims" in classes
 

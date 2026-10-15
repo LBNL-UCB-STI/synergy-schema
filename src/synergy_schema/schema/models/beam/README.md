@@ -19,8 +19,8 @@ Defines the activity-travel itinerary elements:
 
 ### 3. `beam_skims.yaml`
 Defines network travel impedance outputs produced by BEAM:
-- **`BeamNetworkSkims`** (aliases: `BeamSkims`, `BeamSkimsOutput`): Multi-modal, multi-period zone-to-zone (TAZ x TAZ) matrix container packaged in Open Matrix (`.omx`) or `Zarr` format. Encapsulates travel times, distances, tolls, transit IVT/wait times/fares, active mode distances (`DISTWALK`, `DISTBIKE`), and ridehail/TNC metrics across five modeled time periods (`EA`, `AM`, `MD`, `PM`, `EV`).
-- **`BeamODSkimsRecord`** (aliases: `BeamActivitySimODSkimsRecord`): Direct tabular router origin-destination record shape emitted by BEAM (`skimsActivitySimOD_current.csv.gz`).
+- **`BeamNetworkSkims`** (aliases: `BeamSkims`, `BeamSkimsOutput`): **Default and authoritative** multi-modal, multi-period zone-to-zone (TAZ x TAZ) matrix container packaged in Open Matrix (`.omx`) or `Zarr` (`.zarr`) array format (`default_skim_representation: true`). Uses LinkML `array` dimensions (`[origin_zone, destination_zone]` 2D matrices for highway and active modes `DISTWALK`/`DISTBIKE`, and `[time_period, origin_zone, destination_zone]` 3D tensors for multi-period transit IVT/wait times/fares and ridehail/TNC metrics across `EA`, `AM`, `MD`, `PM`, `EV`).
+- **`BeamODSkimsRecord`** (aliases: `BeamActivitySimODSkimsRecord`): Secondary intermediate tabular router origin-destination CSV record shape emitted by BEAM (`skimsActivitySimOD_current.csv.gz`) prior to OMX/Zarr matrix aggregation (`default_skim_representation: false`).
 
 ### 4. `beam.yaml`
 Consolidated schema package that imports `beam_population`, `beam_plans`, and `beam_skims`.

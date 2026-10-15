@@ -158,8 +158,8 @@ readme = "README.md"
 license = "BSD-3-Clause"
 requires-python = ">=3.11"
 dependencies = [
-    "linkml>=1.7.0",
-    "linkml-runtime>=1.6.0",
+    "linkml>=1.12.1,<2",
+    "linkml-runtime>=1.12.1,<2",
     "pyyaml>=6.0",
     "zensical>=0.0.1",
 ]
@@ -537,6 +537,8 @@ def export_package(target_dir: Path) -> None:
         "PolarisDemandDatabaseVehicle",
         "PolarisDemandDatabaseVehicleClass",
         "PolarisDemandDatabaseVehicleType",
+        "PolarisHouseholdStateOutput",
+        "PolarisPersonStateOutput",
         "InputNetworkSkims",
         "NextYearNetworkSkims",
         "SingleYearModelHandoffPackage",

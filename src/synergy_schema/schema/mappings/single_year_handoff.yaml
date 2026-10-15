@@ -28,7 +28,10 @@ enums:
       spatial_crosswalk:
         description: Geographic block-to-zone intersection and allocation weights.
       matrix_skims:
-        description: Zone-to-zone (TAZ x TAZ) Open Matrix OMX travel impedance matrices.
+        description: >-
+          Zone-to-zone (TAZ x TAZ) Open Matrix OMX travel impedance matrices and Zarr (.zarr)
+          multi-dimensional (1D [origin_zone], 2D [origin_zone, destination_zone], or
+          3D [time_period, origin_zone, destination_zone]) arrays modeled using LinkML array dimensions.
 
   FieldTransformationMode:
     description: Transformation logic required to map a source field to a target field.

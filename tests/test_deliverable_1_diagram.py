@@ -77,6 +77,15 @@ def test_deliverable_1_uml_contains_all_models_and_diagrams() -> None:
         "[`SynthFirmEstablishmentRecord`](../schema/SynthFirmEstablishmentRecord.md)"
         in rendered
     )
+    assert 'click BEAM_Skims "../schema/BeamNetworkSkims/"' in rendered
+    assert 'click POL_StateOut "../schema/PolarisPersonStateOutput/"' in rendered
+    assert "PolarisHouseholdStateOutput" in rendered
+    assert "PolarisPersonStateOutput" in rendered
+    assert "+float_2D sov_time_am [origin_zone, destination_zone]" in rendered
+    assert (
+        "+float_3D transit_in_vehicle_time [time_period, origin_zone, destination_zone]"
+        in rendered
+    )
 
 
 def test_deliverable_1_uml_deterministic() -> None:

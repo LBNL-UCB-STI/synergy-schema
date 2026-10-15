@@ -2,13 +2,16 @@ id: https://w3id.org/LBNL-UCB-STI/synergy-schema/models/beam/skims
 name: beam_skims
 title: BEAM network travel skims schema (Open Matrix .omx and Zarr)
 description: >-
-  Schema defining transportation network travel skim matrices and tabular OD skims
-  produced by BEAM dynamic traffic simulation. Network skims quantify zone-to-zone
-  (TAZ x TAZ) travel impedance across multiple time periods (Early AM, AM peak,
-  Midday, PM peak, Evening) and modes (auto SOV/HOV, transit, active, and ridehail/TNC).
-  In integrated workflows (such as PILATES or Synergy), BEAM skims serve as the
-  transportation system feedback consumed by land use models (UrbanSim), vehicle fleet
-  allocation models (ATLAS), and activity-based travel demand models (ActivitySim/POLARIS).
+  Schema defining transportation network travel skim matrices and intermediate
+  tabular OD skims produced by BEAM dynamic traffic simulation. BeamNetworkSkims
+  (.omx / .zarr) is the default and authoritative BEAM skim representation,
+  quantifying zone-to-zone (TAZ x TAZ) travel impedance across multiple time
+  periods (Early AM, AM peak, Midday, PM peak, Evening) and modes (auto SOV/HOV,
+  transit, active, and ridehail/TNC) using LinkML 2D and 3D array dimensions.
+  In integrated workflows (such as PILATES or Synergy), BEAM array skims serve as
+  the transportation system feedback consumed by land use models (UrbanSim),
+  vehicle fleet allocation models (ATLAS), and activity-based travel demand
+  models (ActivitySim/POLARIS).
 
 prefixes:
   synergy_schema: https://w3id.org/LBNL-UCB-STI/synergy-schema/
@@ -20,13 +23,25 @@ default_range: string
 imports:
   - linkml:types
 
+types:
+  NonNegativeFloat:
+    typeof: float
+    minimum_value: 0.0
+    description: Non-negative floating-point travel impedance measure (time, distance, volume, or monetary cost).
+  UnitIntervalFloat:
+    typeof: float
+    minimum_value: 0.0
+    maximum_value: 1.0
+    description: Floating-point probability constrained to the closed unit interval [0.0, 1.0].
+
 classes:
   BeamNetworkSkims:
     description: >-
-      Multi-modal, multi-period zone-to-zone impedance matrix container emitted
-      by BEAM simulation, packaged in Open Matrix (.omx) or Zarr format.
-      Contains 2D non-motorized distance matrices and 3D mode/measure/period
-      matrices for auto, transit, and ridehail.
+      Default and authoritative multi-modal, multi-period zone-to-zone impedance
+      matrix container emitted by BEAM simulation, packaged in Open Matrix (.omx)
+      or Zarr (.zarr) array format. Contains 2D [origin_zone, destination_zone]
+      matrices for auto and non-motorized modes and 3D [time_period, origin_zone,
+      destination_zone] tensors for multi-period transit and ridehail/TNC measures.
     aliases:
       - BeamSkims
       - BeamSkimsOutput
@@ -35,6 +50,8 @@ classes:
       model_association: BEAM
       contract_family: network_skims
       format: "omx, zarr"
+      default_skim_representation: true
+      schema_status: authoritative
       status: formal_contract
       producer_model: BEAM
       consumer_models: "UrbanSim, ATLAS, ActivitySim, POLARIS"
@@ -47,7 +64,8 @@ classes:
         description: Relative path to the .omx or .zarr matrix storage archive.
       format:
         range: string
-        description: Storage format indicator ('omx' or 'zarr').
+        ifabsent: string(omx)
+        description: Storage format indicator for the multi-dimensional skim array container ('omx' or 'zarr'; defaults to 'omx').
       zone_count:
         range: integer
         required: true
@@ -64,136 +82,263 @@ classes:
         range: boolean
         description: Indicates whether dynamic traffic assignment achieved equilibrium convergence.
       sov_time_am:
-        range: float
-        minimum_value: 0.0
-        description: Single-occupant auto highway travel time in minutes during morning peak (AM).
+        range: NonNegativeFloat
+        array:
+          dimensions:
+            - alias: origin_zone
+            - alias: destination_zone
+        description: >-
+          2D OD matrix [origin_zone, destination_zone] of single-occupant auto highway
+          travel time in minutes during morning peak (AM).
       sov_time_pm:
-        range: float
-        minimum_value: 0.0
-        description: Single-occupant auto highway travel time in minutes during evening peak (PM).
+        range: NonNegativeFloat
+        array:
+          dimensions:
+            - alias: origin_zone
+            - alias: destination_zone
+        description: >-
+          2D OD matrix [origin_zone, destination_zone] of single-occupant auto highway
+          travel time in minutes during evening peak (PM).
       sov_time_md:
-        range: float
-        minimum_value: 0.0
-        description: Single-occupant auto highway travel time in minutes during midday off-peak (MD).
+        range: NonNegativeFloat
+        array:
+          dimensions:
+            - alias: origin_zone
+            - alias: destination_zone
+        description: >-
+          2D OD matrix [origin_zone, destination_zone] of single-occupant auto highway
+          travel time in minutes during midday off-peak (MD).
       sov_distance:
-        range: float
-        minimum_value: 0.0
-        description: Single-occupant vehicle highway travel distance in miles.
+        range: NonNegativeFloat
+        array:
+          dimensions:
+            - alias: origin_zone
+            - alias: destination_zone
+        description: >-
+          2D OD matrix [origin_zone, destination_zone] of single-occupant vehicle
+          highway travel distance in miles.
       sov_toll_cost:
-        range: float
-        minimum_value: 0.0
-        description: Single-occupant vehicle highway bridge and value toll costs ($).
+        range: NonNegativeFloat
+        array:
+          dimensions:
+            - alias: origin_zone
+            - alias: destination_zone
+        description: >-
+          2D OD matrix [origin_zone, destination_zone] of single-occupant vehicle
+          highway bridge and value toll costs ($).
       hov2_time_am:
-        range: float
-        minimum_value: 0.0
-        description: High-occupancy vehicle (2 person) travel time in minutes during morning peak (AM).
+        range: NonNegativeFloat
+        array:
+          dimensions:
+            - alias: origin_zone
+            - alias: destination_zone
+        description: >-
+          2D OD matrix [origin_zone, destination_zone] of high-occupancy vehicle
+          (2 person) travel time in minutes during morning peak (AM).
       hov3_time_am:
-        range: float
-        minimum_value: 0.0
-        description: High-occupancy vehicle (3+ person) travel time in minutes during morning peak (AM).
+        range: NonNegativeFloat
+        array:
+          dimensions:
+            - alias: origin_zone
+            - alias: destination_zone
+        description: >-
+          2D OD matrix [origin_zone, destination_zone] of high-occupancy vehicle
+          (3+ person) travel time in minutes during morning peak (AM).
       hov2_distance:
-        range: float
-        minimum_value: 0.0
-        description: High-occupancy vehicle (2 person) travel distance in miles.
+        range: NonNegativeFloat
+        array:
+          dimensions:
+            - alias: origin_zone
+            - alias: destination_zone
+        description: >-
+          2D OD matrix [origin_zone, destination_zone] of high-occupancy vehicle
+          (2 person) travel distance in miles.
       hov3_distance:
-        range: float
-        minimum_value: 0.0
-        description: High-occupancy vehicle (3+ person) travel distance in miles.
+        range: NonNegativeFloat
+        array:
+          dimensions:
+            - alias: origin_zone
+            - alias: destination_zone
+        description: >-
+          2D OD matrix [origin_zone, destination_zone] of high-occupancy vehicle
+          (3+ person) travel distance in miles.
       transit_in_vehicle_time:
-        range: float
-        minimum_value: 0.0
+        range: NonNegativeFloat
+        array:
+          dimensions:
+            - alias: time_period
+            - alias: origin_zone
+            - alias: destination_zone
         annotations:
           matrix_name: WLK_TRN_WLK_TOTIVT
-        description: Total transit in-vehicle travel time in minutes.
+        description: >-
+          3D multi-period OD skim tensor [time_period, origin_zone, destination_zone]
+          of total transit in-vehicle travel time in minutes.
       transit_initial_wait_time:
-        range: float
-        minimum_value: 0.0
+        range: NonNegativeFloat
+        array:
+          dimensions:
+            - alias: time_period
+            - alias: origin_zone
+            - alias: destination_zone
         annotations:
           matrix_name: WLK_EXP_WLK_IWAIT
-        description: Transit initial waiting time in minutes.
+        description: >-
+          3D multi-period OD skim tensor [time_period, origin_zone, destination_zone]
+          of transit initial waiting time in minutes.
       transit_transfer_wait_time:
-        range: float
-        minimum_value: 0.0
-        description: Transit transfer waiting time in minutes.
+        range: NonNegativeFloat
+        array:
+          dimensions:
+            - alias: time_period
+            - alias: origin_zone
+            - alias: destination_zone
+        description: >-
+          3D multi-period OD skim tensor [time_period, origin_zone, destination_zone]
+          of transit transfer waiting time in minutes.
       transit_fare:
-        range: float
-        minimum_value: 0.0
+        range: NonNegativeFloat
+        array:
+          dimensions:
+            - alias: time_period
+            - alias: origin_zone
+            - alias: destination_zone
         annotations:
           matrix_name: WLK_TRN_WLK_FAR
-        description: Transit monetary fare cost in dollars ($).
+        description: >-
+          3D multi-period OD skim tensor [time_period, origin_zone, destination_zone]
+          of transit monetary fare cost in dollars ($).
       transit_failures:
-        range: float
-        minimum_value: 0.0
+        range: NonNegativeFloat
+        array:
+          dimensions:
+            - alias: time_period
+            - alias: origin_zone
+            - alias: destination_zone
         annotations:
           matrix_name: WLK_TRN_WLK_FAILURES
-        description: Count or probability of transit routing or boarding capacity failures.
+        description: >-
+          3D multi-period OD skim tensor [time_period, origin_zone, destination_zone]
+          of count or probability of transit routing or boarding capacity failures.
       walk_distance:
-        range: float
-        minimum_value: 0.0
+        range: NonNegativeFloat
+        array:
+          dimensions:
+            - alias: origin_zone
+            - alias: destination_zone
         annotations:
           matrix_name: DISTWALK
-        description: Zone-to-zone walking network distance in miles (2D matrix).
+        description: >-
+          2D OD matrix [origin_zone, destination_zone] of zone-to-zone walking
+          network distance in miles.
       bike_distance:
-        range: float
-        minimum_value: 0.0
+        range: NonNegativeFloat
+        array:
+          dimensions:
+            - alias: origin_zone
+            - alias: destination_zone
         annotations:
           matrix_name: DISTBIKE
-        description: Zone-to-zone bicycling network distance in miles (2D matrix).
+        description: >-
+          2D OD matrix [origin_zone, destination_zone] of zone-to-zone bicycling
+          network distance in miles.
       ridehail_solo_wait_time:
-        range: float
-        minimum_value: 0.0
+        range: NonNegativeFloat
+        array:
+          dimensions:
+            - alias: time_period
+            - alias: origin_zone
+            - alias: destination_zone
         annotations:
           matrix_name: RH_SOLO_WAIT
-        description: Average passenger wait time for solo ridehail/TNC pickup in minutes.
+        description: >-
+          3D multi-period OD skim tensor [time_period, origin_zone, destination_zone]
+          of average passenger wait time for solo ridehail/TNC pickup in minutes.
       ridehail_solo_cost:
-        range: float
-        minimum_value: 0.0
+        range: NonNegativeFloat
+        array:
+          dimensions:
+            - alias: time_period
+            - alias: origin_zone
+            - alias: destination_zone
         annotations:
           matrix_name: RH_SOLO_COST
-        description: Average monetary fare for solo ridehail/TNC trip in dollars ($).
+        description: >-
+          3D multi-period OD skim tensor [time_period, origin_zone, destination_zone]
+          of average monetary fare for solo ridehail/TNC trip in dollars ($).
       ridehail_pooled_wait_time:
-        range: float
-        minimum_value: 0.0
+        range: NonNegativeFloat
+        array:
+          dimensions:
+            - alias: time_period
+            - alias: origin_zone
+            - alias: destination_zone
         annotations:
           matrix_name: RH_POOLED_WAIT
-        description: Average passenger wait time for pooled ridehail/TNC pickup in minutes.
+        description: >-
+          3D multi-period OD skim tensor [time_period, origin_zone, destination_zone]
+          of average passenger wait time for pooled ridehail/TNC pickup in minutes.
       ridehail_pooled_cost:
-        range: float
-        minimum_value: 0.0
+        range: NonNegativeFloat
+        array:
+          dimensions:
+            - alias: time_period
+            - alias: origin_zone
+            - alias: destination_zone
         annotations:
           matrix_name: RH_POOLED_COST
-        description: Average monetary fare for pooled ridehail/TNC trip in dollars ($).
+        description: >-
+          3D multi-period OD skim tensor [time_period, origin_zone, destination_zone]
+          of average monetary fare for pooled ridehail/TNC trip in dollars ($).
       ridehail_pooled_rejection_prob:
-        range: float
-        minimum_value: 0.0
-        maximum_value: 1.0
+        range: UnitIntervalFloat
+        array:
+          dimensions:
+            - alias: time_period
+            - alias: origin_zone
+            - alias: destination_zone
         annotations:
           matrix_name: RH_POOLED_REJECTIONPROB
-        description: Probability of pooled ridehail ride request rejection or unavailability (0.0 to 1.0).
+        description: >-
+          3D multi-period OD skim tensor [time_period, origin_zone, destination_zone]
+          of probability of pooled ridehail ride request rejection or unavailability (0.0 to 1.0).
       ridehail_solo_trips:
-        range: float
-        minimum_value: 0.0
+        range: NonNegativeFloat
+        array:
+          dimensions:
+            - alias: time_period
+            - alias: origin_zone
+            - alias: destination_zone
         annotations:
           matrix_name: RH_SOLO_TRIPS
-        description: Total simulated solo ridehail trip volume between zone pairs.
+        description: >-
+          3D multi-period OD skim tensor [time_period, origin_zone, destination_zone]
+          of total simulated solo ridehail trip volume between zone pairs.
       ridehail_pooled_trips:
-        range: float
-        minimum_value: 0.0
+        range: NonNegativeFloat
+        array:
+          dimensions:
+            - alias: time_period
+            - alias: origin_zone
+            - alias: destination_zone
         annotations:
           matrix_name: RH_POOLED_TRIPS
-        description: Total simulated pooled ridehail trip volume between zone pairs.
+        description: >-
+          3D multi-period OD skim tensor [time_period, origin_zone, destination_zone]
+          of total simulated pooled ridehail trip volume between zone pairs.
 
   BeamODSkimsRecord:
     description: >-
-      Direct router origin-destination record schema emitted by BEAM router
-      (e.g. skimsActivitySimOD_current.csv.gz) prior to multi-dimensional
-      matrix aggregation into Open Matrix (.omx) or Zarr.
+      Secondary intermediate router origin-destination CSV record schema emitted by
+      the BEAM router (e.g. skimsActivitySimOD_current.csv.gz) prior to multi-dimensional
+      matrix aggregation into the default BeamNetworkSkims (.omx / .zarr) array container.
     aliases:
       - BeamActivitySimODSkimsRecord
     annotations:
       owner: BEAM
       table_name: skimsActivitySimOD_current
       model_association: BEAM
+      default_skim_representation: false
       schema_status: authoritative
       status: active
       enforcement_status: PILATES-observed
