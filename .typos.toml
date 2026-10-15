@@ -1,2 +1,8 @@
+[files]
+extend-exclude = [
+    "examples/ledger/austin_multiyear/consist_runs/**",
+]
+
 [default.extend-words]
 shapshot = "shapshot"
+ba = "ba"

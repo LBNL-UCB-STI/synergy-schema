@@ -1,13 +1,15 @@
 # Model contract review
 
-Use these pages to review one model's native record shapes without first
-navigating the shared handoff, mapping, or workflow material. Each class link
-opens the generated LinkML reference, including its field table, annotations,
-relationships, and direct source declaration.
+These pages let a model team review how Synergy describes their tables,
+without wading through the handoff, mapping, or workflow material first. Each
+class link opens the generated reference page, with its fields, notes,
+relationships, and source definition.
 
-The pages distinguish established current-workflow record sets from provisional
-observed model contracts. A provisional contract is reviewable, but it
-does not establish a shared release, mapping, or cross-model handoff.
+Each page separates two kinds of records. **Established** records are the ones
+the current workflow already uses. **Provisional** records were sketched from
+example files and still need the model team to confirm them. Provisional
+records can be reviewed, but they don't yet count as a shared release, a
+mapping, or a handoff between models.
 
 | Model | Established records | Provisional observed rows |
 | --- | --- | --- |
@@ -17,8 +19,9 @@ does not establish a shared release, mapping, or cross-model handoff.
 | [POLARIS](polaris.md) | Translated household, person, and vehicle records | Selected demand-database population tables |
 | [DEMOS](demos.md) | None currently | Mapped household and person CSV exports |
 
-For review, first confirm whether the listed table, export, or configuration
-item and its direction are correct. Then amend field descriptions, types, requiredness, identities,
-vocabularies, and codebook references as supported by the producer. Keep
-cross-model mappings and workflow-specific behavior outside the model page
-until their owners approve them.
+When reviewing, first check that each listed table, export, or setting is
+real and points the right way (input versus output). Then correct field
+descriptions, types, required fields, IDs, allowed values, and codebook
+references based on what the model actually produces. Leave cross-model
+mappings and workflow-specific behavior off the model page until their owners
+approve them.

@@ -1,17 +1,17 @@
 # Scenario compatibility
 
-Two models can participate in the same scenario without representing every
-assumption in the same way. Compatibility records make the difference between
-a supported assumption, a visible gap, an intentional override, and a true
-conflict explicit.
+Two models can take part in the same scenario without handling every
+assumption the same way. Compatibility records spell out whether each
+assumption is supported, missing, deliberately overridden, or in real
+conflict.
 
 | Situation | Recorded decision | Consequence |
 | --- | --- | --- |
-| No conflict | `compatible` | The native setting represents the shared assumption. |
-| Gap | `compatible_with_gaps` with the unsupported assumption named | The model remains in the exchange, and the missing coverage stays visible. |
-| Override | An intentional native value and rationale | The completed check is rejected until the difference is resolved or accepted under the study's rules. |
-| Conflict | Incompatible authoritative declarations | The completed check is rejected and the scenario must be reconciled. |
+| No conflict | `compatible` | The model setting represents the shared assumption. |
+| Gap | `compatible_with_gaps`, naming the unsupported assumption | The model stays in the exchange, and the missing piece stays visible. |
+| Override | A deliberate model value, with a reason | The final check fails until the difference is fixed or accepted under the study's rules. |
+| Conflict | Authoritative declarations that disagree | The final check fails and the scenario has to be reconciled. |
 
-A gap is not silently upgraded to agreement, and an override is not mislabeled
-as compatibility. This makes the shared-universe claim precise without
-requiring all participating models to have identical capabilities.
+A gap never quietly turns into agreement, and an override is never labeled as
+compatible. That keeps the "same shared universe" claim honest without
+requiring every model to support every assumption.

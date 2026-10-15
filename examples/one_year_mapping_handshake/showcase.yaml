@@ -1,7 +1,4 @@
 scenario_definition: scenario-definition.yaml
 model_bindings: model-bindings.yaml
-trajectory: trajectory.yaml
-population_bundle: pilates-trajectory-bundle.yaml
-polaris_bundle: polaris-translation-bundle.yaml
 mapping_release: mapping-release/revision-1
 catalog_root: catalogs

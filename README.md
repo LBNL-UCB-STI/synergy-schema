@@ -35,19 +35,24 @@ the same definition into several places.
 
 ## Current status
 
-The root schema covers the current PILATES population handoff, partial
-UrbanSim, ActivitySim, and POLARIS identity/join records, and mappings for the
-observed PILATES population path. It also includes a staged-assembly slice for
-immutable DEMOS and ATLAS contributions to one partial population snapshot.
-The repository does not claim complete native-table coverage, runtime
-validation, model-owner approval, or production artifact integrity.
+The main schema and tooling cover:
 
-### Provisional model contracts
+- the multi-year population ledger (`schema/core/population_ledger.yaml`) and
+  conformance / pipeline orchestration (`synergy_schema.ledger`,
+  `synergy_schema.pipeline`, `synergy_schema.conformance`);
+- the Deliverable #1 static single-year cross-model schema
+  ([`deliverable_1_static_schema.yaml`](src/synergy_schema/schema/deliverable_1_static_schema.yaml))
+  spanning UrbanSim, DEMOS, ATLAS, POLARIS, ActivitySim, BEAM, SynthFirm, and
+  OMX network skims;
+- the PILATES population handoff after ATLAS; and
+- cross-model mappings, translation contracts, and provenance receipts.
+
+### Provisional and static model contracts
 
 [`observed_examples.yaml`](src/synergy_schema/schema/observed_examples.yaml)
-separately describes provisional DEMOS, ATLAS, and POLARIS row shapes from
-local examples. It is outside `synergy_schema.yaml` because those examples do
-not establish a shared handoff, mapping, scenario, or trajectory.
+and [`deliverable_1_static_schema.yaml`](src/synergy_schema/schema/deliverable_1_static_schema.yaml)
+hold model table descriptions and single-year handoff contracts across DEMOS,
+ATLAS, POLARIS, UrbanSim, ActivitySim, BEAM, SynthFirm, and OMX network skims.
 
 ## Getting started
 
@@ -76,12 +81,18 @@ Preview the generated schema documentation:
 scripts/preview-schema-docs
 ```
 
-The command regenerates the ignored `docs/schema/` directory, including a
-separate observed-example reference, and starts a Zensical development server
-at <http://127.0.0.1:8000/>. To generate the reference and verify a static
-site build without starting a server, run `scripts/preview-schema-docs build`.
-Set `ZENSICAL_DEV_ADDR`, for example to `127.0.0.1:8001`, when the default
-preview port is already in use.
+The command regenerates the ignored `docs/schema/` directory, including
+Deliverable #1 UML and ER diagrams and the observed-example reference, and
+starts a Zensical development server at <http://127.0.0.1:8000/>. To generate
+the reference and verify a static site build without starting a server, run
+`scripts/preview-schema-docs build`. Set `ZENSICAL_DEV_ADDR`, for example to
+`127.0.0.1:8001`, when the default preview port is already in use.
+
+Export the standalone Deliverable #1 static schema package:
+
+```sh
+uv run python scripts/export_deliverable1.py
+```
 
 Build the Python package and confirm that it includes the root schema:
 
@@ -90,16 +101,15 @@ uv build
 unzip -l dist/synergy_schema-*.whl | rg 'synergy_schema/schema/synergy_schema.yaml'
 ```
 
-## See a complete synthetic handoff
+## Examples
 
-The [post-ATLAS population bundle example](examples/post_atlas_population_bundle/)
-walks through native ATLAS rows, their snapshot-scoped population state, and
-the PILATES bundle that composes the three corresponding artifacts.
-
-For a staged rather than complete handoff, see the
-[core-population assembly example](examples/core_population_assembly/). It
-shows separate DEMOS and ATLAS contributions, explicit column authority, and
-the command that validates their shared snapshot.
+- [`examples/ledger/`](examples/ledger/) demonstrates multi-year population
+  ledger runs across DEMOS, ATLAS, and POLARIS.
+- [`examples/one_year_mapping_handshake/`](examples/one_year_mapping_handshake/)
+  walks through a one-year cross-model mapping handshake, review tables, and
+  conformance checks.
+- [`examples/day_zero_exchange/`](examples/day_zero_exchange/) illustrates a
+  lightweight day-zero manifest for existing file exchanges.
 
 ## Contributing a schema
 

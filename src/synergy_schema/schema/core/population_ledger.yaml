@@ -1,0 +1,226 @@
+id: https://w3id.org/LBNL-UCB-STI/synergy-schema/population-ledger
+name: population_ledger
+title: Population ledger
+description: >-
+  A versioned record of one population as several models edit it in turn,
+  modeled on git. A PopulationSnapshot is a commit: it names the model step
+  that produced it, the snapshot(s) it was built from, and the full core
+  population state afterward. A CoreState is the commit's tree: a map from
+  each core facet to a content digest. A PopulationCheckpoint is a tag
+  naming the snapshot that counts as a given year's population. Models
+  never read or write core tables directly; they read and write model-owned
+  views, and Synergy mappings derive core facets from those views.
+
+prefixes:
+  synergy_schema: https://w3id.org/LBNL-UCB-STI/synergy-schema/
+  linkml: https://w3id.org/linkml/
+
+default_prefix: synergy_schema
+default_range: string
+
+imports:
+  - linkml:types
+  - core_tables
+  - facet_mappings
+  - handoff_bundle
+  - scenario_definition
+
+classes:
+  CoreFacetEntry:
+    description: >-
+      One established core facet within a CoreState (a git tree entry). A
+      facet absent from a CoreState has not been established yet; a facet
+      established as empty is present, with the digest of the empty
+      canonical table. How the content was produced is recorded on the step
+      that produced it, not here.
+    attributes:
+      facet:
+        range: CoreFacet
+        required: true
+        description: Core facet described by this entry.
+      digest:
+        range: FacetContentDigest
+        required: true
+        description: Content identity of the facet.
+      stored_object:
+        range: PhysicalArtifactReference
+        inlined: true
+        description: >-
+          Optional materialized core table: its byte identity and, optionally,
+          a locator. Lets a consumer start from the stored table instead of
+          replaying a chain of delta derivations.
+
+  CoreState:
+    description: >-
+      The whole core population at one point (the git tree). Its state_digest
+      depends only on the facet digests, so identical populations share a
+      state digest across steps, years, and scenarios.
+    annotations:
+      conformance_requirements: >-
+        Each facet appears at most once; state_digest must be recomputable
+        from the facet entries.
+    attributes:
+      state_digest:
+        range: StateDigest
+        required: true
+        description: Content identity of the full set of facet digests.
+      facets:
+        range: CoreFacetEntry
+        multivalued: true
+        inlined_as_list: true
+        description: Established core facets; absent facets are not yet established.
+
+  ModelStep:
+    description: >-
+      One model run within a snapshot: the views it read and wrote, the core
+      facets its inputs depended on, and the core facets it produced. The
+      derivations are the step's write set. When a model changes the same
+      facet through several views in a fixed order (for example marriages,
+      then moves), record each as its own step and snapshot so the order is
+      explicit and each intermediate state has a digest.
+    attributes:
+      model:
+        required: true
+        description: Model that ran this step and owns its views.
+      producing_run:
+        range: ProducingRunReference
+        required: true
+        inlined: true
+        description: Provenance reference for the run, such as a Consist run.
+      input_views:
+        range: ModelView
+        multivalued: true
+        inlined_as_list: true
+        description: Views the model read.
+      output_views:
+        range: ModelView
+        multivalued: true
+        inlined_as_list: true
+        description: Views the model wrote.
+      reads:
+        range: CoreFacet
+        multivalued: true
+        description: Core facets the step's inputs depended on.
+      derivations:
+        range: FacetDerivation
+        multivalued: true
+        inlined_as_list: true
+        description: >-
+          Core facets this step produced. A derivation may reproduce a facet's
+          existing content; every facet whose digest changed must have one.
+
+  PopulationSnapshot:
+    description: >-
+      One commit in the population ledger: the step that ran, the snapshot(s)
+      it was built from, and the full core state afterward. A step that
+      changes no core facet still produces a snapshot whose core state equals
+      its parent's. Order comes from parent links, not from a stored number.
+    annotations:
+      conformance_requirements: >-
+        Every facet whose digest differs from the parent state must have a
+        derivation in step. Every input view's prepared_from_state must equal
+        a parent's state_digest. Every facet in step.reads must be established
+        in the parent state. Joined parents must not change the same facet
+        since their latest common ancestor.
+    attributes:
+      snapshot_id:
+        identifier: true
+        required: true
+        description: Stable identifier for this snapshot.
+      parent_snapshots:
+        range: PopulationSnapshot
+        multivalued: true
+        inlined: false
+        description: >-
+          Snapshots this one was built from. Empty for the first snapshot in a
+          ledger; usually one; more than one only when independent steps are
+          joined.
+      simulation_year:
+        range: integer
+        required: true
+        description: Simulation year the step belongs to.
+      equilibrium_iteration:
+        range: integer
+        description: >-
+          Optional iteration number for feedback loops, which are recorded as a
+          sequence of snapshots rather than a cycle.
+      step:
+        range: ModelStep
+        required: true
+        inlined: true
+        description: Model step that produced this snapshot.
+      core_state:
+        range: CoreState
+        required: true
+        inlined: true
+        description: Full core population after the step.
+
+  PopulationCheckpoint:
+    description: >-
+      Named pointer to the snapshot that counts as the population for one
+      simulation year (a git tag). Trajectories keep one entry per year by
+      pointing at checkpoints; within-year snapshots sit underneath.
+    annotations:
+      conformance_requirements: >-
+        Every facet in the checkpoint's state whose latest derivation used a
+        mapping with input_facets must have a stored_object, so rebuilding a
+        checkpoint never replays derivations across years.
+    attributes:
+      simulation_year:
+        range: integer
+        required: true
+        description: Simulation year this checkpoint represents.
+      snapshot:
+        range: PopulationSnapshot
+        inlined: false
+        required: true
+        description: Snapshot designated as that year's population.
+
+  PopulationLedger:
+    description: >-
+      All snapshots and checkpoints for one scenario definition and one
+      stochastic realization (a branch).
+    tree_root: true
+    annotations:
+      conformance_requirements: >-
+        Parent links must form a directed acyclic graph within the ledger;
+        checkpoint years must be unique and strictly increasing; each
+        checkpoint's snapshot must carry the same simulation_year.
+    attributes:
+      ledger_id:
+        identifier: true
+        required: true
+        description: Stable identifier for this ledger.
+      scenario_definition_ref:
+        range: ScenarioDefinitionReference
+        required: true
+        inlined: true
+        description: Scenario definition shared by every snapshot in the ledger.
+      stochastic_realization_id:
+        required: true
+        description: Stochastic realization shared by every snapshot in the ledger.
+      facet_digest_form:
+        required: true
+        pattern: "^core_facet_table/v[0-9]+$"
+        description: Normalization rules behind every FacetContentDigest, such as core_facet_table/v1.
+      state_digest_form:
+        required: true
+        pattern: "^core_state/v[0-9]+$"
+        description: Rules behind every StateDigest, such as core_state/v1.
+      mapping_catalog:
+        range: CoreFacetMappingCatalog
+        inlined: false
+        required: true
+        description: ID of the mapping catalog whose mappings derivations cite.
+      snapshots:
+        range: PopulationSnapshot
+        multivalued: true
+        required: true
+        minimum_cardinality: 1
+        inlined_as_list: true
+        description: Snapshots in the ledger, parents before children.
+      checkpoints:
+        range: PopulationCheckpoint
+        multivalued: true
+        inlined_as_list: true
+        description: Year-end checkpoints in year order.

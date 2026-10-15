@@ -1,11 +1,11 @@
 # Mapping at a glance
 
 The generated [one-page review summary](../schema/contract-at-a-glance.md)
-collects the source and target owners, original mapping source, mapping-content
-digest, implementation identity, field coverage, known losses, and review
-state.
+puts the key facts about a mapping in one place: who owns each side, where the
+original mapping came from, the mapping's fingerprint, which code implements
+it, which fields are covered, what gets lost, and where the review stands.
 
-This page exists because review quality drops when the important decisions are
-scattered across YAML, SQL, and meeting notes. It is a generated summary
-from the structured records, not a second source of truth. The documentation
-build copies the summary from the synthetic one-year example.
+Reviews get worse when the important decisions are scattered across YAML, SQL,
+and meeting notes. This page is generated from the structured records, so it
+is a summary, not a second source of truth. The docs build copies it from the
+synthetic one-year example.

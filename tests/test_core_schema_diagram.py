@@ -11,60 +11,65 @@ def test_core_schema_uml_contains_every_core_class_and_key_relationships() -> No
     rendered = render_core_schema_uml(CORE)
 
     expected_classes = {
+        # scenario_definition
         "ScenarioDefinitionReference",
         "ScenarioAssumption",
         "ScenarioDefinition",
         "ScenarioAssumptionBinding",
         "ModelScenarioBinding",
+        # core_tables
+        "CoreHousehold",
+        "CorePerson",
+        "CoreHouseholdMembership",
+        "CoreVehicle",
+        "CoreHouseholdLocation",
+        "CorePersonDemographics",
+        "CoreHouseholdDwelling",
+        "CorePersonSchooling",
+        "CorePersonEmployment",
+        "CoreHouseholdIncome",
+        # facet_mappings
+        "ModelView",
+        "CoreFacetMapping",
+        "CoreFieldFromView",
+        "FacetDerivation",
+        "CoreFacetMappingCatalog",
+        # population_ledger
+        "CoreFacetEntry",
+        "CoreState",
+        "ModelStep",
         "PopulationSnapshot",
-        "HouseholdState",
-        "PersonState",
-        "HouseholdMembership",
-        "VehicleState",
-        "HouseholdVehicleAssignment",
-        "SkippedPopulationYear",
-        "PopulationTrajectory",
+        "PopulationCheckpoint",
+        "PopulationLedger",
+        # handoff_bundle
         "ProducingRunReference",
         "ImmutableArtifactIdentity",
         "PhysicalArtifactReference",
         "SchemaContractReference",
         "HandoffBundleMember",
         "HandoffBundle",
+        # native_contract
         "NativeContractCatalogReference",
         "NativeContractElementReference",
     }
     for class_name in expected_classes:
         assert f"class {class_name}" in rendered
-    assert rendered.count("classDiagram") == 7
-    assert rendered.count("```mermaid") == 8
     assert "flowchart LR" in rendered
     for heading in (
         "## Scenario definitions and bindings",
-        "## Population snapshots and relationships",
-        "## Population trajectories",
+        "## Core entity tables",
+        "## Facet mappings and derivations",
+        "## Population ledger and state snapshots",
         "## Handoff and artifact references",
         "## References into model-owned interfaces",
     ):
         assert heading in rendered
-    assert "PopulationTrajectory" in rendered and "PopulationSnapshot" in rendered
-    assert "HouseholdMembership" in rendered and "PersonState" in rendered
-    assert "HouseholdMembership" in rendered and "HouseholdState" in rendered
-    assert "HandoffBundle" in rendered and "HandoffBundleMember" in rendered
-    assert (
-        "ModelScenarioBinding" in rendered and "ScenarioDefinitionReference" in rendered
-    )
-    assert "document nesting, not team ownership" in rendered
-    assert "Catalog → element → binding" in rendered
-    assert "does not copy the model's runtime schema" in rendered
-    assert "ScenarioAssumptionBinding --> NativeContractElementReference" in rendered
-    assert "### Population relationship overview" in rendered
-    assert "HouseholdMembership --> PersonState : person_state_ref" in rendered
-    assert "HouseholdMembership --> HouseholdState : household_state_ref" in rendered
-    assert "HouseholdVehicleAssignment --> VehicleState : vehicle_state_ref" in rendered
-    assert (
-        "HouseholdVehicleAssignment --> HouseholdState : household_state_ref"
-        in rendered
-    )
+
+    assert "CoreHouseholdMembership --> CorePerson : person_id" in rendered
+    assert "CoreHouseholdMembership --> CoreHousehold : household_id" in rendered
+    assert "CoreVehicle --> CoreHousehold : household_id" in rendered
+    assert "PopulationLedger *-- PopulationCheckpoint : checkpoints" in rendered
+    assert "PopulationSnapshot *-- CoreState : state" in rendered
 
 
 def test_core_schema_uml_is_deterministic() -> None:

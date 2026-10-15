@@ -1,0 +1,72 @@
+catalog_id: atlas-demos-native-contract
+catalog_kind: atlas-demos
+revision: 3877652b77990949c0b4cbbc982899b280a2ba38
+upstream:
+  revision: 3877652b77990949c0b4cbbc982899b280a2ba38
+  source_paths:
+    - docs-internal/DEMOS_and_ATLAS_to_POLARIS_interface.xlsx
+elements:
+  - kind: sql_column
+    path: atlas_households.HOUSEID
+  - kind: sql_column
+    path: atlas_households.county_fips
+  - kind: sql_column
+    path: atlas_households.nvehicles
+  - kind: sql_column
+    path: atlas_households.tractid
+  - kind: sql_column
+    path: atlas_vehicles.HOUSEID
+  - kind: sql_column
+    path: atlas_vehicles.VEHID
+  - kind: sql_column
+    path: atlas_vehicles.annual_mileage
+  - kind: sql_column
+    path: atlas_vehicles.bodytype
+  - kind: sql_column
+    path: atlas_vehicles.modelyear
+  - kind: sql_column
+    path: atlas_vehicles.pred_power
+  - kind: sql_column
+    path: atlas_vehicles.vintage_category
+  - kind: sql_column
+    path: demos_households.age_of_head
+  - kind: sql_column
+    path: demos_households.block_id
+  - kind: sql_column
+    path: demos_households.household
+  - kind: sql_column
+    path: demos_households.income
+  - kind: sql_column
+    path: demos_households.is_reorg_household
+  - kind: sql_column
+    path: demos_households.lcm_county_id
+  - kind: sql_column
+    path: demos_households.persons
+  - kind: sql_column
+    path: demos_households.race_of_head
+  - kind: sql_column
+    path: demos_households.workers
+  - kind: sql_column
+    path: demos_persons.age
+  - kind: sql_column
+    path: demos_persons.education
+  - kind: sql_column
+    path: demos_persons.employment
+  - kind: sql_column
+    path: demos_persons.gender
+  - kind: sql_column
+    path: demos_persons.household
+  - kind: sql_column
+    path: demos_persons.id
+  - kind: sql_column
+    path: demos_persons.income
+  - kind: sql_column
+    path: demos_persons.marital_status
+  - kind: sql_column
+    path: demos_persons.person
+  - kind: sql_column
+    path: demos_persons.relp
+  - kind: sql_column
+    path: demos_persons.school_enrollment
+digest_algorithm: sha256
+content_digest: 0596ff12bc2cc8e691fa684dba237d86058be3d116812220942b1c3a89c6db0a

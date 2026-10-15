@@ -77,3 +77,189 @@
   background: var(--md-default-bg-color, #ffffff);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
 }
+
+/*
+ * Berkeley Lab (LBNL) Visual Identity - Light Touch Theme Customizations
+ * Reference: https://creative.lbl.gov/visual-identity/
+ *
+ * Primary Palette:
+ *   Dark Blue:  #00313C (PMS 547)
+ *   Teal:       #007681 (PMS 7474)
+ *   Light Gray: #B1B3B3 (PMS Cool Gray 5)
+ *   Dark Gray:  #63666A (PMS Cool Gray 10)
+ *
+ * Secondary Palette Accents:
+ *   Blue:       #4298B5 (PMS 7459)
+ *   Orange:     #D57800 (PMS 1385)
+ *   Green:      #74AA50 (PMS 7489)
+ *   Red:        #E04E39 (PMS 7417)
+ */
+
+:root {
+  /* Berkeley Lab Primary Palette */
+  --lbl-dark-blue: #00313c;
+  --lbl-teal: #007681;
+  --lbl-light-gray: #b1b3b3;
+  --lbl-dark-gray: #63666a;
+
+  /* Berkeley Lab Secondary / Accent Palette */
+  --lbl-blue: #4298b5;
+  --lbl-orange: #d57800;
+  --lbl-green: #74aa50;
+  --lbl-red: #e04e39;
+
+  /* Material / Zensical Theme Color Overrides (Light Mode) */
+  --md-primary-fg-color: #00313c;
+  --md-primary-fg-color--light: #004d5e;
+  --md-primary-fg-color--dark: #00222a;
+  --md-primary-bg-color: #ffffff;
+  --md-primary-bg-color--light: #ffffffb3;
+
+  --md-accent-fg-color: #007681;
+  --md-accent-fg-color--transparent: #0076811a;
+  --md-accent-bg-color: #ffffff;
+  --md-accent-bg-color--light: #ffffffb3;
+
+  /* Content Links */
+  --md-typeset-a-color: #007681;
+}
+
+/* Dark mode palette adjustments */
+[data-md-color-scheme="slate"] {
+  --md-primary-fg-color: #00313c;
+  --md-primary-fg-color--light: #004d5e;
+  --md-primary-fg-color--dark: #00222a;
+
+  --md-accent-fg-color: #4298b5;
+  --md-accent-fg-color--transparent: #4298b51a;
+
+  /* High-contrast accessible link color for dark background */
+  --md-typeset-a-color: #4298b5;
+}
+
+/* Header bar styling */
+.md-header {
+  background-color: var(--lbl-dark-blue);
+  color: #ffffff;
+}
+
+/* Header text and titles */
+.md-header__title,
+.md-header__topic,
+.md-header__ellipsis {
+  color: #ffffff;
+}
+
+/* Header buttons and icons */
+.md-header__button {
+  color: #ffffff;
+}
+
+.md-header__button svg {
+  color: #ffffff;
+  stroke: #ffffff;
+}
+
+.md-header__button.md-logo svg {
+  color: #ffffff;
+  stroke: #ffffff;
+}
+
+.md-header__button:hover {
+  opacity: 0.85;
+}
+
+.md-header__source {
+  color: #ffffff;
+}
+
+/* Header search bar button */
+.md-search__button {
+  background-color: rgba(255, 255, 255, 0.15);
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+}
+
+.md-search__button:hover,
+.md-search__button:focus {
+  background-color: rgba(255, 255, 255, 0.25);
+  color: #ffffff;
+  border-color: rgba(255, 255, 255, 0.4);
+}
+
+.md-search__button:before {
+  background-color: #ffffff;
+}
+
+.md-search__button:after {
+  background-color: rgba(255, 255, 255, 0.2);
+  color: #ffffff;
+}
+
+/* Nav tabs / Header shadow */
+.md-tabs {
+  background-color: var(--lbl-dark-blue);
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.md-tabs__link {
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.md-tabs__link:hover,
+.md-tabs__item--active .md-tabs__link {
+  color: #ffffff;
+}
+
+/* Links hover transition */
+.md-typeset a {
+  transition: color 125ms;
+}
+
+.md-typeset a:hover {
+  color: var(--lbl-blue);
+}
+
+/* Blockquote & Callout styling with Berkeley Lab teal accent */
+.md-typeset blockquote {
+  border-left: 4px solid var(--lbl-teal);
+  color: inherit;
+}
+
+/* Headings font styling */
+.md-typeset h1,
+.md-typeset h2,
+.md-typeset h3 {
+  color: var(--lbl-dark-blue);
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+[data-md-color-scheme="slate"] .md-typeset h1,
+[data-md-color-scheme="slate"] .md-typeset h2,
+[data-md-color-scheme="slate"] .md-typeset h3 {
+  color: #f0f4f5;
+}
+
+/* Table header styling */
+.md-typeset table:not([class]) th {
+  font-weight: 600;
+  border-bottom: 2px solid var(--lbl-teal);
+}
+
+/* Button & interactive accent highlights */
+.md-typeset .md-button--primary {
+  background-color: var(--lbl-teal);
+  border-color: var(--lbl-teal);
+  color: #ffffff;
+}
+
+.md-typeset .md-button--primary:hover {
+  background-color: var(--lbl-blue);
+  border-color: var(--lbl-blue);
+}
+
+/* Search bar focus outline */
+.md-search__input:focus {
+  outline: 2px solid var(--lbl-blue);
+}

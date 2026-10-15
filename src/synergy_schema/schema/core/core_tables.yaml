@@ -1,0 +1,281 @@
+id: https://w3id.org/LBNL-UCB-STI/synergy-schema/core-tables
+name: core_tables
+title: Core population tables
+description: >-
+  Shared population tables and facets with an agreed meaning across models.
+  Core tables hold only keys; new shared facts become new facets, established
+  when their first writer runs.
+
+prefixes:
+  synergy_schema: https://w3id.org/LBNL-UCB-STI/synergy-schema/
+  linkml: https://w3id.org/linkml/
+
+default_prefix: synergy_schema
+default_range: string
+
+imports:
+  - linkml:types
+
+types:
+  FacetContentDigest:
+    typeof: string
+    pattern: "^sha256:[0-9a-f]{64}$"
+    description: >-
+      Identity of one core facet's content: the rows of its core table class,
+      normalized under the ledger's facet_digest_form and then hashed. It is
+      not a hash of file bytes, so the same rows read from different models'
+      files, or rebuilt from a parent facet and a delta, give the same
+      digest. File-byte identity uses ImmutableArtifactIdentity instead.
+  StateDigest:
+    typeof: string
+    pattern: "^sha256:[0-9a-f]{64}$"
+    description: >-
+      Identity of a whole CoreState: a hash over its sorted (facet, facet
+      content digest) pairs under the ledger's state_digest_form, like a git
+      tree hash. No file is read to compute it.
+
+enums:
+  CoreFacet:
+    description: >-
+      Shared population facts that every model must agree on within one
+      state. Test for membership: two models cannot legitimately disagree
+      about it at the same moment. Other facets (buildings, firms, jobs,
+      freight) can be added later.
+    permissible_values:
+      households:
+        description: Which households exist.
+      people:
+        description: Which people exist (alive and in the population).
+      household_membership:
+        description: Which household each person belongs to.
+      vehicles:
+        description: Which vehicles exist, and which household each belongs to.
+      household_location:
+        description: Household spatial coordinates and geographic zone identifiers.
+      person_demographics:
+        description: Inherent individual demographic attributes (age, sex, race, relationship).
+      household_dwelling:
+        description: Dwelling unit characteristics, housing type, tenure, and charging.
+      person_schooling:
+        description: Educational enrollment status, attainment, and school location assignment.
+      person_employment:
+        description: Employment status, worker classification, and work location assignment.
+      household_income:
+        description: Household annual income deflated to a shared base dollar year.
+
+classes:
+  # Core tables. These are Synergy's canonical form for each facet, derived
+  # from model views; no model is expected to read or write them directly.
+  # Their attributes are exactly what core_facet_table/v1 hashes. Core tables
+  # hold only keys; a new shared fact (such as household location) becomes a
+  # new facet, established when its first writer runs, rather than a new
+  # column on an existing core table.
+  CoreHousehold:
+    description: One household in the core households facet.
+    annotations:
+      core_facet: households
+    attributes:
+      household_id:
+        identifier: true
+        required: true
+        description: Household identifier shared across models within a state.
+
+  CorePerson:
+    description: One person in the core people facet.
+    annotations:
+      core_facet: people
+    attributes:
+      person_id:
+        identifier: true
+        required: true
+        description: Person identifier shared across models within a state.
+
+  CoreHouseholdMembership:
+    description: One person's household in the core household_membership facet.
+    annotations:
+      core_facet: household_membership
+    unique_keys:
+      one_household_per_person:
+        unique_key_slots: [person_id]
+    attributes:
+      person_id:
+        range: CorePerson
+        required: true
+        description: Member person.
+      household_id:
+        range: CoreHousehold
+        required: true
+        description: Containing household.
+
+  CoreVehicle:
+    description: >-
+      One vehicle in the core vehicles facet. Provisional key: vehicle_id is
+      household-scoped in ATLAS, so a vehicle is identified by
+      (household_id, vehicle_id), which also records the vehicle's household.
+      A vehicle that changes household appears as a new vehicle until a
+      global vehicle identity is agreed; a separate assignment facet can be
+      added then.
+    annotations:
+      core_facet: vehicles
+    unique_keys:
+      household_vehicle:
+        unique_key_slots: [household_id, vehicle_id]
+    attributes:
+      household_id:
+        range: CoreHousehold
+        required: true
+        description: Household that scopes the vehicle identifier.
+      vehicle_id:
+        required: true
+        description: Vehicle identifier, unique within its household.
+      type_id:
+        range: integer
+        description: Vehicle type identifier matching POLARIS Vehicle_Type.
+
+  CoreHouseholdLocation:
+    description: Spatial coordinates and geographic zones for households.
+    annotations:
+      core_facet: household_location
+    attributes:
+      household_id:
+        range: CoreHousehold
+        identifier: true
+        required: true
+        description: Household identifier.
+      latitude:
+        range: float
+        description: Decimal latitude coordinate.
+      longitude:
+        range: float
+        description: Decimal longitude coordinate.
+      tract:
+        range: string
+        description: Census tract identifier.
+      block_group:
+        range: string
+        description: Census block group identifier.
+      taz:
+        range: integer
+        description: Traffic analysis zone identifier.
+
+  CorePersonDemographics:
+    description: Core demographic attributes for persons.
+    annotations:
+      core_facet: person_demographics
+    attributes:
+      person_id:
+        range: CorePerson
+        identifier: true
+        required: true
+        description: Person identifier.
+      age:
+        range: integer
+        required: true
+        description: Person age in integer years.
+      sex:
+        range: integer
+        description: Biological sex or gender indicator.
+      race:
+        range: integer
+        description: Race category code.
+      hispanic:
+        range: integer
+        description: Hispanic origin indicator.
+      relate:
+        range: integer
+        description: Relationship to household head code.
+
+  CoreHouseholdDwelling:
+    description: Dwelling unit characteristics and housing details for households.
+    annotations:
+      core_facet: household_dwelling
+    attributes:
+      household_id:
+        range: CoreHousehold
+        identifier: true
+        required: true
+        description: Household identifier.
+      housing_unit_type:
+        range: integer
+        required: true
+        description: Housing unit type code (single family, apartment, etc.).
+      tenure:
+        range: integer
+        description: Homeownership tenure (own vs rent).
+      has_residential_charging:
+        range: integer
+        description: Dedicated residential EV charging availability indicator.
+      time_in_home:
+        range: float
+        description: Longitudinal residence duration in years in current home.
+
+  CorePersonSchooling:
+    description: Educational enrollment and school location for persons.
+    annotations:
+      core_facet: person_schooling
+    attributes:
+      person_id:
+        range: CorePerson
+        identifier: true
+        required: true
+        description: Person identifier.
+      school_status:
+        range: integer
+        description: School attendance or student status indicator.
+      school_location_id:
+        range: integer
+        description: Assigned school location identifier (-1 if not attending).
+      education_level:
+        range: integer
+        description: Highest educational attainment level code.
+      school_grade_level:
+        range: integer
+        description: "School grade level code (crosswalk X-P3: 0..16)."
+
+  CorePersonEmployment:
+    description: Employment, labor force status, and work location for persons.
+    annotations:
+      core_facet: person_employment
+    attributes:
+      person_id:
+        range: CorePerson
+        identifier: true
+        required: true
+        description: Person identifier.
+      employment_status:
+        range: integer
+        required: true
+        description: Employment / labor force status code.
+      worker_type:
+        range: integer
+        description: Worker category or industry code.
+      industry:
+        range: integer
+        description: Employment industry code (ACS INDP).
+      work_location_id:
+        range: integer
+        description: Assigned work location identifier (-1 if not working or unassigned).
+      hours_worked:
+        range: integer
+        description: Weekly work hours.
+      commute_mode:
+        range: integer
+        description: Primary commute travel mode.
+      income:
+        range: integer
+        description: Person annual earnings or income in integer dollars.
+
+  CoreHouseholdIncome:
+    description: Annual income for households in fixed base-year dollars.
+    annotations:
+      core_facet: household_income
+    attributes:
+      household_id:
+        range: CoreHousehold
+        identifier: true
+        required: true
+        description: Household identifier.
+      income:
+        range: integer
+        required: true
+        description: Household annual income in integer dollars (deflated).

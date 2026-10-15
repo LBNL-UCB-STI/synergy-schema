@@ -1,0 +1,161 @@
+{
+  "run": {
+    "id": "_run_demos_2025_6c47fe0c",
+    "parent_run_id": "_run_urbansim_24306f8b",
+    "status": "completed",
+    "model_name": "_run_demos_2025",
+    "description": null,
+    "year": null,
+    "iteration": null,
+    "stage": null,
+    "phase": null,
+    "tags": [],
+    "config_hash": "b4002922ae4120b2043cc50009df8673ff036df3106eb100187b289e1c441d97",
+    "git_hash": "8b14947614623d6dd93e5a75e1a09ffac5a909b1-dirty-1531061f2614",
+    "meta": {
+      "code_identity": "repo_git",
+      "_physical_run_dir": "/Users/zaneedell/git/synergy-schema/examples/ledger/austin_multiyear/consist_runs",
+      "cache_epoch": 1,
+      "mounts": {},
+      "cache_miss_explanation": {
+        "status": "miss",
+        "reason": "no_similar_prior_run",
+        "candidate_run_id": null,
+        "matched_components": [],
+        "mismatched_components": [],
+        "details": {},
+        "confidence": "low"
+      }
+    },
+    "started_at": "2026-10-07T19:19:16.554647Z",
+    "created_at": "2026-10-07T19:19:16.554647Z",
+    "input_hash": "78ff4bf90058f4c3a48907808b3f175adea59dc116b5ef31ad22806ddc396244",
+    "signature": "93c27650e65a6ae2e36cabce9dc5e4d02c0fdcd17d5c0a0e0a83819ed56b598b",
+    "ended_at": "2026-10-07T19:19:16.715532Z",
+    "updated_at": "2026-10-07T19:19:16.715532Z"
+  },
+  "inputs": [
+    {
+      "id": "c61138fb-5fc6-47bf-8e46-9caae8e596f5",
+      "key": "households",
+      "container_uri": "/Users/zaneedell/git/synergy-schema/examples/ledger/austin_multiyear/urbansim/2025/households.parquet",
+      "table_path": null,
+      "array_path": null,
+      "driver": "parquet",
+      "hash": "e241777a9512faeebc90054ab46985fe2df661f394f293c6b704f852a5ee71a2",
+      "content_id": "95ff63d7-7329-4897-9aaa-e50703ccc821",
+      "parent_artifact_id": null,
+      "run_id": "_run_urbansim_24306f8b",
+      "meta": {
+        "hash_semantics": {
+          "version": 1,
+          "algorithm": "sha256",
+          "kind": "file",
+          "digest_contract": "raw_file_bytes",
+          "source": "computed_full"
+        },
+        "tags": []
+      },
+      "created_at": "2026-10-07T19:19:16.361532Z"
+    },
+    {
+      "id": "187a64f5-f7ce-4ca9-b257-07f47e5744be",
+      "key": "persons",
+      "container_uri": "/Users/zaneedell/git/synergy-schema/examples/ledger/austin_multiyear/urbansim/2025/persons.parquet",
+      "table_path": null,
+      "array_path": null,
+      "driver": "parquet",
+      "hash": "b115faf6dc8ac8ff5cbdae4080fb89a9bfa0e37dccdb798502fba3ef2021c9dc",
+      "content_id": "29945911-c244-416f-9915-851792871e00",
+      "parent_artifact_id": null,
+      "run_id": "_run_urbansim_24306f8b",
+      "meta": {
+        "hash_semantics": {
+          "version": 1,
+          "algorithm": "sha256",
+          "kind": "file",
+          "digest_contract": "raw_file_bytes",
+          "source": "computed_full"
+        },
+        "tags": []
+      },
+      "created_at": "2026-10-07T19:19:16.361871Z"
+    }
+  ],
+  "outputs": [
+    {
+      "key": "households_output",
+      "container_uri": "/Users/zaneedell/git/synergy-schema/examples/ledger/austin_multiyear/demos/2025/output/households.parquet",
+      "table_path": null,
+      "array_path": null,
+      "driver": "parquet",
+      "hash": "f034ccdeaf44d915822a06874aeef2cb85e8ac2ce64b1b74c6fa5534700b2ddf",
+      "parent_artifact_id": null,
+      "run_id": "_run_demos_2025_6c47fe0c",
+      "meta": {
+        "hash_semantics": {
+          "version": 1,
+          "algorithm": "sha256",
+          "kind": "file",
+          "digest_contract": "raw_file_bytes",
+          "source": "computed_full"
+        },
+        "tags": []
+      },
+      "id": "37c0dfab-54b6-445c-85fc-d263af4dfefd",
+      "content_id": "e06708d1-8cda-40c1-86cc-232a4625a955",
+      "created_at": "2026-10-07T19:19:16.636844Z"
+    },
+    {
+      "key": "persons_output",
+      "container_uri": "/Users/zaneedell/git/synergy-schema/examples/ledger/austin_multiyear/demos/2025/output/persons.parquet",
+      "table_path": null,
+      "array_path": null,
+      "driver": "parquet",
+      "hash": "452058887dd773151401f7728a0357593cee74d13434e061ad322951137de623",
+      "parent_artifact_id": null,
+      "run_id": "_run_demos_2025_6c47fe0c",
+      "meta": {
+        "hash_semantics": {
+          "version": 1,
+          "algorithm": "sha256",
+          "kind": "file",
+          "digest_contract": "raw_file_bytes",
+          "source": "computed_full"
+        },
+        "tags": []
+      },
+      "id": "5a0f3047-7e06-46b7-8913-db622d870929",
+      "content_id": "6c489232-b2e3-42a1-bc2a-6940a40fe27e",
+      "created_at": "2026-10-07T19:19:16.656070Z"
+    },
+    {
+      "key": "deaths_output",
+      "container_uri": "/Users/zaneedell/git/synergy-schema/examples/ledger/austin_multiyear/demos/2025/output/deaths.parquet",
+      "table_path": null,
+      "array_path": null,
+      "driver": "parquet",
+      "hash": "1fc6a56883c9b993142eca5079cced235b8230175c407a9549ecc64cb5b32c82",
+      "parent_artifact_id": null,
+      "run_id": "_run_demos_2025_6c47fe0c",
+      "meta": {
+        "hash_semantics": {
+          "version": 1,
+          "algorithm": "sha256",
+          "kind": "file",
+          "digest_contract": "raw_file_bytes",
+          "source": "computed_full"
+        },
+        "tags": []
+      },
+      "id": "400dc1a7-1e03-4cfb-a424-5f5838c72d9f",
+      "content_id": "651d4a1f-e64e-4983-88b0-196f9b93db81",
+      "created_at": "2026-10-07T19:19:16.680566Z"
+    }
+  ],
+  "cached_run": null,
+  "config": {
+    "year": 2025
+  },
+  "facet": {}
+}

@@ -1,7 +1,0 @@
-rows:
-  - person_id: alex
-    age: 35
-    household_id: family-a-1
-  - person_id: new-2030
-    age: 1
-    household_id: family-a-2

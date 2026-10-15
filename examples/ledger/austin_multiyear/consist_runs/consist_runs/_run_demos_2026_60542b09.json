@@ -1,0 +1,161 @@
+{
+  "run": {
+    "id": "_run_demos_2026_60542b09",
+    "parent_run_id": "_run_demos_2025_6c47fe0c",
+    "status": "completed",
+    "model_name": "_run_demos_2026",
+    "description": null,
+    "year": null,
+    "iteration": null,
+    "stage": null,
+    "phase": null,
+    "tags": [],
+    "config_hash": "258bd8852a72f1ef652844910b2498a979fd485c89b077d9b9882196bb75dbfd",
+    "git_hash": "8b14947614623d6dd93e5a75e1a09ffac5a909b1-dirty-1531061f2614",
+    "meta": {
+      "code_identity": "repo_git",
+      "_physical_run_dir": "/Users/zaneedell/git/synergy-schema/examples/ledger/austin_multiyear/consist_runs",
+      "cache_epoch": 1,
+      "mounts": {},
+      "cache_miss_explanation": {
+        "status": "miss",
+        "reason": "no_similar_prior_run",
+        "candidate_run_id": null,
+        "matched_components": [],
+        "mismatched_components": [],
+        "details": {},
+        "confidence": "low"
+      }
+    },
+    "started_at": "2026-10-07T19:19:17.415185Z",
+    "created_at": "2026-10-07T19:19:17.415185Z",
+    "input_hash": "fef20bde7a643389f16bd120907c3a3469c73f0c49e4678ae73b471e5b5fce76",
+    "signature": "5dcc99c59ed1911cb17a48bd55c936fc0101ed425f8de3a5eb8696f1d39cfc20",
+    "ended_at": "2026-10-07T19:19:17.568460Z",
+    "updated_at": "2026-10-07T19:19:17.568460Z"
+  },
+  "inputs": [
+    {
+      "id": "37c0dfab-54b6-445c-85fc-d263af4dfefd",
+      "key": "households_output",
+      "container_uri": "/Users/zaneedell/git/synergy-schema/examples/ledger/austin_multiyear/demos/2025/output/households.parquet",
+      "table_path": null,
+      "array_path": null,
+      "driver": "parquet",
+      "hash": "f034ccdeaf44d915822a06874aeef2cb85e8ac2ce64b1b74c6fa5534700b2ddf",
+      "content_id": "e06708d1-8cda-40c1-86cc-232a4625a955",
+      "parent_artifact_id": null,
+      "run_id": "_run_demos_2025_6c47fe0c",
+      "meta": {
+        "hash_semantics": {
+          "version": 1,
+          "algorithm": "sha256",
+          "kind": "file",
+          "digest_contract": "raw_file_bytes",
+          "source": "computed_full"
+        },
+        "tags": []
+      },
+      "created_at": "2026-10-07T19:19:16.636844Z"
+    },
+    {
+      "id": "5a0f3047-7e06-46b7-8913-db622d870929",
+      "key": "persons_output",
+      "container_uri": "/Users/zaneedell/git/synergy-schema/examples/ledger/austin_multiyear/demos/2025/output/persons.parquet",
+      "table_path": null,
+      "array_path": null,
+      "driver": "parquet",
+      "hash": "452058887dd773151401f7728a0357593cee74d13434e061ad322951137de623",
+      "content_id": "6c489232-b2e3-42a1-bc2a-6940a40fe27e",
+      "parent_artifact_id": null,
+      "run_id": "_run_demos_2025_6c47fe0c",
+      "meta": {
+        "hash_semantics": {
+          "version": 1,
+          "algorithm": "sha256",
+          "kind": "file",
+          "digest_contract": "raw_file_bytes",
+          "source": "computed_full"
+        },
+        "tags": []
+      },
+      "created_at": "2026-10-07T19:19:16.656070Z"
+    }
+  ],
+  "outputs": [
+    {
+      "key": "households_output",
+      "container_uri": "/Users/zaneedell/git/synergy-schema/examples/ledger/austin_multiyear/demos/2026/output/households.parquet",
+      "table_path": null,
+      "array_path": null,
+      "driver": "parquet",
+      "hash": "f3fa0fdf162bf8ce6f002d34e91e9e446f4fa25c9522c7d906726ad428c08535",
+      "parent_artifact_id": null,
+      "run_id": "_run_demos_2026_60542b09",
+      "meta": {
+        "hash_semantics": {
+          "version": 1,
+          "algorithm": "sha256",
+          "kind": "file",
+          "digest_contract": "raw_file_bytes",
+          "source": "computed_full"
+        },
+        "tags": []
+      },
+      "id": "934d0f7b-f10e-4ee8-8cf4-e29095c0b8d2",
+      "content_id": "d4af08d4-2d89-4899-8701-731f6b28b9d7",
+      "created_at": "2026-10-07T19:19:17.487907Z"
+    },
+    {
+      "key": "persons_output",
+      "container_uri": "/Users/zaneedell/git/synergy-schema/examples/ledger/austin_multiyear/demos/2026/output/persons.parquet",
+      "table_path": null,
+      "array_path": null,
+      "driver": "parquet",
+      "hash": "7cd4352679083e4d66c2bad8cd49a2d0f1e2a3ac8afbe6e6c043986f7ad14805",
+      "parent_artifact_id": null,
+      "run_id": "_run_demos_2026_60542b09",
+      "meta": {
+        "hash_semantics": {
+          "version": 1,
+          "algorithm": "sha256",
+          "kind": "file",
+          "digest_contract": "raw_file_bytes",
+          "source": "computed_full"
+        },
+        "tags": []
+      },
+      "id": "395b9dfa-4c14-4425-8018-378b858b6bef",
+      "content_id": "9bdd1def-a42d-46f7-95ea-54d476fa7136",
+      "created_at": "2026-10-07T19:19:17.508338Z"
+    },
+    {
+      "key": "deaths_output",
+      "container_uri": "/Users/zaneedell/git/synergy-schema/examples/ledger/austin_multiyear/demos/2026/output/deaths.parquet",
+      "table_path": null,
+      "array_path": null,
+      "driver": "parquet",
+      "hash": "909a09654d46b3674e957d9c69ff433f83cc8c9658e4a28f032676c5b86d3de8",
+      "parent_artifact_id": null,
+      "run_id": "_run_demos_2026_60542b09",
+      "meta": {
+        "hash_semantics": {
+          "version": 1,
+          "algorithm": "sha256",
+          "kind": "file",
+          "digest_contract": "raw_file_bytes",
+          "source": "computed_full"
+        },
+        "tags": []
+      },
+      "id": "e95a0b3c-a69d-4032-90ce-c95c08500042",
+      "content_id": "c0880e27-8471-43b0-af40-4ea0d40da2ae",
+      "created_at": "2026-10-07T19:19:17.529384Z"
+    }
+  ],
+  "cached_run": null,
+  "config": {
+    "year": 2026
+  },
+  "facet": {}
+}

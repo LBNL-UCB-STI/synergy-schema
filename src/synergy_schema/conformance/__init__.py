@@ -1,15 +1,13 @@
 """Offline conformance checks for Synergy exchange documents."""
 
 from .cli import main
-from .assembly import (
-    canonical_population_assembly_projection,
-    population_assembly_digest,
-    validate_population_assembly,
-)
+from .ledger import LedgerConformancePlugin, validate_ledger
+from .tabular_digest import compute_state_digest, compute_tabular_digest
 
 __all__ = [
-    "canonical_population_assembly_projection",
+    "LedgerConformancePlugin",
+    "compute_state_digest",
+    "compute_tabular_digest",
     "main",
-    "population_assembly_digest",
-    "validate_population_assembly",
+    "validate_ledger",
 ]
