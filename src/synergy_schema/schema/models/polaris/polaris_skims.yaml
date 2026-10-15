@@ -55,7 +55,27 @@ classes:
         range: integer
         required: true
         minimum_value: 1
-        description: Number of Traffic Analysis Zones (TAZ) in the square matrix dimension.
+        annotations:
+          hdf5_root_attribute: SHAPE
+        description: Number of Traffic Analysis Zones (TAZ) in the square matrix dimension (HDF5 root attribute SHAPE = [N_zones, N_zones]).
+      omx_version:
+        range: string
+        ifabsent: string(0.2)
+        annotations:
+          hdf5_root_attribute: OMX_VERSION
+        description: Open Matrix HDF5 root attribute OMX_VERSION (canonical value '0.2').
+      zone_lookup:
+        range: integer
+        required: false
+        array:
+          dimensions:
+            - alias: origin_zone
+        annotations:
+          omx_path: /lookup/zone_id
+          hdf5_group: /lookup
+        description: >-
+          1D zone index lookup array [origin_zone] stored under OMX HDF5 group
+          /lookup/<name> mapping 0-based matrix row/column indices to canonical TAZ IDs.
       sov_time_am:
         range: NonNegativeFloat
         array:
@@ -126,6 +146,8 @@ classes:
       format. These 2D [origin_zone, destination_zone] matrices capture simulated
       congestion, route choices, and travel times, serving as the input impedance
       for subsequent multi-year iterations.
+    aliases:
+      - PolarisNetworkSkims
     annotations:
       model_association: POLARIS
       contract_family: network_skims
@@ -143,7 +165,27 @@ classes:
         range: integer
         required: true
         minimum_value: 1
-        description: Number of Traffic Analysis Zones (TAZ) in the square matrix dimension.
+        annotations:
+          hdf5_root_attribute: SHAPE
+        description: Number of Traffic Analysis Zones (TAZ) in the square matrix dimension (HDF5 root attribute SHAPE = [N_zones, N_zones]).
+      omx_version:
+        range: string
+        ifabsent: string(0.2)
+        annotations:
+          hdf5_root_attribute: OMX_VERSION
+        description: Open Matrix HDF5 root attribute OMX_VERSION (canonical value '0.2').
+      zone_lookup:
+        range: integer
+        required: false
+        array:
+          dimensions:
+            - alias: origin_zone
+        annotations:
+          omx_path: /lookup/zone_id
+          hdf5_group: /lookup
+        description: >-
+          1D zone index lookup array [origin_zone] stored under OMX HDF5 group
+          /lookup/<name> mapping 0-based matrix row/column indices to canonical TAZ IDs.
       iteration_count:
         range: integer
         minimum_value: 1

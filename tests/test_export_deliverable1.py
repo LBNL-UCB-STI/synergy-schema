@@ -41,6 +41,7 @@ def test_dist_contains_all_deliverable_schemas_and_files() -> None:
     assert (
         schema_dir / "models" / "activitysim" / "activitysim_population.yaml"
     ).exists()
+    assert (schema_dir / "models" / "activitysim" / "activitysim_skims.yaml").exists()
     assert (schema_dir / "models" / "beam" / "beam.yaml").exists()
     assert (schema_dir / "models" / "beam" / "beam_population.yaml").exists()
     assert (schema_dir / "models" / "beam" / "beam_plans.yaml").exists()
@@ -140,6 +141,7 @@ def test_dist_schema_resolves_cleanly() -> None:
         "CategoricalCrosswalkRule",
         "ActivitySimHouseholdInputRecord",
         "ActivitySimPersonInputRecord",
+        "ActivitySimNetworkSkims",
         "BeamHouseholdRecord",
         "BeamPersonRecord",
         "BeamVehicleRecord",

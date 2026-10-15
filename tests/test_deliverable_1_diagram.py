@@ -86,6 +86,13 @@ def test_deliverable_1_uml_contains_all_models_and_diagrams() -> None:
         "+float_3D transit_in_vehicle_time [time_period, origin_zone, destination_zone]"
         in rendered
     )
+    assert "ActivitySimNetworkSkims" in rendered
+    assert "+float_2D DIST [origin_zone, destination_zone]" in rendered
+    assert "+float_3D SOV_TIME [time_period, origin_zone, destination_zone]" in rendered
+    assert (
+        "+float_3D WLK_TRN_WLK_IVT [time_period, origin_zone, destination_zone]"
+        in rendered
+    )
 
 
 def test_deliverable_1_uml_deterministic() -> None:

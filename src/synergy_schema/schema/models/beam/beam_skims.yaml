@@ -7,11 +7,15 @@ description: >-
   (.omx / .zarr) is the default and authoritative BEAM skim representation,
   quantifying zone-to-zone (TAZ x TAZ) travel impedance across multiple time
   periods (Early AM, AM peak, Midday, PM peak, Evening) and modes (auto SOV/HOV,
-  transit, active, and ridehail/TNC) using LinkML 2D and 3D array dimensions.
-  In integrated workflows (such as PILATES or Synergy), BEAM array skims serve as
-  the transportation system feedback consumed by land use models (UrbanSim),
-  vehicle fleet allocation models (ATLAS), and activity-based travel demand
-  models (ActivitySim/POLARIS).
+  transit, active, and ridehail/TNC) using LinkML 1D, 2D, and 3D array dimensions.
+  Modeled on the canonical production MTC/ActivitySim/BEAM skims.omx HDF5 layout
+  (root attributes OMX_VERSION='0.2' and SHAPE=[N_zones, N_zones], /data 2D float64
+  OD matrices, and /lookup 1D zone index lookup tables). NOTE (PROVISIONAL): The
+  exact boundary between required core skims (DIST, DISTWALK, SOV_*, and
+  WLK_TRN_WLK_* marked required: true) and optional mode skims (DISTBIKE,
+  SOVTOLL_*, HOV2*, HOV3*, submode transit WLK_{LOC,LRF,EXP,HVY,COM}_* / DRV_*,
+  and ridehail marked required: false) is provisional and should be verified
+  against target regional model configurations.
 
 prefixes:
   synergy_schema: https://w3id.org/LBNL-UCB-STI/synergy-schema/
@@ -39,9 +43,29 @@ classes:
     description: >-
       Default and authoritative multi-modal, multi-period zone-to-zone impedance
       matrix container emitted by BEAM simulation, packaged in Open Matrix (.omx)
-      or Zarr (.zarr) array format. Contains 2D [origin_zone, destination_zone]
-      matrices for auto and non-motorized modes and 3D [time_period, origin_zone,
-      destination_zone] tensors for multi-period transit and ridehail/TNC measures.
+      or Zarr (.zarr) array format. In HDF5 .omx storage, root attributes define
+      OMX_VERSION = '0.2' and SHAPE = [N_zones, N_zones], group /lookup holds 1D
+      [origin_zone] zone index lookup tables, and group /data holds 2D float64
+      [origin_zone, destination_zone] matrices where time-dependent modes are
+      stored per period as /data/<MODE>_<MEASURE>__<PERIOD> (corresponding to 3D
+      [time_period, origin_zone, destination_zone] arrays when stacked along
+      time_period or in Zarr). Provisional note: the required vs. optional mode
+      rules (marking DIST, DISTWALK, SOV_*, and WLK_TRN_WLK_* as required: true
+      and all other modes like DISTBIKE, SOVTOLL_*, HOV2*, HOV3*, submode transit
+      WLK_{LOC,LRF,EXP,HVY,COM}_* / DRV_*, and ridehail as required: false) are
+      provisional and worth verifying against target regional model configurations.
+    comments:
+      - >-
+        PROVISIONAL REQUIRED/OPTIONAL SPLIT: Only static distances (DIST, DISTWALK),
+        free-lane single-occupant auto (SOV_TIME, SOV_DIST, SOV_BTOLL across EA, AM,
+        MD, PM, EV), and generic walk-transit-walk accessibility skims
+        (WLK_TRN_WLK_{IVT,IWAIT,XWAIT,WACC,WAUX,WEGR} across AM, MD, PM) are marked
+        required: true. Managed-lane/HOV auto skims (SOVTOLL_*, HOV2*, HOV3*), bike
+        distance (DISTBIKE), transit submode skims (WLK_{LOC,LRF,EXP,HVY,COM}_WLK_*,
+        DRV_{LOC,LRF,EXP,HVY,COM}_WLK_*, WLK_{LOC,LRF,EXP,HVY,COM}_DRV_*), and
+        ridehail skims (RH_*) are marked required: false. This required vs. optional
+        boundary is provisional and should be verified against target regional
+        model configurations.
     aliases:
       - BeamSkims
       - BeamSkimsOutput
@@ -52,7 +76,8 @@ classes:
       format: "omx, zarr"
       default_skim_representation: true
       schema_status: authoritative
-      status: formal_contract
+      status: provisional
+      required_optional_mode_split_status: provisional
       producer_model: BEAM
       consumer_models: "UrbanSim, ATLAS, ActivitySim, POLARIS"
       enforcement_status: PILATES-observed
@@ -66,14 +91,37 @@ classes:
         range: string
         ifabsent: string(omx)
         description: Storage format indicator for the multi-dimensional skim array container ('omx' or 'zarr'; defaults to 'omx').
+      omx_version:
+        range: string
+        ifabsent: string(0.2)
+        annotations:
+          hdf5_root_attribute: OMX_VERSION
+        description: Open Matrix HDF5 root attribute OMX_VERSION (canonical value '0.2').
       zone_count:
         range: integer
         required: true
         minimum_value: 1
-        description: Number of Traffic Analysis Zones (TAZ) in square matrix dimension.
+        annotations:
+          hdf5_root_attribute: SHAPE
+        description: >-
+          Number of Traffic Analysis Zones (TAZ) in square matrix dimension
+          (HDF5 root attribute SHAPE = [N_zones, N_zones]).
       time_periods:
         range: string
-        description: Modeled time-of-day periods represented in matrix slices (e.g. 'EA,AM,MD,PM,EV').
+        ifabsent: string(EA,AM,MD,PM,EV)
+        description: Modeled time-of-day periods represented in matrix slices (e.g. 'EA,AM,MD,PM,EV' or 'AM,MD,PM').
+      zone_lookup:
+        range: integer
+        required: false
+        array:
+          dimensions:
+            - alias: origin_zone
+        annotations:
+          omx_path: /lookup/zone_id
+          hdf5_group: /lookup
+        description: >-
+          1D zone index lookup array [origin_zone] stored under OMX HDF5 group
+          /lookup/<name> mapping 0-based matrix row/column indices to canonical TAZ IDs.
       iteration_number:
         range: integer
         minimum_value: 0
@@ -81,8 +129,528 @@ classes:
       converged:
         range: boolean
         description: Indicates whether dynamic traffic assignment achieved equilibrium convergence.
+
+      # ========================================================================
+      # Canonical Required Core Skim Arrays (required: true, status: provisional)
+      # ========================================================================
+      DIST:
+        range: NonNegativeFloat
+        required: true
+        array:
+          dimensions:
+            - alias: origin_zone
+            - alias: destination_zone
+        annotations:
+          omx_path: /data/DIST
+          hdf5_group: /data
+          status: provisional
+        description: >-
+          2D static OD matrix [origin_zone, destination_zone] of all-day highway/drive
+          network distance in miles (OMX: /data/DIST). Provisional required core skim.
+      DISTWALK:
+        range: NonNegativeFloat
+        required: true
+        array:
+          dimensions:
+            - alias: origin_zone
+            - alias: destination_zone
+        annotations:
+          omx_path: /data/DISTWALK
+          hdf5_group: /data
+          status: provisional
+        description: >-
+          2D static OD matrix [origin_zone, destination_zone] of all-day walk network
+          distance in miles (OMX: /data/DISTWALK). Provisional required core skim.
+      SOV_TIME:
+        range: NonNegativeFloat
+        required: true
+        array:
+          dimensions:
+            - alias: time_period
+            - alias: origin_zone
+            - alias: destination_zone
+        annotations:
+          omx_path_pattern: "/data/SOV_TIME__{EA,AM,MD,PM,EV}"
+          time_periods: "EA,AM,MD,PM,EV"
+          status: provisional
+        description: >-
+          3D time-dependent OD array [time_period, origin_zone, destination_zone] of
+          single-occupant vehicle (SOV) in-vehicle travel time in minutes across
+          periods EA, AM, MD, PM, EV (OMX: /data/SOV_TIME__{EA,AM,MD,PM,EV}).
+          Provisional required core skim.
+      SOV_DIST:
+        range: NonNegativeFloat
+        required: true
+        array:
+          dimensions:
+            - alias: time_period
+            - alias: origin_zone
+            - alias: destination_zone
+        annotations:
+          omx_path_pattern: "/data/SOV_DIST__{EA,AM,MD,PM,EV}"
+          time_periods: "EA,AM,MD,PM,EV"
+          status: provisional
+        description: >-
+          3D time-dependent OD array [time_period, origin_zone, destination_zone] of
+          single-occupant vehicle (SOV) travel distance in miles across periods
+          EA, AM, MD, PM, EV (OMX: /data/SOV_DIST__{EA,AM,MD,PM,EV}).
+          Provisional required core skim.
+      SOV_BTOLL:
+        range: NonNegativeFloat
+        required: true
+        array:
+          dimensions:
+            - alias: time_period
+            - alias: origin_zone
+            - alias: destination_zone
+        annotations:
+          omx_path_pattern: "/data/SOV_BTOLL__{EA,AM,MD,PM,EV}"
+          time_periods: "EA,AM,MD,PM,EV"
+          status: provisional
+        description: >-
+          3D time-dependent OD array [time_period, origin_zone, destination_zone] of
+          single-occupant vehicle (SOV) bridge toll cost across periods
+          EA, AM, MD, PM, EV (OMX: /data/SOV_BTOLL__{EA,AM,MD,PM,EV}).
+          Provisional required core skim.
+      WLK_TRN_WLK_IVT:
+        range: NonNegativeFloat
+        required: true
+        array:
+          dimensions:
+            - alias: time_period
+            - alias: origin_zone
+            - alias: destination_zone
+        annotations:
+          omx_path_pattern: "/data/WLK_TRN_WLK_IVT__{AM,MD,PM}"
+          time_periods: "AM,MD,PM"
+          status: provisional
+        description: >-
+          3D time-dependent OD array [time_period, origin_zone, destination_zone] of
+          generic walk-transit-walk in-vehicle time in minutes used for accessibility
+          calculations (OMX: /data/WLK_TRN_WLK_IVT__{AM,MD,PM}).
+          Provisional required core skim.
+      WLK_TRN_WLK_IWAIT:
+        range: NonNegativeFloat
+        required: true
+        array:
+          dimensions:
+            - alias: time_period
+            - alias: origin_zone
+            - alias: destination_zone
+        annotations:
+          omx_path_pattern: "/data/WLK_TRN_WLK_IWAIT__{AM,MD,PM}"
+          time_periods: "AM,MD,PM"
+          status: provisional
+        description: >-
+          3D time-dependent OD array [time_period, origin_zone, destination_zone] of
+          generic walk-transit-walk initial wait time in minutes used for accessibility
+          calculations (OMX: /data/WLK_TRN_WLK_IWAIT__{AM,MD,PM}).
+          Provisional required core skim.
+      WLK_TRN_WLK_XWAIT:
+        range: NonNegativeFloat
+        required: true
+        array:
+          dimensions:
+            - alias: time_period
+            - alias: origin_zone
+            - alias: destination_zone
+        annotations:
+          omx_path_pattern: "/data/WLK_TRN_WLK_XWAIT__{AM,MD,PM}"
+          time_periods: "AM,MD,PM"
+          status: provisional
+        description: >-
+          3D time-dependent OD array [time_period, origin_zone, destination_zone] of
+          generic walk-transit-walk transfer wait time in minutes used for accessibility
+          calculations (OMX: /data/WLK_TRN_WLK_XWAIT__{AM,MD,PM}).
+          Provisional required core skim.
+      WLK_TRN_WLK_WACC:
+        range: NonNegativeFloat
+        required: true
+        array:
+          dimensions:
+            - alias: time_period
+            - alias: origin_zone
+            - alias: destination_zone
+        annotations:
+          omx_path_pattern: "/data/WLK_TRN_WLK_WACC__{AM,MD,PM}"
+          time_periods: "AM,MD,PM"
+          status: provisional
+        description: >-
+          3D time-dependent OD array [time_period, origin_zone, destination_zone] of
+          generic walk-transit-walk walk access time in minutes used for accessibility
+          calculations (OMX: /data/WLK_TRN_WLK_WACC__{AM,MD,PM}).
+          Provisional required core skim.
+      WLK_TRN_WLK_WAUX:
+        range: NonNegativeFloat
+        required: true
+        array:
+          dimensions:
+            - alias: time_period
+            - alias: origin_zone
+            - alias: destination_zone
+        annotations:
+          omx_path_pattern: "/data/WLK_TRN_WLK_WAUX__{AM,MD,PM}"
+          time_periods: "AM,MD,PM"
+          status: provisional
+        description: >-
+          3D time-dependent OD array [time_period, origin_zone, destination_zone] of
+          generic walk-transit-walk auxiliary walk time in minutes used for accessibility
+          calculations (OMX: /data/WLK_TRN_WLK_WAUX__{AM,MD,PM}).
+          Provisional required core skim.
+      WLK_TRN_WLK_WEGR:
+        range: NonNegativeFloat
+        required: true
+        array:
+          dimensions:
+            - alias: time_period
+            - alias: origin_zone
+            - alias: destination_zone
+        annotations:
+          omx_path_pattern: "/data/WLK_TRN_WLK_WEGR__{AM,MD,PM}"
+          time_periods: "AM,MD,PM"
+          status: provisional
+        description: >-
+          3D time-dependent OD array [time_period, origin_zone, destination_zone] of
+          generic walk-transit-walk walk egress time in minutes used for accessibility
+          calculations (OMX: /data/WLK_TRN_WLK_WEGR__{AM,MD,PM}).
+          Provisional required core skim.
+
+      # ========================================================================
+      # Canonical Optional Mode Families (required: false, status: provisional)
+      # ========================================================================
+      DISTBIKE:
+        range: NonNegativeFloat
+        required: false
+        array:
+          dimensions:
+            - alias: origin_zone
+            - alias: destination_zone
+        annotations:
+          omx_path: /data/DISTBIKE
+          hdf5_group: /data
+          status: provisional
+        description: >-
+          2D static OD matrix [origin_zone, destination_zone] of all-day bicycle
+          network distance in miles (OMX: /data/DISTBIKE). Provisional optional skim.
+      SOVTOLL_TIME:
+        range: NonNegativeFloat
+        required: false
+        array:
+          dimensions:
+            - alias: time_period
+            - alias: origin_zone
+            - alias: destination_zone
+        annotations:
+          omx_path_pattern: "/data/SOVTOLL_TIME__{EA,AM,MD,PM,EV}"
+          status: provisional
+        description: >-
+          3D time-dependent OD array [time_period, origin_zone, destination_zone] of
+          SOV toll-lane travel time in minutes (OMX: /data/SOVTOLL_TIME__{EA,AM,MD,PM,EV}).
+      SOVTOLL_DIST:
+        range: NonNegativeFloat
+        required: false
+        array:
+          dimensions:
+            - alias: time_period
+            - alias: origin_zone
+            - alias: destination_zone
+        annotations:
+          omx_path_pattern: "/data/SOVTOLL_DIST__{EA,AM,MD,PM,EV}"
+          status: provisional
+        description: >-
+          3D time-dependent OD array [time_period, origin_zone, destination_zone] of
+          SOV toll-lane travel distance in miles (OMX: /data/SOVTOLL_DIST__{EA,AM,MD,PM,EV}).
+      SOVTOLL_BTOLL:
+        range: NonNegativeFloat
+        required: false
+        array:
+          dimensions:
+            - alias: time_period
+            - alias: origin_zone
+            - alias: destination_zone
+        annotations:
+          omx_path_pattern: "/data/SOVTOLL_BTOLL__{EA,AM,MD,PM,EV}"
+          status: provisional
+        description: >-
+          3D time-dependent OD array [time_period, origin_zone, destination_zone] of
+          SOV toll-lane bridge toll cost (OMX: /data/SOVTOLL_BTOLL__{EA,AM,MD,PM,EV}).
+      SOVTOLL_VTOLL:
+        range: NonNegativeFloat
+        required: false
+        array:
+          dimensions:
+            - alias: time_period
+            - alias: origin_zone
+            - alias: destination_zone
+        annotations:
+          omx_path_pattern: "/data/SOVTOLL_VTOLL__{EA,AM,MD,PM,EV}"
+          status: provisional
+        description: >-
+          3D time-dependent OD array [time_period, origin_zone, destination_zone] of
+          SOV toll-lane value toll cost (OMX: /data/SOVTOLL_VTOLL__{EA,AM,MD,PM,EV}).
+      HOV2_TIME:
+        range: NonNegativeFloat
+        required: false
+        array:
+          dimensions:
+            - alias: time_period
+            - alias: origin_zone
+            - alias: destination_zone
+        annotations:
+          omx_path_pattern: "/data/HOV2_TIME__{EA,AM,MD,PM,EV}"
+          status: provisional
+        description: >-
+          3D time-dependent OD array [time_period, origin_zone, destination_zone] of
+          HOV2 (shared ride 2) travel time in minutes (OMX: /data/HOV2_TIME__{EA,AM,MD,PM,EV}).
+      HOV2_DIST:
+        range: NonNegativeFloat
+        required: false
+        array:
+          dimensions:
+            - alias: time_period
+            - alias: origin_zone
+            - alias: destination_zone
+        annotations:
+          omx_path_pattern: "/data/HOV2_DIST__{EA,AM,MD,PM,EV}"
+          status: provisional
+        description: >-
+          3D time-dependent OD array [time_period, origin_zone, destination_zone] of
+          HOV2 travel distance in miles (OMX: /data/HOV2_DIST__{EA,AM,MD,PM,EV}).
+      HOV2_BTOLL:
+        range: NonNegativeFloat
+        required: false
+        array:
+          dimensions:
+            - alias: time_period
+            - alias: origin_zone
+            - alias: destination_zone
+        annotations:
+          omx_path_pattern: "/data/HOV2_BTOLL__{EA,AM,MD,PM,EV}"
+          status: provisional
+        description: >-
+          3D time-dependent OD array [time_period, origin_zone, destination_zone] of
+          HOV2 bridge toll cost (OMX: /data/HOV2_BTOLL__{EA,AM,MD,PM,EV}).
+      HOV2TOLL_TIME:
+        range: NonNegativeFloat
+        required: false
+        array:
+          dimensions:
+            - alias: time_period
+            - alias: origin_zone
+            - alias: destination_zone
+        annotations:
+          omx_path_pattern: "/data/HOV2TOLL_TIME__{EA,AM,MD,PM,EV}"
+          status: provisional
+        description: >-
+          3D time-dependent OD array [time_period, origin_zone, destination_zone] of
+          HOV2 toll-lane travel time in minutes (OMX: /data/HOV2TOLL_TIME__{EA,AM,MD,PM,EV}).
+      HOV2TOLL_DIST:
+        range: NonNegativeFloat
+        required: false
+        array:
+          dimensions:
+            - alias: time_period
+            - alias: origin_zone
+            - alias: destination_zone
+        annotations:
+          omx_path_pattern: "/data/HOV2TOLL_DIST__{EA,AM,MD,PM,EV}"
+          status: provisional
+        description: >-
+          3D time-dependent OD array [time_period, origin_zone, destination_zone] of
+          HOV2 toll-lane travel distance in miles (OMX: /data/HOV2TOLL_DIST__{EA,AM,MD,PM,EV}).
+      HOV2TOLL_BTOLL:
+        range: NonNegativeFloat
+        required: false
+        array:
+          dimensions:
+            - alias: time_period
+            - alias: origin_zone
+            - alias: destination_zone
+        annotations:
+          omx_path_pattern: "/data/HOV2TOLL_BTOLL__{EA,AM,MD,PM,EV}"
+          status: provisional
+        description: >-
+          3D time-dependent OD array [time_period, origin_zone, destination_zone] of
+          HOV2 toll-lane bridge toll cost (OMX: /data/HOV2TOLL_BTOLL__{EA,AM,MD,PM,EV}).
+      HOV2TOLL_VTOLL:
+        range: NonNegativeFloat
+        required: false
+        array:
+          dimensions:
+            - alias: time_period
+            - alias: origin_zone
+            - alias: destination_zone
+        annotations:
+          omx_path_pattern: "/data/HOV2TOLL_VTOLL__{EA,AM,MD,PM,EV}"
+          status: provisional
+        description: >-
+          3D time-dependent OD array [time_period, origin_zone, destination_zone] of
+          HOV2 toll-lane value toll cost (OMX: /data/HOV2TOLL_VTOLL__{EA,AM,MD,PM,EV}).
+      HOV3_TIME:
+        range: NonNegativeFloat
+        required: false
+        array:
+          dimensions:
+            - alias: time_period
+            - alias: origin_zone
+            - alias: destination_zone
+        annotations:
+          omx_path_pattern: "/data/HOV3_TIME__{EA,AM,MD,PM,EV}"
+          status: provisional
+        description: >-
+          3D time-dependent OD array [time_period, origin_zone, destination_zone] of
+          HOV3+ (shared ride 3+) travel time in minutes (OMX: /data/HOV3_TIME__{EA,AM,MD,PM,EV}).
+      HOV3_DIST:
+        range: NonNegativeFloat
+        required: false
+        array:
+          dimensions:
+            - alias: time_period
+            - alias: origin_zone
+            - alias: destination_zone
+        annotations:
+          omx_path_pattern: "/data/HOV3_DIST__{EA,AM,MD,PM,EV}"
+          status: provisional
+        description: >-
+          3D time-dependent OD array [time_period, origin_zone, destination_zone] of
+          HOV3+ travel distance in miles (OMX: /data/HOV3_DIST__{EA,AM,MD,PM,EV}).
+      HOV3_BTOLL:
+        range: NonNegativeFloat
+        required: false
+        array:
+          dimensions:
+            - alias: time_period
+            - alias: origin_zone
+            - alias: destination_zone
+        annotations:
+          omx_path_pattern: "/data/HOV3_BTOLL__{EA,AM,MD,PM,EV}"
+          status: provisional
+        description: >-
+          3D time-dependent OD array [time_period, origin_zone, destination_zone] of
+          HOV3+ bridge toll cost (OMX: /data/HOV3_BTOLL__{EA,AM,MD,PM,EV}).
+      HOV3TOLL_TIME:
+        range: NonNegativeFloat
+        required: false
+        array:
+          dimensions:
+            - alias: time_period
+            - alias: origin_zone
+            - alias: destination_zone
+        annotations:
+          omx_path_pattern: "/data/HOV3TOLL_TIME__{EA,AM,MD,PM,EV}"
+          status: provisional
+        description: >-
+          3D time-dependent OD array [time_period, origin_zone, destination_zone] of
+          HOV3+ toll-lane travel time in minutes (OMX: /data/HOV3TOLL_TIME__{EA,AM,MD,PM,EV}).
+      HOV3TOLL_DIST:
+        range: NonNegativeFloat
+        required: false
+        array:
+          dimensions:
+            - alias: time_period
+            - alias: origin_zone
+            - alias: destination_zone
+        annotations:
+          omx_path_pattern: "/data/HOV3TOLL_DIST__{EA,AM,MD,PM,EV}"
+          status: provisional
+        description: >-
+          3D time-dependent OD array [time_period, origin_zone, destination_zone] of
+          HOV3+ toll-lane travel distance in miles (OMX: /data/HOV3TOLL_DIST__{EA,AM,MD,PM,EV}).
+      HOV3TOLL_BTOLL:
+        range: NonNegativeFloat
+        required: false
+        array:
+          dimensions:
+            - alias: time_period
+            - alias: origin_zone
+            - alias: destination_zone
+        annotations:
+          omx_path_pattern: "/data/HOV3TOLL_BTOLL__{EA,AM,MD,PM,EV}"
+          status: provisional
+        description: >-
+          3D time-dependent OD array [time_period, origin_zone, destination_zone] of
+          HOV3+ toll-lane bridge toll cost (OMX: /data/HOV3TOLL_BTOLL__{EA,AM,MD,PM,EV}).
+      HOV3TOLL_VTOLL:
+        range: NonNegativeFloat
+        required: false
+        array:
+          dimensions:
+            - alias: time_period
+            - alias: origin_zone
+            - alias: destination_zone
+        annotations:
+          omx_path_pattern: "/data/HOV3TOLL_VTOLL__{EA,AM,MD,PM,EV}"
+          status: provisional
+        description: >-
+          3D time-dependent OD array [time_period, origin_zone, destination_zone] of
+          HOV3+ toll-lane value toll cost (OMX: /data/HOV3TOLL_VTOLL__{EA,AM,MD,PM,EV}).
+      WLK_SUBMODE_WLK_SKIMS:
+        range: NonNegativeFloat
+        required: false
+        array:
+          dimensions:
+            - alias: time_period
+            - alias: origin_zone
+            - alias: destination_zone
+        annotations:
+          omx_path_pattern: "/data/WLK_{LOC,LRF,EXP,HVY,COM}_WLK_{TOTIVT,KEYIVT,FERRYIVT,IWAIT,XWAIT,WAIT,WAUX,FAR,BOARDS}__{EA,AM,MD,PM,EV}"
+          submodes: "LOC,LRF,EXP,HVY,COM"
+          measures: "TOTIVT,KEYIVT,FERRYIVT,IWAIT,XWAIT,WAIT,WAUX,FAR,BOARDS"
+          time_periods: "EA,AM,MD,PM,EV"
+          status: provisional
+        description: >-
+          Optional 3D walk-access transit submode skim family
+          [time_period, origin_zone, destination_zone] covering local bus (LOC),
+          light rail/ferry (LRF), express bus (EXP), heavy rail (HVY), and commuter
+          rail (COM) with measures TOTIVT, KEYIVT, FERRYIVT, IWAIT, XWAIT, WAIT,
+          WAUX, FAR, and BOARDS across EA, AM, MD, PM, EV.
+      DRV_SUBMODE_WLK_SKIMS:
+        range: NonNegativeFloat
+        required: false
+        array:
+          dimensions:
+            - alias: time_period
+            - alias: origin_zone
+            - alias: destination_zone
+        annotations:
+          omx_path_pattern: "/data/DRV_{LOC,LRF,EXP,HVY,COM}_WLK_{TOTIVT,KEYIVT,FERRYIVT,IWAIT,XWAIT,WAIT,WAUX,FAR,BOARDS,DTIM,DDIST}__{EA,AM,MD,PM,EV}"
+          submodes: "LOC,LRF,EXP,HVY,COM"
+          measures: "TOTIVT,KEYIVT,FERRYIVT,IWAIT,XWAIT,WAIT,WAUX,FAR,BOARDS,DTIM,DDIST"
+          time_periods: "EA,AM,MD,PM,EV"
+          status: provisional
+        description: >-
+          Optional 3D drive-access/walk-egress (park-and-ride outbound) transit
+          submode skim family [time_period, origin_zone, destination_zone] covering
+          LOC, LRF, EXP, HVY, COM with measures TOTIVT, KEYIVT, FERRYIVT, IWAIT,
+          XWAIT, WAIT, WAUX, FAR, BOARDS, drive access time (DTIM), and drive access
+          distance (DDIST) across EA, AM, MD, PM, EV.
+      WLK_SUBMODE_DRV_SKIMS:
+        range: NonNegativeFloat
+        required: false
+        array:
+          dimensions:
+            - alias: time_period
+            - alias: origin_zone
+            - alias: destination_zone
+        annotations:
+          omx_path_pattern: "/data/WLK_{LOC,LRF,EXP,HVY,COM}_DRV_{TOTIVT,KEYIVT,FERRYIVT,IWAIT,XWAIT,WAIT,WAUX,FAR,BOARDS,DTIM,DDIST}__{EA,AM,MD,PM,EV}"
+          submodes: "LOC,LRF,EXP,HVY,COM"
+          measures: "TOTIVT,KEYIVT,FERRYIVT,IWAIT,XWAIT,WAIT,WAUX,FAR,BOARDS,DTIM,DDIST"
+          time_periods: "EA,AM,MD,PM,EV"
+          status: provisional
+        description: >-
+          Optional 3D walk-access/drive-egress (park-and-ride return) transit
+          submode skim family [time_period, origin_zone, destination_zone] covering
+          LOC, LRF, EXP, HVY, COM with measures TOTIVT, KEYIVT, FERRYIVT, IWAIT,
+          XWAIT, WAIT, WAUX, FAR, BOARDS, drive egress time (DTIM), and drive egress
+          distance (DDIST) across EA, AM, MD, PM, EV.
+
+      # ========================================================================
+      # Optional BEAM Semantic & Ridehail Skim Slots (required: false)
+      # ========================================================================
       sov_time_am:
         range: NonNegativeFloat
+        required: false
         array:
           dimensions:
             - alias: origin_zone
@@ -92,6 +660,7 @@ classes:
           travel time in minutes during morning peak (AM).
       sov_time_pm:
         range: NonNegativeFloat
+        required: false
         array:
           dimensions:
             - alias: origin_zone
@@ -101,6 +670,7 @@ classes:
           travel time in minutes during evening peak (PM).
       sov_time_md:
         range: NonNegativeFloat
+        required: false
         array:
           dimensions:
             - alias: origin_zone
@@ -110,6 +680,7 @@ classes:
           travel time in minutes during midday off-peak (MD).
       sov_distance:
         range: NonNegativeFloat
+        required: false
         array:
           dimensions:
             - alias: origin_zone
@@ -119,6 +690,7 @@ classes:
           highway travel distance in miles.
       sov_toll_cost:
         range: NonNegativeFloat
+        required: false
         array:
           dimensions:
             - alias: origin_zone
@@ -128,6 +700,7 @@ classes:
           highway bridge and value toll costs ($).
       hov2_time_am:
         range: NonNegativeFloat
+        required: false
         array:
           dimensions:
             - alias: origin_zone
@@ -137,6 +710,7 @@ classes:
           (2 person) travel time in minutes during morning peak (AM).
       hov3_time_am:
         range: NonNegativeFloat
+        required: false
         array:
           dimensions:
             - alias: origin_zone
@@ -146,6 +720,7 @@ classes:
           (3+ person) travel time in minutes during morning peak (AM).
       hov2_distance:
         range: NonNegativeFloat
+        required: false
         array:
           dimensions:
             - alias: origin_zone
@@ -155,6 +730,7 @@ classes:
           (2 person) travel distance in miles.
       hov3_distance:
         range: NonNegativeFloat
+        required: false
         array:
           dimensions:
             - alias: origin_zone
@@ -164,6 +740,7 @@ classes:
           (3+ person) travel distance in miles.
       transit_in_vehicle_time:
         range: NonNegativeFloat
+        required: false
         array:
           dimensions:
             - alias: time_period
@@ -176,6 +753,7 @@ classes:
           of total transit in-vehicle travel time in minutes.
       transit_initial_wait_time:
         range: NonNegativeFloat
+        required: false
         array:
           dimensions:
             - alias: time_period
@@ -188,6 +766,7 @@ classes:
           of transit initial waiting time in minutes.
       transit_transfer_wait_time:
         range: NonNegativeFloat
+        required: false
         array:
           dimensions:
             - alias: time_period
@@ -198,6 +777,7 @@ classes:
           of transit transfer waiting time in minutes.
       transit_fare:
         range: NonNegativeFloat
+        required: false
         array:
           dimensions:
             - alias: time_period
@@ -210,6 +790,7 @@ classes:
           of transit monetary fare cost in dollars ($).
       transit_failures:
         range: NonNegativeFloat
+        required: false
         array:
           dimensions:
             - alias: time_period
@@ -222,6 +803,7 @@ classes:
           of count or probability of transit routing or boarding capacity failures.
       walk_distance:
         range: NonNegativeFloat
+        required: false
         array:
           dimensions:
             - alias: origin_zone
@@ -233,6 +815,7 @@ classes:
           network distance in miles.
       bike_distance:
         range: NonNegativeFloat
+        required: false
         array:
           dimensions:
             - alias: origin_zone
@@ -244,6 +827,7 @@ classes:
           network distance in miles.
       ridehail_solo_wait_time:
         range: NonNegativeFloat
+        required: false
         array:
           dimensions:
             - alias: time_period
@@ -251,11 +835,13 @@ classes:
             - alias: destination_zone
         annotations:
           matrix_name: RH_SOLO_WAIT
+          status: provisional
         description: >-
           3D multi-period OD skim tensor [time_period, origin_zone, destination_zone]
           of average passenger wait time for solo ridehail/TNC pickup in minutes.
       ridehail_solo_cost:
         range: NonNegativeFloat
+        required: false
         array:
           dimensions:
             - alias: time_period
@@ -263,11 +849,13 @@ classes:
             - alias: destination_zone
         annotations:
           matrix_name: RH_SOLO_COST
+          status: provisional
         description: >-
           3D multi-period OD skim tensor [time_period, origin_zone, destination_zone]
           of average monetary fare for solo ridehail/TNC trip in dollars ($).
       ridehail_pooled_wait_time:
         range: NonNegativeFloat
+        required: false
         array:
           dimensions:
             - alias: time_period
@@ -275,11 +863,13 @@ classes:
             - alias: destination_zone
         annotations:
           matrix_name: RH_POOLED_WAIT
+          status: provisional
         description: >-
           3D multi-period OD skim tensor [time_period, origin_zone, destination_zone]
           of average passenger wait time for pooled ridehail/TNC pickup in minutes.
       ridehail_pooled_cost:
         range: NonNegativeFloat
+        required: false
         array:
           dimensions:
             - alias: time_period
@@ -287,11 +877,13 @@ classes:
             - alias: destination_zone
         annotations:
           matrix_name: RH_POOLED_COST
+          status: provisional
         description: >-
           3D multi-period OD skim tensor [time_period, origin_zone, destination_zone]
           of average monetary fare for pooled ridehail/TNC trip in dollars ($).
       ridehail_pooled_rejection_prob:
         range: UnitIntervalFloat
+        required: false
         array:
           dimensions:
             - alias: time_period
@@ -299,11 +891,13 @@ classes:
             - alias: destination_zone
         annotations:
           matrix_name: RH_POOLED_REJECTIONPROB
+          status: provisional
         description: >-
           3D multi-period OD skim tensor [time_period, origin_zone, destination_zone]
           of probability of pooled ridehail ride request rejection or unavailability (0.0 to 1.0).
       ridehail_solo_trips:
         range: NonNegativeFloat
+        required: false
         array:
           dimensions:
             - alias: time_period
@@ -311,11 +905,13 @@ classes:
             - alias: destination_zone
         annotations:
           matrix_name: RH_SOLO_TRIPS
+          status: provisional
         description: >-
           3D multi-period OD skim tensor [time_period, origin_zone, destination_zone]
           of total simulated solo ridehail trip volume between zone pairs.
       ridehail_pooled_trips:
         range: NonNegativeFloat
+        required: false
         array:
           dimensions:
             - alias: time_period
@@ -323,6 +919,7 @@ classes:
             - alias: destination_zone
         annotations:
           matrix_name: RH_POOLED_TRIPS
+          status: provisional
         description: >-
           3D multi-period OD skim tensor [time_period, origin_zone, destination_zone]
           of total simulated pooled ridehail trip volume between zone pairs.
