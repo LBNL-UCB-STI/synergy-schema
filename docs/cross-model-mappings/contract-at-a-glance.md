@@ -5,6 +5,12 @@ This reference summarizes the single-year table handoffs, join keys, categorical
 The **DEMOS / ATLAS → POLARIS** mappings implement the joint multi-team specification in `docs/resources/DEMOS_and_ATLAS_to_POLARIS_interface.xlsx` (Section 5). Counterpart handoffs for **ActivitySim**, **BEAM**, **SynthFirm**, and post-run state feedback are documented alongside them so model owners can review and verify how their interfaces are represented.
 
 > **Visual Diagrams**: See [Database ER Diagrams](interactive-schema.md) for crow's-foot relational schemas and [Architecture & UML](deliverable_1_uml.md) for workflow pipelines and class diagrams.
+>
+> **From Static Contract to Executable Pipeline (Next-Phase Bridge)**: Once verified with model owners, the rules on this page translate directly into the next project phase's automated multi-year workflow across three execution tiers:
+>
+> 1. **Relational SQL Projections (`direct`, `renamed`, `aggregated`, `wide_to_long`, and `X-H1`–`X-V5` crosswalks)**: Deterministic table joins, `CASE WHEN` / lookup-table recodes, within-household `ROW_NUMBER()` indexing, and wide-to-long fleet unpivots executed via SQL over boundary tables.
+> 2. **Seeded Python Refinement (`D-H1`–`D-V2` donor draws & longitudinal progression `X-P4`–`X-P5`)**: Reproducible, hash-seeded Python operators that impute missing attributes from PUMS/NHTS donor distributions and carry forward time-invariant demographics and locations across simulation years.
+> 3. **Runtime Travel-Model Assignment (`work_location_id`, `school_location_id`, `journey_to_work_*`, `ecom`, `num_groceries`, `num_meals`)**: Initialized with schema-valid defaults at the handoff boundary and populated at runtime by POLARIS or ActivitySim/BEAM.
 
 ---
 
