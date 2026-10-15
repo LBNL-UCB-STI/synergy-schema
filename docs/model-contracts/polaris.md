@@ -22,11 +22,13 @@ using the specific exporter/importer context.
 
 | Physical table role | LinkML class | Owner question |
 | --- | --- | --- |
-| Household seed-shaped table | [PolarisDemandDatabaseHousehold](../schema/PolarisDemandDatabaseHousehold.md) | What does non-unique raw `hhold` mean, and which table roles are inputs? |
-| Person seed-shaped table | [PolarisDemandDatabasePerson](../schema/PolarisDemandDatabasePerson.md) | Confirm person/household key scope and importer semantics. |
-| Vehicle seed-shaped table | [PolarisDemandDatabaseVehicle](../schema/PolarisDemandDatabaseVehicle.md) | Confirm vehicle type/codebook version and demand/supply dependency. |
-| Vehicle_Class dimension table | [PolarisDemandDatabaseVehicleClass](../schema/PolarisDemandDatabaseVehicleClass.md) | Confirm passenger and commercial vehicle class definitions (`class_id` 1..8+). |
-| Vehicle_Type dimension table | [PolarisDemandDatabaseVehicleType](../schema/PolarisDemandDatabaseVehicleType.md) | Confirm composite key (`vehicle_class`, `connectivity_type`, `powertrain_type`, `automation_type`, `fuel_type`, `vintage_type`) lookup (`X-V5`). |
+| Household seed-shaped table | [PolarisDemandDatabaseHousehold](../schema/observed-examples/PolarisDemandDatabaseHousehold.md) | What does non-unique raw `hhold` mean, and which table roles are inputs? |
+| Person seed-shaped table | [PolarisDemandDatabasePerson](../schema/observed-examples/PolarisDemandDatabasePerson.md) | Confirm person/household key scope and importer semantics. |
+| Vehicle seed-shaped table | [PolarisDemandDatabaseVehicle](../schema/observed-examples/PolarisDemandDatabaseVehicle.md) | Confirm vehicle type/codebook version and demand/supply dependency. |
+| Vehicle_Class dimension table | [PolarisDemandDatabaseVehicleClass](../schema/observed-examples/PolarisDemandDatabaseVehicleClass.md) | Confirm passenger and commercial vehicle class definitions (`class_id` 1..8+). |
+| Vehicle_Type dimension table | [PolarisDemandDatabaseVehicleType](../schema/observed-examples/PolarisDemandDatabaseVehicleType.md) | Confirm composite key (`vehicle_class`, `connectivity_type`, `powertrain_type`, `automation_type`, `fuel_type`, `vintage_type`) lookup (`X-V5`). |
+| Post-run household state output | [PolarisHouseholdStateOutput](../schema/observed-examples/PolarisHouseholdStateOutput.md) | Confirm final physical table/column names for `vehicles` and `autonomous_vehicles` emitted into `*-Result.sqlite`. |
+| Post-run person state output | [PolarisPersonStateOutput](../schema/observed-examples/PolarisPersonStateOutput.md) | Confirm final physical table/column names for `work_location_id`, `school_location_id`, and `transit_pass` emitted into `*-Result.sqlite`. |
 
 The provisional records make no shared release, snapshot, or round-trip claim
 until POLARIS supplies the corresponding manifest and importer/exporter

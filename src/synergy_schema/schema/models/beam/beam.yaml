@@ -1,0 +1,21 @@
+id: https://w3id.org/LBNL-UCB-STI/synergy-schema/models/beam
+name: beam
+title: BEAM model schema package
+description: >-
+  Composite schema bundle importing all BEAM model contracts:
+  population inputs (households, persons, vehicles), travel plans
+  (input plans and executed output plans), and network travel skims
+  (Open Matrix .omx, Zarr, and router OD skims).
+
+prefixes:
+  synergy_schema: https://w3id.org/LBNL-UCB-STI/synergy-schema/
+  linkml: https://w3id.org/linkml/
+
+default_prefix: synergy_schema
+default_range: string
+
+imports:
+  - linkml:types
+  - ./beam_population
+  - ./beam_plans
+  - ./beam_skims

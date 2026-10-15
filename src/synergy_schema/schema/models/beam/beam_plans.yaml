@@ -1,0 +1,258 @@
+id: https://w3id.org/LBNL-UCB-STI/synergy-schema/models/beam/plans
+name: beam_plans
+title: BEAM travel plans input and output schema
+description: >-
+  BEAM-owned activity-travel plans schema observed in the PILATES reference
+  implementation. BEAM receives initial agent plans (activities and legs)
+  from activity-based travel demand models (e.g. ActivitySim or POLARIS/Synergy),
+  executes them via dynamic multi-agent simulation and MATSim router scoring,
+  and outputs updated executed plans.
+
+prefixes:
+  synergy_schema: https://w3id.org/LBNL-UCB-STI/synergy-schema/
+  linkml: https://w3id.org/linkml/
+
+default_prefix: synergy_schema
+default_range: string
+
+imports:
+  - linkml:types
+
+classes:
+  BeamPlanRecord:
+    description: >-
+      Authoritative travel plan element schema provided as input to BEAM,
+      corresponding to PlansBeamIn in the PILATES reference implementation.
+      Supplied via plans.csv or plans.parquet. Each row represents either an
+      activity (with location, duration/end time, purpose) or a leg (with mode,
+      route, departure time).
+    aliases:
+      - PlansBeamIn
+      - BeamPlanInputRecord
+    annotations:
+      owner: BEAM
+      table_name: plans
+      model_association: BEAM
+      schema_status: authoritative
+      status: active
+      enforcement_status: PILATES-observed
+    unique_keys:
+      composite_plan_element:
+        unique_key_name: composite_plan_element
+        unique_key_slots:
+          - person_id
+          - planindex
+          - planelementindex
+    attributes:
+      person_id:
+        range: integer
+        required: true
+        annotations:
+          foreign_key: BeamPersonRecord.person_id
+        description: Foreign key linking plan element to a unique person.
+      planelementindex:
+        range: integer
+        required: true
+        annotations:
+          physical_name: PlanElementIndex
+        description: Sequential zero- or one-based index of the element within the daily plan.
+      activityelement:
+        range: string
+        required: true
+        annotations:
+          physical_name: ActivityElement
+        description: Plan element discriminator type ('activity' or 'leg').
+      activitytype:
+        range: string
+        annotations:
+          physical_name: ActivityType
+        description: >-
+          Activity purpose or type (e.g. Home, Work, School, University,
+          Shop, Escort, Social, EatOut, Other). Set for activity elements.
+      x:
+        range: float
+        description: Projected X coordinate or longitude of activity location or leg destination.
+      y:
+        range: float
+        description: Projected Y coordinate or latitude of activity location or leg destination.
+      departure_time:
+        range: float
+        description: >-
+          Departure or end time of the element, expressed in hours or seconds
+          from midnight (e.g. 8.5 for 8:30 AM).
+      tour_id:
+        range: integer
+        description: Tour identifier from upstream activity-based model (e.g. ActivitySim).
+      trip_id:
+        range: integer
+        description: Trip identifier from upstream model corresponding to this travel leg.
+      number_of_participants:
+        range: float
+        description: Number of participants accompanying the person for joint activities/trips.
+      tour_mode:
+        range: string
+        description: Primary mode assigned to the tour (e.g. DRIVE_ALONE, SHARED2, WALK_TRANSIT).
+      trip_mode:
+        range: string
+        description: Planned mode for this specific travel leg (e.g. car, walk, bike, ride_hail, pt).
+      trip_dur_min:
+        range: float
+        description: Expected trip duration in minutes from upstream model.
+      trip_cost_dollars:
+        range: float
+        description: Expected trip monetary cost in dollars.
+      planindex:
+        range: integer
+        description: Index of the plan alternative for the agent (for BEAM/MATSim replanning).
+      planselected:
+        range: boolean
+        description: Indicates whether this plan alternative is currently selected by the agent.
+      planscore:
+        range: float
+        description: Utility score assigned to this plan by the BEAM scoring function.
+      legtraveltime:
+        range: float
+        description: Scheduled or estimated travel time for the leg in seconds or minutes.
+      legroutetype:
+        range: string
+        description: Route representation type (e.g. 'link-set-links', 'transit-passenger').
+      legroutestartlink:
+        range: integer
+        description: Network link identifier at the start of the routed leg.
+      legrouteendlink:
+        range: integer
+        description: Network link identifier at the end of the routed leg.
+      legroutetraveltime:
+        range: float
+        description: Route travel time computed across network links.
+      legroutedistance:
+        range: float
+        description: Route travel distance computed across network links (meters or miles).
+      legroutelinks:
+        range: string
+        description: Serialized space-delimited list of network link IDs traversed along the route.
+
+  BeamPlanOutputRecord:
+    description: >-
+      Executed travel plan element schema emitted as output by BEAM dynamic
+      traffic simulation, corresponding to BeamPlansOut in PILATES.
+      Emitted via executedPlans.csv or beamPlans.parquet.
+    aliases:
+      - BeamPlansOut
+      - BeamExecutedPlanRecord
+    annotations:
+      owner: BEAM
+      table_name: executedPlans
+      model_association: BEAM
+      schema_status: authoritative
+      status: active
+      enforcement_status: PILATES-observed
+    attributes:
+      trip_id:
+        range: integer
+        annotations:
+          physical_name: tripId
+        description: Trip identifier carried through BEAM simulation.
+      person_id:
+        range: integer
+        required: true
+        annotations:
+          physical_name: personId
+          foreign_key: BeamPersonRecord.person_id
+        description: Person identifier for the executed plan row.
+      plan_index:
+        range: integer
+        annotations:
+          physical_name: planIndex
+        description: Plan index selected and executed in simulation.
+      plan_score:
+        range: float
+        annotations:
+          physical_name: planScore
+        description: Converged utility score of the executed plan.
+      plan_selected:
+        range: boolean
+        annotations:
+          physical_name: planSelected
+        description: Flag confirming whether this plan was selected for execution.
+      plan_element_type:
+        range: string
+        annotations:
+          physical_name: planElementType
+        description: Executed plan element discriminator ('activity' or 'leg').
+      plan_element_index:
+        range: integer
+        annotations:
+          physical_name: planElementIndex
+        description: Zero- or one-based sequence index of element in executed plan.
+      activity_type:
+        range: string
+        annotations:
+          physical_name: activityType
+        description: Executed activity purpose or type.
+      activity_location_x:
+        range: float
+        annotations:
+          physical_name: activityLocationX
+        description: Executed activity location projected X coordinate.
+      activity_location_y:
+        range: float
+        annotations:
+          physical_name: activityLocationY
+        description: Executed activity location projected Y coordinate.
+      activity_end_time:
+        range: float
+        annotations:
+          physical_name: activityEndTime
+        description: Actual simulated end / departure time of the activity.
+      leg_mode:
+        range: string
+        annotations:
+          physical_name: legMode
+        description: Actual transportation mode used for the executed leg.
+      leg_departure_time:
+        range: float
+        annotations:
+          physical_name: legDepartureTime
+        description: Actual simulated departure time for the leg.
+      leg_travel_time:
+        range: float
+        annotations:
+          physical_name: legTravelTime
+        description: Actual simulated network travel time for the leg (seconds or minutes).
+      leg_route_type:
+        range: string
+        annotations:
+          physical_name: legRouteType
+        description: Route representation type for the executed path.
+      leg_route_start_link:
+        range: integer
+        annotations:
+          physical_name: legRouteStartLink
+        description: Starting network link identifier.
+      leg_route_end_link:
+        range: integer
+        annotations:
+          physical_name: legRouteEndLink
+        description: Ending network link identifier.
+      leg_route_travel_time:
+        range: float
+        annotations:
+          physical_name: legRouteTravelTime
+        description: Sum of link travel times along the simulated route.
+      leg_route_distance:
+        range: float
+        annotations:
+          physical_name: legRouteDistance
+        description: Sum of link distances along the simulated route.
+      leg_route_links:
+        range: string
+        annotations:
+          physical_name: legRouteLinks
+        description: Serialized space-delimited list of traversed network link IDs.
+      trip_dur_min:
+        range: string
+        description: Total trip duration in minutes.
+      trip_cost_dollars:
+        range: string
+        description: Total trip monetary cost in dollars.

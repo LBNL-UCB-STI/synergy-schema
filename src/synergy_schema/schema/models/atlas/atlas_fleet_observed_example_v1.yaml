@@ -19,6 +19,8 @@ imports:
 classes:
   # Provisional row schema derived from the supplied ATLAS files.
   AtlasHouseholdFleetOutputExampleV1:
+    aliases:
+      - AtlasHouseholdFleetOutput
     description: >-
       Observed household-side fleet example row from the paired ATLAS example
       files. Membership in the paired example and reconciliation of nvehicles
@@ -49,6 +51,8 @@ classes:
 
   # Provisional row schema, paired only within the supplied files.
   AtlasVehicleFleetOutputExampleV1:
+    aliases:
+      - AtlasVehicleFleetOutput
     description: >-
       Observed vehicle-side fleet example row paired with
       AtlasHouseholdFleetOutputExampleV1. The (HOUSEID, VEHID) uniqueness rule

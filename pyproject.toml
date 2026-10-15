@@ -10,8 +10,8 @@ readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [
     "duckdb>=1.5.6",
-    "linkml-runtime>=1.9.4,<2",
-    "linkml>=1.9.4,<2",
+    "linkml-runtime>=1.12.1,<2",
+    "linkml>=1.12.1,<2",
     "pyarrow>=25.0.1",
 ]
 
@@ -44,3 +44,6 @@ packages = ["src/synergy_schema"]
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 pythonpath = ["."]
+
+[tool.uv]
+override-dependencies = ["sqlalchemy>=2.0.44"]

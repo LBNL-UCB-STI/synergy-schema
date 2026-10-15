@@ -1,0 +1,386 @@
+id: https://w3id.org/LBNL-UCB-STI/synergy-schema/models/beam/population
+name: beam_population
+title: BEAM population input schema (Households and Persons)
+description: >-
+  BEAM-owned household, person, and vehicle input record schemas observed in the
+  PILATES reference implementation. These classes represent the agent population
+  consumed by the BEAM (Behavior, Energy, Autonomy, and Mobility) dynamic travel
+  simulation engine.
+
+prefixes:
+  synergy_schema: https://w3id.org/LBNL-UCB-STI/synergy-schema/
+  linkml: https://w3id.org/linkml/
+
+default_prefix: synergy_schema
+default_range: string
+
+imports:
+  - linkml:types
+
+classes:
+  BeamHouseholdRecord:
+    description: >-
+      Authoritative household input schema for the BEAM simulation engine,
+      corresponding to HouseholdsBeamIn in the PILATES reference implementation.
+      Supplied via households.csv or households.parquet.
+    aliases:
+      - HouseholdsBeamIn
+      - BeamHouseholdInputRecord
+    annotations:
+      owner: BEAM
+      table_name: households
+      model_association: BEAM
+      schema_status: authoritative
+      status: active
+      enforcement_status: PILATES-observed
+    attributes:
+      household_id:
+        range: integer
+        identifier: true
+        required: true
+        description: Unique household identifier linking persons and vehicles.
+      block_id:
+        range: integer
+        description: Census block identifier for household location.
+      home_zone_id:
+        range: integer
+        description: Home Traffic Analysis Zone (TAZ) for the household.
+      income:
+        range: float
+        description: Annual household income in dollars ($).
+      income_in_thousands:
+        range: float
+        description: Annual household income in thousands ($k).
+      income_segment:
+        range: integer
+        description: Household income segmentation category.
+      hhsize:
+        range: integer
+        description: Total number of persons residing in the household.
+      hht:
+        range: integer
+        annotations:
+          physical_name: HHT
+        description: Census HHT household family/living arrangement code.
+      cars:
+        range: integer
+        description: Total number of personal vehicles available to the household.
+      num_workers:
+        range: float
+        description: Number of employed workers in the household.
+      num_non_workers:
+        range: float
+        description: Number of non-working members in the household.
+      num_drivers:
+        range: integer
+        description: Number of licensed drivers in the household.
+      num_adults:
+        range: integer
+        description: Number of adult household members (age 18+).
+      num_children:
+        range: integer
+        description: Total number of children in the household (under 18).
+      num_young_children:
+        range: integer
+        description: Number of young children in the household (under 5).
+      num_children_5_to_15:
+        range: integer
+        description: Number of school-age children between ages 5 and 15.
+      num_children_16_to_17:
+        range: integer
+        description: Number of driving-eligible children between ages 16 and 17.
+      num_college_age:
+        range: integer
+        description: Number of college-age individuals in the household.
+      num_young_adults:
+        range: integer
+        description: Number of young adults in the household.
+      non_family:
+        range: boolean
+        description: Indicates whether this is a non-family household.
+      family:
+        range: boolean
+        description: Indicates whether this is a family household.
+      home_is_urban:
+        range: boolean
+        description: Indicates whether the household home location is in an urban area.
+      home_is_rural:
+        range: boolean
+        description: Indicates whether the household home location is in a rural area.
+      median_value_of_time:
+        range: float
+        description: Median value of time for members of the household ($/hour).
+      hh_value_of_time:
+        range: float
+        description: Aggregate household-level value of time ($/hour).
+      hh_work_auto_savings_ratio:
+        range: float
+        description: Household work auto travel savings ratio.
+      num_under16_not_at_school:
+        range: integer
+        description: Number of children under 16 not enrolled in school.
+      num_travel_active:
+        range: integer
+        description: Total number of travel-active members in the household.
+      num_travel_active_adults:
+        range: integer
+        description: Number of travel-active adult members.
+      num_travel_active_preschoolers:
+        range: integer
+        description: Number of travel-active preschool children.
+      num_travel_active_children:
+        range: integer
+        description: Number of travel-active school-age children.
+      num_travel_active_non_preschoolers:
+        range: integer
+        description: Number of travel-active non-preschool members.
+      participates_in_jtf_model:
+        range: boolean
+        description: Indicates participation in the joint tour frequency model.
+      joint_tour_frequency:
+        range: string
+        description: Joint tour frequency pattern label.
+      num_hh_joint_tours:
+        range: integer
+        description: Total count of household joint tours.
+      sample_rate:
+        range: float
+        description: Population expansion sample rate or weight.
+
+  BeamPersonRecord:
+    description: >-
+      Authoritative person input schema for the BEAM simulation engine,
+      corresponding to PersonsBeamIn in the PILATES reference implementation.
+      Supplied via persons.csv or persons.parquet.
+    aliases:
+      - PersonsBeamIn
+      - BeamPersonInputRecord
+    annotations:
+      owner: BEAM
+      table_name: persons
+      model_association: BEAM
+      schema_status: authoritative
+      status: active
+      enforcement_status: PILATES-observed
+    attributes:
+      person_id:
+        range: integer
+        identifier: true
+        required: true
+        description: Person identifier unique across the population.
+      household_id:
+        range: integer
+        required: true
+        annotations:
+          foreign_key: BeamHouseholdRecord.household_id
+        description: Foreign key linking person to their BeamHouseholdRecord.
+      age:
+        range: integer
+        description: Age of the person in years.
+      pnum:
+        range: integer
+        annotations:
+          physical_name: PNUM
+        description: Sequential person number within household (PNUM, 1-based).
+      sex:
+        range: integer
+        description: Biological sex code (1=Male, 2=Female).
+      male:
+        range: boolean
+        description: Binary indicator for male gender.
+      female:
+        range: boolean
+        description: Binary indicator for female gender.
+      adult:
+        range: boolean
+        description: Indicator for adult status (age 18+).
+      age_16_p:
+        range: boolean
+        description: Indicator for driving-eligible age (16+).
+      age_16_to_19:
+        range: boolean
+        description: Indicator for youth between ages 16 and 19.
+      pemploy:
+        range: integer
+        description: Employment status code.
+      pstudent:
+        range: integer
+        description: Student enrollment status code.
+      ptype:
+        range: integer
+        description: >-
+          Person type category (1=Full-time worker, 2=Part-time worker,
+          3=University student, 4=Non-worker, 5=Retiree, 6=Driving-age student,
+          7=Non-driving student, 8=Preschool).
+      is_worker:
+        range: boolean
+        description: Indicator for employed worker.
+      has_full_time:
+        range: boolean
+        description: Indicator for full-time employment.
+      has_part_time:
+        range: boolean
+        description: Indicator for part-time employment.
+      has_non_worker:
+        range: boolean
+        description: Indicator for non-worker status.
+      has_retiree:
+        range: boolean
+        description: Indicator for retired status.
+      work_from_home:
+        range: boolean
+        description: Indicator for telecommuting or working from home.
+      is_student:
+        range: boolean
+        description: General student indicator.
+      is_gradeschool:
+        range: boolean
+        description: Grade school student indicator.
+      is_highschool:
+        range: boolean
+        description: High school student indicator.
+      is_university:
+        range: boolean
+        description: University / college student indicator.
+      has_university:
+        range: boolean
+        description: Household contains a university student.
+      school_segment:
+        range: integer
+        description: School segment classification code.
+      student_is_employed:
+        range: boolean
+        description: Indicates student who is also employed.
+      nonstudent_to_school:
+        range: boolean
+        description: Indicates non-student attending school activities.
+      has_preschool_kid:
+        range: boolean
+        description: Household contains a preschool child.
+      has_school_kid:
+        range: boolean
+        description: Household contains a school-age child.
+      has_driving_kid:
+        range: boolean
+        description: Household contains a driving-age child.
+      home_x:
+        range: float
+        description: Home location projected X coordinate or longitude.
+      home_y:
+        range: float
+        description: Home location projected Y coordinate or latitude.
+      home_zone_id:
+        range: integer
+        description: Home Traffic Analysis Zone (TAZ) for the person.
+      workplace_zone_id:
+        range: integer
+        description: Workplace Traffic Analysis Zone (TAZ) for the person.
+      school_zone_id:
+        range: integer
+        description: School Traffic Analysis Zone (TAZ) for the person.
+      distance_to_work:
+        range: float
+        description: Commute distance to workplace in miles.
+      roundtrip_auto_time_to_work:
+        range: float
+        description: Round-trip auto commute travel time in minutes.
+      value_of_time:
+        range: float
+        description: Individual value of time ($/hour).
+      transit_pass_ownership:
+        range: integer
+        description: Transit pass ownership status code.
+      transit_pass_subsidy:
+        range: float
+        description: Employer transit pass subsidy amount ($).
+      parking_cost:
+        range: float
+        description: Daily or monthly parking cost at workplace ($).
+      free_parking_at_work:
+        range: boolean
+        description: Indicator for free parking availability at workplace.
+      has_electric_bike:
+        range: boolean
+        description: Indicator for electric bicycle access.
+      has_carshare:
+        range: boolean
+        description: Indicator for carshare service membership.
+      has_rideshare:
+        range: boolean
+        description: Indicator for rideshare/TNC app access.
+
+  BeamVehicleRecord:
+    description: >-
+      Authoritative vehicle input schema for the BEAM simulation engine,
+      corresponding to VehiclesBeamIn in the PILATES reference implementation.
+      Staged from ATLAS vehicles2 output.
+    aliases:
+      - VehiclesBeamIn
+      - BeamVehicleInputRecord
+    annotations:
+      owner: BEAM
+      table_name: vehicles
+      model_association: BEAM
+      schema_status: authoritative
+      status: active
+      enforcement_status: PILATES-observed
+    attributes:
+      vehicle_id:
+        range: string
+        identifier: true
+        required: true
+        description: Unique vehicle identifier used by BEAM router and agents.
+      household_id:
+        range: integer
+        required: true
+        annotations:
+          foreign_key: BeamHouseholdRecord.household_id
+        description: Foreign key linking vehicle to owning household.
+      source_vehicle_id:
+        range: integer
+        annotations:
+          physical_name: sourceVehicleId
+        description: Original ATLAS vehicle identifier preserved for provenance.
+      maindriver_id:
+        range: integer
+        annotations:
+          foreign_key: BeamPersonRecord.person_id
+        description: Foreign key identifying primary driver person.
+      vehicletypeid:
+        range: string
+        annotations:
+          physical_name: vehicleTypeId
+        description: BEAM vehicle type identifier mapping to vehicleTypes.csv.
+      bodytype:
+        range: string
+        description: Vehicle body type category (e.g. sedan, SUV, pickup, van).
+      pred_power:
+        range: string
+        description: Predicted powertrain technology (ICE, HEV, PHEV, BEV).
+      ownlease:
+        range: string
+        description: Ownership or lease status.
+      modelyear:
+        range: integer
+        description: Vehicle model year.
+      adopt_fuel:
+        range: string
+        description: Adopted fuel type.
+      adopt_veh:
+        range: string
+        description: Vehicle technology adoption classification.
+      acquire_year:
+        range: string
+        description: Vehicle acquisition year.
+      vehicle_tag:
+        range: string
+        description: Vehicle tag or identifier label.
+      year:
+        range: integer
+        description: Simulation calendar year.
+      newhhflag:
+        range: string
+        description: New household indicator flag.
+      vintage_category:
+        range: string
+        description: Vehicle age or vintage bracket.

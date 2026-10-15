@@ -18,6 +18,8 @@ OBSERVED_ROOTS = {
     "PolarisDemandDatabaseVehicle",
     "PolarisDemandDatabaseVehicleClass",
     "PolarisDemandDatabaseVehicleType",
+    "PolarisHouseholdStateOutput",
+    "PolarisPersonStateOutput",
 }
 
 
