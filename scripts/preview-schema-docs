@@ -33,10 +33,22 @@ uv run gen-doc \
   --directory "$generated_docs" \
   "$deliverable_1_schema_path"
 
+# Remove case-colliding slot page before rendering synergy_schema.yaml so
+# case-insensitive filesystems (macOS APFS) create lowercase has_residential_charging.md,
+# and normalize the link target in PolarisDemandDatabaseHousehold.md.
+rm -f "$generated_docs/Has_Residential_Charging.md"
+
 uv run gen-doc \
   --no-render-imports \
   --directory "$generated_docs" \
   "$schema_path"
+
+uv run python -c '
+from pathlib import Path
+p = Path("'"$generated_docs"'/PolarisDemandDatabaseHousehold.md")
+if p.exists():
+    p.write_text(p.read_text().replace("(Has_Residential_Charging.md)", "(has_residential_charging.md)"))
+'
 
 uv run gen-doc \
   --no-render-imports \

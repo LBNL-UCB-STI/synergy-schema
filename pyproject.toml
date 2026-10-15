@@ -26,7 +26,8 @@ dev = [
   "pandas>=2,<3",
   "pytest>=8,<9",
   "tabulate>=0.9,<1",
-  "zensical==0.0.40",
+  "zensical==0.0.40; python_version < '3.11'",
+  "zensical==0.0.70; python_version >= '3.11'",
 ]
 
 [tool.hatch.build]
