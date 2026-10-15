@@ -16,6 +16,8 @@ POPULATION_CLASSES = [
     "PolarisDemandDatabaseHousehold",
     "PolarisDemandDatabasePerson",
     "PolarisDemandDatabaseVehicle",
+    "PolarisDemandDatabaseVehicleClass",
+    "PolarisDemandDatabaseVehicleType",
 ]
 
 REGIONAL_CLASSES = [
@@ -29,6 +31,8 @@ REGIONAL_CLASSES = [
     "PolarisDemandDatabaseHousehold",
     "PolarisDemandDatabasePerson",
     "PolarisDemandDatabaseVehicle",
+    "PolarisDemandDatabaseVehicleClass",
+    "PolarisDemandDatabaseVehicleType",
     "InputNetworkSkims",
     "NextYearNetworkSkims",
     "ActivitySimHouseholdInputRecord",
@@ -59,6 +63,8 @@ SYNTHFIRM_REGIONAL_CLASSES = [
     "SynthFirmB2BShipmentRecord",
     "SynthFirmInternationalFreightRecord",
     "PolarisDemandDatabaseVehicle",
+    "PolarisDemandDatabaseVehicleType",
+    "PolarisDemandDatabaseVehicleClass",
     "BeamVehicleRecord",
     "InputNetworkSkims",
 ]
@@ -74,6 +80,8 @@ POLARIS_REGIONAL_CLASSES = [
     "PolarisDemandDatabaseHousehold",
     "PolarisDemandDatabasePerson",
     "PolarisDemandDatabaseVehicle",
+    "PolarisDemandDatabaseVehicleClass",
+    "PolarisDemandDatabaseVehicleType",
     "InputNetworkSkims",
     "NextYearNetworkSkims",
 ]
@@ -178,6 +186,22 @@ def generate_mermaid_erd(
     ):
         lines.append(
             '    PolarisDemandDatabaseHousehold ||--|{ PolarisDemandDatabaseVehicle : "owns"'
+        )
+
+    if (
+        "PolarisDemandDatabaseVehicleType" in target_classes
+        and "PolarisDemandDatabaseVehicle" in target_classes
+    ):
+        lines.append(
+            '    PolarisDemandDatabaseVehicleType ||--o{ PolarisDemandDatabaseVehicle : "classifies"'
+        )
+
+    if (
+        "PolarisDemandDatabaseVehicleClass" in target_classes
+        and "PolarisDemandDatabaseVehicleType" in target_classes
+    ):
+        lines.append(
+            '    PolarisDemandDatabaseVehicleClass ||--o{ PolarisDemandDatabaseVehicleType : "defines class"'
         )
 
     if (

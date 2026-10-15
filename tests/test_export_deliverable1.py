@@ -38,6 +38,14 @@ def test_dist_contains_all_deliverable_schemas_and_files() -> None:
         schema_dir / "models" / "polaris" / "polaris_demand_database_v1.yaml"
     ).exists()
     assert (schema_dir / "models" / "polaris" / "polaris_skims.yaml").exists()
+    assert (
+        schema_dir / "models" / "activitysim" / "activitysim_population.yaml"
+    ).exists()
+    assert (schema_dir / "models" / "beam" / "beam.yaml").exists()
+    assert (schema_dir / "models" / "beam" / "beam_population.yaml").exists()
+    assert (schema_dir / "models" / "beam" / "beam_plans.yaml").exists()
+    assert (schema_dir / "models" / "beam" / "beam_skims.yaml").exists()
+    assert (schema_dir / "models" / "synthfirm" / "synthfirm.yaml").exists()
     assert (schema_dir / "mappings" / "single_year_handoff.yaml").exists()
     assert (
         DIST_DIR / "docs" / "resources" / "DEMOS_and_ATLAS_to_POLARIS_interface.xlsx"
@@ -121,11 +129,22 @@ def test_dist_schema_resolves_cleanly() -> None:
         "PolarisDemandDatabaseHousehold",
         "PolarisDemandDatabasePerson",
         "PolarisDemandDatabaseVehicle",
+        "PolarisDemandDatabaseVehicleClass",
+        "PolarisDemandDatabaseVehicleType",
         "InputNetworkSkims",
         "NextYearNetworkSkims",
         "SingleYearModelHandoffPackage",
         "ModelHandoffChannel",
         "CategoricalCrosswalkRule",
+        "ActivitySimHouseholdInputRecord",
+        "ActivitySimPersonInputRecord",
+        "BeamHouseholdRecord",
+        "BeamPersonRecord",
+        "BeamVehicleRecord",
+        "BeamPlanRecord",
+        "BeamPlanOutputRecord",
+        "BeamNetworkSkims",
+        "BeamODSkimsRecord",
         "SynthFirmEstablishmentRecord",
         "SynthFirmCarrierRecord",
         "SynthFirmB2BShipmentRecord",

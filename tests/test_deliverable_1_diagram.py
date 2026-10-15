@@ -56,7 +56,9 @@ def test_deliverable_1_uml_contains_all_models_and_diagrams() -> None:
 
     # Crosswalk annotations
     assert "Crosswalk X-P1" in rendered
-    assert "Crosswalk X-P2" in rendered
+    assert "Crosswalk X-P1, X-P2" in rendered
+    assert "Crosswalk X-P1, X-P6" in rendered
+    assert "Crosswalk X-P1 / D-P3a" in rendered
     assert "Crosswalk X-V1" in rendered
     assert "Crosswalk X-V2" in rendered
 

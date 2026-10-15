@@ -24,7 +24,7 @@ It reflects the authoritative specification established in the multi-agency inte
 | **POLARIS** DTA Solver | [`NextYearNetworkSkims`](../schema/NextYearNetworkSkims.md) (.omx) | Matrix Skims | Zone (i, j) | `sov_time_am`, `sov_time_pm`, `congestion_index` |
 | [`UrbanSimBlockMarginals`](../schema/UrbanSimBlockMarginals.md) | **SynthFirm** [`SynthFirmEstablishmentRecord`](../schema/SynthFirmEstablishmentRecord.md) | Zonal Control | `block_id` ↔ `MESOZONE` | Zonal employment by NAICS industry, commercial/industrial floor space |
 | **SynthFirm** Establishments | **SynthFirm** [`SynthFirmB2BShipmentRecord`](../schema/SynthFirmB2BShipmentRecord.md) | Freight Contracts | `BusID` ↔ `SellerID`/`BuyerID` | Commodity SCTG 1–5, shipment tonnage, truckload, private/for-hire carrier |
-| **SynthFirm** Fleets | **POLARIS** `Demand.sqlite/Vehicle` ([`PolarisDemandDatabaseVehicle`](../schema/PolarisDemandDatabaseVehicle.md)) | Commercial Fleets | `BusID` ↔ `location` | Commercial truck fleet inventory, class, and depot locations |
+| **SynthFirm** Fleets ([`SynthFirmEstablishmentRecord`](../schema/SynthFirmEstablishmentRecord.md)) | **POLARIS** `Demand.sqlite/Vehicle` ([`PolarisDemandDatabaseVehicle`](../schema/PolarisDemandDatabaseVehicle.md)) | Commercial Fleets (`wide_to_long`) | `BusID` ↔ `hhold` / `fleet_id` ↔ `fleet` | Wide fleet counts (`diesel_class_1_2a`..`electric_class_7_8_vocational`, `EV_powertrain`) unpivoted to discrete vehicles (`vehicle_id`, `fleet`, `type` via `Vehicle_Type`) |
 | **SynthFirm** Shipments | **BEAM** `freight-plans.xml` ([`BeamPlanRecord`](../schema/BeamPlanRecord.md)) | Freight Tours | `BusID` ↔ `depot_id` | Commercial multi-stop tours, payload, and depot charging profiles |
 
 ---
@@ -118,13 +118,15 @@ It reflects the authoritative specification established in the multi-agency inte
 
 === "SynthFirm Fleets → POLARIS Commercial Vehicles"
 
+    `SynthFirmEstablishmentRecord` stores commercial fleets in **wide format** across 13 fuel × FHWA-class count columns (`diesel_class_1_2a` .. `electric_class_7_8_vocational`), `EV_powertrain`, and aggregate `n_trucks`. A `wide_to_long` unpivot expands non-zero fleet counts into discrete commercial vehicle records targeting `PolarisDemandDatabaseVehicle` (and `PolarisDemandDatabaseVehicleType`):
+
     | SynthFirm Column | POLARIS Column | Mode | Rule / Crosswalk | Description & Residue Handling |
     | :--- | :--- | :--- | :--- | :--- |
-    | `BusID` | `location` | `derived` | Depot TAZ | Firm location mapped to POLARIS TAZ zone to define vehicle depot. |
-    | `fleet_id` | `vehicle_id` | `derived` | Sequence | Unique commercial vehicle ID assigned within firm fleet. |
-    | `veh_type` | `vehicle_class` | `derived` | **X-V1** | Vocational truck or tractor trailer mapped to POLARIS commercial vehicle class. |
-    | `fuel` | `fuel_type` | `enum_crosswalk`| **X-V3** | Diesel, Gasoline, or Electric powertrain mapping. |
-    | `n_trucks` | — | *Residue* | Fleet Size | Aggregate depot fleet size used for tour sampling. |
+    | `BusID`, `MESOZONE` | `hhold` *(or depot TAZ)* | `derived` | Depot / Owner Link | Establishment identifier (`BusID`) and zone (`MESOZONE`) anchor the commercial vehicle owner (`Vehicle.hhold`) and depot TAZ location (`PolarisDemandDatabaseVehicle` has no `location` column). |
+    | `fleet_id` *(unpivoted index)* | `vehicle_id`, `fleet` | `wide_to_long` | Sequence | Sub-fleet allocation index (`fleet_id`) expanded across `n_trucks` to assign unique `Vehicle.vehicle_id` and commercial `Vehicle.fleet` indicator. |
+    | `diesel_class_1_2a` .. `electric_class_7_8_vocational` | `Vehicle_Type.vehicle_class`, `Vehicle_Type.fuel_type`, `Vehicle.type` | `wide_to_long` | **X-V1**, **X-V3**, **X-V5** | 13 wide fuel × class count columns unpivoted into discrete vehicle rows; FHWA class and fuel resolve to composite `Vehicle_Type.type_id` (`Vehicle.type`). |
+    | `EV_powertrain` | `Vehicle_Type.powertrain_type` | `enum_crosswalk` | **X-V2**, **X-V5** | Maps `SynthFirmPowertrainEnum` (`BEV`, `PHEV`, `FCEV`) to `Vehicle_Type.powertrain_type` (and `fuel_type` = Electricity/H2) when resolving `Vehicle.type`. |
+    | `n_trucks` | — | *Residue* | Unpivot Total Check | Aggregate establishment truck count; equals the sum of unpivoted commercial vehicle rows generated for `(BusID, fleet_id)`. |
 
 === "SynthFirm B2B Shipments → BEAM Freight Plans"
 

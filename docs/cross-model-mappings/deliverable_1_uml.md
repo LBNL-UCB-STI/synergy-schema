@@ -318,13 +318,13 @@ classDiagram
         +int household [FK]
         +float id [Ordinal]
         +int age
-        +int gender [Crosswalk X-P2]
+        +int gender [Crosswalk X-P1]
         +int relp [Crosswalk X-P1]
-        +int education [Crosswalk X-P4]
-        +float employment [Crosswalk X-P5]
-        +float school_enrollment [Crosswalk X-P6]
+        +int education [Crosswalk X-P1, X-P6]
+        +float employment [Crosswalk X-P1, X-P2]
+        +float school_enrollment [Crosswalk X-P1]
         +float income
-        +int marital_status
+        +int marital_status [Crosswalk X-P1 / D-P3a]
         +string serialno_pums [PUMS Trace]
         +float sporder [PUMS Order]
     }
@@ -384,7 +384,7 @@ classDiagram
 ## 5. POLARIS Activity-Based Demand & Network Skims Schema
 
 POLARIS consumes the integrated demographic, land-use, and vehicle microdata into its [`PolarisDemandDatabaseHousehold`](../schema/PolarisDemandDatabaseHousehold.md),
-[`PolarisDemandDatabasePerson`](../schema/PolarisDemandDatabasePerson.md), and [`PolarisDemandDatabaseVehicle`](../schema/PolarisDemandDatabaseVehicle.md) relational tables,
+[`PolarisDemandDatabasePerson`](../schema/PolarisDemandDatabasePerson.md), [`PolarisDemandDatabaseVehicle`](../schema/PolarisDemandDatabaseVehicle.md), [`PolarisDemandDatabaseVehicleClass`](../schema/PolarisDemandDatabaseVehicleClass.md), and [`PolarisDemandDatabaseVehicleType`](../schema/PolarisDemandDatabaseVehicleType.md) relational tables,
 runs activity-based traffic simulation, and emits updated dynamic network skims ([`NextYearNetworkSkims`](../schema/NextYearNetworkSkims.md)).
 
 ```mermaid
@@ -403,11 +403,12 @@ classDiagram
         +int household [FK]
         +int id [Ordinal]
         +int age
-        +int gender [Crosswalk X-P2]
+        +int gender [Crosswalk X-P1]
         +int relate [Crosswalk X-P1]
-        +int education [Crosswalk X-P4]
-        +int worker_type [Crosswalk X-P5]
-        +int student_status [Crosswalk X-P6]
+        +int education [Crosswalk X-P1, X-P6]
+        +int employment [Crosswalk X-P1, X-P2]
+        +int school_enrollment [Crosswalk X-P1]
+        +int school_grade_level [Crosswalk X-P3..X-P5]
         +int income
     }
     class PolarisDemandDatabaseVehicle {

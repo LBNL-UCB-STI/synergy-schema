@@ -74,3 +74,22 @@ def test_demos_provisional_schema_marks_status_and_conservative_required_types()
     assert "hhold" not in person.attributes
     assert not person.attributes["id"].identifier
     assert not person.unique_keys
+
+
+def test_demos_person_crosswalk_annotations_match_interface_spec() -> None:
+    view = SchemaView(str(SCHEMA_PATH))
+    person = view.get_class("DemosPolarisMappedPerson")
+
+    assert person.attributes["relp"].annotations["crosswalk"].value == "X-P1"
+    assert person.attributes["gender"].annotations["crosswalk"].value == "X-P1"
+    assert person.attributes["education"].annotations["crosswalk"].value == "X-P1, X-P6"
+    assert (
+        person.attributes["employment"].annotations["crosswalk"].value == "X-P1, X-P2"
+    )
+    assert (
+        person.attributes["school_enrollment"].annotations["crosswalk"].value == "X-P1"
+    )
+    assert person.attributes["marital_status"].annotations["crosswalk"].value == "X-P1"
+    assert (
+        person.attributes["marital_status"].annotations["donor_draw"].value == "D-P3a"
+    )

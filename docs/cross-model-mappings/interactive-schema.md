@@ -16,6 +16,8 @@ erDiagram
     AtlasHouseholdFleetOutput ||--|{ AtlasVehicleFleetOutput : "owns"
     PolarisDemandDatabaseHousehold ||--|{ PolarisDemandDatabasePerson : "contains"
     PolarisDemandDatabaseHousehold ||--|{ PolarisDemandDatabaseVehicle : "owns"
+    PolarisDemandDatabaseVehicleType ||--o{ PolarisDemandDatabaseVehicle : "classifies"
+    PolarisDemandDatabaseVehicleClass ||--o{ PolarisDemandDatabaseVehicleType : "defines class"
     DemosPolarisMappedHousehold ||--|| AtlasHouseholdFleetOutput : "1:1 fleet join"
     DemosPolarisMappedHousehold ||--|| PolarisDemandDatabaseHousehold : "pop recode lineage"
     DemosPolarisMappedPerson ||--|| PolarisDemandDatabasePerson : "pop recode lineage"
@@ -72,21 +74,81 @@ erDiagram
         int persons "Physical household person-count column"
         int workers "Physical household worker-count column"
         int vehicles "Physical household vehicle-count column"
-        int type "Physical household type field; code..."
-        int income "Physical household income field;..."
-        int housing_unit_type "Physical housing-unit-type field;..."
+        int type "Physical household type code..."
+        int income "Physical household annual income in..."
+        int bikes "Physical household bicycle count column"
+        int housing_unit_type "Physical housing-unit-type code..."
+        int ecom "Physical household e-commerce order..."
+        float delRat "Physical delivery ratio factor"
+        int dispose_veh "Physical vehicle disposal..."
+        int Has_Residential_Charging "Physical indicator for residential EV..."
+        int num_groceries "Physical count of grocery delivery..."
+        int num_meals "Physical count of meal delivery..."
+        float time_in_home "Longitudinal residence duration in..."
     }
 
     PolarisDemandDatabasePerson {
         int person PK "Physical Person primary-key column"
         int household FK "Physical household join value checked..."
         int id "Physical within-household person..."
+        int school_location_id "Physical school location identifier..."
+        int work_location_id "Physical work location identifier (-1..."
+        int age "Physical person age in years"
+        int worker_class "Physical worker class code (ACS COW: 0"
+        int education "Physical education level code (ACS..."
+        int industry "Physical employment industry code..."
+        int employment "Physical employment status code..."
+        int gender "Physical gender code (crosswalk X-P1:..."
+        int income "Physical person annual income in..."
+        int journey_to_work_arrival_time "Commute arrival time in minutes after..."
+        int journey_to_work_mode "Commute mode code"
+        int journey_to_work_travel_time "Commute travel time in minutes"
+        int journey_to_work_vehicle_occupancy "Commute vehicle occupancy count"
+        int marital_status "Physical marital status code..."
+        int race "Physical race category code..."
+        int school_enrollment "Physical school enrollment status..."
+        int school_grade_level "Physical school grade level code..."
+        int work_hours "Usual weekly work hours"
+        int telecommute_level "Telecommute frequency level (0"
+        int transit_pass "Transit pass possession indicator"
+        int disability "Disability status code (crosswalk..."
+        float time_in_job "Longitudinal job tenure in years"
+        int is_long_term_chooser "Indicator marking persons whose long-..."
+        int escooter_use_level "E-scooter usage frequency level (0"
     }
 
     PolarisDemandDatabaseVehicle {
-        int vehicle_id PK "Physical Vehicle primary-key column"
+        int vehicle_id PK "Physical within-household or fleet..."
         int hhold FK "Physical household join value checked..."
-        int type "Physical vehicle type field; code..."
+        int type FK "Physical foreign key referencing..."
+        int parking "Physical vehicle parking arrangement..."
+        int L3_wtp "Willingness-to-pay for Level 3..."
+        int L4_wtp "Willingness-to-pay for Level 4..."
+        int fleet "Fleet vehicle classification indicator"
+        int subtype "Physical vehicle subtype identifier"
+    }
+
+    PolarisDemandDatabaseVehicleClass {
+        int class_id PK "Physical vehicle class identifier (1"
+        string class_type "Vehicle class name (e"
+        int capacity "Passenger capacity"
+        float length "Vehicle length"
+        float max_speed "Maximum speed"
+        float max_accel "Maximum acceleration"
+        float max_decel "Maximum deceleration"
+        int ev_ml_class "EV machine learning powertrain class"
+    }
+
+    PolarisDemandDatabaseVehicleType {
+        int type_id PK "Physical vehicle type primary key..."
+        int vehicle_class FK "Reference to Vehicle_Class"
+        int connectivity_type "Vehicle connectivity level (crosswalk..."
+        int powertrain_type "Powertrain type (crosswalk X-V2 /..."
+        int automation_type "Automation level (crosswalk X-V5:..."
+        int fuel_type "Fuel type (crosswalk X-V3 / X-V5:..."
+        int vintage_type "Vintage age category (crosswalk X-V4..."
+        int ev_features_id "EV features identifier"
+        float operating_cost_per_mile "Operating cost per mile in dollars"
     }
 
 ```
@@ -105,6 +167,8 @@ The regional architecture diagrams link the tables across the modeling suite. To
         AtlasHouseholdFleetOutput ||--|{ AtlasVehicleFleetOutput : "owns"
         PolarisDemandDatabaseHousehold ||--|{ PolarisDemandDatabasePerson : "contains"
         PolarisDemandDatabaseHousehold ||--|{ PolarisDemandDatabaseVehicle : "owns"
+        PolarisDemandDatabaseVehicleType ||--o{ PolarisDemandDatabaseVehicle : "classifies"
+        PolarisDemandDatabaseVehicleClass ||--o{ PolarisDemandDatabaseVehicleType : "defines class"
         UrbanSimBlockMarginals ||--|{ BlockToTazMapping : "maps_to"
         UrbanSimZonalTotals ||--|{ BlockToTazMapping : "aggregates"
         DemosPolarisMappedHousehold ||--|| AtlasHouseholdFleetOutput : "1:1 fleet join"
@@ -409,21 +473,81 @@ The regional architecture diagrams link the tables across the modeling suite. To
             int persons "Physical household person-count column"
             int workers "Physical household worker-count column"
             int vehicles "Physical household vehicle-count column"
-            int type "Physical household type field; code..."
-            int income "Physical household income field;..."
-            int housing_unit_type "Physical housing-unit-type field;..."
+            int type "Physical household type code..."
+            int income "Physical household annual income in..."
+            int bikes "Physical household bicycle count column"
+            int housing_unit_type "Physical housing-unit-type code..."
+            int ecom "Physical household e-commerce order..."
+            float delRat "Physical delivery ratio factor"
+            int dispose_veh "Physical vehicle disposal..."
+            int Has_Residential_Charging "Physical indicator for residential EV..."
+            int num_groceries "Physical count of grocery delivery..."
+            int num_meals "Physical count of meal delivery..."
+            float time_in_home "Longitudinal residence duration in..."
         }
 
         PolarisDemandDatabasePerson {
             int person PK "Physical Person primary-key column"
             int household FK "Physical household join value checked..."
             int id "Physical within-household person..."
+            int school_location_id "Physical school location identifier..."
+            int work_location_id "Physical work location identifier (-1..."
+            int age "Physical person age in years"
+            int worker_class "Physical worker class code (ACS COW: 0"
+            int education "Physical education level code (ACS..."
+            int industry "Physical employment industry code..."
+            int employment "Physical employment status code..."
+            int gender "Physical gender code (crosswalk X-P1:..."
+            int income "Physical person annual income in..."
+            int journey_to_work_arrival_time "Commute arrival time in minutes after..."
+            int journey_to_work_mode "Commute mode code"
+            int journey_to_work_travel_time "Commute travel time in minutes"
+            int journey_to_work_vehicle_occupancy "Commute vehicle occupancy count"
+            int marital_status "Physical marital status code..."
+            int race "Physical race category code..."
+            int school_enrollment "Physical school enrollment status..."
+            int school_grade_level "Physical school grade level code..."
+            int work_hours "Usual weekly work hours"
+            int telecommute_level "Telecommute frequency level (0"
+            int transit_pass "Transit pass possession indicator"
+            int disability "Disability status code (crosswalk..."
+            float time_in_job "Longitudinal job tenure in years"
+            int is_long_term_chooser "Indicator marking persons whose long-..."
+            int escooter_use_level "E-scooter usage frequency level (0"
         }
 
         PolarisDemandDatabaseVehicle {
-            int vehicle_id PK "Physical Vehicle primary-key column"
+            int vehicle_id PK "Physical within-household or fleet..."
             int hhold FK "Physical household join value checked..."
-            int type "Physical vehicle type field; code..."
+            int type FK "Physical foreign key referencing..."
+            int parking "Physical vehicle parking arrangement..."
+            int L3_wtp "Willingness-to-pay for Level 3..."
+            int L4_wtp "Willingness-to-pay for Level 4..."
+            int fleet "Fleet vehicle classification indicator"
+            int subtype "Physical vehicle subtype identifier"
+        }
+
+        PolarisDemandDatabaseVehicleClass {
+            int class_id PK "Physical vehicle class identifier (1"
+            string class_type "Vehicle class name (e"
+            int capacity "Passenger capacity"
+            float length "Vehicle length"
+            float max_speed "Maximum speed"
+            float max_accel "Maximum acceleration"
+            float max_decel "Maximum deceleration"
+            int ev_ml_class "EV machine learning powertrain class"
+        }
+
+        PolarisDemandDatabaseVehicleType {
+            int type_id PK "Physical vehicle type primary key..."
+            int vehicle_class FK "Reference to Vehicle_Class"
+            int connectivity_type "Vehicle connectivity level (crosswalk..."
+            int powertrain_type "Powertrain type (crosswalk X-V2 /..."
+            int automation_type "Automation level (crosswalk X-V5:..."
+            int fuel_type "Fuel type (crosswalk X-V3 / X-V5:..."
+            int vintage_type "Vintage age category (crosswalk X-V4..."
+            int ev_features_id "EV features identifier"
+            float operating_cost_per_mile "Operating cost per mile in dollars"
         }
 
         SynthFirmB2BShipmentRecord {
@@ -592,6 +716,8 @@ The regional architecture diagrams link the tables across the modeling suite. To
         AtlasHouseholdFleetOutput ||--|{ AtlasVehicleFleetOutput : "owns"
         PolarisDemandDatabaseHousehold ||--|{ PolarisDemandDatabasePerson : "contains"
         PolarisDemandDatabaseHousehold ||--|{ PolarisDemandDatabaseVehicle : "owns"
+        PolarisDemandDatabaseVehicleType ||--o{ PolarisDemandDatabaseVehicle : "classifies"
+        PolarisDemandDatabaseVehicleClass ||--o{ PolarisDemandDatabaseVehicleType : "defines class"
         UrbanSimBlockMarginals ||--|{ BlockToTazMapping : "maps_to"
         UrbanSimZonalTotals ||--|{ BlockToTazMapping : "aggregates"
         DemosPolarisMappedHousehold ||--|| AtlasHouseholdFleetOutput : "1:1 fleet join"
@@ -688,21 +814,81 @@ The regional architecture diagrams link the tables across the modeling suite. To
             int persons "Physical household person-count column"
             int workers "Physical household worker-count column"
             int vehicles "Physical household vehicle-count column"
-            int type "Physical household type field; code..."
-            int income "Physical household income field;..."
-            int housing_unit_type "Physical housing-unit-type field;..."
+            int type "Physical household type code..."
+            int income "Physical household annual income in..."
+            int bikes "Physical household bicycle count column"
+            int housing_unit_type "Physical housing-unit-type code..."
+            int ecom "Physical household e-commerce order..."
+            float delRat "Physical delivery ratio factor"
+            int dispose_veh "Physical vehicle disposal..."
+            int Has_Residential_Charging "Physical indicator for residential EV..."
+            int num_groceries "Physical count of grocery delivery..."
+            int num_meals "Physical count of meal delivery..."
+            float time_in_home "Longitudinal residence duration in..."
         }
 
         PolarisDemandDatabasePerson {
             int person PK "Physical Person primary-key column"
             int household FK "Physical household join value checked..."
             int id "Physical within-household person..."
+            int school_location_id "Physical school location identifier..."
+            int work_location_id "Physical work location identifier (-1..."
+            int age "Physical person age in years"
+            int worker_class "Physical worker class code (ACS COW: 0"
+            int education "Physical education level code (ACS..."
+            int industry "Physical employment industry code..."
+            int employment "Physical employment status code..."
+            int gender "Physical gender code (crosswalk X-P1:..."
+            int income "Physical person annual income in..."
+            int journey_to_work_arrival_time "Commute arrival time in minutes after..."
+            int journey_to_work_mode "Commute mode code"
+            int journey_to_work_travel_time "Commute travel time in minutes"
+            int journey_to_work_vehicle_occupancy "Commute vehicle occupancy count"
+            int marital_status "Physical marital status code..."
+            int race "Physical race category code..."
+            int school_enrollment "Physical school enrollment status..."
+            int school_grade_level "Physical school grade level code..."
+            int work_hours "Usual weekly work hours"
+            int telecommute_level "Telecommute frequency level (0"
+            int transit_pass "Transit pass possession indicator"
+            int disability "Disability status code (crosswalk..."
+            float time_in_job "Longitudinal job tenure in years"
+            int is_long_term_chooser "Indicator marking persons whose long-..."
+            int escooter_use_level "E-scooter usage frequency level (0"
         }
 
         PolarisDemandDatabaseVehicle {
-            int vehicle_id PK "Physical Vehicle primary-key column"
+            int vehicle_id PK "Physical within-household or fleet..."
             int hhold FK "Physical household join value checked..."
-            int type "Physical vehicle type field; code..."
+            int type FK "Physical foreign key referencing..."
+            int parking "Physical vehicle parking arrangement..."
+            int L3_wtp "Willingness-to-pay for Level 3..."
+            int L4_wtp "Willingness-to-pay for Level 4..."
+            int fleet "Fleet vehicle classification indicator"
+            int subtype "Physical vehicle subtype identifier"
+        }
+
+        PolarisDemandDatabaseVehicleClass {
+            int class_id PK "Physical vehicle class identifier (1"
+            string class_type "Vehicle class name (e"
+            int capacity "Passenger capacity"
+            float length "Vehicle length"
+            float max_speed "Maximum speed"
+            float max_accel "Maximum acceleration"
+            float max_decel "Maximum deceleration"
+            int ev_ml_class "EV machine learning powertrain class"
+        }
+
+        PolarisDemandDatabaseVehicleType {
+            int type_id PK "Physical vehicle type primary key..."
+            int vehicle_class FK "Reference to Vehicle_Class"
+            int connectivity_type "Vehicle connectivity level (crosswalk..."
+            int powertrain_type "Powertrain type (crosswalk X-V2 /..."
+            int automation_type "Automation level (crosswalk X-V5:..."
+            int fuel_type "Fuel type (crosswalk X-V3 / X-V5:..."
+            int vintage_type "Vintage age category (crosswalk X-V4..."
+            int ev_features_id "EV features identifier"
+            float operating_cost_per_mile "Operating cost per mile in dollars"
         }
 
         UrbanSimBlockMarginals {
@@ -1184,6 +1370,8 @@ The regional architecture diagrams link the tables across the modeling suite. To
 
     ```mermaid
     erDiagram
+        PolarisDemandDatabaseVehicleType ||--o{ PolarisDemandDatabaseVehicle : "classifies"
+        PolarisDemandDatabaseVehicleClass ||--o{ PolarisDemandDatabaseVehicleType : "defines class"
         UrbanSimZonalTotals ||--o{ InputNetworkSkims : "TAZ dimension"
         SynthFirmEstablishmentRecord ||--o{ SynthFirmB2BShipmentRecord : "seller / buyer"
         SynthFirmEstablishmentRecord ||--|| SynthFirmCarrierRecord : "for-hire carrier"
@@ -1225,9 +1413,37 @@ The regional architecture diagrams link the tables across the modeling suite. To
         }
 
         PolarisDemandDatabaseVehicle {
-            int vehicle_id PK "Physical Vehicle primary-key column"
+            int vehicle_id PK "Physical within-household or fleet..."
             int hhold FK "Physical household join value checked..."
-            int type "Physical vehicle type field; code..."
+            int type FK "Physical foreign key referencing..."
+            int parking "Physical vehicle parking arrangement..."
+            int L3_wtp "Willingness-to-pay for Level 3..."
+            int L4_wtp "Willingness-to-pay for Level 4..."
+            int fleet "Fleet vehicle classification indicator"
+            int subtype "Physical vehicle subtype identifier"
+        }
+
+        PolarisDemandDatabaseVehicleClass {
+            int class_id PK "Physical vehicle class identifier (1"
+            string class_type "Vehicle class name (e"
+            int capacity "Passenger capacity"
+            float length "Vehicle length"
+            float max_speed "Maximum speed"
+            float max_accel "Maximum acceleration"
+            float max_decel "Maximum deceleration"
+            int ev_ml_class "EV machine learning powertrain class"
+        }
+
+        PolarisDemandDatabaseVehicleType {
+            int type_id PK "Physical vehicle type primary key..."
+            int vehicle_class FK "Reference to Vehicle_Class"
+            int connectivity_type "Vehicle connectivity level (crosswalk..."
+            int powertrain_type "Powertrain type (crosswalk X-V2 /..."
+            int automation_type "Automation level (crosswalk X-V5:..."
+            int fuel_type "Fuel type (crosswalk X-V3 / X-V5:..."
+            int vintage_type "Vintage age category (crosswalk X-V4..."
+            int ev_features_id "EV features identifier"
+            float operating_cost_per_mile "Operating cost per mile in dollars"
         }
 
         SynthFirmB2BShipmentRecord {
@@ -1403,6 +1619,8 @@ The table below documents every intra-model foreign key and cross-model handoff 
 | [`AtlasVehicleFleetOutput`](../schema/AtlasVehicleFleetOutput.md) | `houseid` `[FK]` | [`AtlasHouseholdFleetOutput`](../schema/AtlasHouseholdFleetOutput.md) | `houseid` `[PK]` | $N:1$ | Intra-Model FK | Associates discrete vehicles with synthesized household fleets |
 | [`PolarisDemandDatabasePerson`](../schema/PolarisDemandDatabasePerson.md) | `household` `[FK]` | [`PolarisDemandDatabaseHousehold`](../schema/PolarisDemandDatabaseHousehold.md) | `household` `[PK]` | $N:1$ | Intra-Model FK | Enforces POLARIS traveler membership in households |
 | [`PolarisDemandDatabaseVehicle`](../schema/PolarisDemandDatabaseVehicle.md) | `hhold` `[FK]` | [`PolarisDemandDatabaseHousehold`](../schema/PolarisDemandDatabaseHousehold.md) | `household` `[PK]` | $N:1$ | Intra-Model FK | Associates POLARIS vehicles with households |
+| [`PolarisDemandDatabaseVehicle`](../schema/PolarisDemandDatabaseVehicle.md) | `type` `[FK]` | [`PolarisDemandDatabaseVehicleType`](../schema/PolarisDemandDatabaseVehicleType.md) | `type_id` `[PK]` | $N:1$ | Intra-Model FK | Resolves vehicle composite powertrain/fuel/vintage type (`X-V5`) |
+| [`PolarisDemandDatabaseVehicleType`](../schema/PolarisDemandDatabaseVehicleType.md) | `vehicle_class` `[FK]` | [`PolarisDemandDatabaseVehicleClass`](../schema/PolarisDemandDatabaseVehicleClass.md) | `class_id` `[PK]` | $N:1$ | Intra-Model FK | Links composite vehicle type to physical vehicle size/body class (`X-V1`) |
 | [`AtlasHouseholdFleetOutput`](../schema/AtlasHouseholdFleetOutput.md) | `houseid` `[FK]` | [`DemosPolarisMappedHousehold`](../schema/DemosPolarisMappedHousehold.md) | `household` `[PK]` | $1:1$ | Cross-Model Join | Joins ATLAS synthesized vehicle counts to DEMOS households |
 | [`PolarisDemandDatabaseHousehold`](../schema/PolarisDemandDatabaseHousehold.md) | `household` `[FK]` | [`DemosPolarisMappedHousehold`](../schema/DemosPolarisMappedHousehold.md) | `household` `[PK]` | $1:1$ | Cross-Model Lineage | Lineage tracking from DEMOS base population to POLARIS demand |
 | [`PolarisDemandDatabasePerson`](../schema/PolarisDemandDatabasePerson.md) | `person` `[FK]` | [`DemosPolarisMappedPerson`](../schema/DemosPolarisMappedPerson.md) | `person` `[PK]` | $1:1$ | Cross-Model Lineage | Lineage tracking & direct attribute translation from DEMOS synthetic persons to POLARIS demand persons |

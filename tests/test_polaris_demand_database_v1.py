@@ -25,6 +25,8 @@ def test_v1_is_a_provisional_observed_record_set() -> None:
         "PolarisDemandDatabaseHousehold",
         "PolarisDemandDatabasePerson",
         "PolarisDemandDatabaseVehicle",
+        "PolarisDemandDatabaseVehicleClass",
+        "PolarisDemandDatabaseVehicleType",
     }
 
 
@@ -41,9 +43,75 @@ def test_selected_roots_have_observed_physical_keys_and_names() -> None:
             "type",
             "income",
             "housing_unit_type",
+            "bikes",
+            "delRat",
+            "dispose_veh",
+            "ecom",
+            "Has_Residential_Charging",
+            "num_groceries",
+            "num_meals",
+            "time_in_home",
         },
-        "PolarisDemandDatabasePerson": {"person", "household", "id"},
-        "PolarisDemandDatabaseVehicle": {"vehicle_id", "hhold", "type"},
+        "PolarisDemandDatabasePerson": {
+            "person",
+            "household",
+            "id",
+            "age",
+            "disability",
+            "education",
+            "employment",
+            "escooter_use_level",
+            "gender",
+            "income",
+            "industry",
+            "is_long_term_chooser",
+            "journey_to_work_arrival_time",
+            "journey_to_work_mode",
+            "journey_to_work_travel_time",
+            "journey_to_work_vehicle_occupancy",
+            "marital_status",
+            "race",
+            "school_enrollment",
+            "school_grade_level",
+            "school_location_id",
+            "telecommute_level",
+            "time_in_job",
+            "transit_pass",
+            "work_hours",
+            "work_location_id",
+            "worker_class",
+        },
+        "PolarisDemandDatabaseVehicle": {
+            "vehicle_id",
+            "hhold",
+            "parking",
+            "L3_wtp",
+            "L4_wtp",
+            "type",
+            "fleet",
+            "subtype",
+        },
+        "PolarisDemandDatabaseVehicleClass": {
+            "class_id",
+            "class_type",
+            "capacity",
+            "length",
+            "max_speed",
+            "max_accel",
+            "max_decel",
+            "ev_ml_class",
+        },
+        "PolarisDemandDatabaseVehicleType": {
+            "type_id",
+            "vehicle_class",
+            "connectivity_type",
+            "powertrain_type",
+            "automation_type",
+            "fuel_type",
+            "vintage_type",
+            "ev_features_id",
+            "operating_cost_per_mile",
+        },
     }
     for class_name, fields in expected.items():
         cls = view.induced_class(class_name)
@@ -66,12 +134,14 @@ def test_hhold_is_distinct_from_household_and_not_unique() -> None:
 
 def test_population_joins_are_external_validation_checks() -> None:
     view = SchemaView(str(SCHEMA_PATH))
-    for class_name, slot_name in [
-        ("PolarisDemandDatabasePerson", "household"),
-        ("PolarisDemandDatabaseVehicle", "hhold"),
+    for class_name, slot_name, target in [
+        ("PolarisDemandDatabasePerson", "household", ".household"),
+        ("PolarisDemandDatabaseVehicle", "hhold", ".household"),
+        ("PolarisDemandDatabaseVehicle", "type", ".type_id"),
+        ("PolarisDemandDatabaseVehicleType", "vehicle_class", ".class_id"),
     ]:
         slot = view.induced_slot(slot_name, class_name)
-        assert slot.annotations["relationship_target"].value.endswith(".household")
+        assert slot.annotations["relationship_target"].value.endswith(target)
         assert slot.annotations["validation_boundary"].value == (
             "external conformance check, not a SQLite foreign key"
         )

@@ -33,6 +33,8 @@ def test_deliverable_1_schema_contains_all_models_and_channels() -> None:
     assert "PolarisDemandDatabaseHousehold" in classes
     assert "PolarisDemandDatabasePerson" in classes
     assert "PolarisDemandDatabaseVehicle" in classes
+    assert "PolarisDemandDatabaseVehicleClass" in classes
+    assert "PolarisDemandDatabaseVehicleType" in classes
     assert "InputNetworkSkims" in classes
     assert "NextYearNetworkSkims" in classes
 
@@ -45,7 +47,9 @@ def test_deliverable_1_schema_contains_all_models_and_channels() -> None:
     assert "BeamPersonRecord" in classes
     assert "BeamVehicleRecord" in classes
     assert "BeamPlanRecord" in classes
+    assert "BeamPlanOutputRecord" in classes
     assert "BeamNetworkSkims" in classes
+    assert "BeamODSkimsRecord" in classes
 
     # SynthFirm
     assert "SynthFirmEstablishmentRecord" in classes

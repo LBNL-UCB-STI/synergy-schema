@@ -80,7 +80,7 @@ flowchart TD
 | **POLARIS** DTA Solver | `NextYearNetworkSkims` (.omx) | Matrix Skims | Zone (i, j) | `sov_time_am`, `sov_time_pm`, `congestion_index` |
 | `UrbanSimBlockMarginals` | **SynthFirm** `SynthFirmEstablishmentRecord` | Zonal Control | `block_id` ↔ `MESOZONE` | Zonal employment by NAICS industry, commercial/industrial floor space |
 | **SynthFirm** Establishments | **SynthFirm** `SynthFirmB2BShipmentRecord` | Freight Contracts | `BusID` ↔ `SellerID`/`BuyerID` | Commodity SCTG 1–5, shipment tonnage, truckload, private/for-hire carrier |
-| **SynthFirm** Fleets | **POLARIS** `Demand.sqlite/Vehicle` | Commercial Fleets | `BusID` ↔ `location` | Commercial truck fleet inventory, class, and depot locations |
+| **SynthFirm** Fleets (`SynthFirmEstablishmentRecord`) | **POLARIS** `Demand.sqlite/Vehicle` | Commercial Fleets (`wide_to_long`) | `BusID` ↔ `hhold` / `fleet_id` ↔ `fleet` | Wide fleet counts (`diesel_class_1_2a`..`electric_class_7_8_vocational`, `EV_powertrain`) unpivoted to discrete vehicles (`vehicle_id`, `fleet`, `type` via `Vehicle_Type`) |
 | **SynthFirm** Shipments | **BEAM** `freight-plans.xml` | Freight Tours | `BusID` ↔ `depot_id` | Commercial multi-stop tours, payload, and depot charging profiles |
 
 ---
