@@ -1,8 +1,7 @@
-# Deliverable 1 - Static Cross-Model Schema UML & Architecture
+# Architecture & Per-Model UML Class Diagrams
 
-This document renders the visual entity-relationship class diagrams and multi-model
-data-flow maps for the static single-year integration across UrbanSim, DEMOS, ATLAS,
-POLARIS, and Travel Network Skims (.omx).
+This page maps the single-year data exchange workflows and class structures across **UrbanSim**, **DEMOS**, **ATLAS**, **POLARIS**, **ActivitySim**, **BEAM**, **SynthFirm**, and **Network Skims** (`.omx` / `.zarr`).
+Click any node or class header in a diagram to open its LinkML field specification.
 
 ---
 
@@ -10,8 +9,7 @@ POLARIS, and Travel Network Skims (.omx).
 
 === "Primary Workflow: POLARIS Dynamic Traffic Assignment"
 
-    The primary Year 1 deliverable centers on the core Synergy workflow with POLARIS
-    as the activity-based travel demand and dynamic traffic assignment engine:
+    In the primary ANL/LBNL workflow, **UrbanSim** land-use marginals, **DEMOS** synthetic households and persons, and **ATLAS** household vehicle fleets populate **POLARIS** (`Supply.sqlite` and `Demand.sqlite`) for activity-based simulation and dynamic traffic assignment:
 
     ```mermaid
     flowchart TD
@@ -86,9 +84,7 @@ POLARIS, and Travel Network Skims (.omx).
 
 === "LBL Counterpart Workflow: ActivitySim Demand & BEAM Dynamic Simulation"
 
-    Synergy also supports LBL-maintained tools—ActivitySim and BEAM—demonstrating that
-    the upstream scenario state (UrbanSim land use, DEMOS population, and ATLAS vehicle fleet)
-    can seamlessly drive alternative demand and simulation engines:
+    In the LBNL counterpart workflow, the same upstream scenario state (**UrbanSim** land use, **DEMOS** population, and **ATLAS** vehicles) feeds **ActivitySim** tour/trip demand and **BEAM** multi-agent traffic, transit, and charging simulation:
 
     ```mermaid
     flowchart TD
@@ -184,9 +180,7 @@ POLARIS, and Travel Network Skims (.omx).
 
 === "Freight & Commercial Demand Pipeline: SynthFirm to POLARIS & BEAM"
 
-    SynthFirm synthesizes regional business establishments, carrier licensing, and B2B freight flows
-    from macro-economic trade projections and UrbanSim zonal employment. It provides commercial vehicle
-    fleets and trip demands to POLARIS and BEAM:
+    **SynthFirm** synthesizes business establishments, carrier fleets, and B2B commodity shipments from FAF5 trade forecasts and **UrbanSim** employment marginals, supplying commercial vehicles and freight tours to **POLARIS** and **BEAM**:
 
     ```mermaid
     flowchart TD
@@ -243,9 +237,8 @@ POLARIS, and Travel Network Skims (.omx).
 
 ## 2. UrbanSim Land Use & Zonal Marginals Schema
 
-UrbanSim operates as a macro-spatial forecasting model. It predicts marginal household/population
-totals and land-use capacities at the atomic Census Block level ([`UrbanSimBlockMarginals`](../schema/UrbanSimBlockMarginals.md)),
-aggregated to macro-zones ([`UrbanSimZonalTotals`](../schema/UrbanSimZonalTotals.md)) via an explicit spatial crosswalk ([`BlockToTazMapping`](../schema/BlockToTazMapping.md)).
+UrbanSim forecasts household, population, and employment marginals at the Census Block level ([`UrbanSimBlockMarginals`](../schema/UrbanSimBlockMarginals.md))
+and rolls them up to Traffic Analysis Zones ([`UrbanSimZonalTotals`](../schema/UrbanSimZonalTotals.md)) through [`BlockToTazMapping`](../schema/BlockToTazMapping.md).
 
 ```mermaid
 classDiagram
@@ -299,8 +292,7 @@ classDiagram
 
 ## 3. DEMOS Synthetic Population Schema
 
-DEMOS models the demographic evolution of synthetic agents. It preserves Census PUMS seed
-traceability (`SERIALNO_PUMS`, `SPORDER`) while providing microdata agents ([`DemosPolarisMappedHousehold`](../schema/DemosPolarisMappedHousehold.md), [`DemosPolarisMappedPerson`](../schema/DemosPolarisMappedPerson.md)) to ATLAS and POLARIS.
+DEMOS evolves household and person microdata ([`DemosPolarisMappedHousehold`](../schema/DemosPolarisMappedHousehold.md), [`DemosPolarisMappedPerson`](../schema/DemosPolarisMappedPerson.md)) while retaining Census PUMS seed lineage (`SERIALNO_PUMS`, `SPORDER`) for auditability before staging into ATLAS, POLARIS, or ActivitySim.
 
 ```mermaid
 classDiagram
@@ -340,9 +332,7 @@ classDiagram
 
 ## 4. ATLAS Vehicle Fleet Synthesis Schema
 
-ATLAS models household vehicle ownership and technology adoption across the 6-county Austin region,
-predicting body types and powertrains (ICE, HEV, PHEV, AEV) via [`AtlasHouseholdFleetOutput`](../schema/AtlasHouseholdFleetOutput.md)
-and [`AtlasVehicleFleetOutput`](../schema/AtlasVehicleFleetOutput.md).
+ATLAS predicts household vehicle counts ([`AtlasHouseholdFleetOutput`](../schema/AtlasHouseholdFleetOutput.md)) and vehicle-level body types, vintages, and powertrains ([`AtlasVehicleFleetOutput`](../schema/AtlasVehicleFleetOutput.md)).
 
 ```mermaid
 classDiagram
@@ -386,9 +376,8 @@ classDiagram
 
 ## 5. POLARIS Activity-Based Demand & Network Skims Schema
 
-POLARIS consumes the integrated demographic, land-use, and vehicle microdata into its [`PolarisDemandDatabaseHousehold`](../schema/PolarisDemandDatabaseHousehold.md),
-[`PolarisDemandDatabasePerson`](../schema/PolarisDemandDatabasePerson.md), [`PolarisDemandDatabaseVehicle`](../schema/PolarisDemandDatabaseVehicle.md), [`PolarisDemandDatabaseVehicleClass`](../schema/PolarisDemandDatabaseVehicleClass.md), and [`PolarisDemandDatabaseVehicleType`](../schema/PolarisDemandDatabaseVehicleType.md) relational tables,
-runs activity-based traffic simulation, and emits post-run population state updates ([`PolarisHouseholdStateOutput`](../schema/PolarisHouseholdStateOutput.md), [`PolarisPersonStateOutput`](../schema/PolarisPersonStateOutput.md)) alongside updated dynamic network skims ([`NextYearNetworkSkims`](../schema/NextYearNetworkSkims.md)).
+POLARIS ingests households, persons, and vehicles into `Demand.sqlite` ([`PolarisDemandDatabaseHousehold`](../schema/PolarisDemandDatabaseHousehold.md), [`PolarisDemandDatabasePerson`](../schema/PolarisDemandDatabasePerson.md), [`PolarisDemandDatabaseVehicle`](../schema/PolarisDemandDatabaseVehicle.md), [`PolarisDemandDatabaseVehicleClass`](../schema/PolarisDemandDatabaseVehicleClass.md), [`PolarisDemandDatabaseVehicleType`](../schema/PolarisDemandDatabaseVehicleType.md)).
+After simulation, POLARIS produces converged network skims ([`NextYearNetworkSkims`](../schema/NextYearNetworkSkims.md)) and post-run population state updates ([`PolarisHouseholdStateOutput`](../schema/PolarisHouseholdStateOutput.md), [`PolarisPersonStateOutput`](../schema/PolarisPersonStateOutput.md) — marked **provisional** for collaborator verification of exact SQLite output column names under assumptions A20–A31).
 
 ```mermaid
 classDiagram
@@ -508,17 +497,13 @@ classDiagram
 
 ## 6. LBL Tool Integration: ActivitySim & BEAM Schemas
 
-To ensure that scenarios generated for the core Synergy workflow can translate into
-LBL-maintained tools, the schema provides direct contracts for ActivitySim activity-based
-travel demand modeling and BEAM multi-agent dynamic traffic, transit, and charging simulation.
+To run the same regional scenarios through LBNL's demand and simulation stack, the schema defines counterpart interfaces for **ActivitySim** and **BEAM**.
 
 ### ActivitySim Demand & Population Schema
 
-ActivitySim consumes synthetic households and persons staged from DEMOS ([`ActivitySimHouseholdInputRecord`](../schema/ActivitySimHouseholdInputRecord.md),
-[`ActivitySimPersonInputRecord`](../schema/ActivitySimPersonInputRecord.md)), coupled with zonal land-use totals from UrbanSim and canonical
-Open Matrix / Zarr network skims ([`ActivitySimNetworkSkims`](../schema/ActivitySimNetworkSkims.md)), to model activity schedules,
-tour generation, destination choice, and mode selection. ATLAS modifies the input household table by updating the number of cars per
-household (`cars` via [`AtlasHouseholdFleetOutput`](../schema/AtlasHouseholdFleetOutput.md)), providing authoritative auto ownership for mode choice modeling.
+ActivitySim consumes households and persons staged from DEMOS ([`ActivitySimHouseholdInputRecord`](../schema/ActivitySimHouseholdInputRecord.md),
+[`ActivitySimPersonInputRecord`](../schema/ActivitySimPersonInputRecord.md)), zonal land-use totals from UrbanSim, and Open Matrix / Zarr network skims ([`ActivitySimNetworkSkims`](../schema/ActivitySimNetworkSkims.md)).
+ATLAS updates household auto ownership (`cars` via [`AtlasHouseholdFleetOutput`](../schema/AtlasHouseholdFleetOutput.md)) prior to tour and mode choice.
 
 ```mermaid
 classDiagram
@@ -561,10 +546,9 @@ classDiagram
 
 ### BEAM Multi-Agent Population, Fleet, Plans & Skims Schema
 
-BEAM receives enriched demographic agents ([`BeamHouseholdRecord`](../schema/BeamHouseholdRecord.md), [`BeamPersonRecord`](../schema/BeamPersonRecord.md)),
-the ATLAS-synthesized vehicle fleet with powertrain classifications ([`BeamVehicleRecord`](../schema/BeamVehicleRecord.md)), and ActivitySim-generated
-daily activity-travel plans ([`BeamPlanRecord`](../schema/BeamPlanRecord.md), [`BeamPlanOutputRecord`](../schema/BeamPlanOutputRecord.md)). It simulates microscopic
-agent interactions, congestion, and energy/charging profiles, emitting [`BeamNetworkSkims`](../schema/BeamNetworkSkims.md) (`.omx` / `.zarr` multi-dimensional LinkML arrays) as the default skim representation (note: the required vs. optional mode split between `DIST`/`DISTWALK`/`SOV_*`/`WLK_TRN_WLK_*` and optional managed-lane/HOV/submode skims is provisional and worth verifying).
+BEAM ingests demographic agents ([`BeamHouseholdRecord`](../schema/BeamHouseholdRecord.md), [`BeamPersonRecord`](../schema/BeamPersonRecord.md)),
+the ATLAS vehicle fleet ([`BeamVehicleRecord`](../schema/BeamVehicleRecord.md)), and ActivitySim daily plans ([`BeamPlanRecord`](../schema/BeamPlanRecord.md), [`BeamPlanOutputRecord`](../schema/BeamPlanOutputRecord.md)),
+and outputs [`BeamNetworkSkims`](../schema/BeamNetworkSkims.md) (`.omx` / `.zarr` LinkML arrays). Only `DIST`, `DISTWALK`, `SOV_*`, and `WLK_TRN_WLK_*` are currently marked required; the required vs. optional boundary across managed-lane, HOV, transit submode, and ridehail skims is **provisional** and flagged for collaborator verification.
 
 ```mermaid
 classDiagram
@@ -634,11 +618,10 @@ classDiagram
 
 ## 7. SynthFirm Synthetic Firm, Fleet, and Freight Flow Schema
 
-SynthFirm models synthetic business establishments ([`SynthFirmEstablishmentRecord`](../schema/SynthFirmEstablishmentRecord.md)),
-commercial carrier licensing ([`SynthFirmCarrierRecord`](../schema/SynthFirmCarrierRecord.md)), private and for-hire vehicle fleets,
-and business-to-business (B2B) commodity shipments ([`SynthFirmB2BShipmentRecord`](../schema/SynthFirmB2BShipmentRecord.md),
-[`SynthFirmInternationalFreightRecord`](../schema/SynthFirmInternationalFreightRecord.md)). It translates macro-economic Freight Analysis
-Framework (FAF5) trade forecasts into microscopic freight movement and commercial vehicle tours.
+SynthFirm synthesizes business establishments ([`SynthFirmEstablishmentRecord`](../schema/SynthFirmEstablishmentRecord.md)),
+for-hire carriers ([`SynthFirmCarrierRecord`](../schema/SynthFirmCarrierRecord.md)), commercial fleets,
+and B2B commodity shipments ([`SynthFirmB2BShipmentRecord`](../schema/SynthFirmB2BShipmentRecord.md),
+[`SynthFirmInternationalFreightRecord`](../schema/SynthFirmInternationalFreightRecord.md)) from FAF5 trade forecasts and UrbanSim employment controls.
 
 ```mermaid
 classDiagram

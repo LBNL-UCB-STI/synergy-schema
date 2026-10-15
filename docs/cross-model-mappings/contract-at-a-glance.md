@@ -1,11 +1,10 @@
 # Cross-Model Data Contract at a Glance
 
-This document summarizes the static single-year data exchange relationships, identifier bindings, categorical crosswalks, donor draw algorithms, and residue boundaries across **UrbanSim**, **DEMOS**, **ATLAS**, **POLARIS**, **ActivitySim**, **BEAM**, and **Network Skims** (`.omx`).
+This reference summarizes the single-year table handoffs, join keys, categorical crosswalks (`X-H1`–`X-V5`), stratified donor draws (`D-H1`–`D-V2`), and unmapped residue fields across **UrbanSim**, **DEMOS**, **ATLAS**, **POLARIS**, **ActivitySim**, **BEAM**, **SynthFirm**, and **Network Skims** (`.omx` / `.zarr`).
 
-It reflects the authoritative specification established in the multi-agency interface agreement (`DEMOS_and_ATLAS_to_POLARIS_interface.xlsx`), co-located in this repository under `docs/resources/`.
+The **DEMOS / ATLAS → POLARIS** mappings implement the joint multi-team specification in `docs/resources/DEMOS_and_ATLAS_to_POLARIS_interface.xlsx` (Section 5). Counterpart handoffs for **ActivitySim**, **BEAM**, **SynthFirm**, and post-run state feedback are documented alongside them so model owners can review and verify how their interfaces are represented.
 
-> [!NOTE] Architecture & Pipeline Diagrams
-> For the visual system-level workflow and component interaction diagrams across the modeling suite, see [Multi-Model Architecture & UML Diagrams](deliverable_1_uml.md).
+> **Visual Diagrams**: See [Database ER Diagrams](interactive-schema.md) for crow's-foot relational schemas and [Architecture & UML](deliverable_1_uml.md) for workflow pipelines and class diagrams.
 
 ---
 
@@ -29,12 +28,15 @@ It reflects the authoritative specification established in the multi-agency inte
 | **SynthFirm** Fleets ([`SynthFirmEstablishmentRecord`](../schema/SynthFirmEstablishmentRecord.md)) | **POLARIS** `Demand.sqlite/Vehicle` ([`PolarisDemandDatabaseVehicle`](../schema/PolarisDemandDatabaseVehicle.md)) | Commercial Fleets (`wide_to_long`) | `BusID` ↔ `hhold` / `fleet_id` ↔ `fleet` | Wide fleet counts (`diesel_class_1_2a`..`electric_class_7_8_vocational`, `EV_powertrain`) unpivoted to discrete vehicles (`vehicle_id`, `fleet`, `type` via `Vehicle_Type`) |
 | **SynthFirm** Shipments | **BEAM** `freight-plans.xml` ([`BeamPlanRecord`](../schema/BeamPlanRecord.md)) | Freight Tours | `BusID` ↔ `depot_id` | Commercial multi-stop tours, payload, and depot charging profiles |
 
-> [!WARNING] Provisional Skim Mode Requirement Boundary (`BeamNetworkSkims` & `ActivitySimNetworkSkims`)
-> In the canonical Open Matrix (`skims.omx`, `OMX_VERSION = '0.2'`, `SHAPE = [N_zones, N_zones]`, `/data` 2D matrices, `/lookup` 1D zone index lookup tables) and Zarr (`.zarr`) skim schemas, only static distances (`DIST`, `DISTWALK`), free-lane SOV auto (`SOV_TIME`, `SOV_DIST`, `SOV_BTOLL` across `EA, AM, MD, PM, EV`), and generic walk-transit-walk accessibility skims (`WLK_TRN_WLK_{IVT,IWAIT,XWAIT,WACC,WAUX,WEGR}` across `AM, MD, PM`) are marked `required: true`, while all other modes (`DISTBIKE`, `SOVTOLL_*`, `HOV2*`, `HOV3*`, submode transit `WLK_{LOC,LRF,EXP,HVY,COM}_*` / `DRV_*`, and ridehail `RH_*`) are marked `required: false`. **This boundary between required core skims and optional mode skims is provisional (`status: provisional`) and should be verified against target regional model configurations.**
+> **Provisional Boundaries Flagged for Collaborator Verification**
+>
+> - **OMX / Zarr Skim Mode Split (`BeamNetworkSkims` & `ActivitySimNetworkSkims`)**: Based on the canonical `skims.omx` (`OMX_VERSION = '0.2'`, `SHAPE = [N_zones, N_zones]`), only static distances (`DIST`, `DISTWALK`), free-lane SOV auto (`SOV_TIME`, `SOV_DIST`, `SOV_BTOLL`), and walk-transit-walk accessibility skims (`WLK_TRN_WLK_{IVT,IWAIT,XWAIT,WACC,WAUX,WEGR}`) are marked `required: true`. Managed-lane (`SOVTOLL_*`, `HOV2*`, `HOV3*`), bike (`DISTBIKE`), transit submode (`WLK_{LOC,LRF,EXP,HVY,COM}_*`, `DRV_*`), and ridehail (`RH_*`) arrays are marked `required: false` (`status: provisional`).
+> - **POLARIS Post-Run State Feedback (`PolarisHouseholdStateOutput` & `PolarisPersonStateOutput`)**: Models the post-simulation household and person state attributes feeding Year $t+1$ (`A20`, `A21`, `A23`, `A30`, `A31`); exact SQLite output table and column names are flagged `status: provisional` pending ANL confirmation.
+> - **SynthFirm Commercial Fleet Unpivot**: `SynthFirmEstablishmentRecord` stores truck fleets in 13 wide fuel × FHWA-class columns; mapping into `PolarisDemandDatabaseVehicle` requires a `wide_to_long` expansion and depot-to-`hhold` convention.
 
 ---
 
-## 2. Detailed Column-Level Mapping Specifications
+## 2. Column-Level Mapping Specifications & Residue
 
 === "DEMOS Household → POLARIS"
 
@@ -146,7 +148,7 @@ It reflects the authoritative specification established in the multi-agency inte
 
 ---
 
-## 3. Authoritative Categorical Crosswalks
+## 3. Categorical Crosswalks (`X-H1` – `X-V5`)
 
 === "Household Crosswalks (X-H1 – X-H3)"
 
@@ -294,11 +296,11 @@ It reflects the authoritative specification established in the multi-agency inte
 
 ---
 
-## 4. Donor Draws, Execution Pipeline, and Network Skims
+## 4. Donor Draws, Staging Pipeline, and Network Skims
 
 === "Donor Draws Specification Register (D-H1 – D-V2)"
 
-    When attributes are not directly modeled by upstream demographic engines, they are drawn from the fixed base-year reference population using stratified donor pools:
+    Attributes not synthesized directly by DEMOS or ATLAS are imputed from the base-year POLARIS reference population using stratified donor pools:
 
     | Draw ID | Target Entity | Donor Attributes Copied | Stratification / Segmentation | Fallback / Collapse Order |
     | :--- | :--- | :--- | :--- | :--- |
@@ -354,10 +356,10 @@ It reflects the authoritative specification established in the multi-agency inte
 
 ---
 
-## 5. Authoritative Interface Specification Workbook
+## 5. Joint Interface Specification Workbook
 
-The complete tabular specifications, field-by-field formulas, donor distributions, and assumption logs are maintained in the official multi-agency interface agreement:
+Field-level formulas, donor stratification tables, and assumption logs (`A1`–`A31`) for the DEMOS / ATLAS → POLARIS handoff are maintained in the shared workbook:
 
 - **File**: `docs/resources/DEMOS_and_ATLAS_to_POLARIS_interface.xlsx`
-- **Source**: Joint specification agreement across DEMOS, ATLAS, and POLARIS modeling teams.
-- **Included Sheets**: `Overview`, `Households`, `Persons`, `Vehicles`, `Draws`, `Crosswalks`, `Assumptions`, `Open questions`, `Inputs`, `Record classes & events`, and `Process & settings`.
+- **Contributors**: DEMOS, ATLAS, and POLARIS modeling teams (ANL & LBNL).
+- **Sheets**: `Overview`, `Households`, `Persons`, `Vehicles`, `Draws`, `Crosswalks`, `Assumptions`, `Open questions`, `Inputs`, `Record classes & events`, and `Process & settings`.
