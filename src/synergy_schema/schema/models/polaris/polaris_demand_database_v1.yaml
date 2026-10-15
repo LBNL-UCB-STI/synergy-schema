@@ -525,3 +525,167 @@ classes:
         annotations:
           physical_name: operating_cost_per_mile
         description: "Operating cost per mile in dollars."
+
+  PolarisHouseholdStateOutput:
+    description: >-
+      Provisional post-run household state output schema from POLARIS at the end of Year t,
+      capturing resolved residential location, longitudinal residence duration, and household
+      behavioral choices carried forward to update the core population for Year t+1 (A30, A31).
+      ANL will confirm whether POLARIS mutates Demand.sqlite in place or exports these records
+      via Result.sqlite.
+    aliases:
+      - PolarisHouseholdOutput
+    annotations:
+      table_name: Household
+      model_association: POLARIS result / post-run demand database
+      schema_status: provisional
+      status: provisional_placeholder
+    attributes:
+      household:
+        range: integer
+        identifier: true
+        required: true
+        annotations:
+          physical_name: household
+          foreign_key: PolarisDemandDatabaseHousehold.household
+        description: "Household primary-key identifier linking post-run state back to the core household."
+      location:
+        range: integer
+        required: true
+        annotations:
+          physical_name: location
+          foreign_key: UrbanSimZonalTotals.zone_id
+        description: "Resolved residential zone/location identifier at the end of Year t."
+      time_in_home:
+        range: float
+        required: false
+        annotations:
+          physical_name: time_in_home
+        description: "Longitudinal residence duration in years updated for Year t+1 (A31)."
+      ecom:
+        range: integer
+        required: true
+        annotations:
+          physical_name: ecom
+        description: "POLARIS-modeled household e-commerce delivery frequency carried to Year t+1 (A30)."
+      delRat:
+        range: float
+        required: false
+        annotations:
+          physical_name: delRat
+        description: "POLARIS-modeled household delivery ratio factor carried to Year t+1 (A30)."
+      dispose_veh:
+        range: integer
+        required: false
+        annotations:
+          physical_name: dispose_veh
+        description: "POLARIS-modeled vehicle disposal count/indicator."
+      num_groceries:
+        range: integer
+        required: true
+        annotations:
+          physical_name: num_groceries
+        description: "POLARIS-modeled count of grocery delivery orders carried to Year t+1 (A30)."
+      num_meals:
+        range: integer
+        required: true
+        annotations:
+          physical_name: num_meals
+        description: "POLARIS-modeled count of meal delivery orders carried to Year t+1 (A30)."
+
+  PolarisPersonStateOutput:
+    description: >-
+      Provisional post-run person state output schema from POLARIS at the end of Year t,
+      capturing resolved work and school locations (replacing -1 sentinels), realized commute
+      attributes, and long-term mobility choices carried forward to update the core population
+      for Year t+1 (A20, A21, A23, A30, A31). ANL will confirm whether POLARIS mutates
+      Demand.sqlite in place or exports these records via Result.sqlite.
+    aliases:
+      - PolarisPersonOutput
+    annotations:
+      table_name: Person
+      model_association: POLARIS result / post-run demand database
+      schema_status: provisional
+      status: provisional_placeholder
+    attributes:
+      person:
+        range: integer
+        identifier: true
+        required: true
+        annotations:
+          physical_name: person
+          foreign_key: PolarisDemandDatabasePerson.person
+        description: "Person primary-key identifier linking post-run state back to the core person."
+      household:
+        range: integer
+        required: true
+        annotations:
+          physical_name: household
+          foreign_key: PolarisDemandDatabaseHousehold.household
+        description: "Household identifier for the person."
+      work_location_id:
+        range: integer
+        required: true
+        annotations:
+          physical_name: work_location_id
+        description: "Resolved workplace location identifier replacing -1 sentinel after POLARIS workplace destination choice (A20, A23)."
+      school_location_id:
+        range: integer
+        required: true
+        annotations:
+          physical_name: school_location_id
+        description: "Resolved school location identifier replacing -1 sentinel after POLARIS school destination choice (A23)."
+      journey_to_work_mode:
+        range: integer
+        required: true
+        annotations:
+          physical_name: journey_to_work_mode
+        description: "Realized/chosen commute mode code (A21, D-P2)."
+      journey_to_work_travel_time:
+        range: integer
+        required: true
+        annotations:
+          physical_name: journey_to_work_travel_time
+        description: "Realized/chosen commute travel time in minutes (A21, D-P2)."
+      journey_to_work_arrival_time:
+        range: integer
+        required: true
+        annotations:
+          physical_name: journey_to_work_arrival_time
+        description: "Realized/chosen work arrival time in minutes after midnight (A21, D-P2)."
+      journey_to_work_vehicle_occupancy:
+        range: integer
+        required: true
+        annotations:
+          physical_name: journey_to_work_vehicle_occupancy
+        description: "Realized/chosen commute vehicle occupancy count (A21, D-P2)."
+      telecommute_level:
+        range: integer
+        required: true
+        annotations:
+          physical_name: telecommute_level
+        description: "POLARIS-modeled telecommute frequency level (0..5 days/week) carried to Year t+1 (A30)."
+      transit_pass:
+        range: integer
+        required: false
+        annotations:
+          physical_name: transit_pass
+        description: "POLARIS-modeled transit pass ownership indicator carried to Year t+1 (A30)."
+      escooter_use_level:
+        range: integer
+        required: true
+        annotations:
+          physical_name: escooter_use_level
+        description: "POLARIS-modeled e-scooter usage frequency level (0..3) carried to Year t+1 (A30)."
+      time_in_job:
+        range: float
+        required: false
+        annotations:
+          physical_name: time_in_job
+        description: "Longitudinal job tenure in years updated for Year t+1 (A31)."
+      is_long_term_chooser:
+        range: integer
+        required: false
+        annotations:
+          physical_name: is_long_term_chooser
+        description: "Long-term choice re-evaluation flag, reset to 0 after POLARIS choices complete (A30)."

@@ -1,0 +1,460 @@
+id: https://w3id.org/LBNL-UCB-STI/synergy-schema/models/synthfirm
+name: synthfirm
+title: SynthFirm Synthetic Firm, Commercial Fleet, and B2B Freight Flow Schema
+description: >-
+  LinkML schema defining the data structures, entities, and relationships for the
+  SynthFirm agent-based commercial transport and freight demand generation model.
+  Covers synthetic business establishments, commercial vehicle fleet allocations,
+  domestic buyer-seller (B2B) freight shipments, and international seaport/airport
+  gateway freight drayage flows.
+
+prefixes:
+  synergy_schema: https://w3id.org/LBNL-UCB-STI/synergy-schema/
+  linkml: https://w3id.org/linkml/
+
+default_prefix: synergy_schema
+default_range: string
+
+imports:
+  - linkml:types
+
+enums:
+  SynthFirmModeChoiceEnum:
+    description: Discrete freight transportation mode choice for B2B commodity shipments.
+    permissible_values:
+      For-hire Truck:
+        description: Freight transported via third-party commercial carrier (NAICS 484/492).
+      Private Truck:
+        description: Freight transported using establishment's own private vehicle fleet.
+
+  SynthFirmPowertrainEnum:
+    description: Alternative clean powertrain technology adopted by commercial vehicle fleet.
+    permissible_values:
+      Battery Electric:
+        description: Pure battery-electric commercial vehicle (BEV).
+      H2 Fuel Cell:
+        description: Hydrogen fuel cell electric commercial vehicle (FCEV), prominent in heavy line-haul tractors.
+      PHEV:
+        description: Plug-in hybrid electric commercial vehicle.
+      None:
+        description: Conventional internal combustion engine (Diesel or Gasoline).
+
+  SynthFirmPortTypeEnum:
+    description: Gateway facility type for international freight trade.
+    permissible_values:
+      Airport:
+        description: Air cargo gateway facility (e.g., SFO cargo terminal).
+      Seaport:
+        description: Maritime container or bulk port terminal (e.g., Port of Oakland).
+
+classes:
+  SynthFirmEstablishmentRecord:
+    description: >-
+      Synthetic business establishment synthesizing establishment-level firm demographics,
+      NAICS industry sector, employment count, spatial coordinates, and commercial vehicle
+      fleet inventory partitioned by weight class and fuel type.
+    annotations:
+      model_association: SynthFirm
+      contract_family: firm_and_fleet
+      spatial_granularity: census_block_group
+      status: authoritative
+    aliases:
+      - synthetic_firms_with_fleet_mc_adjusted
+      - synthetic_leasing_company
+    attributes:
+      BusID:
+        range: integer
+        identifier: true
+        required: true
+        description: Unique synthetic business establishment identifier.
+      fleet_id:
+        range: integer
+        required: true
+        description: Sub-fleet category index within the establishment.
+      CBPZONE:
+        range: integer
+        required: true
+        description: County Business Patterns zone identifier or 4-digit county FIPS code.
+      FAFZONE:
+        range: integer
+        required: true
+        description: Federal Freight Analysis Framework (FAF5) zone identifier.
+      esizecat:
+        range: integer
+        required: true
+        description: Establishment employment size category index.
+      Industry_NAICS6_Make:
+        range: string
+        required: true
+        description: 6-digit NAICS industry classification code representing the establishment's primary economic activity.
+      Commodity_SCTG:
+        range: integer
+        required: true
+        description: Primary 2-digit Standard Classification of Transported Goods (SCTG) commodity code produced or handled.
+      Emp:
+        range: float
+        required: true
+        minimum_value: 0.0
+        description: Total employment count (number of employees) at this establishment location.
+      MESOZONE:
+        range: string
+        required: true
+        description: Micro-zone spatial identifier (11-digit US Census Block Group FIPS within the region, or 5-digit external zone).
+      lat:
+        range: float
+        required: true
+        description: Centroid latitude coordinate (WGS84).
+      lon:
+        range: float
+        required: true
+        description: Centroid longitude coordinate (WGS84).
+      state_abbr:
+        range: string
+        required: true
+        description: Two-letter US state abbreviation (e.g. CA, TX).
+      EV_powertrain:
+        range: SynthFirmPowertrainEnum
+        description: Alternative fuel powertrain assigned to the establishment's electrified fleet (e.g. Battery Electric, H2 Fuel Cell).
+        aliases:
+          - EV_powertrain (if any)
+      diesel_class_1_2a:
+        range: float
+        minimum_value: 0.0
+        description: Count of Diesel Class 1 & 2A vocational commercial vehicles.
+        aliases:
+          - Diesel Class 1&2A Vocational
+      diesel_class_2b_3:
+        range: float
+        minimum_value: 0.0
+        description: Count of Diesel Class 2B & 3 vocational commercial vehicles.
+        aliases:
+          - Diesel Class 2B&3 Vocational
+      diesel_class_4_6:
+        range: float
+        minimum_value: 0.0
+        description: Count of Diesel Class 4-6 vocational commercial vehicles.
+        aliases:
+          - Diesel Class 4-6 Vocational
+      diesel_class_7_8_tractor:
+        range: float
+        minimum_value: 0.0
+        description: Count of Diesel Class 7 & 8 tractor-trailer line-haul commercial vehicles.
+        aliases:
+          - Diesel Class 7&8 Tractor
+      diesel_class_7_8_vocational:
+        range: float
+        minimum_value: 0.0
+        description: Count of Diesel Class 7 & 8 vocational commercial vehicles.
+        aliases:
+          - Diesel Class 7&8 Vocational
+      gasoline_class_1_2a:
+        range: float
+        minimum_value: 0.0
+        description: Count of Gasoline Class 1 & 2A vocational commercial vehicles.
+        aliases:
+          - Gasoline Class 1&2A Vocational
+      gasoline_class_2b_3:
+        range: float
+        minimum_value: 0.0
+        description: Count of Gasoline Class 2B & 3 vocational commercial vehicles.
+        aliases:
+          - Gasoline Class 2B&3 Vocational
+      gasoline_class_4_6:
+        range: float
+        minimum_value: 0.0
+        description: Count of Gasoline Class 4-6 vocational commercial vehicles.
+        aliases:
+          - Gasoline Class 4-6 Vocational
+      electric_class_1_2a:
+        range: float
+        minimum_value: 0.0
+        description: Count of Electric Class 1 & 2A vocational commercial vehicles.
+        aliases:
+          - Electric Class 1&2A Vocational
+      electric_class_2b_3:
+        range: float
+        minimum_value: 0.0
+        description: Count of Electric Class 2B & 3 vocational commercial vehicles.
+        aliases:
+          - Electric Class 2B&3 Vocational
+      electric_class_4_6:
+        range: float
+        minimum_value: 0.0
+        description: Count of Electric Class 4-6 vocational commercial vehicles.
+        aliases:
+          - Electric Class 4-6 Vocational
+      electric_class_7_8_tractor:
+        range: float
+        minimum_value: 0.0
+        description: Count of Electric Class 7 & 8 tractor line-haul commercial vehicles.
+        aliases:
+          - Electric Class 7&8 Tractor
+      electric_class_7_8_vocational:
+        range: float
+        minimum_value: 0.0
+        description: Count of Electric Class 7 & 8 vocational commercial vehicles.
+        aliases:
+          - Electric Class 7&8 Vocational
+      n_trucks:
+        range: float
+        required: true
+        minimum_value: 0.0
+        description: Total count of commercial vehicles across all fuel and weight classes in this sub-fleet entry.
+
+  SynthFirmCarrierRecord:
+    is_a: SynthFirmEstablishmentRecord
+    description: >-
+      Synthetic for-hire motor freight trucking carrier (NAICS 484000/492000), extending
+      the base establishment record with commodity group transport licensing authorizations.
+    annotations:
+      model_association: SynthFirm
+      contract_family: for_hire_carriers
+      status: authoritative
+    aliases:
+      - synthetic_carriers
+    attributes:
+      SCTG1:
+        range: integer
+        minimum_value: 0
+        maximum_value: 1
+        description: Binary flag indicating authority/capability to transport SCTG Group 1 (Bulk / Agriculture / Mining).
+      SCTG2:
+        range: integer
+        minimum_value: 0
+        maximum_value: 1
+        description: Binary flag indicating authority/capability to transport SCTG Group 2 (Industrial, Chemicals, Fuel).
+      SCTG3:
+        range: integer
+        minimum_value: 0
+        maximum_value: 1
+        description: Binary flag indicating authority/capability to transport SCTG Group 3 (Food, Beverage, Ag Products).
+      SCTG4:
+        range: integer
+        minimum_value: 0
+        maximum_value: 1
+        description: Binary flag indicating authority/capability to transport SCTG Group 4 (Manufactured Goods / Tech).
+      SCTG5:
+        range: integer
+        minimum_value: 0
+        maximum_value: 1
+        description: Binary flag indicating authority/capability to transport SCTG Group 5 (Mixed Freight / SCTG 43).
+
+  SynthFirmB2BShipmentRecord:
+    description: >-
+      Synthesized business-to-business (B2B) commodity freight shipment representing a discrete
+      truckload or cargo flow between a selling establishment and a buying establishment.
+    annotations:
+      model_association: SynthFirm
+      contract_family: b2b_shipments
+      status: authoritative
+    aliases:
+      - for_hire_truck_shipment
+      - private_truck_shipment
+    attributes:
+      shipment_id:
+        range: integer
+        identifier: true
+        required: true
+        description: Unique freight shipment identifier.
+      BuyerID:
+        range: integer
+        required: true
+        description: Unique business identifier of the destination purchasing establishment.
+        annotations:
+          foreign_key: SynthFirmEstablishmentRecord.BusID
+      BuyerZone:
+        range: string
+        required: true
+        description: Census Block Group FIPS or external zone identifier of the buyer location.
+      BuyerNAICS:
+        range: string
+        required: true
+        description: NAICS industry classification code of the buyer.
+      SellerID:
+        range: integer
+        required: true
+        description: Unique business identifier of the origin shipping establishment.
+        annotations:
+          foreign_key: SynthFirmEstablishmentRecord.BusID
+      SellerZone:
+        range: string
+        required: true
+        description: Census Block Group FIPS or external zone identifier of the seller location.
+      SellerNAICS:
+        range: string
+        required: true
+        description: NAICS industry classification code of the seller.
+      TruckLoad:
+        range: float
+        required: true
+        minimum_value: 0.0
+        description: Total freight shipment payload weight in short tons.
+      Commodity_SCTG:
+        range: integer
+        required: true
+        description: 2-digit Standard Classification of Transported Goods (SCTG) commodity code (1-43).
+      SCTG_Group:
+        range: integer
+        required: true
+        minimum_value: 1
+        maximum_value: 5
+        description: Aggregated commodity group category (1 to 5).
+      UnitCost:
+        range: float
+        required: true
+        description: Commodity unit value / cost in dollars per short ton.
+      orig_FAFID:
+        range: integer
+        required: true
+        description: Federal Freight Analysis Framework (FAF5) origin zone identifier.
+      dest_FAFID:
+        range: integer
+        required: true
+        description: Federal Freight Analysis Framework (FAF5) destination zone identifier.
+      mode_choice:
+        range: SynthFirmModeChoiceEnum
+        required: true
+        description: Chosen transportation mode (For-hire Truck vs. Private Truck).
+      probability:
+        range: float
+        required: true
+        minimum_value: 0.0
+        maximum_value: 1.0
+        description: Mode choice model probability of selected mode.
+      Distance:
+        range: float
+        required: true
+        minimum_value: 0.0
+        description: Highway network routing distance in miles.
+      Travel_time:
+        range: float
+        required: true
+        minimum_value: 0.0
+        description: Highway network travel time impedance.
+      fleet_id:
+        range: integer
+        description: >-
+          Optional sub-fleet index for private truck shipments, resolving to the seller's
+          owned commercial vehicle fleet allocation.
+        annotations:
+          foreign_key: SynthFirmEstablishmentRecord.fleet_id
+
+  SynthFirmInternationalFreightRecord:
+    description: >-
+      International import/export freight drayage cargo flow connecting regional port
+      and airport gateways with domestic buyers or sellers.
+    annotations:
+      model_association: SynthFirm
+      contract_family: international_freight
+      status: authoritative
+    aliases:
+      - import_OD_with_buyer
+      - export_OD_with_seller
+    attributes:
+      bundle_id:
+        range: integer
+        identifier: true
+        required: true
+        description: Unique international freight shipment bundle identifier.
+      PORTID:
+        range: integer
+        required: true
+        description: Unique federal port of entry or airport facility identifier.
+      port_location:
+        range: string
+        required: true
+        description: Human-readable port or airport name and location.
+        aliases:
+          - CBP Port Location
+      FAF:
+        range: integer
+        required: true
+        description: FAF5 zone of the port facility.
+      CBPZONE:
+        range: integer
+        required: true
+        description: County Business Patterns zone of the port facility.
+      PORTZONE:
+        range: string
+        required: true
+        description: Census Block Group FIPS of the port/airport facility location.
+      port_type:
+        range: SynthFirmPortTypeEnum
+        required: true
+        description: Gateway facility classification (Airport vs. Seaport).
+        aliases:
+          - TYPE
+      is_airport:
+        range: integer
+        minimum_value: 0
+        maximum_value: 1
+        required: true
+        description: Binary flag indicating airport facility (1) or seaport (0).
+      CFS_CODE:
+        range: string
+        required: true
+        description: Commodity Flow Survey international world region origin/destination code.
+      CFS_NAME:
+        range: string
+        required: true
+        description: Commodity Flow Survey international world region name (e.g. Asia & Oceania, Europe).
+      dms_orig:
+        range: integer
+        description: Domestic origin zone for export drayage flows.
+      dms_dest:
+        range: integer
+        description: Domestic destination zone for import drayage flows.
+      Commodity_SCTG:
+        range: integer
+        required: true
+        description: SCTG commodity code (1-43).
+      SCTG_Group:
+        range: integer
+        required: true
+        description: SCTG commodity group category (1-5).
+      TruckLoad:
+        range: float
+        required: true
+        minimum_value: 0.0
+        description: Payload weight in short tons.
+      mode_choice:
+        range: string
+        required: true
+        description: Freight transport mode (e.g. For-hire Truck).
+      shipments:
+        range: integer
+        required: true
+        minimum_value: 1
+        description: Annualized count of truck shipments represented in this flow bundle.
+      Distance:
+        range: float
+        required: true
+        minimum_value: 0.0
+        description: Highway drayage distance between port and domestic facility in miles.
+      tmiles:
+        range: float
+        required: true
+        minimum_value: 0.0
+        description: Total ton-miles of freight movement.
+      BuyerID:
+        range: integer
+        description: Domestic purchasing establishment identifier (for import flows).
+        annotations:
+          foreign_key: SynthFirmEstablishmentRecord.BusID
+      BuyerZone:
+        range: string
+        description: Domestic buyer Census Block Group FIPS (for import flows).
+      BuyerNAICS:
+        range: string
+        description: Domestic buyer NAICS industry code (for import flows).
+      SellerID:
+        range: integer
+        description: Domestic shipping establishment identifier (for export flows).
+        annotations:
+          foreign_key: SynthFirmEstablishmentRecord.BusID
+      SellerZone:
+        range: string
+        description: Domestic seller Census Block Group FIPS (for export flows).
+      SellerNAICS:
+        range: string
+        description: Domestic seller NAICS industry code (for export flows).

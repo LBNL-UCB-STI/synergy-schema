@@ -1,0 +1,216 @@
+id: https://w3id.org/LBNL-UCB-STI/synergy-schema/mappings/single-year-handoff
+name: single_year_handoff
+title: Static Single-Year Multi-Model Data Handoff and Crosswalk Specification
+description: >-
+  Formal LinkML specification governing the static structural relationships,
+  join keys, foreign references, categorical crosswalks (X-H1 through X-V5),
+  and residue classifications across UrbanSim, DEMOS, ATLAS, POLARIS, and
+  Network Skims for a single simulation year.
+
+prefixes:
+  synergy_schema: https://w3id.org/LBNL-UCB-STI/synergy-schema/
+  linkml: https://w3id.org/linkml/
+
+default_prefix: synergy_schema
+default_range: string
+
+imports:
+  - linkml:types
+
+enums:
+  HandoffChannelType:
+    description: Technical mechanism and format of data transfer between models.
+    permissible_values:
+      tabular_microdata:
+        description: Agent-level tabular CSV or SQLite microdata (households, persons, vehicles).
+      zonal_aggregation:
+        description: Spatially aggregated control totals or zonal land use attributes.
+      spatial_crosswalk:
+        description: Geographic block-to-zone intersection and allocation weights.
+      matrix_skims:
+        description: >-
+          Zone-to-zone (TAZ x TAZ) Open Matrix OMX travel impedance matrices and Zarr (.zarr)
+          multi-dimensional (1D [origin_zone], 2D [origin_zone, destination_zone], or
+          3D [time_period, origin_zone, destination_zone]) arrays modeled using LinkML array dimensions.
+
+  FieldTransformationMode:
+    description: Transformation logic required to map a source field to a target field.
+    permissible_values:
+      direct:
+        description: Direct 1-to-1 copy with identical name and type.
+      renamed:
+        description: 1-to-1 copy with target field rename.
+      enum_crosswalk:
+        description: Categorical translation using an explicit code crosswalk.
+      aggregated:
+        description: Spatial or group rollup sum or weighted average.
+      derived:
+        description: Computed from multiple source fields via explicit business logic.
+      wide_to_long:
+        description: Unpivot wide count columns (e.g. fuel x vehicle class counts) into discrete record rows.
+
+  ResidueKind:
+    description: Categorization of unmapped fields or synthetic residues.
+    permissible_values:
+      unmapped_source:
+        description: Source column not required or consumed by the downstream model.
+      target_default:
+        description: Required downstream target column populated with a default constant.
+      synthetic_seed_trace:
+        description: Seed lineage column (e.g. SERIALNO_PUMS, SPORDER) kept for auditability.
+      internal_simulation_state:
+        description: Model-internal agent state flag not passed across interfaces.
+
+classes:
+  SingleYearModelHandoffPackage:
+    description: Master container for single-year cross-model handoff contracts.
+    attributes:
+      package_id:
+        range: string
+        identifier: true
+        required: true
+        description: Unique identifier for this single-year handoff package release.
+      simulation_year:
+        range: integer
+        required: true
+        description: The simulated calendar year (e.g. 2018).
+      geographic_scope:
+        range: string
+        required: true
+        description: Geographic region modeled (e.g. Austin Metropolitan Area).
+      channels:
+        range: ModelHandoffChannel
+        multivalued: true
+        inlined: true
+        inlined_as_list: true
+        description: Complete set of active data channels connecting models.
+      crosswalks:
+        range: CategoricalCrosswalkRule
+        multivalued: true
+        inlined: true
+        inlined_as_list: true
+        description: Set of categorical crosswalk rules referenced by channels.
+
+
+  ModelHandoffChannel:
+    description: Contract specifying data transfer between a source and target model.
+    attributes:
+      channel_id:
+        range: string
+        identifier: true
+        required: true
+        description: Stable channel key (e.g. DEMOS_TO_POLARIS_HH).
+      source_model:
+        range: string
+        required: true
+        description: Upstream producing model name.
+      source_artifact:
+        range: string
+        required: true
+        description: Producing table, file, or matrix name.
+      target_model:
+        range: string
+        required: true
+        description: Downstream consuming model name.
+      target_artifact:
+        range: string
+        required: true
+        description: Consuming table, file, or matrix name.
+      channel_type:
+        range: HandoffChannelType
+        required: true
+        description: Nature of data exchanged.
+      join_keys:
+        range: string
+        multivalued: true
+        description: Identifiers used to join or index records across the handoff.
+      field_mappings:
+        range: FieldMappingSpec
+        multivalued: true
+        inlined: true
+        description: Mappings for individual transferred columns.
+      residues:
+        range: MappingResidueSpec
+        multivalued: true
+        inlined: true
+        description: Columns deliberately retained as residue or assigned defaults.
+
+  FieldMappingSpec:
+    description: Detailed mapping specification for a single column.
+    attributes:
+      source_field:
+        range: string
+        required: true
+        description: Column name in source artifact.
+      target_field:
+        range: string
+        required: true
+        description: Column name in target artifact.
+      transformation_mode:
+        range: FieldTransformationMode
+        required: true
+        description: Logical transformation mode.
+      crosswalk_id:
+        range: string
+        description: Crosswalk rule ID if mode is enum_crosswalk.
+      description:
+        range: string
+        description: Semantic description of mapping rationale.
+
+  MappingResidueSpec:
+    description: Specification of an unmapped column or required default value.
+    attributes:
+      field_name:
+        range: string
+        required: true
+        description: Column name.
+      residue_kind:
+        range: ResidueKind
+        required: true
+        description: Category of residue.
+      default_value:
+        range: string
+        description: Default constant applied if residue_kind is target_default.
+      rationale:
+        range: string
+        description: Justification for unmapped status or default value.
+
+  CategoricalCrosswalkRule:
+    description: Discrete code crosswalk between source and target categorical values.
+    attributes:
+      crosswalk_id:
+        range: string
+        identifier: true
+        required: true
+        description: Unique crosswalk code (e.g. X-H1, X-P1, X-V1).
+      source_attribute:
+        range: string
+        required: true
+        description: Source model categorical attribute name.
+      target_attribute:
+        range: string
+        required: true
+        description: Target model categorical attribute name.
+      description:
+        range: string
+        description: Narrative explaining categorical alignment.
+      value_mappings:
+        range: CategoryValueMapping
+        multivalued: true
+        inlined: true
+        description: Pairwise value translations.
+
+  CategoryValueMapping:
+    description: Individual categorical code mapping entry.
+    attributes:
+      source_value:
+        range: string
+        required: true
+        description: Source code or label.
+      target_value:
+        range: string
+        required: true
+        description: Target code or label.
+      notes:
+        range: string
+        description: Specific domain context or assumptions.
