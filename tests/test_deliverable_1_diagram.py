@@ -93,6 +93,13 @@ def test_deliverable_1_uml_contains_all_models_and_diagrams() -> None:
         "+float_3D WLK_TRN_WLK_IVT [time_period, origin_zone, destination_zone]"
         in rendered
     )
+    assert "class PolarisDemandDatabaseVehicleClass {" in rendered
+    assert "class PolarisDemandDatabaseVehicleType {" in rendered
+    assert "+int housing_unit_type [Crosswalk D-H1]" in rendered
+    assert "+int autonomous_vehicles" in rendered
+    assert "+int relate" not in rendered
+    assert "+int housing_type" not in rendered
+    assert "+int odometer" not in rendered
 
 
 def test_deliverable_1_uml_deterministic() -> None:

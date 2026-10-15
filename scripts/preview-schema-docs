@@ -3,6 +3,7 @@ set -euo pipefail
 
 repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 schema_path="$repo_root/src/synergy_schema/schema/synergy_schema.yaml"
+deliverable_1_schema_path="$repo_root/src/synergy_schema/schema/deliverable_1_static_schema.yaml"
 observed_examples_schema_path="$repo_root/src/synergy_schema/schema/observed_examples.yaml"
 mapping_path="$repo_root/examples/post_atlas_population_bundle/population_identity_mappings.yaml"
 generated_docs="$repo_root/docs/schema"
@@ -28,6 +29,11 @@ mkdir -p "$generated_docs"
 mkdir -p "$observed_examples_docs"
 
 cd "$repo_root"
+uv run gen-doc \
+  --render-imports \
+  --directory "$generated_docs" \
+  "$deliverable_1_schema_path"
+
 uv run gen-doc \
   --no-render-imports \
   --directory "$generated_docs" \
