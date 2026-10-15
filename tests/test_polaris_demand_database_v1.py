@@ -27,7 +27,63 @@ def test_v1_is_a_provisional_observed_record_set() -> None:
         "PolarisDemandDatabaseVehicle",
         "PolarisDemandDatabaseVehicleClass",
         "PolarisDemandDatabaseVehicleType",
+        "PolarisHouseholdStateOutput",
+        "PolarisPersonStateOutput",
     }
+
+
+def test_polaris_post_run_state_output_classes() -> None:
+    view = SchemaView(str(SCHEMA_PATH))
+    hh_out = view.induced_class("PolarisHouseholdStateOutput")
+    assert "PolarisHouseholdOutput" in hh_out.aliases
+    assert hh_out.annotations["status"].value == "provisional_placeholder"
+    assert set(hh_out.attributes) == {
+        "household",
+        "location",
+        "time_in_home",
+        "ecom",
+        "delRat",
+        "dispose_veh",
+        "num_groceries",
+        "num_meals",
+    }
+    assert hh_out.attributes["household"].identifier is True
+    assert (
+        hh_out.attributes["household"].annotations["foreign_key"].value
+        == "PolarisDemandDatabaseHousehold.household"
+    )
+    assert (
+        hh_out.attributes["location"].annotations["foreign_key"].value
+        == "UrbanSimZonalTotals.zone_id"
+    )
+
+    person_out = view.induced_class("PolarisPersonStateOutput")
+    assert "PolarisPersonOutput" in person_out.aliases
+    assert person_out.annotations["status"].value == "provisional_placeholder"
+    assert set(person_out.attributes) == {
+        "person",
+        "household",
+        "work_location_id",
+        "school_location_id",
+        "journey_to_work_mode",
+        "journey_to_work_travel_time",
+        "journey_to_work_arrival_time",
+        "journey_to_work_vehicle_occupancy",
+        "telecommute_level",
+        "transit_pass",
+        "escooter_use_level",
+        "time_in_job",
+        "is_long_term_chooser",
+    }
+    assert person_out.attributes["person"].identifier is True
+    assert (
+        person_out.attributes["person"].annotations["foreign_key"].value
+        == "PolarisDemandDatabasePerson.person"
+    )
+    assert (
+        person_out.attributes["household"].annotations["foreign_key"].value
+        == "PolarisDemandDatabaseHousehold.household"
+    )
 
 
 def test_selected_roots_have_observed_physical_keys_and_names() -> None:

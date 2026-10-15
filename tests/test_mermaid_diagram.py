@@ -99,6 +99,11 @@ def test_generate_mermaid_regional_erd() -> None:
         in mermaid_str
     )
 
+    # Verify LinkML array dimensionality tags on network skims
+    assert "float_1D transit_accessibility_index" in mermaid_str
+    assert "float_2D sov_time_am" in mermaid_str
+    assert "float_3D transit_in_vehicle_time" in mermaid_str
+
 
 def test_render_database_erd_markdown() -> None:
     from synergy_schema.interactive_diagram import render_database_erd_markdown

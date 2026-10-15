@@ -113,21 +113,32 @@ SPATIAL_SKIM_CLASSES = [
 ]
 
 
-def _clean_type(range_val: str | None) -> str:
-    """Normalize LinkML range types to clean alphanumeric types for Mermaid."""
+def _clean_type(range_val: str | None, slot_array: object | None = None) -> str:
+    """Normalize LinkML range types and array dimensions to clean alphanumeric types for Mermaid."""
     if not range_val:
-        return "string"
-    mapping = {
-        "integer": "int",
-        "int": "int",
-        "string": "string",
-        "str": "string",
-        "float": "float",
-        "double": "float",
-        "boolean": "bool",
-        "bool": "bool",
-    }
-    return mapping.get(str(range_val).lower(), "string")
+        base_type = "string"
+    else:
+        mapping = {
+            "integer": "int",
+            "int": "int",
+            "string": "string",
+            "str": "string",
+            "float": "float",
+            "double": "float",
+            "nonnegativefloat": "float",
+            "congestionindexfloat": "float",
+            "unitintervalfloat": "float",
+            "boolean": "bool",
+            "bool": "bool",
+        }
+        base_type = mapping.get(str(range_val).lower(), "string")
+
+    dimensions = (
+        getattr(slot_array, "dimensions", None) if slot_array is not None else None
+    )
+    if dimensions:
+        return f"{base_type}_{len(dimensions)}D"
+    return base_type
 
 
 def _clean_comment(comment: str) -> str:
@@ -627,7 +638,7 @@ def generate_mermaid_erd(
                 other_slots.append(slot)
 
         for slot in pk_slots + fk_slots + other_slots:
-            clean_t = _clean_type(slot.range)
+            clean_t = _clean_type(slot.range, slot.array)
             key_tag = ""
             if slot in pk_slots and slot in fk_slots:
                 key_tag = "PK, FK"
