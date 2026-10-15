@@ -1,0 +1,257 @@
+id: https://w3id.org/LBNL-UCB-STI/synergy-schema/models/polaris/skims
+name: polaris_skims
+title: POLARIS network travel skims schema (Open Matrix .omx)
+description: >-
+  Schema defining Open Matrix (.omx) transportation network skim matrices used
+  across the integrated modeling workflow. Network skims quantify zone-to-zone
+  (TAZ x TAZ) travel impedance across time-of-day periods (AM, PM, Mid-Day, Overnight)
+  and modes (auto SOV/HOV, transit) using LinkML array dimensions. InputNetworkSkims
+  are consumed by UrbanSim (for real estate development and accessibility) and ATLAS
+  (for vehicle fleet and powertrain choice). NextYearNetworkSkims are produced as
+  output by POLARIS dynamic traffic assignment (DTA) representing the updated highway
+  and transit equilibrium.
+
+prefixes:
+  synergy_schema: https://w3id.org/LBNL-UCB-STI/synergy-schema/
+  linkml: https://w3id.org/linkml/
+
+default_prefix: synergy_schema
+default_range: string
+
+imports:
+  - linkml:types
+
+types:
+  NonNegativeFloat:
+    typeof: float
+    minimum_value: 0.0
+    description: Non-negative floating-point travel impedance measure (time, distance, or monetary cost).
+  CongestionIndexFloat:
+    typeof: float
+    minimum_value: 1.0
+    description: Ratio of congested travel time to free-flow travel time (>= 1.0).
+
+classes:
+  InputNetworkSkims:
+    description: >-
+      Open Matrix (.omx) container representing baseline zone-to-zone travel
+      times, distances, generalized costs (2D origin_zone x destination_zone matrices),
+      and zonal accessibility vectors (1D origin_zone arrays) provided as input to
+      UrbanSim and ATLAS.
+    annotations:
+      model_association: transportation_network
+      contract_family: network_skims
+      format: omx
+      default_skim_representation: true
+      status: formal_contract
+      consumer_models: "UrbanSim, ATLAS"
+    attributes:
+      file_path:
+        range: string
+        identifier: true
+        required: true
+        description: Relative path to the .omx HDF5 matrix file.
+      zone_count:
+        range: integer
+        required: true
+        minimum_value: 1
+        annotations:
+          hdf5_root_attribute: SHAPE
+        description: Number of Traffic Analysis Zones (TAZ) in the square matrix dimension (HDF5 root attribute SHAPE = [N_zones, N_zones]).
+      omx_version:
+        range: string
+        ifabsent: string(0.2)
+        annotations:
+          hdf5_root_attribute: OMX_VERSION
+        description: Open Matrix HDF5 root attribute OMX_VERSION (canonical value '0.2').
+      zone_lookup:
+        range: integer
+        required: false
+        array:
+          dimensions:
+            - alias: origin_zone
+        annotations:
+          omx_path: /lookup/zone_id
+          hdf5_group: /lookup
+        description: >-
+          1D zone index lookup array [origin_zone] stored under OMX HDF5 group
+          /lookup/<name> mapping 0-based matrix row/column indices to canonical TAZ IDs.
+      sov_time_am:
+        range: NonNegativeFloat
+        array:
+          dimensions:
+            - alias: origin_zone
+            - alias: destination_zone
+        description: >-
+          2D OD matrix [origin_zone, destination_zone] of single-occupant auto highway
+          travel time in minutes during the morning peak period (AM).
+      sov_time_pm:
+        range: NonNegativeFloat
+        array:
+          dimensions:
+            - alias: origin_zone
+            - alias: destination_zone
+        description: >-
+          2D OD matrix [origin_zone, destination_zone] of single-occupant auto highway
+          travel time in minutes during the evening peak period (PM).
+      sov_time_md:
+        range: NonNegativeFloat
+        array:
+          dimensions:
+            - alias: origin_zone
+            - alias: destination_zone
+        description: >-
+          2D OD matrix [origin_zone, destination_zone] of single-occupant auto highway
+          travel time in minutes during the midday off-peak period (MD).
+      sov_distance:
+        range: NonNegativeFloat
+        array:
+          dimensions:
+            - alias: origin_zone
+            - alias: destination_zone
+        description: >-
+          2D OD matrix [origin_zone, destination_zone] of network highway travel
+          distance (in miles or kilometers).
+      sov_toll_cost:
+        range: NonNegativeFloat
+        array:
+          dimensions:
+            - alias: origin_zone
+            - alias: destination_zone
+        description: >-
+          2D OD matrix [origin_zone, destination_zone] of monetary toll cost for
+          auto travel between zone pairs.
+      transit_travel_time:
+        range: NonNegativeFloat
+        array:
+          dimensions:
+            - alias: origin_zone
+            - alias: destination_zone
+        description: >-
+          2D OD matrix [origin_zone, destination_zone] of total transit travel time
+          including in-vehicle, waiting, and transfer times.
+      transit_accessibility_index:
+        range: float
+        array:
+          dimensions:
+            - alias: origin_zone
+        description: >-
+          1D zonal vector [origin_zone] of composite regional accessibility logsum
+          or job count reachable within a travel threshold.
+
+  NextYearNetworkSkims:
+    description: >-
+      Converged dynamic traffic assignment (DTA) network skims emitted as output
+      by POLARIS at the conclusion of Year t travel simulation in Open Matrix (.omx)
+      format. These 2D [origin_zone, destination_zone] matrices capture simulated
+      congestion, route choices, and travel times, serving as the input impedance
+      for subsequent multi-year iterations.
+    aliases:
+      - PolarisNetworkSkims
+    annotations:
+      model_association: POLARIS
+      contract_family: network_skims
+      format: omx
+      default_skim_representation: true
+      status: formal_contract
+      producer_model: POLARIS
+    attributes:
+      file_path:
+        range: string
+        identifier: true
+        required: true
+        description: Relative path to the output .omx matrix file.
+      zone_count:
+        range: integer
+        required: true
+        minimum_value: 1
+        annotations:
+          hdf5_root_attribute: SHAPE
+        description: Number of Traffic Analysis Zones (TAZ) in the square matrix dimension (HDF5 root attribute SHAPE = [N_zones, N_zones]).
+      omx_version:
+        range: string
+        ifabsent: string(0.2)
+        annotations:
+          hdf5_root_attribute: OMX_VERSION
+        description: Open Matrix HDF5 root attribute OMX_VERSION (canonical value '0.2').
+      zone_lookup:
+        range: integer
+        required: false
+        array:
+          dimensions:
+            - alias: origin_zone
+        annotations:
+          omx_path: /lookup/zone_id
+          hdf5_group: /lookup
+        description: >-
+          1D zone index lookup array [origin_zone] stored under OMX HDF5 group
+          /lookup/<name> mapping 0-based matrix row/column indices to canonical TAZ IDs.
+      iteration_count:
+        range: integer
+        minimum_value: 1
+        description: Number of DTA feedback iterations completed to achieve user-equilibrium convergence.
+      gap_metric:
+        range: float
+        minimum_value: 0.0
+        description: Relative duality gap or convergence metric attained by the DTA solver.
+      sov_time_am:
+        range: NonNegativeFloat
+        array:
+          dimensions:
+            - alias: origin_zone
+            - alias: destination_zone
+        description: >-
+          2D OD matrix [origin_zone, destination_zone] of converged morning peak (AM)
+          auto travel time in minutes.
+      sov_time_pm:
+        range: NonNegativeFloat
+        array:
+          dimensions:
+            - alias: origin_zone
+            - alias: destination_zone
+        description: >-
+          2D OD matrix [origin_zone, destination_zone] of converged evening peak (PM)
+          auto travel time in minutes.
+      sov_time_md:
+        range: NonNegativeFloat
+        array:
+          dimensions:
+            - alias: origin_zone
+            - alias: destination_zone
+        description: >-
+          2D OD matrix [origin_zone, destination_zone] of converged midday (MD)
+          auto travel time in minutes.
+      sov_distance:
+        range: NonNegativeFloat
+        array:
+          dimensions:
+            - alias: origin_zone
+            - alias: destination_zone
+        description: >-
+          2D OD matrix [origin_zone, destination_zone] of converged network highway
+          travel distance.
+      sov_toll_cost:
+        range: NonNegativeFloat
+        array:
+          dimensions:
+            - alias: origin_zone
+            - alias: destination_zone
+        description: >-
+          2D OD matrix [origin_zone, destination_zone] of converged auto toll costs.
+      transit_travel_time:
+        range: NonNegativeFloat
+        array:
+          dimensions:
+            - alias: origin_zone
+            - alias: destination_zone
+        description: >-
+          2D OD matrix [origin_zone, destination_zone] of simulated transit travel time.
+      congestion_index:
+        range: CongestionIndexFloat
+        array:
+          dimensions:
+            - alias: origin_zone
+            - alias: destination_zone
+        description: >-
+          2D OD matrix [origin_zone, destination_zone] of the ratio of congested peak
+          travel time to free-flow travel time across the network.

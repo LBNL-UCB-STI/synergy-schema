@@ -1,0 +1,34 @@
+id: https://w3id.org/LBNL-UCB-STI/synergy-schema/deliverable-1-static-schema
+name: deliverable_1_static_schema
+title: Synergy Deliverable 1 - Static Cross-Model Schema Specification
+description: >-
+  Master LinkML schema bundle for Deliverable #1: defining the static structural
+  contracts, entities, spatial crosswalks, foreign relationships, and categorical
+  translations connecting UrbanSim, DEMOS, ATLAS, POLARIS, and Travel Network
+  Skims for a single simulation year.
+
+prefixes:
+  synergy_schema: https://w3id.org/LBNL-UCB-STI/synergy-schema/
+  linkml: https://w3id.org/linkml/
+
+default_prefix: synergy_schema
+default_range: string
+
+imports:
+  - linkml:types
+  - models/urbansim/urbansim_land_use
+  - models/demos/demos_polaris_mapped_examples
+  - models/atlas/atlas_fleet_observed_example_v1
+  - models/polaris/polaris_demand_database_v1
+  - models/polaris/polaris_skims
+  - models/activitysim/activitysim_population
+  - models/activitysim/activitysim_skims
+  - models/beam/beam
+  - models/synthfirm/synthfirm
+  - mappings/single_year_handoff
+
+annotations:
+  deliverable: "Deliverable #1 (Static Cross-Model Schema)"
+  target_date: "2026-10-31"
+  status: "active"
+  scope: "Single-year multi-model data flow contracts and crosswalks"
