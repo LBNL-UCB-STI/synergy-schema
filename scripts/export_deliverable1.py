@@ -28,18 +28,18 @@ DEFAULT_DIST = REPO_ROOT / "dist" / "synergy-static-schema"
 STANDALONE_README = """# SYNERGY Static Cross-Model Schema (Deliverable 1)
 
 This repository publishes the LinkML schema definitions, categorical crosswalks,
-and visual documentation for the single-year data exchange across the LBNL and ANL
-regional modeling suite (DOE Deliverable #1):
+and visual documentation for the single-year data exchange across the LBNL, ANL,
+and NLR regional modeling suite (DOE Deliverable #1):
 
-- **UrbanSim**: Zonal land-use totals, Census Block marginals, and Block-to-TAZ spatial weights.
-- **DEMOS**: Synthetic household and person evolution with Census PUMS seed lineage.
-- **ATLAS**: Household vehicle fleet counts, body types, and powertrains (`ICE`, `Hybrid`, `PHEV`, `AEV`).
-- **POLARIS**: Activity-based demand tables (`Demand.sqlite`), network supply (`Supply.sqlite`), and post-run state feedback (`Result.sqlite`).
-- **ActivitySim & BEAM**: LBNL activity-based demand and multi-agent simulation counterparts consuming the same upstream scenario state.
-- **SynthFirm**: Business establishments, commercial vehicle fleets, and B2B commodity shipments.
+- **UrbanSim** *(containerized land-use model run by LBNL; not currently a funded collaborator)*: Zonal land-use totals, Census Block marginals, and Block-to-TAZ spatial weights.
+- **DEMOS** *(NLR, formerly NREL)*: Synthetic household and person evolution with Census PUMS seed lineage.
+- **ATLAS** *(LBNL)*: Household vehicle fleet counts, body types, and powertrains (`ICE`, `Hybrid`, `PHEV`, `AEV`).
+- **POLARIS** *(ANL)*: Activity-based demand tables (`Demand.sqlite`), network supply (`Supply.sqlite`), and post-run state feedback (`Result.sqlite`).
+- **ActivitySim & BEAM** *(LBNL)*: LBNL's maintained ActivitySim demand implementation and BEAM multi-agent traffic/charging simulation consuming the same upstream scenario state.
+- **SynthFirm** *(LBNL)*: Business establishments, commercial vehicle fleets, and B2B commodity shipments.
 - **Network Travel Skims (`.omx` / `.zarr`)**: Multi-dimensional zone-to-zone highway, transit, and ridehail travel impedance arrays.
 
-Beyond fulfilling Deliverable #1, this package serves as a verification reference for model owners at Argonne and Berkeley Lab to inspect how their model inputs, outputs, join keys, and provisional boundary assumptions are represented—and as the direct specification for the SQL projection queries and seeded Python refinement operators in the next project phase's automated multi-year workflow.
+Beyond fulfilling Deliverable #1, this package serves as a verification reference for model owners at Argonne (POLARIS), NLR (DEMOS), and Berkeley Lab (ATLAS, BEAM, SynthFirm, and LBNL's maintained ActivitySim implementation) to inspect how their model inputs, outputs, join keys, and provisional boundary assumptions are represented—and as the direct specification for the SQL projection queries and seeded Python refinement operators in the next project phase's automated multi-year workflow.
 
 ---
 
@@ -336,21 +336,21 @@ STANDALONE_INDEX_MD = """# SYNERGY Static Cross-Model Schema (Deliverable 1)
 
 This site documents **Deliverable #1: Static Single-Year Cross-Model Schema** for the DOE SYNERGY project. It serves three roles:
 
-1. **DOE Deliverable #1**: A machine-readable LinkML specification and reference guide for single-year data exchange across the LBNL and ANL regional modeling suite.
-2. **Collaborator Review & Verification**: A working contract where model owners at Argonne (DEMOS, ATLAS, POLARIS) and Berkeley Lab (UrbanSim, ActivitySim, BEAM, SynthFirm) can inspect table schemas, join keys, categorical crosswalks, and provisional boundaries.
+1. **DOE Deliverable #1**: A machine-readable LinkML specification and reference guide for single-year data exchange across the LBNL, ANL, and NLR regional modeling suite.
+2. **Collaborator Review & Verification**: A working contract where model owners at Argonne (**POLARIS**), NLR, formerly NREL (**DEMOS**), and Berkeley Lab (**ATLAS**, **BEAM**, **SynthFirm**, and the project's maintained **ActivitySim** implementation, plus LBNL's containerized **UrbanSim** pipeline) can inspect table schemas, join keys, categorical crosswalks, and provisional boundaries.
 3. **Blueprint for Next-Phase Executable Workflows**: Every join key, categorical crosswalk (`X-H1`–`X-V5`), and donor draw rule (`D-H1`–`D-V2`) defined here translates directly into executable SQL projections and seeded Python refinement operators in the next project phase's automated multi-year pipeline.
 
 ---
 
 ## Participating Models
 
-1. **UrbanSim** — Parcel/block land use, residential capacity, employment allocation, and Census Block marginals.
-2. **DEMOS** — Household and person demographic synthesis, evolution, and Census PUMS donor lineage (`serialno`, `pnum`).
-3. **ATLAS** — Household vehicle ownership counts, body types, vintage, and powertrain adoption (ICEV, HEV, PHEV, BEV).
-4. **POLARIS** — Activity-based travel demand (`Demand.sqlite`), multi-modal network supply (`Supply.sqlite`), and dynamic traffic assignment.
-5. **ActivitySim & BEAM** — LBNL counterpart tour-based travel demand and multi-agent dynamic network simulation.
+1. **UrbanSim** *(containerized at LBNL; not currently a funded collaborator)* — Parcel/block land use, residential capacity, employment allocation, and Census Block marginals.
+2. **DEMOS** *(NLR, formerly NREL)* — Household and person demographic synthesis, evolution, and Census PUMS donor lineage (`serialno`, `pnum`).
+3. **ATLAS** *(LBNL)* — Household vehicle ownership counts, body types, vintage, and powertrain adoption (ICEV, HEV, PHEV, BEV).
+4. **POLARIS** *(ANL)* — Activity-based travel demand (`Demand.sqlite`), multi-modal network supply (`Supply.sqlite`), and dynamic traffic assignment.
+5. **ActivitySim & BEAM** *(LBNL)* — LBNL's maintained ActivitySim tour-based demand implementation and BEAM multi-agent dynamic network simulation.
 6. **Network Skim Cubes (`.omx` / `.zarr`)** — 3D/4D zone-to-zone travel time, distance, and cost arrays (`LinkML Array` specifications).
-7. **SynthFirm** — Synthetic business establishments, commercial vehicle fleets, and B2B freight tours.
+7. **SynthFirm** *(LBNL)* — Synthetic business establishments, commercial vehicle fleets, and B2B freight tours.
 
 ---
 
@@ -358,7 +358,7 @@ This site documents **Deliverable #1: Static Single-Year Cross-Model Schema** fo
 
 - **LinkML Source Schemas**: Machine-readable YAML specifications declaring classes, slots, primary/foreign keys, and multi-dimensional array shapes under `schema/`.
 - **Database ER Diagrams**: [Interactive Entity-Relationship Explorer](interactive-schema.md) showing per-model primary keys, intra-model foreign keys, and cross-model handoff edges.
-- **Architecture & Workflow UML**: [Multi-Model Architecture & UML](deliverable_1_uml.md) comparing the ANL POLARIS workflow, the LBNL ActivitySim/BEAM counterpart workflow, and the SynthFirm freight pipeline.
+- **Architecture & Workflow UML**: [Multi-Model Architecture & UML](deliverable_1_uml.md) comparing the POLARIS workflow, the ActivitySim/BEAM counterpart workflow, and the SynthFirm freight pipeline.
 - **Crosswalks, Donor Draws & Provisional Items**: [Contract at a Glance](contract-at-a-glance.md) detailing column mappings, categorical crosswalks (`X-H1`–`X-V5`), PUMS/NHTS donor draws (`D-H1`–`D-V2`), and three provisional boundaries flagged for collaborator confirmation.
 - **Generated Class & Enum Catalog**: [Schema Reference](schema/index.md) with full slot tables for every model entity.
 """

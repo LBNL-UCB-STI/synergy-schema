@@ -9,7 +9,7 @@ Click any node or class header in a diagram to open its LinkML field specificati
 
 === "Primary Workflow: POLARIS Dynamic Traffic Assignment"
 
-    In the primary ANL/LBNL workflow, **UrbanSim** land-use marginals, **DEMOS** synthetic households and persons, and **ATLAS** household vehicle fleets populate **POLARIS** (`Supply.sqlite` and `Demand.sqlite`) for activity-based simulation and dynamic traffic assignment:
+    In the primary POLARIS workflow, containerized **UrbanSim** land-use marginals, **DEMOS** (NLR) synthetic households and persons, and **ATLAS** (LBNL) household vehicle fleets populate **POLARIS** (ANL, `Supply.sqlite` and `Demand.sqlite`) for activity-based simulation and dynamic traffic assignment:
 
     ```mermaid
     flowchart TD
@@ -84,7 +84,7 @@ Click any node or class header in a diagram to open its LinkML field specificati
 
 === "LBL Counterpart Workflow: ActivitySim Demand & BEAM Dynamic Simulation"
 
-    In the LBNL counterpart workflow, the same upstream scenario state (**UrbanSim** land use, **DEMOS** population, and **ATLAS** vehicles) feeds **ActivitySim** tour/trip demand and **BEAM** multi-agent traffic, transit, and charging simulation:
+    In the LBNL counterpart workflow, the same upstream scenario state (containerized **UrbanSim** land use, **DEMOS** population, and **ATLAS** vehicles) feeds LBNL's maintained **ActivitySim** tour/trip demand implementation and **BEAM** multi-agent traffic, transit, and charging simulation:
 
     ```mermaid
     flowchart TD

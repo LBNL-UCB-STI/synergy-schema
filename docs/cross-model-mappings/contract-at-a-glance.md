@@ -367,5 +367,5 @@ The **DEMOS / ATLAS → POLARIS** mappings implement the joint multi-team specif
 Field-level formulas, donor stratification tables, and assumption logs (`A1`–`A31`) for the DEMOS / ATLAS → POLARIS handoff are maintained in the shared workbook:
 
 - **File**: `docs/resources/DEMOS_and_ATLAS_to_POLARIS_interface.xlsx`
-- **Contributors**: DEMOS, ATLAS, and POLARIS modeling teams (ANL & LBNL).
+- **Contributors**: DEMOS (NLR, formerly NREL), ATLAS (LBNL), and POLARIS (ANL) modeling teams.
 - **Sheets**: `Overview`, `Households`, `Persons`, `Vehicles`, `Draws`, `Crosswalks`, `Assumptions`, `Open questions`, `Inputs`, `Record classes & events`, and `Process & settings`.
