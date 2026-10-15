@@ -39,7 +39,7 @@ regional modeling suite (DOE Deliverable #1):
 - **SynthFirm**: Business establishments, commercial vehicle fleets, and B2B commodity shipments.
 - **Network Travel Skims (`.omx` / `.zarr`)**: Multi-dimensional zone-to-zone highway, transit, and ridehail travel impedance arrays.
 
-Beyond fulfilling Deliverable #1, this package serves as a shared roadmap and verification reference for model owners at Argonne and Berkeley Lab to inspect how their model inputs, outputs, join keys, and provisional boundary assumptions are represented.
+Beyond fulfilling Deliverable #1, this package serves as a verification reference for model owners at Argonne and Berkeley Lab to inspect how their model inputs, outputs, join keys, and provisional boundary assumptions are represented—and as the direct specification for the SQL projection queries and seeded Python refinement operators in the next project phase's automated multi-year workflow.
 
 ---
 
@@ -334,10 +334,11 @@ site/
 
 STANDALONE_INDEX_MD = """# SYNERGY Static Cross-Model Schema (Deliverable 1)
 
-This site documents **Deliverable #1: Static Single-Year Cross-Model Schema** for the DOE SYNERGY project. It serves two roles:
+This site documents **Deliverable #1: Static Single-Year Cross-Model Schema** for the DOE SYNERGY project. It serves three roles:
 
 1. **DOE Deliverable #1**: A machine-readable LinkML specification and reference guide for single-year data exchange across the LBNL and ANL regional modeling suite.
-2. **Collaborator Review & Verification Roadmap**: A shared working contract where model owners at Argonne (DEMOS, ATLAS, POLARIS) and Berkeley Lab (UrbanSim, ActivitySim, BEAM, SynthFirm) can inspect table schemas, join keys, categorical crosswalks, and provisional boundaries before automated pipeline execution.
+2. **Collaborator Review & Verification**: A working contract where model owners at Argonne (DEMOS, ATLAS, POLARIS) and Berkeley Lab (UrbanSim, ActivitySim, BEAM, SynthFirm) can inspect table schemas, join keys, categorical crosswalks, and provisional boundaries.
+3. **Blueprint for Next-Phase Executable Workflows**: Every join key, categorical crosswalk (`X-H1`–`X-V5`), and donor draw rule (`D-H1`–`D-V2`) defined here translates directly into executable SQL projections and seeded Python refinement operators in the next project phase's automated multi-year pipeline.
 
 ---
 
