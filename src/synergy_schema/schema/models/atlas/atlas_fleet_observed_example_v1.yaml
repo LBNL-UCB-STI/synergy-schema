@@ -25,6 +25,7 @@ classes:
     aliases:
       - AtlasHousehold
       - AtlasHouseholdFleet
+      - AtlasHouseholdFleetOutputExampleV1
     annotations:
       model_association: ATLAS
       schema_status: authoritative
@@ -55,6 +56,7 @@ classes:
     aliases:
       - AtlasVehicle
       - AtlasVehicleFleet
+      - AtlasVehicleFleetOutputExampleV1
     annotations:
       model_association: ATLAS
       schema_status: authoritative

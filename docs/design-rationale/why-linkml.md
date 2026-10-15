@@ -1,14 +1,13 @@
 # Why LinkML
 
-The shared language must be readable in source form, precise enough for typed
-validation, and able to generate a browsable field reference. LinkML provides
-that combination without requiring participating models to adopt it at
-runtime.
+The shared definitions need to be readable as source files, precise enough to
+validate against, and able to generate a browsable field reference. LinkML
+does all three, and the models never have to use it at runtime.
 
-The LinkML files define structure: fields, types, required values, and declared
-relationships. Python conformance checks handle comparisons across files, such
-as whether a receipt names the same scenario and mapping as its bundle. Model
-runtimes remain responsible for producing and consuming their native data.
+The LinkML files define structure: fields, types, required values, and
+relationships. Python checks handle comparisons across files, such as whether
+a receipt names the same scenario and mapping as its bundle. The models
+themselves remain responsible for producing and reading their own data.
 
-This division keeps the portable definitions useful without presenting schema
-validation as proof that a full workflow ran correctly.
+This split keeps the shared definitions portable, without passing off schema
+validation as proof that a whole workflow ran correctly.

@@ -1,0 +1,6 @@
+source_owner: ATLAS model team
+target_owner: POLARIS model team
+required_semantic_review_roles:
+  - source_owner
+  - target_owner
+enforcement: Repository ownership metadata; Git handles intentionally not fabricated.

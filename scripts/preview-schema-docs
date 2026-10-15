@@ -5,7 +5,6 @@ repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 schema_path="$repo_root/src/synergy_schema/schema/synergy_schema.yaml"
 deliverable_1_schema_path="$repo_root/src/synergy_schema/schema/deliverable_1_static_schema.yaml"
 observed_examples_schema_path="$repo_root/src/synergy_schema/schema/observed_examples.yaml"
-mapping_path="$repo_root/examples/post_atlas_population_bundle/population_identity_mappings.yaml"
 generated_docs="$repo_root/docs/schema"
 observed_examples_docs="$generated_docs/observed-examples"
 mode="${1:-serve}"
@@ -44,13 +43,16 @@ uv run gen-doc \
   --directory "$observed_examples_docs" \
   "$observed_examples_schema_path"
 
-uv run python -m synergy_schema.cross_model_identity_diagram \
-  "$mapping_path" \
-  "$generated_docs/cross-model-population-identity.md"
-
 uv run python -m synergy_schema.core_schema_diagram \
   "$repo_root/src/synergy_schema/schema/core" \
   "$generated_docs/core-schema-uml.md"
+
+uv run python -m synergy_schema.deliverable_1_diagram \
+  --output "$repo_root/docs/cross-model-mappings/deliverable_1_uml.md"
+
+uv run python -m synergy_schema.mermaid_diagram
+
+uv run python -m synergy_schema.interactive_diagram
 
 cp "$repo_root/examples/one_year_mapping_handshake/review/contract-at-a-glance.md" \
   "$generated_docs/contract-at-a-glance.md"

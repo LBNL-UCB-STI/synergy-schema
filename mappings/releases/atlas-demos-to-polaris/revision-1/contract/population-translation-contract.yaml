@@ -1,0 +1,1925 @@
+id: mapping:atlas-demos-to-polaris
+name: atlas_demos_to_polaris
+title: ATLAS and DEMOS to POLARIS population translation contract
+description: Complete production translation contract mapping DEMOS synthetic population
+  and ATLAS vehicle fleet outputs onto the POLARIS demand database schema. Formulated
+  jointly by ANL, LBNL, and UCB teams per docs-internal/DEMOS_and_ATLAS_to_POLARIS_interface.xlsx.
+revision: revision-1
+encoding_source:
+  locator: docs-internal/DEMOS_and_ATLAS_to_POLARIS_interface.xlsx
+  media_type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet
+  artifact_identity:
+    digest_algorithm: sha256
+    content_digest: c0b2064ae8ca2988962944201a3e3a59896133e5b7a4a36b21209db417a0e20e
+source_catalog: &id001
+  catalog_id: atlas-demos-native-contract
+  catalog_kind: atlas-demos
+  revision: 3877652b77990949c0b4cbbc982899b280a2ba38
+  digest_algorithm: sha256
+  content_digest: 0596ff12bc2cc8e691fa684dba237d86058be3d116812220942b1c3a89c6db0a
+target_catalog: &id002
+  catalog_id: polaris-native-contract
+  catalog_kind: polaris
+  revision: 3877652b77990949c0b4cbbc982899b280a2ba38
+  digest_algorithm: sha256
+  content_digest: 1468f80fa42be43ab0e18cf6575eecf5cb765b709e9c062195773d0467332c32
+source_schema_contract:
+  language: linkml
+  schema_digest_algorithm: sha256
+  schema_digest: f5d65732ed66141a8fcd569c37c26b5a39916fb7670e87d5196d730f7606ae0a
+  selected_root: ObservedExamplesEntrypoint
+  schema_uri: src/synergy_schema/schema/synergy_schema.yaml
+target_schema_contract:
+  language: linkml
+  schema_digest_algorithm: sha256
+  schema_digest: f5d65732ed66141a8fcd569c37c26b5a39916fb7670e87d5196d730f7606ae0a
+  selected_root: PolarisDemandDatabaseV1Household
+  schema_uri: src/synergy_schema/schema/synergy_schema.yaml
+semantic_content_digest_algorithm: sha256
+semantic_content_digest: 51ead67024fa32be5451125ee2d8c8fbedcef3fd02ce6cbd566b6e8c16f8e9a6
+field_mappings:
+  - id: map-household-id
+    description: DEMOS household identifier mapped to POLARIS household primary key.
+    transformation_mode: renamed
+    rule: Carry the DEMOS household ID directly into polaris_households.household.
+    implementation_evidence: &id003
+      - implementation/translation.sql
+    source_element:
+      catalog: *id001
+      kind: sql_column
+      path: demos_households.household
+    target_element:
+      catalog: *id002
+      kind: sql_column
+      path: polaris_households.household
+  - id: map-household-income
+    description: DEMOS household annual income deflated via CPI series to POLARIS
+      dollar year (A7).
+    transformation_mode: derived
+    rule: Deflate DEMOS household income using the official CPI deflation factor to
+      the POLARIS base dollar year.
+    implementation_evidence: *id003
+    source_element:
+      catalog: *id001
+      kind: sql_column
+      path: demos_households.income
+    target_element:
+      catalog: *id002
+      kind: sql_column
+      path: polaris_households.income
+  - id: map-person-id
+    description: DEMOS person identifier mapped to POLARIS person primary key.
+    transformation_mode: direct
+    rule: Map DEMOS person ID directly to polaris_persons.person.
+    implementation_evidence: *id003
+    source_element:
+      catalog: *id001
+      kind: sql_column
+      path: demos_persons.person
+    target_element:
+      catalog: *id002
+      kind: sql_column
+      path: polaris_persons.person
+  - id: map-person-household-id
+    description: DEMOS person foreign key to owning household.
+    transformation_mode: direct
+    rule: Map DEMOS household ID foreign key directly to polaris_persons.household.
+    implementation_evidence: *id003
+    source_element:
+      catalog: *id001
+      kind: sql_column
+      path: demos_persons.household
+    target_element:
+      catalog: *id002
+      kind: sql_column
+      path: polaris_persons.household
+  - id: map-person-gender
+    description: DEMOS person gender (1 Male, 2 Female) mapped directly (X-P1).
+    transformation_mode: direct
+    rule: Map DEMOS gender (1 Male, 2 Female) directly to POLARIS gender enum domain.
+    implementation_evidence: *id003
+    source_element:
+      catalog: *id001
+      kind: sql_column
+      path: demos_persons.gender
+    target_element:
+      catalog: *id002
+      kind: sql_column
+      path: polaris_persons.gender
+  - id: map-person-age
+    description: DEMOS person age in years mapped directly (X-P1).
+    transformation_mode: direct
+    rule: Map DEMOS integer age in years directly to polaris_persons.age.
+    implementation_evidence: *id003
+    source_element:
+      catalog: *id001
+      kind: sql_column
+      path: demos_persons.age
+    target_element:
+      catalog: *id002
+      kind: sql_column
+      path: polaris_persons.age
+  - id: map-person-education
+    description: DEMOS educational attainment with K-12 consistency override (X-P1,
+      X-P6, A24).
+    transformation_mode: derived
+    rule: Map DEMOS education (ACS SCHL 0-24), applying K-12 consistency override
+      to grade code g when outside allowed range.
+    implementation_evidence: *id003
+    source_element:
+      catalog: *id001
+      kind: sql_column
+      path: demos_persons.education
+    target_element:
+      catalog: *id002
+      kind: sql_column
+      path: polaris_persons.education
+  - id: map-person-income
+    description: DEMOS person annual income deflated via CPI series to POLARIS dollar
+      year (A7).
+    transformation_mode: derived
+    rule: Deflate DEMOS person income using the CPI deflation factor to the POLARIS
+      base dollar year.
+    implementation_evidence: *id003
+    source_element:
+      catalog: *id001
+      kind: sql_column
+      path: demos_persons.income
+    target_element:
+      catalog: *id002
+      kind: sql_column
+      path: polaris_persons.income
+  - id: map-person-employment
+    description: DEMOS person employment status (ACS ESR) mapped directly (X-P1, X-P2).
+    transformation_mode: direct
+    rule: Map DEMOS employment status (ACS ESR 0-6) directly to POLARIS employment
+      domain.
+    implementation_evidence: *id003
+    source_element:
+      catalog: *id001
+      kind: sql_column
+      path: demos_persons.employment
+    target_element:
+      catalog: *id002
+      kind: sql_column
+      path: polaris_persons.employment
+  - id: map-person-marital-status
+    description: DEMOS person marital status (1-5 identical; 0 carries previous value
+      or draws D-P3a) (X-P1, A27).
+    transformation_mode: derived
+    rule: Map DEMOS marital status (1-5 identical; code 0 carries previous value for
+      surviving, or draws D-P3a for new).
+    implementation_evidence: *id003
+    source_element:
+      catalog: *id001
+      kind: sql_column
+      path: demos_persons.marital_status
+    target_element:
+      catalog: *id002
+      kind: sql_column
+      path: polaris_persons.marital_status
+  - id: map-person-school-enrollment
+    description: DEMOS school enrollment (0 NA, 1 none, 2 public, 3 private) with
+      public/private continuity (X-P1, A25).
+    transformation_mode: derived
+    rule: Map DEMOS school enrollment, preserving prior public/private status for
+      continuing students.
+    implementation_evidence: *id003
+    source_element:
+      catalog: *id001
+      kind: sql_column
+      path: demos_persons.school_enrollment
+    target_element:
+      catalog: *id002
+      kind: sql_column
+      path: polaris_persons.school_enrollment
+  - id: map-vehicle-household-id
+    description: ATLAS vehicle owning household mapped to POLARIS hhold column (A41).
+    transformation_mode: renamed
+    rule: Map ATLAS HOUSEID to polaris_vehicles.hhold.
+    implementation_evidence: *id003
+    source_element:
+      catalog: *id001
+      kind: sql_column
+      path: atlas_vehicles.HOUSEID
+    target_element:
+      catalog: *id002
+      kind: sql_column
+      path: polaris_vehicles.hhold
+  - id: map-vehicle-id
+    description: ATLAS vehicle sequence ID mapped to POLARIS vehicle_id (carried for
+      retained, sequenced for new, A42).
+    transformation_mode: derived
+    rule: Map ATLAS VEHID to polaris_vehicles.vehicle_id, retaining ID across years
+      for surviving vehicles.
+    implementation_evidence: *id003
+    source_element:
+      catalog: *id001
+      kind: sql_column
+      path: atlas_vehicles.VEHID
+    target_element:
+      catalog: *id002
+      kind: sql_column
+      path: polaris_vehicles.vehicle_id
+residue_records:
+  - id: demos-hh-block-id-unmapped
+    residue_kind: unmapped_source
+    deterministic_rule: Condition dwelling draw D-H1 on block GEOID tract.
+    rationale: DEMOS census block GEOID is used for spatial conditioning in dwelling
+      draw D-H1 but not stored directly as a column in POLARIS demand database.
+    disposition: Retain in source pipeline for spatial conditioning; omit from polaris_households
+      table.
+    implementation_evidence: *id003
+    affected_elements:
+      - catalog: *id001
+        kind: sql_column
+        path: demos_households.block_id
+  - id: demos-hh-county-unmapped
+    residue_kind: unmapped_source
+    deterministic_rule: Fallback to county ID when tract match fails in D-H1.
+    rationale: DEMOS lcm_county_id serves as geographic fallback when tract cannot
+      be matched (A12), but is not a direct column in POLARIS households.
+    disposition: Retain in source pipeline for geographic fallback; omit from polaris_households
+      table.
+    implementation_evidence: *id003
+    affected_elements:
+      - catalog: *id001
+        kind: sql_column
+        path: demos_households.lcm_county_id
+  - id: demos-hh-race-of-head-unmapped
+    residue_kind: unmapped_source
+    deterministic_rule: Assign race_of_head to new household reference person.
+    rationale: DEMOS race_of_head is used to assign head race for new households (A26)
+      rather than stored on the household table.
+    disposition: Pass to person synthesis step for new household head race; omit from
+      polaris_households.
+    implementation_evidence: *id003
+    affected_elements:
+      - catalog: *id001
+        kind: sql_column
+        path: demos_households.race_of_head
+  - id: demos-hh-persons-context-dropped
+    residue_kind: dropped_context
+    deterministic_rule: Verify count matches person rows, then drop.
+    rationale: DEMOS household persons count is checked against person rows; the actual
+      count of person rows in polaris_persons is authoritative.
+    disposition: Drop column after cross-validation; compute target column from person
+      row count.
+    implementation_evidence: *id003
+    affected_elements:
+      - catalog: *id001
+        kind: sql_column
+        path: demos_households.persons
+  - id: demos-hh-is-reorg-unmapped
+    residue_kind: unmapped_source
+    deterministic_rule: None
+    rationale: DEMOS reorganization household indicator is an internal DEMOS simulation
+      diagnostic not consumed by POLARIS.
+    disposition: Retain in source diagnostic artifacts; omit from POLARIS demand database.
+    implementation_evidence: *id003
+    affected_elements:
+      - catalog: *id001
+        kind: sql_column
+        path: demos_households.is_reorg_household
+  - id: demos-hh-age-of-head-unmapped
+    residue_kind: unmapped_source
+    deterministic_rule: None
+    rationale: DEMOS household-level age_of_head is stale; person table age of reference
+      person is authoritative.
+    disposition: Drop stale household-level head age; source from reference person
+      record.
+    implementation_evidence: *id003
+    affected_elements:
+      - catalog: *id001
+        kind: sql_column
+        path: demos_households.age_of_head
+  - id: demos-hh-workers-unmapped
+    residue_kind: unmapped_source
+    deterministic_rule: None
+    rationale: DEMOS household workers count is superseded by the authoritative count
+      of persons with ESR 1 or 4 (X-P2, A22).
+    disposition: Drop DEMOS household worker count; recompute from person employment
+      records.
+    implementation_evidence: *id003
+    affected_elements:
+      - catalog: *id001
+        kind: sql_column
+        path: demos_households.workers
+  - id: demos-person-relp-unmapped
+    residue_kind: unmapped_source
+    deterministic_rule: Evaluate household composition and head relationship.
+    rationale: DEMOS relationship to head (RELP) drives household type composition
+      (X-H1) and race inheritance (D-P3b), but is not a persistent POLARIS demand
+      column.
+    disposition: Consume during household type derivation and race draw; omit from
+      polaris_persons table.
+    implementation_evidence: *id003
+    affected_elements:
+      - catalog: *id001
+        kind: sql_column
+        path: demos_persons.relp
+  - id: demos-person-id-unmapped
+    residue_kind: unmapped_source
+    deterministic_rule: Regenerate zero-based index 0..n-1 per household.
+    rationale: DEMOS person within-household id contains gaps/blanks; POLARIS regenerates
+      zero-based consecutive id 0..n-1 per household.
+    disposition: Drop non-consecutive source IDs; regenerate sequential 0..n-1 index
+      in POLARIS.
+    implementation_evidence: *id003
+    affected_elements:
+      - catalog: *id001
+        kind: sql_column
+        path: demos_persons.id
+  - id: atlas-hh-houseid-dropped
+    residue_kind: dropped_context
+    deterministic_rule: Verify HOUSEID matches DEMOS household ID.
+    rationale: ATLAS household HOUSEID is validated against DEMOS household IDs; DEMOS
+      household table provides primary identity.
+    disposition: Validate join identity then drop; DEMOS household table provides
+      canonical household records.
+    implementation_evidence: *id003
+    affected_elements:
+      - catalog: *id001
+        kind: sql_column
+        path: atlas_households.HOUSEID
+  - id: atlas-hh-nvehicles-dropped
+    residue_kind: dropped_context
+    deterministic_rule: Verify count matches ATLAS vehicle records.
+    rationale: ATLAS household vehicle count is checked for consistency against vehicle
+      rows; count of rows is authoritative.
+    disposition: Validate against vehicle row count then drop from household record.
+    implementation_evidence: *id003
+    affected_elements:
+      - catalog: *id001
+        kind: sql_column
+        path: atlas_households.nvehicles
+  - id: atlas-hh-county-fips-dropped
+    residue_kind: dropped_context
+    deterministic_rule: Verify against DEMOS block_id county.
+    rationale: ATLAS household county FIPS is redundant with DEMOS geography and dropped
+      in favor of DEMOS block_id.
+    disposition: Drop redundant ATLAS geographic column.
+    implementation_evidence: *id003
+    affected_elements:
+      - catalog: *id001
+        kind: sql_column
+        path: atlas_households.county_fips
+  - id: atlas-hh-tractid-dropped
+    residue_kind: dropped_context
+    deterministic_rule: Verify against DEMOS block_id tract.
+    rationale: ATLAS household tractid is redundant with DEMOS block_id geography.
+    disposition: Drop redundant ATLAS tract identifier.
+    implementation_evidence: *id003
+    affected_elements:
+      - catalog: *id001
+        kind: sql_column
+        path: atlas_households.tractid
+  - id: atlas-veh-bodytype-unmapped
+    residue_kind: unmapped_source
+    deterministic_rule: Crosswalk X-V1 and draw D-V1 into vehicle_class.
+    rationale: ATLAS vehicle bodytype is crosswalked (X-V1) and size-drawn (D-V1)
+      to determine POLARIS vehicle_class key rather than mapped directly.
+    disposition: Transform through X-V1/D-V1 into vehicle_class dimension of polaris_vehicle_type
+      lookup.
+    implementation_evidence: *id003
+    affected_elements:
+      - catalog: *id001
+        kind: sql_column
+        path: atlas_vehicles.bodytype
+  - id: atlas-veh-pred-power-unmapped
+    residue_kind: unmapped_source
+    deterministic_rule: Crosswalk X-V2 and X-V3 to powertrain and fuel types.
+    rationale: ATLAS predicted powertrain is crosswalked via X-V2 to powertrain_type
+      and X-V3 to fuel_type keys rather than stored directly.
+    disposition: Transform through X-V2/X-V3 into powertrain_type and fuel_type dimensions
+      of polaris_vehicle_type lookup.
+    implementation_evidence: *id003
+    affected_elements:
+      - catalog: *id001
+        kind: sql_column
+        path: atlas_vehicles.pred_power
+  - id: atlas-veh-modelyear-unmapped
+    residue_kind: unmapped_source
+    deterministic_rule: Compute age = year - modelyear, bucket into vintage_type X-V4.
+    rationale: ATLAS modelyear is converted to age (simulation_year - modelyear) and
+      bucketed into vintage_type via X-V4 rather than stored as year.
+    disposition: Transform through age calculation and X-V4 bucketing into vintage_type
+      dimension.
+    implementation_evidence: *id003
+    affected_elements:
+      - catalog: *id001
+        kind: sql_column
+        path: atlas_vehicles.modelyear
+  - id: atlas-veh-vintage-category-dropped
+    residue_kind: dropped_context
+    deterministic_rule: None
+    rationale: ATLAS proprietary vintage category is dropped in favor of explicit
+      modelyear age bucketing (X-V4).
+    disposition: Drop ATLAS internal vintage categories in favor of POLARIS vintage_type
+      buckets.
+    implementation_evidence: *id003
+    affected_elements:
+      - catalog: *id001
+        kind: sql_column
+        path: atlas_vehicles.vintage_category
+  - id: atlas-veh-annual-mileage-dropped
+    residue_kind: dropped_context
+    deterministic_rule: None
+    rationale: ATLAS annual mileage estimate is not represented in the POLARIS demand
+      database vehicles table.
+    disposition: Omit ATLAS annual mileage estimate from translated POLARIS demand
+      database.
+    implementation_evidence: *id003
+    affected_elements:
+      - catalog: *id001
+        kind: sql_column
+        path: atlas_vehicles.annual_mileage
+  - id: target-default-polaris-households-Has-Residential-Charging
+    residue_kind: required_target_default
+    deterministic_rule: Carry t-1 value for surviving, or draw D-H1.
+    rationale: Carried from t-1 for surviving households; drawn jointly in D-H1 for
+      new households (A10, A11).
+    disposition: Populate polaris_households.Has_Residential_Charging via deterministic
+      calculation or model default.
+    implementation_evidence: *id003
+    affected_elements:
+      - catalog: *id002
+        kind: sql_column
+        path: polaris_households.Has_Residential_Charging
+  - id: target-default-polaris-households-bikes
+    residue_kind: required_target_default
+    deterministic_rule: Carry t-1 value for surviving, 0 for new.
+    rationale: 'POLARIS demand model output: carried from t-1 for surviving households;
+      initialized to 0 for new households (A16).'
+    disposition: Populate polaris_households.bikes via deterministic calculation or
+      model default.
+    implementation_evidence: *id003
+    affected_elements:
+      - catalog: *id002
+        kind: sql_column
+        path: polaris_households.bikes
+  - id: target-default-polaris-households-delRat
+    residue_kind: required_target_default
+    deterministic_rule: Carry t-1 value for surviving, 0 for new.
+    rationale: 'POLARIS demand model output: carried from t-1 for surviving households;
+      initialized to 0 for new households (A16).'
+    disposition: Populate polaris_households.delRat via deterministic calculation
+      or model default.
+    implementation_evidence: *id003
+    affected_elements:
+      - catalog: *id002
+        kind: sql_column
+        path: polaris_households.delRat
+  - id: target-default-polaris-households-dispose-veh
+    residue_kind: required_target_default
+    deterministic_rule: Carry t-1 value for surviving, 0 for new.
+    rationale: 'POLARIS demand model output: carried from t-1 for surviving households;
+      initialized to 0 for new households (A16).'
+    disposition: Populate polaris_households.dispose_veh via deterministic calculation
+      or model default.
+    implementation_evidence: *id003
+    affected_elements:
+      - catalog: *id002
+        kind: sql_column
+        path: polaris_households.dispose_veh
+  - id: target-default-polaris-households-ecom
+    residue_kind: required_target_default
+    deterministic_rule: Carry t-1 value for surviving, 0 for new.
+    rationale: 'POLARIS demand model output: carried from t-1 for surviving households;
+      initialized to 0 for new households (A16).'
+    disposition: Populate polaris_households.ecom via deterministic calculation or
+      model default.
+    implementation_evidence: *id003
+    affected_elements:
+      - catalog: *id002
+        kind: sql_column
+        path: polaris_households.ecom
+  - id: target-default-polaris-households-hhold
+    residue_kind: required_target_default
+    deterministic_rule: Previous value for surviving, -1 for new.
+    rationale: 'Physical alias: previous value for surviving households, -1 for new
+      households pending POLARIS internal ID assignment.'
+    disposition: Populate polaris_households.hhold via deterministic calculation or
+      model default.
+    implementation_evidence: *id003
+    affected_elements:
+      - catalog: *id002
+        kind: sql_column
+        path: polaris_households.hhold
+  - id: target-default-polaris-households-housing-unit-type
+    residue_kind: required_target_default
+    deterministic_rule: Carry t-1 value for surviving, or draw D-H1.
+    rationale: 'Housing unit type enum (1-5): carried for surviving; drawn via D-H1
+      for new (X-H3, A10).'
+    disposition: Populate polaris_households.housing_unit_type via deterministic calculation
+      or model default.
+    implementation_evidence: *id003
+    affected_elements:
+      - catalog: *id002
+        kind: sql_column
+        path: polaris_households.housing_unit_type
+  - id: target-default-polaris-households-workers
+    residue_kind: required_target_default
+    deterministic_rule: COUNT(person) WHERE employment IN (1, 4).
+    rationale: 'Derived count of household workers: sum of household persons with
+      employment ESR 1 or 4 (A22).'
+    disposition: Populate polaris_households.workers via deterministic calculation
+      or model default.
+    implementation_evidence: *id003
+    affected_elements:
+      - catalog: *id002
+        kind: sql_column
+        path: polaris_households.workers
+  - id: target-default-polaris-households-location
+    residue_kind: required_target_default
+    deterministic_rule: Carry t-1 value for surviving, or draw D-H1.
+    rationale: 'Zone location ID: carried from t-1 for surviving; drawn in D-H1 within
+      tract/county for new (A10, A11, A12).'
+    disposition: Populate polaris_households.location via deterministic calculation
+      or model default.
+    implementation_evidence: *id003
+    affected_elements:
+      - catalog: *id002
+        kind: sql_column
+        path: polaris_households.location
+  - id: target-default-polaris-households-num-groceries
+    residue_kind: required_target_default
+    deterministic_rule: Carry t-1 value for surviving, 0 for new.
+    rationale: 'POLARIS demand model output: carried for surviving, 0 for new (A16).'
+    disposition: Populate polaris_households.num_groceries via deterministic calculation
+      or model default.
+    implementation_evidence: *id003
+    affected_elements:
+      - catalog: *id002
+        kind: sql_column
+        path: polaris_households.num_groceries
+  - id: target-default-polaris-households-num-meals
+    residue_kind: required_target_default
+    deterministic_rule: Carry t-1 value for surviving, 0 for new.
+    rationale: 'POLARIS demand model output: carried for surviving, 0 for new (A16).'
+    disposition: Populate polaris_households.num_meals via deterministic calculation
+      or model default.
+    implementation_evidence: *id003
+    affected_elements:
+      - catalog: *id002
+        kind: sql_column
+        path: polaris_households.num_meals
+  - id: target-default-polaris-households-persons
+    residue_kind: required_target_default
+    deterministic_rule: COUNT(person) for this household.
+    rationale: Authoritative count of person records belonging to this household.
+    disposition: Populate polaris_households.persons via deterministic calculation
+      or model default.
+    implementation_evidence: *id003
+    affected_elements:
+      - catalog: *id002
+        kind: sql_column
+        path: polaris_households.persons
+  - id: target-default-polaris-households-time-in-home
+    residue_kind: required_target_default
+    deterministic_rule: Previous value + 1 for surviving, 0 for new.
+    rationale: 'Duration in residence: previous value + 1 for surviving; 0 for new
+      households (A31).'
+    disposition: Populate polaris_households.time_in_home via deterministic calculation
+      or model default.
+    implementation_evidence: *id003
+    affected_elements:
+      - catalog: *id002
+        kind: sql_column
+        path: polaris_households.time_in_home
+  - id: target-default-polaris-households-type
+    residue_kind: required_target_default
+    deterministic_rule: Evaluate X-H1 composition and tenure crosswalk X-H2.
+    rationale: 'Household type enum (1-11): tenure x HHT recomputed annually from
+      composition (X-H1, X-H2, A13, A14).'
+    disposition: Populate polaris_households.type via deterministic calculation or
+      model default.
+    implementation_evidence: *id003
+    affected_elements:
+      - catalog: *id002
+        kind: sql_column
+        path: polaris_households.type
+  - id: target-default-polaris-households-vehicles
+    residue_kind: required_target_default
+    deterministic_rule: COUNT(vehicle) for this household.
+    rationale: Authoritative count of vehicle records belonging to this household.
+    disposition: Populate polaris_households.vehicles via deterministic calculation
+      or model default.
+    implementation_evidence: *id003
+    affected_elements:
+      - catalog: *id002
+        kind: sql_column
+        path: polaris_households.vehicles
+  - id: target-default-polaris-persons-disability
+    residue_kind: required_target_default
+    deterministic_rule: Carry t-1 value for surviving, or draw D-P4.
+    rationale: 'Disability status (1 with, 2 without): carried from t-1 for surviving;
+      drawn via D-P4 by sex/age for new (A28).'
+    disposition: Populate polaris_persons.disability via deterministic calculation
+      or model default.
+    implementation_evidence: *id003
+    affected_elements:
+      - catalog: *id002
+        kind: sql_column
+        path: polaris_persons.disability
+  - id: target-default-polaris-persons-escooter-use-level
+    residue_kind: required_target_default
+    deterministic_rule: Carry t-1 value for surviving, 0 for new.
+    rationale: 'POLARIS demand model output: carried from t-1 for surviving, initialized
+      to 0 for new (A30).'
+    disposition: Populate polaris_persons.escooter_use_level via deterministic calculation
+      or model default.
+    implementation_evidence: *id003
+    affected_elements:
+      - catalog: *id002
+        kind: sql_column
+        path: polaris_persons.escooter_use_level
+  - id: target-default-polaris-persons-id
+    residue_kind: required_target_default
+    deterministic_rule: ROW_NUMBER() - 1 within household.
+    rationale: Zero-based sequential person index 0..n-1 within the household.
+    disposition: Populate polaris_persons.id via deterministic calculation or model
+      default.
+    implementation_evidence: *id003
+    affected_elements:
+      - catalog: *id002
+        kind: sql_column
+        path: polaris_persons.id
+  - id: target-default-polaris-persons-industry
+    residue_kind: required_target_default
+    deterministic_rule: Carry t-1 value for continuing worker, or draw D-P1.
+    rationale: 'Census INDP industry code: carried from t-1 for continuing workers;
+      drawn via D-P1 on event or new worker (A20, A21).'
+    disposition: Populate polaris_persons.industry via deterministic calculation or
+      model default.
+    implementation_evidence: *id003
+    affected_elements:
+      - catalog: *id002
+        kind: sql_column
+        path: polaris_persons.industry
+  - id: target-default-polaris-persons-is-long-term-chooser
+    residue_kind: required_target_default
+    deterministic_rule: Set 1 on event or new person, 0 otherwise.
+    rationale: 'Derived flag: 1 on mobility/employment event or new person, else 0
+      (A30).'
+    disposition: Populate polaris_persons.is_long_term_chooser via deterministic calculation
+      or model default.
+    implementation_evidence: *id003
+    affected_elements:
+      - catalog: *id002
+        kind: sql_column
+        path: polaris_persons.is_long_term_chooser
+  - id: target-default-polaris-persons-journey-to-work-arrival-time
+    residue_kind: required_target_default
+    deterministic_rule: Carry t-1 value for continuing, or draw D-P2.
+    rationale: 'Usual work arrival time: carried from t-1 for continuing; drawn in
+      D-P2 or 07:00-09:00 for new (D-P2).'
+    disposition: Populate polaris_persons.journey_to_work_arrival_time via deterministic
+      calculation or model default.
+    implementation_evidence: *id003
+    affected_elements:
+      - catalog: *id002
+        kind: sql_column
+        path: polaris_persons.journey_to_work_arrival_time
+  - id: target-default-polaris-persons-journey-to-work-mode
+    residue_kind: required_target_default
+    deterministic_rule: Carry t-1 value for continuing, or draw D-P2.
+    rationale: 'Usual commute mode: carried from t-1 for continuing; drawn via D-P2
+      for new worker (A21, D-P2).'
+    disposition: Populate polaris_persons.journey_to_work_mode via deterministic calculation
+      or model default.
+    implementation_evidence: *id003
+    affected_elements:
+      - catalog: *id002
+        kind: sql_column
+        path: polaris_persons.journey_to_work_mode
+  - id: target-default-polaris-persons-journey-to-work-travel-time
+    residue_kind: required_target_default
+    deterministic_rule: Carry t-1 value for continuing, or draw D-P2.
+    rationale: 'Usual commute travel time: carried from t-1 for continuing; drawn
+      via D-P2 for new worker (A21, D-P2).'
+    disposition: Populate polaris_persons.journey_to_work_travel_time via deterministic
+      calculation or model default.
+    implementation_evidence: *id003
+    affected_elements:
+      - catalog: *id002
+        kind: sql_column
+        path: polaris_persons.journey_to_work_travel_time
+  - id: target-default-polaris-persons-journey-to-work-vehicle-occupancy
+    residue_kind: required_target_default
+    deterministic_rule: Carry t-1 value for continuing, or draw D-P2.
+    rationale: 'Usual commute vehicle occupancy: carried from t-1 for continuing;
+      drawn via D-P2 for new worker (A21, D-P2).'
+    disposition: Populate polaris_persons.journey_to_work_vehicle_occupancy via deterministic
+      calculation or model default.
+    implementation_evidence: *id003
+    affected_elements:
+      - catalog: *id002
+        kind: sql_column
+        path: polaris_persons.journey_to_work_vehicle_occupancy
+  - id: target-default-polaris-persons-race
+    residue_kind: required_target_default
+    deterministic_rule: Carry t-1 value for surviving, race_of_head for head, or draw
+      D-P3b.
+    rationale: 'RACE RAC1P code: carried from t-1 for surviving; new head takes race_of_head,
+      others draw D-P3b (A26).'
+    disposition: Populate polaris_persons.race via deterministic calculation or model
+      default.
+    implementation_evidence: *id003
+    affected_elements:
+      - catalog: *id002
+        kind: sql_column
+        path: polaris_persons.race
+  - id: target-default-polaris-persons-school-grade-level
+    residue_kind: required_target_default
+    deterministic_rule: Advance grade X-P4 for continuing, or draw X-P5 for entrant.
+    rationale: 'Current school grade: progression X-P4 for continuing students; entry
+      grade draw X-P5 for entrants.'
+    disposition: Populate polaris_persons.school_grade_level via deterministic calculation
+      or model default.
+    implementation_evidence: *id003
+    affected_elements:
+      - catalog: *id002
+        kind: sql_column
+        path: polaris_persons.school_grade_level
+  - id: target-default-polaris-persons-school-location-id
+    residue_kind: required_target_default
+    deterministic_rule: Carry t-1 value for continuing, -1 for new.
+    rationale: 'School location zone ID: carried from t-1 for continuing students;
+      -1 for new/unassigned (A23).'
+    disposition: Populate polaris_persons.school_location_id via deterministic calculation
+      or model default.
+    implementation_evidence: *id003
+    affected_elements:
+      - catalog: *id002
+        kind: sql_column
+        path: polaris_persons.school_location_id
+  - id: target-default-polaris-persons-telecommute-level
+    residue_kind: required_target_default
+    deterministic_rule: Carry t-1 value for surviving, 0 for new.
+    rationale: 'POLARIS demand model output: carried from t-1 for surviving, initialized
+      to 0 for new (A30).'
+    disposition: Populate polaris_persons.telecommute_level via deterministic calculation
+      or model default.
+    implementation_evidence: *id003
+    affected_elements:
+      - catalog: *id002
+        kind: sql_column
+        path: polaris_persons.telecommute_level
+  - id: target-default-polaris-persons-time-in-job
+    residue_kind: required_target_default
+    deterministic_rule: Previous value + 1 for continuing, 0 for new.
+    rationale: 'Job tenure duration: previous value + 1 for continuing worker; 0 for
+      new worker or non-worker (A31).'
+    disposition: Populate polaris_persons.time_in_job via deterministic calculation
+      or model default.
+    implementation_evidence: *id003
+    affected_elements:
+      - catalog: *id002
+        kind: sql_column
+        path: polaris_persons.time_in_job
+  - id: target-default-polaris-persons-transit-pass
+    residue_kind: required_target_default
+    deterministic_rule: Carry t-1 value for surviving, 0 for new.
+    rationale: 'POLARIS demand model output: carried from t-1 for surviving, initialized
+      to 0 for new (A30).'
+    disposition: Populate polaris_persons.transit_pass via deterministic calculation
+      or model default.
+    implementation_evidence: *id003
+    affected_elements:
+      - catalog: *id002
+        kind: sql_column
+        path: polaris_persons.transit_pass
+  - id: target-default-polaris-persons-work-hours
+    residue_kind: required_target_default
+    deterministic_rule: Carry t-1 value for continuing, or draw D-P1.
+    rationale: 'Usual weekly work hours: carried from t-1 for continuing worker; drawn
+      via D-P1 for new worker (A20, A21).'
+    disposition: Populate polaris_persons.work_hours via deterministic calculation
+      or model default.
+    implementation_evidence: *id003
+    affected_elements:
+      - catalog: *id002
+        kind: sql_column
+        path: polaris_persons.work_hours
+  - id: target-default-polaris-persons-work-location-id
+    residue_kind: required_target_default
+    deterministic_rule: Carry t-1 value for continuing, -1 for new.
+    rationale: 'Workplace zone ID: carried from t-1 for continuing worker; -1 for
+      new/unassigned (A20, A23).'
+    disposition: Populate polaris_persons.work_location_id via deterministic calculation
+      or model default.
+    implementation_evidence: *id003
+    affected_elements:
+      - catalog: *id002
+        kind: sql_column
+        path: polaris_persons.work_location_id
+  - id: target-default-polaris-persons-worker-class
+    residue_kind: required_target_default
+    deterministic_rule: Carry t-1 value for continuing, or draw D-P1.
+    rationale: 'Class of worker COW code (0-9): carried from t-1 for continuing worker;
+      drawn via D-P1 for new worker (A20, A21).'
+    disposition: Populate polaris_persons.worker_class via deterministic calculation
+      or model default.
+    implementation_evidence: *id003
+    affected_elements:
+      - catalog: *id002
+        kind: sql_column
+        path: polaris_persons.worker_class
+  - id: target-default-polaris-vehicles-L3-wtp
+    residue_kind: required_target_default
+    deterministic_rule: Carry t-1 value for retained, 0 for new.
+    rationale: 'Willingness to pay for L3 automation: carried for retained vehicle,
+      0 for new vehicle.'
+    disposition: Populate polaris_vehicles.L3_wtp via deterministic calculation or
+      model default.
+    implementation_evidence: *id003
+    affected_elements:
+      - catalog: *id002
+        kind: sql_column
+        path: polaris_vehicles.L3_wtp
+  - id: target-default-polaris-vehicles-L4-wtp
+    residue_kind: required_target_default
+    deterministic_rule: Carry t-1 value for retained, 0 for new.
+    rationale: 'Willingness to pay for L4 automation: carried for retained vehicle,
+      0 for new vehicle.'
+    disposition: Populate polaris_vehicles.L4_wtp via deterministic calculation or
+      model default.
+    implementation_evidence: *id003
+    affected_elements:
+      - catalog: *id002
+        kind: sql_column
+        path: polaris_vehicles.L4_wtp
+  - id: target-default-polaris-vehicles-fleet
+    residue_kind: required_target_default
+    deterministic_rule: Carry t-1 value for retained, 0 for new.
+    rationale: 'Fleet classification: carried for retained vehicle, 0 for new vehicle.'
+    disposition: Populate polaris_vehicles.fleet via deterministic calculation or
+      model default.
+    implementation_evidence: *id003
+    affected_elements:
+      - catalog: *id002
+        kind: sql_column
+        path: polaris_vehicles.fleet
+  - id: target-default-polaris-vehicles-parking
+    residue_kind: required_target_default
+    deterministic_rule: Carry t-1 value for retained, 0 for new.
+    rationale: 'Residential parking arrangement: carried for retained vehicle, 0 for
+      new vehicle.'
+    disposition: Populate polaris_vehicles.parking via deterministic calculation or
+      model default.
+    implementation_evidence: *id003
+    affected_elements:
+      - catalog: *id002
+        kind: sql_column
+        path: polaris_vehicles.parking
+  - id: target-default-polaris-vehicles-subtype
+    residue_kind: required_target_default
+    deterministic_rule: Carry t-1 value for retained, 0 for new.
+    rationale: 'Vehicle subtype: carried for retained vehicle, 0 for new vehicle.'
+    disposition: Populate polaris_vehicles.subtype via deterministic calculation or
+      model default.
+    implementation_evidence: *id003
+    affected_elements:
+      - catalog: *id002
+        kind: sql_column
+        path: polaris_vehicles.subtype
+  - id: target-default-polaris-vehicles-type
+    residue_kind: required_target_default
+    deterministic_rule: LOOKUP type_id in polaris_vehicle_type by 6 key dimensions.
+    rationale: 'Foreign key to polaris_vehicle_type: looked up via the 6 key columns
+      (class, powertrain, fuel, vintage, connectivity, automation) (A46).'
+    disposition: Populate polaris_vehicles.type via deterministic calculation or model
+      default.
+    implementation_evidence: *id003
+    affected_elements:
+      - catalog: *id002
+        kind: sql_column
+        path: polaris_vehicles.type
+  - id: target-default-polaris-vehicle-class-capacity
+    residue_kind: required_target_default
+    deterministic_rule: Constant reference catalog value.
+    rationale: 'Static vehicle class specification: passenger capacity.'
+    disposition: Populate polaris_vehicle_class.capacity via deterministic calculation
+      or model default.
+    implementation_evidence: *id003
+    affected_elements:
+      - catalog: *id002
+        kind: sql_column
+        path: polaris_vehicle_class.capacity
+  - id: target-default-polaris-vehicle-class-class-id
+    residue_kind: required_target_default
+    deterministic_rule: Constant reference catalog value.
+    rationale: 'Static vehicle class specification: primary key (1-8 passenger classes).'
+    disposition: Populate polaris_vehicle_class.class_id via deterministic calculation
+      or model default.
+    implementation_evidence: *id003
+    affected_elements:
+      - catalog: *id002
+        kind: sql_column
+        path: polaris_vehicle_class.class_id
+  - id: target-default-polaris-vehicle-class-class-type
+    residue_kind: required_target_default
+    deterministic_rule: Constant reference catalog value.
+    rationale: 'Static vehicle class specification: class label.'
+    disposition: Populate polaris_vehicle_class.class_type via deterministic calculation
+      or model default.
+    implementation_evidence: *id003
+    affected_elements:
+      - catalog: *id002
+        kind: sql_column
+        path: polaris_vehicle_class.class_type
+  - id: target-default-polaris-vehicle-class-ev-ml-class
+    residue_kind: required_target_default
+    deterministic_rule: Constant reference catalog value.
+    rationale: 'Static vehicle class specification: electric vehicle machine learning
+      class.'
+    disposition: Populate polaris_vehicle_class.ev_ml_class via deterministic calculation
+      or model default.
+    implementation_evidence: *id003
+    affected_elements:
+      - catalog: *id002
+        kind: sql_column
+        path: polaris_vehicle_class.ev_ml_class
+  - id: target-default-polaris-vehicle-class-length
+    residue_kind: required_target_default
+    deterministic_rule: Constant reference catalog value.
+    rationale: 'Static vehicle class specification: vehicle physical length.'
+    disposition: Populate polaris_vehicle_class.length via deterministic calculation
+      or model default.
+    implementation_evidence: *id003
+    affected_elements:
+      - catalog: *id002
+        kind: sql_column
+        path: polaris_vehicle_class.length
+  - id: target-default-polaris-vehicle-class-max-accel
+    residue_kind: required_target_default
+    deterministic_rule: Constant reference catalog value.
+    rationale: 'Static vehicle class specification: maximum acceleration.'
+    disposition: Populate polaris_vehicle_class.max_accel via deterministic calculation
+      or model default.
+    implementation_evidence: *id003
+    affected_elements:
+      - catalog: *id002
+        kind: sql_column
+        path: polaris_vehicle_class.max_accel
+  - id: target-default-polaris-vehicle-class-max-decel
+    residue_kind: required_target_default
+    deterministic_rule: Constant reference catalog value.
+    rationale: 'Static vehicle class specification: maximum deceleration.'
+    disposition: Populate polaris_vehicle_class.max_decel via deterministic calculation
+      or model default.
+    implementation_evidence: *id003
+    affected_elements:
+      - catalog: *id002
+        kind: sql_column
+        path: polaris_vehicle_class.max_decel
+  - id: target-default-polaris-vehicle-class-max-speed
+    residue_kind: required_target_default
+    deterministic_rule: Constant reference catalog value.
+    rationale: 'Static vehicle class specification: maximum design speed.'
+    disposition: Populate polaris_vehicle_class.max_speed via deterministic calculation
+      or model default.
+    implementation_evidence: *id003
+    affected_elements:
+      - catalog: *id002
+        kind: sql_column
+        path: polaris_vehicle_class.max_speed
+  - id: target-default-polaris-vehicle-type-automation-type
+    residue_kind: required_target_default
+    deterministic_rule: Constant reference catalog value.
+    rationale: 'Static vehicle type dimension: automation level (0 L0, 1 L3/4, 2 L5).'
+    disposition: Populate polaris_vehicle_type.automation_type via deterministic calculation
+      or model default.
+    implementation_evidence: *id003
+    affected_elements:
+      - catalog: *id002
+        kind: sql_column
+        path: polaris_vehicle_type.automation_type
+  - id: target-default-polaris-vehicle-type-connectivity-type
+    residue_kind: required_target_default
+    deterministic_rule: Constant reference catalog value.
+    rationale: 'Static vehicle type dimension: connectivity (0 No, 1 Yes).'
+    disposition: Populate polaris_vehicle_type.connectivity_type via deterministic
+      calculation or model default.
+    implementation_evidence: *id003
+    affected_elements:
+      - catalog: *id002
+        kind: sql_column
+        path: polaris_vehicle_type.connectivity_type
+  - id: target-default-polaris-vehicle-type-ev-features-id
+    residue_kind: required_target_default
+    deterministic_rule: Constant reference catalog value.
+    rationale: 'Static vehicle type attribute: electric vehicle features reference
+      ID.'
+    disposition: Populate polaris_vehicle_type.ev_features_id via deterministic calculation
+      or model default.
+    implementation_evidence: *id003
+    affected_elements:
+      - catalog: *id002
+        kind: sql_column
+        path: polaris_vehicle_type.ev_features_id
+  - id: target-default-polaris-vehicle-type-fuel-type
+    residue_kind: required_target_default
+    deterministic_rule: Constant reference catalog value.
+    rationale: 'Static vehicle type dimension: fuel (0 Gas, 1 Diesel, 2 CNG, 3 H2,
+      4 Elec).'
+    disposition: Populate polaris_vehicle_type.fuel_type via deterministic calculation
+      or model default.
+    implementation_evidence: *id003
+    affected_elements:
+      - catalog: *id002
+        kind: sql_column
+        path: polaris_vehicle_type.fuel_type
+  - id: target-default-polaris-vehicle-type-operating-cost-per-mile
+    residue_kind: required_target_default
+    deterministic_rule: Constant reference catalog value.
+    rationale: 'Static vehicle type attribute: average operating cost per mile.'
+    disposition: Populate polaris_vehicle_type.operating_cost_per_mile via deterministic
+      calculation or model default.
+    implementation_evidence: *id003
+    affected_elements:
+      - catalog: *id002
+        kind: sql_column
+        path: polaris_vehicle_type.operating_cost_per_mile
+  - id: target-default-polaris-vehicle-type-powertrain-type
+    residue_kind: required_target_default
+    deterministic_rule: Constant reference catalog value.
+    rationale: 'Static vehicle type dimension: powertrain (0 Conv, 1 HEV, 2 PHEV,
+      3 BEV).'
+    disposition: Populate polaris_vehicle_type.powertrain_type via deterministic calculation
+      or model default.
+    implementation_evidence: *id003
+    affected_elements:
+      - catalog: *id002
+        kind: sql_column
+        path: polaris_vehicle_type.powertrain_type
+  - id: target-default-polaris-vehicle-type-type-id
+    residue_kind: required_target_default
+    deterministic_rule: Constant reference catalog value.
+    rationale: 'Static vehicle type primary key: integer ID resolved via 6 key dimensions.'
+    disposition: Populate polaris_vehicle_type.type_id via deterministic calculation
+      or model default.
+    implementation_evidence: *id003
+    affected_elements:
+      - catalog: *id002
+        kind: sql_column
+        path: polaris_vehicle_type.type_id
+  - id: target-default-polaris-vehicle-type-vehicle-class
+    residue_kind: required_target_default
+    deterministic_rule: Constant reference catalog value.
+    rationale: 'Static vehicle type dimension: foreign key to polaris_vehicle_class.'
+    disposition: Populate polaris_vehicle_type.vehicle_class via deterministic calculation
+      or model default.
+    implementation_evidence: *id003
+    affected_elements:
+      - catalog: *id002
+        kind: sql_column
+        path: polaris_vehicle_type.vehicle_class
+  - id: target-default-polaris-vehicle-type-vintage-type
+    residue_kind: required_target_default
+    deterministic_rule: Constant reference catalog value.
+    rationale: 'Static vehicle type dimension: vintage category (0 0-5y, 1 6-10y,
+      2 10+y).'
+    disposition: Populate polaris_vehicle_type.vintage_type via deterministic calculation
+      or model default.
+    implementation_evidence: *id003
+    affected_elements:
+      - catalog: *id002
+        kind: sql_column
+        path: polaris_vehicle_type.vintage_type
+  - id: crosswalk-X-H1
+    residue_kind: lookup_or_crosswalk
+    deterministic_rule: Map relationship composition to married family, male/female
+      family, single/other nonfamily, or GQ.
+    rationale: 'X-H1: DEMOS household composition to POLARIS HHT enum (married-couple
+      family, other family male/female, nonfamily single/other, GQ).'
+    disposition: Evaluate composition to determine intermediate HHT code.
+    implementation_evidence: *id003
+    affected_elements:
+      - catalog: *id002
+        kind: sql_column
+        path: polaris_households.type
+  - id: crosswalk-X-H2
+    residue_kind: lookup_or_crosswalk
+    deterministic_rule: Cross tenure with HHT to produce type codes 1-11.
+    rationale: 'X-H2: Tenure x HHT mapped to POLARIS type code (1-11). Type 1-5 own,
+      6-10 rent, 11 GQ.'
+    disposition: Populate polaris_households.type with the crosswalked type integer.
+    implementation_evidence: *id003
+    affected_elements:
+      - catalog: *id002
+        kind: sql_column
+        path: polaris_households.type
+  - id: crosswalk-X-H3
+    residue_kind: lookup_or_crosswalk
+    deterministic_rule: Map dwelling type to HU_TYPE enum 1-5.
+    rationale: 'X-H3: Housing unit type enum HU_TYPE (1 single family, 2 small apt
+      2-9 units, 3 large apt 10+ units, 4 other/mobile, 5 GQ).'
+    disposition: Populate polaris_households.housing_unit_type with the crosswalked
+      enum code.
+    implementation_evidence: *id003
+    affected_elements:
+      - catalog: *id002
+        kind: sql_column
+        path: polaris_households.housing_unit_type
+  - id: crosswalk-X-H4
+    residue_kind: lookup_or_crosswalk
+    deterministic_rule: Bin head age, size, adults, workers, and income into donor
+      matching cells.
+    rationale: 'X-H4: Household segmentation classes for donor matching (head age
+      <25/25-34/35-54/55-64/65+, size 1/2/3+, adults 1/2/3+, workers 0/1/2+, income
+      quintiles, tract/county).'
+    disposition: Segment households into donor cells for dwelling draw D-H1.
+    implementation_evidence: *id003
+    affected_elements:
+      - catalog: *id002
+        kind: sql_column
+        path: polaris_households.location
+  - id: crosswalk-X-H5
+    residue_kind: filtered_rows
+    deterministic_rule: Filter candidate donor locations where is_home_eligible is
+      true.
+    rationale: 'X-H5: Land use eligibility filter (Land_Use.is_home_eligible) applied
+      during dwelling donor matching.'
+    disposition: Restrict donor dwelling selection to home-eligible zones.
+    implementation_evidence: *id003
+    affected_elements:
+      - catalog: *id002
+        kind: sql_column
+        path: polaris_households.location
+  - id: crosswalk-X-P1
+    residue_kind: lookup_or_crosswalk
+    deterministic_rule: Map DEMOS person attributes to POLARIS enum ranges.
+    rationale: 'X-P1: DEMOS person variables domain alignment with POLARIS enums (relp
+      0-17, gender 1-2, age integer, education 0-24, employment 0-6, marital_status
+      1-5, school_enrollment 0-3).'
+    disposition: Enforce identical code ranges and documented fallbacks.
+    implementation_evidence: *id003
+    affected_elements:
+      - catalog: *id002
+        kind: sql_column
+        path: polaris_persons.gender
+      - catalog: *id002
+        kind: sql_column
+        path: polaris_persons.age
+      - catalog: *id002
+        kind: sql_column
+        path: polaris_persons.education
+      - catalog: *id002
+        kind: sql_column
+        path: polaris_persons.employment
+      - catalog: *id002
+        kind: sql_column
+        path: polaris_persons.marital_status
+      - catalog: *id002
+        kind: sql_column
+        path: polaris_persons.school_enrollment
+  - id: crosswalk-X-P2
+    residue_kind: lookup_or_crosswalk
+    deterministic_rule: ESR 1 and 4 classify as employed at work; ESR 2 and 5 employed
+      not at work; others not employed.
+    rationale: 'X-P2: Employment (ESR) groups driving employment status and worker
+      flags (ESR 1 civilian at work, 4 armed forces at work).'
+    disposition: Drive worker count derivation and commute model eligibility.
+    implementation_evidence: *id003
+    affected_elements:
+      - catalog: *id002
+        kind: sql_column
+        path: polaris_persons.employment
+      - catalog: *id002
+        kind: sql_column
+        path: polaris_households.workers
+  - id: crosswalk-X-P3
+    residue_kind: lookup_or_crosswalk
+    deterministic_rule: Map grade 1 to PREK, 2-10 to K-8, 11-14 to 9-12, 15-16 to
+      Higher Ed.
+    rationale: 'X-P3: School grade level and school type classification (grade 1 preschool
+      -> PREK; 2-10 -> K-8; 11-14 -> 9-12; 15-16 -> higher ed).'
+    disposition: Resolve school type for destination choice and school travel models.
+    implementation_evidence: *id003
+    affected_elements:
+      - catalog: *id002
+        kind: sql_column
+        path: polaris_persons.school_grade_level
+  - id: crosswalk-X-P4
+    residue_kind: lookup_or_crosswalk
+    deterministic_rule: Advance continuing student grade by 1, with preschool age
+      check and grade 12 to undergrad rule.
+    rationale: 'X-P4: Grade progression for continuing enrolled students (grades 2-13
+      advance by 1; preschool advances to K if age >= 5; grade 12 advances to undergrad).'
+    disposition: Advance enrolled student grade level annually.
+    implementation_evidence: *id003
+    affected_elements:
+      - catalog: *id002
+        kind: sql_column
+        path: polaris_persons.school_grade_level
+  - id: crosswalk-X-P5
+    residue_kind: lookup_or_crosswalk
+    deterministic_rule: Draw entry grade from reference empirical distribution conditioned
+      on age and attainment.
+    rationale: 'X-P5: Entry grade for school entrants drawn from reference distribution
+      conditioned on age and attainment.'
+    disposition: Assign starting grade level for new school entrants.
+    implementation_evidence: *id003
+    affected_elements:
+      - catalog: *id002
+        kind: sql_column
+        path: polaris_persons.school_grade_level
+  - id: crosswalk-X-P6
+    residue_kind: lookup_or_crosswalk
+    deterministic_rule: If education is not in [g, g+1] for grade g, set education
+      = g.
+    rationale: 'X-P6: K-12 education consistency rule: for grade g in 1-14, education
+      must be g or g+1, overridden to g if outside range.'
+    disposition: Override educational attainment to ensure K-12 grade-level consistency.
+    implementation_evidence: *id003
+    affected_elements:
+      - catalog: *id002
+        kind: sql_column
+        path: polaris_persons.education
+      - catalog: *id002
+        kind: sql_column
+        path: polaris_persons.school_grade_level
+  - id: crosswalk-X-P7
+    residue_kind: lookup_or_crosswalk
+    deterministic_rule: Bin worker age, education, disability age, relp, and industry
+      codes into donor cells.
+    rationale: 'X-P7: Person segmentation classes for donor matching (work age groups,
+      education groups, disability age groups, relp groups, full-time flag, INDP industry
+      groups).'
+    disposition: Segment persons into donor cells for job D-P1 and commute D-P2 draws.
+    implementation_evidence: *id003
+    affected_elements:
+      - catalog: *id002
+        kind: sql_column
+        path: polaris_persons.industry
+      - catalog: *id002
+        kind: sql_column
+        path: polaris_persons.work_hours
+      - catalog: *id002
+        kind: sql_column
+        path: polaris_persons.worker_class
+  - id: crosswalk-X-V1
+    residue_kind: lookup_or_crosswalk
+    deterministic_rule: Map bodytype to candidate passenger vehicle classes, selecting
+      via draw D-V1.
+    rationale: 'X-V1: ATLAS bodytype crosswalk to POLARIS vehicle_class (car -> compact/midsize;
+      suv -> compact/midsize/fullsize; pickup -> midsize/fullsize; van -> fullsize
+      suv).'
+    disposition: Determine candidate vehicle_class values for vehicle type resolution.
+    implementation_evidence: *id003
+    affected_elements:
+      - catalog: *id002
+        kind: sql_column
+        path: polaris_vehicles.type
+  - id: crosswalk-X-V2
+    residue_kind: lookup_or_crosswalk
+    deterministic_rule: Map ICE -> 0, Hybrid -> 1, PHEV -> 2, AEV -> 3.
+    rationale: 'X-V2: ATLAS pred_power mapping to POLARIS powertrain_type (ICE ->
+      0 Conventional, Hybrid -> 1 HEV, PHEV -> 2 PHEV, AEV -> 3 BEV_long).'
+    disposition: Set powertrain_type dimension for vehicle type lookup.
+    implementation_evidence: *id003
+    affected_elements:
+      - catalog: *id002
+        kind: sql_column
+        path: polaris_vehicles.type
+  - id: crosswalk-X-V3
+    residue_kind: lookup_or_crosswalk
+    deterministic_rule: Conventional draws gas/diesel via D-V2; HEV/PHEV sets Gas;
+      BEV_long sets Elec.
+    rationale: 'X-V3: Powertrain to fuel type mapping (Conventional -> gas/diesel
+      via D-V2; HEV/PHEV -> 0 Gas; BEV_long -> 4 Elec).'
+    disposition: Set fuel_type dimension for vehicle type lookup.
+    implementation_evidence: *id003
+    affected_elements:
+      - catalog: *id002
+        kind: sql_column
+        path: polaris_vehicles.type
+  - id: crosswalk-X-V4
+    residue_kind: lookup_or_crosswalk
+    deterministic_rule: Age <= 5 -> vintage 0; 6-10 -> vintage 1; >= 11 -> vintage
+      2.
+    rationale: 'X-V4: Vehicle age (simulation_year - modelyear) bucketing to vintage_type
+      (<=5 -> 0 0-5y, 6-10 -> 1 6-10y, >=11 -> 2 10+y).'
+    disposition: Set vintage_type dimension for vehicle type lookup.
+    implementation_evidence: *id003
+    affected_elements:
+      - catalog: *id002
+        kind: sql_column
+        path: polaris_vehicles.type
+  - id: crosswalk-X-V5
+    residue_kind: lookup_or_crosswalk
+    deterministic_rule: Resolve type_id by matching all 6 dimension keys in polaris_vehicle_type.
+    rationale: 'X-V5: Vehicle_Type 6-key enumeration schema (vehicle_class, powertrain_type,
+      fuel_type, vintage_type, connectivity_type, automation_type).'
+    disposition: Assign resolved type_id foreign key in polaris_vehicles table.
+    implementation_evidence: *id003
+    affected_elements:
+      - catalog: *id002
+        kind: sql_column
+        path: polaris_vehicles.type
+  - id: draw-D-H1
+    residue_kind: lookup_or_crosswalk
+    deterministic_rule: Match donor cell in tract/county and copy dwelling attributes.
+    rationale: 'D-H1: Dwelling draw for new households. Copies location, housing_unit_type,
+      tenure, Has_Residential_Charging from donor in same tract/county.'
+    disposition: Populate dwelling attributes for newly formed or relocating households.
+    implementation_evidence: *id003
+    affected_elements:
+      - catalog: *id002
+        kind: sql_column
+        path: polaris_households.location
+      - catalog: *id002
+        kind: sql_column
+        path: polaris_households.housing_unit_type
+      - catalog: *id002
+        kind: sql_column
+        path: polaris_households.Has_Residential_Charging
+  - id: draw-D-H2
+    residue_kind: lookup_or_crosswalk
+    deterministic_rule: Copy entire donor fleet for new households in interim phase.
+    rationale: 'D-H2: Fleet draw for new households in interim phase until ATLAS outputs
+      are fully connected.'
+    disposition: Provide vehicle records for new households during interim simulation
+      runs.
+    implementation_evidence: *id003
+    affected_elements:
+      - catalog: *id002
+        kind: sql_column
+        path: polaris_vehicles.type
+  - id: draw-D-P1
+    residue_kind: lookup_or_crosswalk
+    deterministic_rule: Copy worker_class, industry, and work_hours jointly from matched
+      donor.
+    rationale: 'D-P1: Job attributes bundle draw. Copies worker_class, industry, work_hours
+      jointly from donor pool matched by age, education, gender.'
+    disposition: Assign bundled job attributes to new workers and job changers.
+    implementation_evidence: *id003
+    affected_elements:
+      - catalog: *id002
+        kind: sql_column
+        path: polaris_persons.worker_class
+      - catalog: *id002
+        kind: sql_column
+        path: polaris_persons.industry
+      - catalog: *id002
+        kind: sql_column
+        path: polaris_persons.work_hours
+  - id: draw-D-P2
+    residue_kind: lookup_or_crosswalk
+    deterministic_rule: Copy commute mode, travel time, occupancy, and arrival time
+      jointly from matched donor.
+    rationale: 'D-P2: Commute attributes bundle draw. Copies journey_to_work_mode,
+      travel_time, vehicle_occupancy, arrival_time jointly from donor pool.'
+    disposition: Assign bundled commute attributes to new workers.
+    implementation_evidence: *id003
+    affected_elements:
+      - catalog: *id002
+        kind: sql_column
+        path: polaris_persons.journey_to_work_mode
+      - catalog: *id002
+        kind: sql_column
+        path: polaris_persons.journey_to_work_travel_time
+      - catalog: *id002
+        kind: sql_column
+        path: polaris_persons.journey_to_work_vehicle_occupancy
+      - catalog: *id002
+        kind: sql_column
+        path: polaris_persons.journey_to_work_arrival_time
+  - id: draw-D-P3a
+    residue_kind: lookup_or_crosswalk
+    deterministic_rule: Draw marital status from age-conditioned empirical distribution
+      for code 0 fallback.
+    rationale: 'D-P3a: Marital status fallback draw for new persons with DEMOS code
+      0 (conditioned on age and household type).'
+    disposition: Resolve missing marital status codes for new individuals.
+    implementation_evidence: *id003
+    affected_elements:
+      - catalog: *id002
+        kind: sql_column
+        path: polaris_persons.marital_status
+  - id: draw-D-P3b
+    residue_kind: lookup_or_crosswalk
+    deterministic_rule: Draw race conditioned on household head race and relationship
+      category.
+    rationale: 'D-P3b: Race conditional draw for non-head persons of new households
+      conditioned on head''s race and relationship category.'
+    disposition: Assign consistent race codes to non-head household members.
+    implementation_evidence: *id003
+    affected_elements:
+      - catalog: *id002
+        kind: sql_column
+        path: polaris_persons.race
+  - id: draw-D-P4
+    residue_kind: lookup_or_crosswalk
+    deterministic_rule: Sample disability status from age- and sex-stratified empirical
+      prevalence.
+    rationale: 'D-P4: Disability status draw for new persons from empirical rate conditioned
+      on sex and age group.'
+    disposition: Assign disability status (1 with, 2 without) to new persons.
+    implementation_evidence: *id003
+    affected_elements:
+      - catalog: *id002
+        kind: sql_column
+        path: polaris_persons.disability
+  - id: draw-D-V1
+    residue_kind: lookup_or_crosswalk
+    deterministic_rule: Sample vehicle size class within bodytype from county and
+      income-stratified shares.
+    rationale: 'D-V1: Size class within body type draw (compact vs midsize vs fullsize)
+      conditioned on county and income class.'
+    disposition: Disambiguate bodytype into specific vehicle_class dimension.
+    implementation_evidence: *id003
+    affected_elements:
+      - catalog: *id002
+        kind: sql_column
+        path: polaris_vehicles.type
+  - id: draw-D-V2
+    residue_kind: lookup_or_crosswalk
+    deterministic_rule: Sample diesel vs gasoline for conventional vehicles based
+      on class and county shares.
+    rationale: 'D-V2: Diesel fuel share draw for conventional vehicles conditioned
+      on vehicle class and county.'
+    disposition: Assign diesel or gas fuel_type to conventional ICE vehicles.
+    implementation_evidence: *id003
+    affected_elements:
+      - catalog: *id002
+        kind: sql_column
+        path: polaris_vehicles.type
+  - id: assumption-A1
+    residue_kind: lookup_or_crosswalk
+    deterministic_rule: None
+    rationale: 'A1: Variables not modeled in DEMOS are carried forward from previous
+      year, derived deterministically, drawn from empirical reference, or simulated
+      by POLARIS.'
+    disposition: Establish general attribute origin framework across population tables.
+    implementation_evidence: *id003
+    affected_elements:
+      - catalog: *id002
+        kind: sql_column
+        path: polaris_households.type
+  - id: assumption-A2
+    residue_kind: lookup_or_crosswalk
+    deterministic_rule: None
+    rationale: 'A2: Fixed reference population drawn from the base-year synthetic
+      population serves as donor pool for all empirical draws.'
+    disposition: Pin base-year synthetic population as immutable donor pool.
+    implementation_evidence: *id003
+    affected_elements:
+      - catalog: *id002
+        kind: sql_column
+        path: polaris_households.location
+  - id: assumption-A3
+    residue_kind: lookup_or_crosswalk
+    deterministic_rule: Match cells with min size 20; collapse segmentation hierarchy
+      if cell is smaller.
+    rationale: 'A3: Standard donor draw procedure matches target records to donor
+      cells with minimum cell size threshold (20) and hierarchical collapsing.'
+    disposition: Execute donor draws with robust fallback hierarchy.
+    implementation_evidence: *id003
+    affected_elements:
+      - catalog: *id002
+        kind: sql_column
+        path: polaris_households.location
+  - id: assumption-A4
+    residue_kind: lookup_or_crosswalk
+    deterministic_rule: Seed RNGs with hash of scenario ID, realization ID, and entity
+      key.
+    rationale: 'A4: Deterministic reproducibility: stochastic draws use seeded pseudorandom
+      number generators keyed by scenario and realization seed.'
+    disposition: Enforce deterministic execution across repeated simulation runs.
+    implementation_evidence: *id003
+    affected_elements:
+      - catalog: *id002
+        kind: sql_column
+        path: polaris_households.location
+  - id: assumption-A5
+    residue_kind: lookup_or_crosswalk
+    deterministic_rule: Copy attributes across years when no change event occurs.
+    rationale: 'A5: Continuity principle: surviving households, persons, and vehicles
+      retain unmodeled attributes across years unless modified by an explicit event.'
+    disposition: Preserve unmodeled state across annual simulation transitions.
+    implementation_evidence: *id003
+    affected_elements:
+      - catalog: *id002
+        kind: sql_column
+        path: polaris_households.location
+      - catalog: *id002
+        kind: sql_column
+        path: polaris_persons.worker_class
+      - catalog: *id002
+        kind: sql_column
+        path: polaris_vehicles.type
+  - id: assumption-A6
+    residue_kind: lookup_or_crosswalk
+    deterministic_rule: Pass through base year GQ population without modification.
+    rationale: 'A6: Group quarters population records are carried forward unchanged
+      from base year; DEMOS group quarters records are ignored.'
+    disposition: Maintain static group quarters records throughout scenario.
+    implementation_evidence: *id003
+    affected_elements:
+      - catalog: *id002
+        kind: sql_column
+        path: polaris_households.type
+  - id: assumption-A7
+    residue_kind: lookup_or_crosswalk
+    deterministic_rule: Multiply income by year-specific CPI deflation factor.
+    rationale: 'A7: Household and person income values are deflated to the POLARIS
+      base dollar year using the designated CPI deflation series.'
+    disposition: Standardize all monetary amounts to constant model dollars.
+    implementation_evidence: *id003
+    affected_elements:
+      - catalog: *id002
+        kind: sql_column
+        path: polaris_households.income
+      - catalog: *id002
+        kind: sql_column
+        path: polaris_persons.income
+  - id: assumption-A9
+    residue_kind: lookup_or_crosswalk
+    deterministic_rule: None
+    rationale: 'A9: DEMOS demographic values are used as supplied except where explicitly
+      modified by documented crosswalk and consistency rules.'
+    disposition: Accept DEMOS demographics as authoritative baseline.
+    implementation_evidence: *id003
+    affected_elements:
+      - catalog: *id002
+        kind: sql_column
+        path: polaris_persons.education
+  - id: assumption-A10
+    residue_kind: lookup_or_crosswalk
+    deterministic_rule: Retain location, tenure, housing_unit_type, and charging for
+      surviving households.
+    rationale: 'A10: Surviving households do not relocate in the annual translation
+      step; location, tenure, housing_unit_type, and charging access persist.'
+    disposition: Preserve residential characteristics for surviving households.
+    implementation_evidence: *id003
+    affected_elements:
+      - catalog: *id002
+        kind: sql_column
+        path: polaris_households.location
+      - catalog: *id002
+        kind: sql_column
+        path: polaris_households.housing_unit_type
+      - catalog: *id002
+        kind: sql_column
+        path: polaris_households.Has_Residential_Charging
+  - id: assumption-A11
+    residue_kind: lookup_or_crosswalk
+    deterministic_rule: Draw dwelling attributes jointly from tract donor via D-H1.
+    rationale: 'A11: New household dwellings are drawn jointly within tract via draw
+      D-H1 to preserve structural correlations.'
+    disposition: Jointly synthesize dwelling characteristics for new households.
+    implementation_evidence: *id003
+    affected_elements:
+      - catalog: *id002
+        kind: sql_column
+        path: polaris_households.location
+      - catalog: *id002
+        kind: sql_column
+        path: polaris_households.housing_unit_type
+      - catalog: *id002
+        kind: sql_column
+        path: polaris_households.Has_Residential_Charging
+  - id: assumption-A12
+    residue_kind: lookup_or_crosswalk
+    deterministic_rule: Extract tract from block_id; use lcm_county_id if tract cannot
+      match.
+    rationale: 'A12: Geographic resolution: DEMOS block_id determines 11-digit tract;
+      if missing or unmatchable, fallback to lcm_county_id.'
+    disposition: Resolve spatial matching domain for new household donor search.
+    implementation_evidence: *id003
+    affected_elements:
+      - catalog: *id002
+        kind: sql_column
+        path: polaris_households.location
+  - id: assumption-A13
+    residue_kind: lookup_or_crosswalk
+    deterministic_rule: Recompute HHT from relationship codes each year.
+    rationale: 'A13: Household type (HHT) is recomputed each simulation year from
+      current member relationships via crosswalk X-H1.'
+    disposition: Dynamically update household structural category as members age and
+      transition.
+    implementation_evidence: *id003
+    affected_elements:
+      - catalog: *id002
+        kind: sql_column
+        path: polaris_households.type
+  - id: assumption-A14
+    residue_kind: lookup_or_crosswalk
+    deterministic_rule: Carry tenure for surviving, draw with dwelling for new.
+    rationale: 'A14: Tenure is carried forward for surviving households and drawn
+      jointly with dwelling for new households (D-H1).'
+    disposition: Maintain or assign housing tenure.
+    implementation_evidence: *id003
+    affected_elements:
+      - catalog: *id002
+        kind: sql_column
+        path: polaris_households.type
+  - id: assumption-A15
+    residue_kind: lookup_or_crosswalk
+    deterministic_rule: Surviving households keep vehicles; new draw D-H2.
+    rationale: 'A15: Interim vehicle handling: until ATLAS is connected, surviving
+      households keep vehicle fleet, new draw D-H2.'
+    disposition: Handle vehicle inventory during interim pipeline stages.
+    implementation_evidence: *id003
+    affected_elements:
+      - catalog: *id002
+        kind: sql_column
+        path: polaris_vehicles.type
+  - id: assumption-A16
+    residue_kind: lookup_or_crosswalk
+    deterministic_rule: Carry forward previous values for surviving; initialize to
+      0 for new.
+    rationale: 'A16: Household behavioral attributes (bikes, delRat, ecom, num_groceries,
+      num_meals, dispose_veh) persist for surviving, initialized to 0 for new.'
+    disposition: Initialize POLARIS behavioral attributes for household simulation.
+    implementation_evidence: *id003
+    affected_elements:
+      - catalog: *id002
+        kind: sql_column
+        path: polaris_households.bikes
+      - catalog: *id002
+        kind: sql_column
+        path: polaris_households.delRat
+      - catalog: *id002
+        kind: sql_column
+        path: polaris_households.ecom
+      - catalog: *id002
+        kind: sql_column
+        path: polaris_households.num_groceries
+      - catalog: *id002
+        kind: sql_column
+        path: polaris_households.num_meals
+      - catalog: *id002
+        kind: sql_column
+        path: polaris_households.dispose_veh
+  - id: assumption-A17
+    residue_kind: lookup_or_crosswalk
+    deterministic_rule: Compute low income indicator and quintiles from income and
+      household size.
+    rationale: 'A17: Low-income indicator and income quintile are derived deterministically
+      from household income and size thresholds.'
+    disposition: Populate equity analysis stratification fields.
+    implementation_evidence: *id003
+    affected_elements:
+      - catalog: *id002
+        kind: sql_column
+        path: polaris_households.income
+      - catalog: *id002
+        kind: sql_column
+        path: polaris_households.persons
+  - id: assumption-A20
+    residue_kind: lookup_or_crosswalk
+    deterministic_rule: Retain job attributes across years for continuing workers.
+    rationale: 'A20: Job persistence: continuing employed workers retain worker_class,
+      industry, work_hours, and work_location_id.'
+    disposition: Maintain employment consistency across consecutive model years.
+    implementation_evidence: *id003
+    affected_elements:
+      - catalog: *id002
+        kind: sql_column
+        path: polaris_persons.worker_class
+      - catalog: *id002
+        kind: sql_column
+        path: polaris_persons.industry
+      - catalog: *id002
+        kind: sql_column
+        path: polaris_persons.work_hours
+      - catalog: *id002
+        kind: sql_column
+        path: polaris_persons.work_location_id
+  - id: assumption-A21
+    residue_kind: lookup_or_crosswalk
+    deterministic_rule: Sample correlated job and commute attributes as bundles via
+      D-P1 and D-P2.
+    rationale: 'A21: Job and commute attributes are drawn as bundles (D-P1, D-P2)
+      for new workers or workers experiencing employment transitions.'
+    disposition: Preserve multi-attribute correlations in workplace and commute synthesis.
+    implementation_evidence: *id003
+    affected_elements:
+      - catalog: *id002
+        kind: sql_column
+        path: polaris_persons.worker_class
+      - catalog: *id002
+        kind: sql_column
+        path: polaris_persons.industry
+      - catalog: *id002
+        kind: sql_column
+        path: polaris_persons.journey_to_work_mode
+  - id: assumption-A22
+    residue_kind: lookup_or_crosswalk
+    deterministic_rule: Count persons where ESR is 1 or 4.
+    rationale: 'A22: Household worker count is derived by counting person rows with
+      employment status ESR 1 (civilian at work) or 4 (armed forces at work).'
+    disposition: Populate household worker count consistently with person employment
+      status.
+    implementation_evidence: *id003
+    affected_elements:
+      - catalog: *id002
+        kind: sql_column
+        path: polaris_households.workers
+  - id: assumption-A23
+    residue_kind: lookup_or_crosswalk
+    deterministic_rule: Assign -1 to work and school locations for unassigned or new
+      persons.
+    rationale: 'A23: Work and school locations are assigned -1 for new workers/students
+      pending POLARIS internal destination choice models.'
+    disposition: Signal destination choice requirement to downstream POLARIS models.
+    implementation_evidence: *id003
+    affected_elements:
+      - catalog: *id002
+        kind: sql_column
+        path: polaris_persons.work_location_id
+      - catalog: *id002
+        kind: sql_column
+        path: polaris_persons.school_location_id
+  - id: assumption-A24
+    residue_kind: lookup_or_crosswalk
+    deterministic_rule: Apply grade progression X-P4/X-P5 and override attainment
+      X-P6.
+    rationale: 'A24: Grade progression and K-12 education override enforce consistency
+      between enrolled grade and attainment (X-P4, X-P5, X-P6).'
+    disposition: Guarantee strict alignment between age, grade, and attainment.
+    implementation_evidence: *id003
+    affected_elements:
+      - catalog: *id002
+        kind: sql_column
+        path: polaris_persons.education
+      - catalog: *id002
+        kind: sql_column
+        path: polaris_persons.school_grade_level
+  - id: assumption-A25
+    residue_kind: lookup_or_crosswalk
+    deterministic_rule: Retain public vs private enrollment type for continuing students.
+    rationale: 'A25: Public vs private school enrollment status is preserved from
+      previous year for continuing enrolled students.'
+    disposition: Preserve schooling sector continuity.
+    implementation_evidence: *id003
+    affected_elements:
+      - catalog: *id002
+        kind: sql_column
+        path: polaris_persons.school_enrollment
+  - id: assumption-A26
+    residue_kind: lookup_or_crosswalk
+    deterministic_rule: Carry for surviving; head takes race_of_head; others draw
+      D-P3b.
+    rationale: 'A26: Race persistence and assignment: surviving retain race; head
+      of new household takes DEMOS race_of_head; others draw D-P3b.'
+    disposition: Populate demographic race attribute across surviving and new individuals.
+    implementation_evidence: *id003
+    affected_elements:
+      - catalog: *id002
+        kind: sql_column
+        path: polaris_persons.race
+  - id: assumption-A27
+    residue_kind: lookup_or_crosswalk
+    deterministic_rule: Retain t-1 marital status for surviving with code 0; draw
+      D-P3a for new.
+    rationale: 'A27: Marital status code 0 handling: carried from previous year for
+      surviving; drawn D-P3a for new persons.'
+    disposition: Resolve unassigned marital status codes.
+    implementation_evidence: *id003
+    affected_elements:
+      - catalog: *id002
+        kind: sql_column
+        path: polaris_persons.marital_status
+  - id: assumption-A28
+    residue_kind: lookup_or_crosswalk
+    deterministic_rule: Retain disability for surviving; draw D-P4 for new.
+    rationale: 'A28: Disability status carried from previous year for surviving persons;
+      drawn via D-P4 by sex/age for new persons.'
+    disposition: Maintain or assign individual disability status.
+    implementation_evidence: *id003
+    affected_elements:
+      - catalog: *id002
+        kind: sql_column
+        path: polaris_persons.disability
+  - id: assumption-A29
+    residue_kind: lookup_or_crosswalk
+    deterministic_rule: Initialize infant attributes (age 0, head race, relp 2, 0
+      education, -1 locations).
+    rationale: 'A29: Infant and child birth attributes: newborns inherit household
+      head race, relationship child, zero education/employment, -1 locations.'
+    disposition: Synthesize newborn person records.
+    implementation_evidence: *id003
+    affected_elements:
+      - catalog: *id002
+        kind: sql_column
+        path: polaris_persons.age
+      - catalog: *id002
+        kind: sql_column
+        path: polaris_persons.race
+  - id: assumption-A30
+    residue_kind: lookup_or_crosswalk
+    deterministic_rule: Flag is_long_term_chooser on event; initialize emerging tech
+      to 0 for new.
+    rationale: 'A30: Emerging mobility and long-term choice: telecommute, transit
+      pass, escooter modeled by POLARIS; is_long_term_chooser set to 1 on event.'
+    disposition: Trigger POLARIS long-term choice models for transitioning individuals.
+    implementation_evidence: *id003
+    affected_elements:
+      - catalog: *id002
+        kind: sql_column
+        path: polaris_persons.telecommute_level
+      - catalog: *id002
+        kind: sql_column
+        path: polaris_persons.transit_pass
+      - catalog: *id002
+        kind: sql_column
+        path: polaris_persons.escooter_use_level
+      - catalog: *id002
+        kind: sql_column
+        path: polaris_persons.is_long_term_chooser
+  - id: assumption-A31
+    residue_kind: lookup_or_crosswalk
+    deterministic_rule: Increment duration by 1 for continuous tenure; reset to 0
+      upon relocation or job switch.
+    rationale: 'A31: Duration variable progression: time_in_home and time_in_job increment
+      by 1 each year, or reset to 0 upon relocation / job change.'
+    disposition: Track duration in residence and employment.
+    implementation_evidence: *id003
+    affected_elements:
+      - catalog: *id002
+        kind: sql_column
+        path: polaris_households.time_in_home
+      - catalog: *id002
+        kind: sql_column
+        path: polaris_persons.time_in_job
+  - id: assumption-A41
+    residue_kind: lookup_or_crosswalk
+    deterministic_rule: Assign vehicles to households based on ATLAS HOUSEID.
+    rationale: 'A41: Vehicle household assignment: vehicles are assigned to owning
+      households; persons moving households do not take vehicles with them.'
+    disposition: Bind vehicle ownership to household entity.
+    implementation_evidence: *id003
+    affected_elements:
+      - catalog: *id002
+        kind: sql_column
+        path: polaris_vehicles.hhold
+  - id: assumption-A42
+    residue_kind: lookup_or_crosswalk
+    deterministic_rule: Retain vehicle_id and type attributes across years for surviving
+      vehicles.
+    rationale: 'A42: Retained vehicle identity: vehicles surviving from t-1 keep vehicle_id,
+      class, powertrain, fuel, connectivity, and automation attributes.'
+    disposition: Maintain vehicle identity and attributes across annual iterations.
+    implementation_evidence: *id003
+    affected_elements:
+      - catalog: *id002
+        kind: sql_column
+        path: polaris_vehicles.vehicle_id
+      - catalog: *id002
+        kind: sql_column
+        path: polaris_vehicles.type
+  - id: assumption-A43
+    residue_kind: lookup_or_crosswalk
+    deterministic_rule: Draw size class via D-V1 based on county and household income.
+    rationale: 'A43: Size class within body type drawn from D-V1 conditioned on household
+      income and county.'
+    disposition: Resolve vehicle size class for new vehicle acquisitions.
+    implementation_evidence: *id003
+    affected_elements:
+      - catalog: *id002
+        kind: sql_column
+        path: polaris_vehicles.type
+  - id: assumption-A44
+    residue_kind: lookup_or_crosswalk
+    deterministic_rule: Map BEV/HEV/PHEV directly, sample D-V2 for conventional vehicles.
+    rationale: 'A44: Fuel type inferred from powertrain: BEV is electric, HEV/PHEV
+      gas, conventional draws gas/diesel via D-V2.'
+    disposition: Determine fuel type dimension for vehicle type lookup.
+    implementation_evidence: *id003
+    affected_elements:
+      - catalog: *id002
+        kind: sql_column
+        path: polaris_vehicles.type
+  - id: assumption-A45
+    residue_kind: lookup_or_crosswalk
+    deterministic_rule: Compute vintage bucket from simulation_year - modelyear via
+      X-V4.
+    rationale: 'A45: Vintage type derived from vehicle age (simulation_year - modelyear)
+      via crosswalk X-V4.'
+    disposition: Determine vintage type dimension for vehicle type lookup.
+    implementation_evidence: *id003
+    affected_elements:
+      - catalog: *id002
+        kind: sql_column
+        path: polaris_vehicles.type
+  - id: assumption-A46
+    residue_kind: lookup_or_crosswalk
+    deterministic_rule: Query type_id from existing polaris_vehicle_type table using
+      the 6 key dimensions.
+    rationale: 'A46: Vehicle types are always looked up from existing rows in Vehicle_Type;
+      new types are never inserted at runtime.'
+    disposition: Resolve foreign key into static vehicle type catalog.
+    implementation_evidence: *id003
+    affected_elements:
+      - catalog: *id002
+        kind: sql_column
+        path: polaris_vehicles.type
+governance:
+  maintaining_team: Synergy schema maintainers
+  lifecycle_status: draft
+  review_records: []

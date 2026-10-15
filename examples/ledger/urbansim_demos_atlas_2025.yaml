@@ -1,0 +1,110 @@
+# Synthetic example: UrbanSim -> DEMOS -> ATLAS within 2025.
+# Digests are placeholders (repeated hex) rather than real hashes. This
+# illustrates ledger shape, not an admitted raw-model mapping; ATLAS vehicles
+# are keyed provisionally by (household_id, vehicle_id). Mappings live in
+# mapping_catalog.yaml.
+#
+#   snapshot  step      derives              hh / ppl / memb / veh
+#   S0        UrbanSim  hh, ppl, memb        a1 / b1 / c1 /  -
+#   S1        DEMOS     hh, ppl, memb        a2 / b2 / c2 /  -
+#   S2        ATLAS     veh                  a2 / b2 / c2 / d1
+#   checkpoint 2025 -> S2
+#
+# DEMOS writes a deaths-only delta view, so its people mapping starts from the
+# parent's people facet (b1). Synergy stores the derived table (stored_object)
+# so the 2025 checkpoint can be rebuilt without replaying the delta.
+ledger_id: population-ledger:synthetic-region:baseline:r1
+scenario_definition_ref:
+  scenario_definition_id: scenario:synthetic-region:baseline
+  revision: "2026.09"
+  content_digest: "0000000000000000000000000000000000000000000000000000000000000000"
+stochastic_realization_id: r1
+facet_digest_form: core_facet_table/v1
+state_digest_form: core_state/v1
+mapping_catalog: mapping-catalog:synthetic-region/v1
+snapshots:
+  - snapshot_id: snapshot:2025:urbansim
+    simulation_year: 2025
+    step:
+      model: urbansim
+      producing_run: {provider: consist, run_id: urbansim-2025-r1}
+      output_views:
+        - view_id: view:urbansim/households_output:2025
+          view_kind: urbansim/households_output
+          artifact: {artifact_identity: {digest_algorithm: sha256, content_digest: "1111111111111111111111111111111111111111111111111111111111111111"}, locator: urbansim/2025/households.parquet}
+        - view_id: view:urbansim/persons_output:2025
+          view_kind: urbansim/persons_output
+          artifact: {artifact_identity: {digest_algorithm: sha256, content_digest: "2222222222222222222222222222222222222222222222222222222222222222"}, locator: urbansim/2025/persons.parquet}
+      derivations:
+        - {facet: households, mapping: "mapping:urbansim-core/v1#households", views: ["view:urbansim/households_output:2025"]}
+        - {facet: people, mapping: "mapping:urbansim-core/v1#people", views: ["view:urbansim/persons_output:2025"]}
+        - {facet: household_membership, mapping: "mapping:urbansim-core/v1#household_membership", views: ["view:urbansim/persons_output:2025"]}
+    core_state:
+      state_digest: sha256:5050505050505050505050505050505050505050505050505050505050505050
+      facets:
+        - {facet: households, digest: sha256:a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1}
+        - {facet: people, digest: sha256:b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1}
+        - {facet: household_membership, digest: sha256:c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1}
+
+  - snapshot_id: snapshot:2025:demos
+    parent_snapshots: ["snapshot:2025:urbansim"]
+    simulation_year: 2025
+    step:
+      model: demos
+      producing_run: {provider: consist, run_id: demos-2025-r1}
+      input_views:
+        - view_id: view:demos/persons_input:2025
+          view_kind: demos/persons_input
+          artifact: {artifact_identity: {digest_algorithm: sha256, content_digest: "3333333333333333333333333333333333333333333333333333333333333333"}, locator: demos/2025/input/persons.parquet}
+          prepared_from_state: sha256:5050505050505050505050505050505050505050505050505050505050505050
+      output_views:
+        - view_id: view:demos/persons_output:2025
+          view_kind: demos/persons_output
+          artifact: {artifact_identity: {digest_algorithm: sha256, content_digest: "4444444444444444444444444444444444444444444444444444444444444444"}, locator: demos/2025/output/persons.parquet}
+        - view_id: view:demos/households_output:2025
+          view_kind: demos/households_output
+          artifact: {artifact_identity: {digest_algorithm: sha256, content_digest: "5555555555555555555555555555555555555555555555555555555555555555"}, locator: demos/2025/output/households.parquet}
+        - view_id: view:demos/deaths_output:2025
+          view_kind: demos/deaths_output
+          artifact: {artifact_identity: {digest_algorithm: sha256, content_digest: "8888888888888888888888888888888888888888888888888888888888888888"}, locator: demos/2025/output/deaths.parquet}
+      reads: [households, people, household_membership]
+      derivations:
+        - {facet: households, mapping: "mapping:demos-core/v1#households", views: ["view:demos/households_output:2025"]}
+        - {facet: people, mapping: "mapping:demos-core/v1#people", views: ["view:demos/deaths_output:2025"]}
+        - {facet: household_membership, mapping: "mapping:demos-core/v1#household_membership", views: ["view:demos/persons_output:2025"]}
+    core_state:
+      state_digest: sha256:5151515151515151515151515151515151515151515151515151515151515151
+      facets:
+        - {facet: households, digest: sha256:a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2}
+        - {facet: people, digest: sha256:b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2, stored_object: {artifact_identity: {digest_algorithm: sha256, content_digest: "9999999999999999999999999999999999999999999999999999999999999999"}, locator: synergy/2025/core/people.parquet}}
+        - {facet: household_membership, digest: sha256:c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2}
+
+  - snapshot_id: snapshot:2025:atlas
+    parent_snapshots: ["snapshot:2025:demos"]
+    simulation_year: 2025
+    step:
+      model: atlas
+      producing_run: {provider: consist, run_id: atlas-2025-r1}
+      input_views:
+        - view_id: view:atlas/household_input:2025
+          view_kind: atlas/household_input
+          artifact: {artifact_identity: {digest_algorithm: sha256, content_digest: "6666666666666666666666666666666666666666666666666666666666666666"}, locator: atlas/2025/input/households.csv}
+          prepared_from_state: sha256:5151515151515151515151515151515151515151515151515151515151515151
+      output_views:
+        - view_id: view:atlas/vehicles_output:2025
+          view_kind: atlas/vehicles_output
+          artifact: {artifact_identity: {digest_algorithm: sha256, content_digest: "7777777777777777777777777777777777777777777777777777777777777777"}, locator: atlas/2025/output/vehicles.parquet}
+      reads: [households, household_membership]
+      derivations:
+        - {facet: vehicles, mapping: "mapping:atlas-core/v1#vehicles", views: ["view:atlas/vehicles_output:2025"]}
+    # Unchanged facets keep the DEMOS digests (and stored table).
+    core_state:
+      state_digest: sha256:5252525252525252525252525252525252525252525252525252525252525252
+      facets:
+        - {facet: households, digest: sha256:a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2}
+        - {facet: people, digest: sha256:b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2, stored_object: {artifact_identity: {digest_algorithm: sha256, content_digest: "9999999999999999999999999999999999999999999999999999999999999999"}, locator: synergy/2025/core/people.parquet}}
+        - {facet: household_membership, digest: sha256:c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2}
+        - {facet: vehicles, digest: sha256:d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1}
+checkpoints:
+  - simulation_year: 2025
+    snapshot: snapshot:2025:atlas

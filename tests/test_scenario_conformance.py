@@ -199,7 +199,11 @@ def test_binding_and_trajectory_failures_are_stable(tmp_path: Path) -> None:
         ],
     }
     trajectory = _trajectory(definition)
-    trajectory["requested_years"] = [2025]
+    trajectory["scenario_definition_ref"] = {
+        "scenario_definition_id": "conflicting-scenario",
+        "revision": "r1",
+        "content_digest": "0" * 64,
+    }
     codes = [
         item.code
         for item in validate_scenario(
@@ -209,7 +213,7 @@ def test_binding_and_trajectory_failures_are_stable(tmp_path: Path) -> None:
     assert codes == [
         "NATIVE_ELEMENT_UNRESOLVED",
         "SCENARIO_BINDING_CONFLICT",
-        "TRAJECTORY_COMPLETENESS_MISMATCH",
+        "SCENARIO_BINDING_CONFLICT",
     ]
 
 
@@ -286,26 +290,32 @@ def test_completeness_status_matches_successful_and_skipped_years(
             }
         ],
     }
-    trajectory = _trajectory(definition)
-    trajectory["snapshots"] = trajectory["snapshots"][:1]
-    trajectory["skipped_years"] = [{"year": 2030, "reason": "not run"}]
-    trajectory["completeness_status"] = "incomplete"
+    matching_target = _trajectory(definition)
     assert (
         validate_scenario(
-            definition, [binding], trajectory, catalog_root=tmp_path / "catalogs"
+            definition, [binding], matching_target, catalog_root=tmp_path / "catalogs"
         ).diagnostics
         == ()
     )
-    trajectory["completeness_status"] = "complete"
+    conflicting_target = {
+        "scenario_definition_ref": {
+            "scenario_definition_id": "different",
+            "revision": "r1",
+            "content_digest": "0" * 64,
+        }
+    }
     assert [
         item.code
         for item in validate_scenario(
-            definition, [binding], trajectory, catalog_root=tmp_path / "catalogs"
+            definition,
+            [binding],
+            conflicting_target,
+            catalog_root=tmp_path / "catalogs",
         ).diagnostics
-    ] == ["TRAJECTORY_COMPLETENESS_MISMATCH"]
+    ] == ["SCENARIO_BINDING_CONFLICT"]
 
 
-def test_cli_handles_malformed_trajectory_members_and_checks_schema(
+def test_cli_handles_conflicting_target_and_checks_schema(
     tmp_path: Path,
 ) -> None:
     definition = _definition()
@@ -342,37 +352,35 @@ def test_cli_handles_malformed_trajectory_members_and_checks_schema(
     )
     definition_path.write_text(yaml.safe_dump(definition), encoding="utf-8")
     bindings_path.write_text(yaml.safe_dump(binding), encoding="utf-8")
-    for malformed in (
-        {
-            **_trajectory(definition),
-            "snapshots": [
-                {**_trajectory(definition)["snapshots"][0], "simulation_year": None}
-            ],
-        },
-        {**_trajectory(definition), "snapshots": ["not-a-mapping"]},
-    ):
-        trajectory_path.write_text(yaml.safe_dump(malformed), encoding="utf-8")
-        assert (
-            main(
-                [
-                    "check-scenario",
-                    "--schema",
-                    str(
-                        Path(__file__).parents[1]
-                        / "src/synergy_schema/schema/synergy_schema.yaml"
-                    ),
-                    "--definition",
-                    str(definition_path),
-                    "--bindings",
-                    str(bindings_path),
-                    "--trajectory",
-                    str(trajectory_path),
-                    "--catalog-root",
-                    str(tmp_path / "catalogs"),
-                ]
-            )
-            == 1
+    conflicting = {
+        "scenario_definition_ref": {
+            "scenario_definition_id": "conflicting",
+            "revision": "r1",
+            "content_digest": "0" * 64,
+        }
+    }
+    trajectory_path.write_text(yaml.safe_dump(conflicting), encoding="utf-8")
+    assert (
+        main(
+            [
+                "check-scenario",
+                "--schema",
+                str(
+                    Path(__file__).parents[1]
+                    / "src/synergy_schema/schema/synergy_schema.yaml"
+                ),
+                "--definition",
+                str(definition_path),
+                "--bindings",
+                str(bindings_path),
+                "--trajectory",
+                str(trajectory_path),
+                "--catalog-root",
+                str(tmp_path / "catalogs"),
+            ]
         )
+        == 1
+    )
     assert (
         main(
             [
@@ -393,7 +401,7 @@ def test_cli_handles_malformed_trajectory_members_and_checks_schema(
     )
 
 
-def test_cli_rejects_malformed_skipped_year_members(
+def test_cli_rejects_incompatible_scenario_schema(
     tmp_path: Path, capsys: pytest.CaptureFixture[str]
 ) -> None:
     definition = _definition()
@@ -430,34 +438,9 @@ def test_cli_rejects_malformed_skipped_year_members(
     )
     definition_path.write_text(yaml.safe_dump(definition), encoding="utf-8")
     bindings_path.write_text(yaml.safe_dump(binding), encoding="utf-8")
-    schema_path = (
-        Path(__file__).parents[1] / "src/synergy_schema/schema/synergy_schema.yaml"
+    trajectory_path.write_text(
+        yaml.safe_dump(_trajectory(definition)), encoding="utf-8"
     )
-    for skipped_years in ([{}], [{"year": 2030, "reason": None}], ["scalar"]):
-        trajectory = _trajectory(definition)
-        trajectory["snapshots"] = trajectory["snapshots"][:1]
-        trajectory["skipped_years"] = skipped_years
-        trajectory["completeness_status"] = "incomplete"
-        trajectory_path.write_text(yaml.safe_dump(trajectory), encoding="utf-8")
-        assert (
-            main(
-                [
-                    "check-scenario",
-                    "--schema",
-                    str(schema_path),
-                    "--definition",
-                    str(definition_path),
-                    "--bindings",
-                    str(bindings_path),
-                    "--trajectory",
-                    str(trajectory_path),
-                    "--catalog-root",
-                    str(tmp_path / "catalogs"),
-                ]
-            )
-            == 1
-        )
-        assert "SCENARIO_DOCUMENT_INVALID" in capsys.readouterr().err
     incompatible_schema = tmp_path / "incompatible.yaml"
     incompatible_schema.write_text(
         "id: https://example.org/test\nname: test\n", encoding="utf-8"

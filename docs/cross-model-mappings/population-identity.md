@@ -1,14 +1,15 @@
 # Population identity
 
-Population identity answers which household, person, membership, or vehicle a
-record represents. It is different from a row number, a file checksum, and a
-state occurrence in one year.
+Population identity is about which household, person, household membership,
+or vehicle a record describes. That's different from a row number, a file
+checksum, or a record describing someone in one particular year.
 
-Some native identifiers persist across models or years. Others are local
-ordinals that are meaningful only inside one table or snapshot. Synergy records
-that distinction explicitly so an accidental equality of integers is not
-treated as proof that two rows describe the same entity.
+Some model IDs stay the same across models or years. Others are just row
+numbers that only mean something inside one table or one year. Synergy records
+which is which, so two rows that happen to share the number 42 aren't treated
+as the same household.
 
-The generated [identity map](../schema/cross-model-population-identity.md) shows
-which identifiers are preserved, renamed, derived, composite, or local at the
-UrbanSim, ActivitySim, ATLAS, and POLARIS boundaries.
+The [contract review](../schema/contract-at-a-glance.md)
+and [core schema UML](../schema/core-schema-uml.md)
+show how canonical identities, memberships, and translation contracts connect
+native model views to core entity tables.

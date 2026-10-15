@@ -671,3 +671,29 @@ def generate_mermaid_erd(
         lines.append("")
 
     return "\n".join(lines)
+
+
+def main() -> None:
+    """Validate and compile Mermaid ER diagrams from the Deliverable 1 static schema."""
+    base_dir = Path(__file__).resolve().parents[2]
+    schema_path = (
+        base_dir
+        / "src"
+        / "synergy_schema"
+        / "schema"
+        / "deliverable_1_static_schema.yaml"
+    )
+    for class_group in (
+        POPULATION_CLASSES,
+        REGIONAL_CLASSES,
+        POLARIS_REGIONAL_CLASSES,
+        BEAM_AS_REGIONAL_CLASSES,
+        SPATIAL_SKIM_CLASSES,
+        SYNTHFIRM_REGIONAL_CLASSES,
+    ):
+        generate_mermaid_erd(schema_path, class_group)
+    print(f"Compiled Mermaid ER diagrams from {schema_path}")
+
+
+if __name__ == "__main__":
+    main()

@@ -3,39 +3,36 @@ site_name = "Synergy Schema"
 site_description = "Shared definitions and evidence for coordinated modeling workflows"
 docs_dir = "docs"
 site_dir = "site"
-
 nav = [
     { "Overview" = "index.md" },
-    { "Proof of concept" = [
-        { "A population that changes over three years" = "proof-of-concept/index.md" },
-        { "Following the proof from claim to file" = "proof-of-concept/check-the-showcase.md" },
-    ] },
-    { "Bring an existing mapping" = [
-        { "Bring an existing mapping" = "bring-an-existing-mapping/index.md" },
-        { "Day-zero manifest" = "bring-an-existing-mapping/day-zero-manifest.md" },
-        { "One-year mapping handshake" = "bring-an-existing-mapping/one-year-mapping-handshake.md" },
-        { "Mapping at a glance" = "bring-an-existing-mapping/contract-at-a-glance.md" },
-        { "Costs and exit" = "bring-an-existing-mapping/costs-and-exit.md" },
-    ] },
     { "Shared structure" = [
         { "How Synergy is organized" = "shared-structure/index.md" },
         { "Scenario definitions and trajectories" = "shared-structure/scenario-definitions-and-trajectories.md" },
         { "Population snapshots and artifact identity" = "shared-structure/population-snapshots-and-artifact-identity.md" },
+        { "Canonical tabular content digests" = "shared-structure/canonical-tabular-digests.md" },
         { "Population trajectory realization identity" = "shared-structure/realization-identity.md" },
         { "Core schema UML" = "schema/core-schema-uml.md" },
         { "Glossary" = "shared-structure/glossary.md" },
     ] },
     { "Cross-model mappings" = [
         { "Cross-model mappings" = "cross-model-mappings/index.md" },
+        { "Contract at a Glance" = "cross-model-mappings/contract-at-a-glance.md" },
+        { "Architecture & UML" = "cross-model-mappings/deliverable_1_uml.md" },
         { "Database ER Diagrams" = "cross-model-mappings/interactive-schema.md" },
-        { "Population identity" = "cross-model-mappings/population-identity.md" },
         { "Mapping meaning, implementation, and lineage" = "cross-model-mappings/mapping-lineage.md" },
+        { "Population identity" = "cross-model-mappings/population-identity.md" },
         { "Scenario compatibility" = "cross-model-mappings/scenario-compatibility.md" },
+        { "Adoption pilot" = [
+            { "Three-step pilot" = "bring-an-existing-mapping/index.md" },
+            { "Day-zero manifest" = "bring-an-existing-mapping/day-zero-manifest.md" },
+            { "One-year mapping handshake" = "bring-an-existing-mapping/one-year-mapping-handshake.md" },
+            { "Mapping at a glance" = "bring-an-existing-mapping/contract-at-a-glance.md" },
+            { "Costs and exit" = "bring-an-existing-mapping/costs-and-exit.md" },
+        ] },
     ] },
     { "Workflow structures" = [
         { "Workflow structures" = "workflow-structures/index.md" },
         { "PILATES post-ATLAS population" = "workflow-structures/pilates.md" },
-        { "Staged core-population assembly" = "workflow-structures/core-population-assembly.md" },
         { "POLARIS translated population" = "workflow-structures/polaris.md" },
     ] },
     { "Design rationale" = [
@@ -69,6 +66,10 @@ extra_javascript = [
 language = "en"
 features = ["content.code.copy", "navigation.indexes", "navigation.top", "search.highlight", "toc.integrate"]
 
+[project.theme.font]
+text = "Libre Franklin"
+code = "JetBrains Mono"
+
 [project.markdown_extensions.pymdownx.superfences]
 custom_fences = [
   { name = "mermaid", class = "mermaid", format = "pymdownx.superfences.fence_code_format" },
@@ -78,11 +79,6 @@ custom_fences = [
 
 [project.markdown_extensions.pymdownx.tabbed]
 alternate_style = true
-
-[project.markdown_extensions.zensical.extensions.macros]
-module_name = "docs_macros"
-on_error_fail = true
-on_undefined = "strict"
 
 [[project.theme.palette]]
 media = "(prefers-color-scheme)"

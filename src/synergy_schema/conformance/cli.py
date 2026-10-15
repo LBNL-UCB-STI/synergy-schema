@@ -12,23 +12,19 @@ import yaml
 
 from linkml_runtime.utils.schemaview import SchemaView
 
-from .bundles import validate_polaris_bundle, validate_population_bundle
-from .assembly import validate_population_assembly
 from .day_zero import create_day_zero_manifest, validate_day_zero_manifest
 from .diagnostics import CheckResult, InputError
-from .documents import load_list, load_mapping, load_mapping_release, load_showcase
+from .documents import load_list, load_mapping, load_showcase
+from .ledger import validate_ledger
 from .mappings import validate_mapping_release
 from .review import diff_mappings, import_mapping, render_mapping
 from .scenario import validate_scenario
-from .shapes import validate_bundle_shape
 
 
 _COMMANDS = (
     "check-scenario",
     "check-mappings",
-    "check-population-bundle",
-    "check-population-assembly",
-    "check-polaris-bundle",
+    "check-ledger",
     "check-all",
     "create-day-zero-manifest",
     "render-mapping",
@@ -52,24 +48,37 @@ def build_parser() -> argparse.ArgumentParser:
     mappings.add_argument("--require-approved-mapping", action="store_true")
     mappings.add_argument("--new-receipt", action="store_true")
     mappings.add_argument("--catalog-root")
-    population = commands.add_parser("check-population-bundle")
-    population.add_argument("--schema", required=True)
-    population.add_argument("--bundle", required=True)
-    assembly = commands.add_parser("check-population-assembly")
-    assembly.add_argument("--schema", required=True)
-    assembly.add_argument("--assembly", required=True)
-    assembly.add_argument(
-        "--contribution",
-        action="append",
-        default=[],
-        help="canonical CorePopulationContribution manifest (repeatable)",
+    ledger = commands.add_parser("check-ledger")
+    ledger.add_argument(
+        "ledger", nargs="?", default=None, help="path to PopulationLedger document"
     )
-    polaris = commands.add_parser("check-polaris-bundle")
-    polaris.add_argument("--schema", required=True)
-    polaris.add_argument("--bundle", required=True)
-    polaris.add_argument("--source-population-bundle", required=True)
-    polaris.add_argument("--mapping-release", required=True)
-    polaris.add_argument("--production", action="store_true")
+    ledger.add_argument(
+        "--ledger", dest="ledger_flag", help="path to PopulationLedger document"
+    )
+    ledger.add_argument(
+        "--schema", help="path to schema (defaults to population_ledger.yaml)"
+    )
+    ledger.add_argument(
+        "--mapping-catalog", help="path to CoreFacetMappingCatalog document"
+    )
+    ledger.add_argument(
+        "--verify-consist-provenance",
+        action="store_true",
+        help="verify producing_run and artifact hashes against Consist DuckDB provenance",
+    )
+    ledger.add_argument(
+        "--consist-db",
+        help="path to Consist provenance.duckdb",
+    )
+    ledger.add_argument(
+        "--data-root",
+        help="root directory for resolving relative view and stored_object artifact locators",
+    )
+    ledger.add_argument(
+        "--verify-state-digest",
+        action="store_true",
+        help="verify that core_state.state_digest matches recomputed core_state/v1 hash",
+    )
     check_all = commands.add_parser("check-all")
     check_all.add_argument("--schema", required=True)
     check_all.add_argument("--dir", required=True)
@@ -102,7 +111,6 @@ def _dispatch(args: argparse.Namespace) -> CheckResult:
             required_roots = {
                 "ScenarioDefinition",
                 "ModelScenarioBinding",
-                "PopulationTrajectory",
             }
             if any(schema.get_class(root) is None for root in required_roots):
                 raise InputError(
@@ -126,56 +134,24 @@ def _dispatch(args: argparse.Namespace) -> CheckResult:
             schema_path=args.schema,
             catalog_root=args.catalog_root,
         )
-    if args.command == "check-population-bundle":
-        _require_roots(args.schema, {"PopulationTrajectoryBundle"})
-        bundle = load_mapping(args.bundle)
-        return _check_population_bundle(args.schema, bundle)
-    if args.command == "check-population-assembly":
-        _require_roots(
-            args.schema, {"CorePopulationAssembly", "CorePopulationContribution"}
+    if args.command == "check-ledger":
+        path = args.ledger or args.ledger_flag
+        if not path:
+            raise InputError("check-ledger requires a ledger document path")
+        ledger_doc = load_mapping(path)
+        catalog_doc = (
+            load_mapping(args.mapping_catalog) if args.mapping_catalog else None
         )
-        assembly_document = load_mapping(args.assembly)
-        shape = validate_bundle_shape(
-            args.schema, assembly_document, "CorePopulationAssembly"
-        )
-        if shape.exit_code:
-            return shape
-        contribution_documents = []
-        for path in args.contribution:
-            document = load_mapping(path)
-            contribution_shape = validate_bundle_shape(
-                args.schema, document, "CorePopulationContribution"
-            )
-            if contribution_shape.exit_code:
-                return contribution_shape
-            contribution_documents.append(document)
-        return validate_population_assembly(assembly_document, contribution_documents)
-    if args.command == "check-polaris-bundle":
-        _require_roots(args.schema, {"PolarisPopulationTranslationBundle"})
-        bundle = load_mapping(args.bundle)
-        source = load_mapping(args.source_population_bundle)
-        contract, implementations, ownership = load_mapping_release(
-            args.mapping_release
-        )
-        return _check_polaris_bundle(
-            args.schema,
-            bundle,
-            source,
-            contract,
-            implementations,
-            ownership,
-            production=args.production,
+        return validate_ledger(
+            ledger_doc,
+            catalog=catalog_doc,
+            schema_path=args.schema,
+            verify_consist_provenance=args.verify_consist_provenance,
+            consist_db=args.consist_db,
+            data_root=args.data_root,
+            verify_state_digest=args.verify_state_digest,
         )
     if args.command == "check-all":
-        _require_roots(
-            args.schema,
-            {
-                "ScenarioDefinition",
-                "PopulationTrajectoryBundle",
-                "PolarisPopulationTranslationBundle",
-                "PopulationTranslationContract",
-            },
-        )
         root = Path(args.dir)
         manifest = load_showcase(root)
 
@@ -185,42 +161,53 @@ def _dispatch(args: argparse.Namespace) -> CheckResult:
                 raise InputError(f"showcase.yaml requires relative {name}")
             return load_mapping(root / value)
 
-        definition = document("scenario_definition")
-        bindings = load_list(root / str(manifest["model_bindings"]))
-        trajectory = document("trajectory")
-        population = document("population_bundle")
-        polaris = document("polaris_bundle")
-        release_value = manifest.get("mapping_release")
-        if not isinstance(release_value, str):
-            raise InputError("showcase.yaml requires relative mapping_release")
-        release = root / release_value
-        contract, implementations, ownership = load_mapping_release(release)
+        results: list[CheckResult] = []
         catalog_root = (
             root / str(manifest["catalog_root"])
             if manifest.get("catalog_root")
             else None
         )
-        results = [
-            validate_scenario(
-                definition, bindings, trajectory, catalog_root=catalog_root
-            ),
-            validate_mapping_release(
-                release,
-                require_approved=args.require_approved_mapping or args.production,
-                new_receipt=True,
-                schema_path=args.schema,
-                catalog_root=catalog_root,
-            ),
-            _check_polaris_bundle(
-                args.schema,
-                polaris,
-                population,
-                contract,
-                implementations,
-                ownership,
-                production=args.production,
-            ),
-        ]
+        if "scenario_definition" in manifest:
+            _require_roots(args.schema, {"ScenarioDefinition", "ModelScenarioBinding"})
+            definition = document("scenario_definition")
+            bindings = load_list(root / str(manifest["model_bindings"]))
+            target = None
+            if "ledger" in manifest:
+                target = document("ledger")
+            elif "trajectory" in manifest:
+                target = document("trajectory")
+            results.append(
+                validate_scenario(
+                    definition, bindings, target, catalog_root=catalog_root
+                )
+            )
+
+        if "mapping_release" in manifest:
+            _require_roots(args.schema, {"PopulationTranslationContract"})
+            release_value = manifest["mapping_release"]
+            release = root / str(release_value)
+            results.append(
+                validate_mapping_release(
+                    release,
+                    require_approved=args.require_approved_mapping or args.production,
+                    new_receipt=True,
+                    schema_path=args.schema,
+                    catalog_root=catalog_root,
+                )
+            )
+
+        if "ledger" in manifest:
+            _require_roots(args.schema, {"PopulationLedger"})
+            ledger_doc = document("ledger")
+            catalog_doc = (
+                document("mapping_catalog") if "mapping_catalog" in manifest else None
+            )
+            results.append(
+                validate_ledger(
+                    ledger_doc, catalog=catalog_doc, schema_path=args.schema
+                )
+            )
+
         return _combine(*results)
     if args.command == "create-day-zero-manifest":
         manifest = create_day_zero_manifest(
@@ -279,41 +266,6 @@ def _combine(*results: CheckResult) -> CheckResult:
         for item in result.diagnostics
     }
     return CheckResult(tuple(unique.values()))
-
-
-def _check_population_bundle(
-    schema_path: str, bundle: dict[str, object]
-) -> CheckResult:
-    shape = validate_bundle_shape(schema_path, bundle, "PopulationTrajectoryBundle")
-    return shape if shape.exit_code else validate_population_bundle(bundle)
-
-
-def _check_polaris_bundle(
-    schema_path: str,
-    bundle: dict[str, object],
-    source: dict[str, object],
-    contract: dict[str, object],
-    implementations: list[dict[str, object]],
-    ownership: dict[str, object],
-    *,
-    production: bool,
-) -> CheckResult:
-    shapes = _combine(
-        validate_bundle_shape(schema_path, source, "PopulationTrajectoryBundle"),
-        validate_bundle_shape(
-            schema_path, bundle, "PolarisPopulationTranslationBundle"
-        ),
-    )
-    if shapes.exit_code:
-        return shapes
-    return validate_polaris_bundle(
-        bundle,
-        source,
-        contract,
-        implementations,
-        ownership,
-        production=production,
-    )
 
 
 def main(argv: Sequence[str] | None = None) -> int:

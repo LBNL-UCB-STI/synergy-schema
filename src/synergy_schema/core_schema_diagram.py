@@ -68,13 +68,17 @@ MODULES = {
         "Scenario definitions and bindings",
         "Shared assumptions and the declarations connecting them to native model settings.",
     ),
-    "population_snapshot": (
-        "Population snapshots and relationships",
-        "Snapshot-scoped identities, household membership, and vehicle relationships.",
+    "core_tables": (
+        "Core entity tables",
+        "Key-only identities for households, persons, household memberships, and vehicles.",
     ),
-    "population_trajectory": (
-        "Population trajectories",
-        "Ordered snapshots and explicit records for requested years that were skipped.",
+    "facet_mappings": (
+        "Facet mappings and derivations",
+        "Catalogs declaring how model-specific views map to core facet tables and derivations.",
+    ),
+    "population_ledger": (
+        "Population ledger and state snapshots",
+        "Step executions, state digests, facet digests, and checkpoint declarations.",
     ),
     "handoff_bundle": (
         "Handoff and artifact references",
@@ -135,7 +139,7 @@ def render_core_schema_uml(core_dir: Path) -> str:
     lines = [
         "# Core schema UML",
         "",
-        "This generated page contains every class declared in the five core schema",
+        "This generated page contains every class declared in the six core schema",
         "modules. The overview shows how the modules depend on one another; the",
         "smaller UML diagrams below show the complete scalar fields and typed",
         "relationships for one module at a time.",
@@ -145,10 +149,12 @@ def render_core_schema_uml(core_dir: Path) -> str:
         "```mermaid",
         "flowchart LR",
         '  scenario["Scenario definitions"] --> native["Model-owned interface references"]',
-        '  snapshot["Population snapshots"] --> scenario',
-        '  trajectory["Population trajectories"] --> snapshot',
-        '  trajectory --> handoff["Handoff and artifacts"]',
-        "  native --> handoff",
+        '  ledger["Population ledger"] --> scenario',
+        '  ledger --> core["Core tables"]',
+        '  mappings["Facet mappings"] --> core',
+        "  mappings --> native",
+        '  native --> handoff["Handoff and artifacts"]',
+        "  ledger --> handoff",
         "```",
         "",
         "Each detailed diagram includes every class defined by that module. A",
@@ -165,34 +171,42 @@ def render_core_schema_uml(core_dir: Path) -> str:
                 "",
             ]
         )
-        if module_name == "population_snapshot":
+        if module_name == "core_tables":
             lines.extend(
                 [
-                    "### Population relationship overview",
+                    "### Core entity relationship overview",
                     "",
-                    "Households, persons, and vehicles are snapshot-scoped state",
-                    "occurrences. Membership and vehicle assignment are explicit",
-                    "relationship records; the schema does not infer a direct",
-                    "person-to-household or vehicle-to-household link.",
+                    "Core tables define the key-only canonical identities for households,",
+                    "persons, and vehicles, with explicit membership relationships.",
                     "",
                     "```mermaid",
                     "classDiagram",
                     "direction LR",
-                    "  HouseholdMembership --> PersonState : person_state_ref",
-                    "  HouseholdMembership --> HouseholdState : household_state_ref",
-                    "  HouseholdMembership --> PopulationSnapshot : population_snapshot_ref",
-                    "  HouseholdVehicleAssignment --> VehicleState : vehicle_state_ref",
-                    "  HouseholdVehicleAssignment --> HouseholdState : household_state_ref",
-                    "  HouseholdVehicleAssignment --> PopulationSnapshot : population_snapshot_ref",
-                    "  PersonState --> PopulationSnapshot : population_snapshot_ref",
-                    "  HouseholdState --> PopulationSnapshot : population_snapshot_ref",
-                    "  VehicleState --> PopulationSnapshot : population_snapshot_ref",
-                    "  HouseholdState --> HouseholdState : predecessor_state_refs",
+                    "  CoreHouseholdMembership --> CorePerson : person_id",
+                    "  CoreHouseholdMembership --> CoreHousehold : household_id",
+                    "  CoreVehicle --> CoreHousehold : household_id",
                     "```",
                     "",
-                    "A state identifier names one occurrence in one snapshot. Optional",
-                    "longitudinal references connect identity across snapshots; they do",
-                    "not turn the occurrence record into a timeless master entity.",
+                    "### Complete fields and references",
+                    "",
+                ]
+            )
+        if module_name == "population_ledger":
+            lines.extend(
+                [
+                    "### Population ledger overview",
+                    "",
+                    "The ledger tracks step executions, state digests, facet digests, and checkpoints.",
+                    "",
+                    "```mermaid",
+                    "classDiagram",
+                    "direction LR",
+                    "  PopulationLedger *-- PopulationCheckpoint : checkpoints",
+                    "  PopulationLedger *-- ModelStep : steps",
+                    "  PopulationCheckpoint *-- PopulationSnapshot : snapshots",
+                    "  PopulationSnapshot *-- CoreState : state",
+                    "  CoreState *-- CoreFacetEntry : facets",
+                    "```",
                     "",
                     "### Complete fields and references",
                     "",

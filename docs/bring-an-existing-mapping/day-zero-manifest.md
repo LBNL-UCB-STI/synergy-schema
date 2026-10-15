@@ -1,16 +1,18 @@
 # Day-zero manifest
 
-A day-zero manifest records one existing payload and the code or run that
-produced it. It answers the first practical questions—what file is being
-discussed, which exact bytes does it contain, and where did it come from—before
-any claim is made about a complete field mapping or runtime integration.
+A day-zero manifest records one existing file and the code or run that
+produced it. It answers the first practical questions: which file are we
+talking about, what exactly is in it, and where did it come from? It does this
+before anyone makes claims about a complete field mapping or a runtime
+integration.
 
-This is discovery evidence. It prevents later review from drifting to a
-different file with the same name, but it does not establish that the payload
-is correct or that an automatic adapter exists.
+Think of it as discovery evidence. It stops later reviews from drifting onto a
+different file with the same name, but it doesn't show that the file is
+correct or that an automatic adapter exists.
 
-The first acceptance point is deliberately narrow: the payload and producer
-identities are present and the manifest passes its structural check. Work stops
-before mapping claims are recorded when a representative payload or its source
-cannot be identified. Automatic receipt emission is a later production goal;
-manual discovery remains an honest description of the current state.
+The bar for this step is deliberately low: the file and producer fingerprints
+are present, and the manifest passes its structural check. Work stops here,
+before any mapping is written down, if nobody can find a representative file
+or say where it came from. Automatic receipt emission is a later production
+goal; until then, assembling the manifest by hand is an honest description of
+where things stand.

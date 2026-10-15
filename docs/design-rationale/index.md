@@ -1,30 +1,30 @@
 # Design rationale
 
-Synergy separates shared facts, model-owned interfaces, mapping decisions, and
-run evidence because they have different owners and change at different rates.
-Combining them would make a convenient file today but leave future changes hard
-to interpret: a new column, a changed assumption, and a new executable would
-all look like the same kind of revision.
+Synergy keeps shared facts, model interfaces, mapping decisions, and run
+evidence in separate records because different people own them and they change
+at different speeds. Lumping them together would make a convenient file today,
+but later it would be hard to tell whether a change was a new column, a new
+assumption, or a new version of the code.
 
-These notes explain the main design choices and their costs. They also describe
-the cases where flat files and a README already provide enough coordination.
+These notes explain the main design choices and what they cost. They also say
+when flat files and a README are enough.
 
 ## Common questions
 
 **Why not share one wide population table?** Different models own different
-facts and update them at different times. The shared structure identifies the
-facts that must agree without turning one model's table into everyone else's
-runtime interface.
+facts and update them at different times. The shared structure pins down the
+facts that must match, without turning one model's table into everyone else's
+interface.
 
-**Why use LinkML?** It keeps the definitions readable while supporting a
-generated reference and structural validation.
+**Why use LinkML?** It keeps the definitions readable while also generating a
+reference site and structural validation.
 
 **When are flat files enough?** A small, stable exchange with a clear owner may
-need only files and a README. More structure earns its cost when versions,
-mapping rules, ownership, and run evidence must remain comparable over time.
+only need files and a README. More structure pays off when versions, mapping
+rules, ownership, and run evidence need to stay comparable over time.
 
-- [Why LinkML](why-linkml.md) explains the choice of a readable schema source.
-- [Why not one big table?](why-not-one-big-table.md) explains the ownership and
-  time boundaries behind the separate records.
-- [Are flat files enough?](are-flat-files-enough.md) gives the threshold for
-  adding more structure.
+- [Why LinkML](why-linkml.md) explains the choice of schema language.
+- [Why not one big table?](why-not-one-big-table.md) explains why the records
+  are split up.
+- [Are flat files enough?](are-flat-files-enough.md) covers when to add more
+  structure.

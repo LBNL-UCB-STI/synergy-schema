@@ -5,7 +5,6 @@ from pathlib import Path
 
 import yaml
 
-from synergy_schema.conformance.bundles import canonical_bundle_digest
 from synergy_schema.conformance.cli import main
 from synergy_schema.conformance.day_zero import validate_day_zero_manifest
 from synergy_schema.conformance.documents import load_mapping
@@ -38,7 +37,7 @@ def test_day_zero_example_is_a_byte_accurate_discovery_receipt() -> None:
     ] == ["PRODUCTION_RECEIPT_REQUIRED"]
 
 
-def test_one_year_handshake_is_an_honest_draft_with_canonical_bundle_identity(
+def test_one_year_handshake_is_an_honest_draft(
     capsys: object,
 ) -> None:
     example = ROOT / "examples/one_year_mapping_handshake"
@@ -55,11 +54,6 @@ def test_one_year_handshake_is_an_honest_draft_with_canonical_bundle_identity(
         == 0
     )
     assert "MAPPING_NOT_APPROVED" in capsys.readouterr().err
-    polaris = load_mapping(example / "polaris-translation-bundle.yaml")
-    population = load_mapping(example / "pilates-trajectory-bundle.yaml")
-    assert polaris["source_trajectory_bundle"][
-        "manifest_content_digest"
-    ] == canonical_bundle_digest(population)
     contract = load_mapping(
         example
         / "mapping-release/revision-1/contract/population-translation-contract.yaml"
@@ -75,10 +69,6 @@ def test_one_year_handshake_is_an_honest_draft_with_canonical_bundle_identity(
         "02ae76d67869ec8cee8ca138288e44907cd86ba31db81b66fa6d2e845e798663"
     )
     assert mapping_digest(contract) == contract["semantic_content_digest"]
-    assert (
-        contract["semantic_content_digest"]
-        == polaris["population_translation_contract"]["semantic_content_digest"]
-    )
     assert {item["id"] for item in contract["residue_records"]} == {
         "household-type-lookup",
         "out-of-region-households-filtered",
@@ -91,41 +81,4 @@ def test_one_year_handshake_is_an_honest_draft_with_canonical_bundle_identity(
         "unmapped_source",
         "dropped_context",
     }
-    assert {item["residue_record_id"] for item in polaris["residue_observations"]} == {
-        item["id"] for item in contract["residue_records"]
-    }
     assert (ROOT / "mappings/releases/atlas-demos-to-polaris/OWNERS.yaml").exists()
-
-
-def test_published_zev_trajectory_carries_a_realization_identity_and_contracts() -> (
-    None
-):
-    """The public multi-year example pins its selection separately from receipts."""
-    bundle = load_mapping(
-        ROOT / "examples/evolving_population/zev-pilates-trajectory-bundle.yaml"
-    )
-
-    identity = bundle["realization_identity"]
-    assert identity["kind"] == "synergy:scenario-realization:population-trajectory-v1"
-    assert identity["projection_version"] == "1"
-    assert identity["digest_algorithm"] == "sha256"
-    assert len(identity["content_digest"]) == 64
-    assert identity["content_digest"].islower()
-
-    receipt = bundle["realization_receipt"]
-    assert receipt["receipt_version"] == "1"
-    assert receipt["realization_identity"] == identity
-
-    snapshots = bundle["population_snapshot_bundles"]
-    assert len(snapshots) >= 2
-    for snapshot_bundle in snapshots:
-        for member in snapshot_bundle["members"]:
-            contract = member["schema_contract"]
-            assert contract["language"] == "LinkML"
-            assert contract["schema_digest_algorithm"] == "sha256"
-            assert len(contract["schema_digest"]) == 64
-            assert contract["selected_root"] in {
-                "AtlasHouseholdInput",
-                "AtlasPersonInput",
-                "AtlasVehicleOutput",
-            }

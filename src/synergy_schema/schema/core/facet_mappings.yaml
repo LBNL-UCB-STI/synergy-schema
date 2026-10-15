@@ -1,0 +1,201 @@
+id: https://w3id.org/LBNL-UCB-STI/synergy-schema/facet-mappings
+name: facet_mappings
+title: Facet mappings
+description: >-
+  Rules and catalogs for deriving core facets from model output views and
+  preparing model input views from core state.
+
+prefixes:
+  synergy_schema: https://w3id.org/LBNL-UCB-STI/synergy-schema/
+  linkml: https://w3id.org/linkml/
+
+default_prefix: synergy_schema
+default_range: string
+
+imports:
+  - linkml:types
+  - core_tables
+  - handoff_bundle
+  - native_contract
+  - ../mappings/population_translation
+
+enums:
+  WritePolicy:
+    description: >-
+      Policy controlling how field updates interact with existing or prior core
+      facet attributes across pipeline steps.
+    permissible_values:
+      preserve:
+        description: >-
+          Protects existing or unmodeled core attributes from being overwritten by
+          coarser upstream derive runs; preserves prior values when inputs are partial.
+      refine_with_prior:
+        description: >-
+          Conditions refinement or stochastic draw on prior attribute state, updating
+          or enriching the facet while maintaining consistency with prior facts.
+      overwrite:
+        description: >-
+          Directly replaces the attribute value from the model view without checking
+          prior state.
+
+  MappingDirection:
+    description: Direction of facet derivation or view projection.
+    permissible_values:
+      derive:
+        description: Derives core facet table rows from model output views.
+      project:
+        description: Projects core facet table rows into a model input view.
+
+classes:
+  ModelView:
+    description: >-
+      One model-owned artifact read or written by a model step, such as the
+      ATLAS household input or the DEMOS persons output. Views may hold any
+      model-specific columns; the owning model is the step's model.
+    attributes:
+      view_id:
+        identifier: true
+        required: true
+        description: Stable identifier for this view occurrence.
+      view_kind:
+        required: true
+        description: >-
+          Model-scoped name for the kind of view, such as atlas/household_input
+          or demos/persons_output.
+      artifact:
+        range: PhysicalArtifactReference
+        required: true
+        inlined: true
+        description: Physical artifact holding the view's rows.
+      schema_contract:
+        range: SchemaContractReference
+        inlined: true
+        description: Optional contract describing the view's columns.
+      prepared_from_state:
+        range: StateDigest
+        description: >-
+          For input views, the state Synergy prepared the view from, recorded
+          when it was built; it must equal a parent's state_digest, which
+          catches a model run on an out-of-date input. Omitted for output
+          views.
+
+  CoreFacetMapping:
+    description: >-
+      How Synergy derives one core facet from a model's output views. Mappings
+      are fixed system knowledge, kept in a CoreFacetMappingCatalog and cited
+      by ID from ledgers. Inputs may include the parent's content for some
+      facets, for steps whose views are partial (a deaths-only delta, or a
+      view missing a key column).
+    annotations:
+      conformance_requirements: >-
+        Every attribute of the facet's core table class must come from at
+        least one field binding or input facet; when an attribute has more
+        than one source, rule must say how they combine. Each binding's
+        view_kind must appear in input_view_kinds.
+    rules:
+      - description: A mapping with column bindings must name the view kinds it reads.
+        preconditions:
+          slot_conditions:
+            field_bindings:
+              value_presence: PRESENT
+        postconditions:
+          slot_conditions:
+            input_view_kinds:
+              required: true
+    attributes:
+      mapping_id:
+        identifier: true
+        required: true
+        description: Stable identifier for this mapping, such as mapping:demos-core/v1#people.
+      facet:
+        range: CoreFacet
+        required: true
+        description: Core facet this mapping produces.
+      direction:
+        range: MappingDirection
+        description: Whether this mapping derives core facets from views or projects core facets to a model view.
+      input_view_kinds:
+        multivalued: true
+        description: Kinds of model output view the mapping reads, such as demos/deaths_output.
+      input_facets:
+        range: CoreFacet
+        multivalued: true
+        description: >-
+          Core facets whose parent content the mapping starts from or joins
+          against. Their digests are fixed by the parent state, so derivations
+          don't repeat them.
+      field_bindings:
+        range: CoreFieldFromView
+        multivalued: true
+        inlined_as_list: true
+        description: View columns supplying fields of the facet's core table.
+      rule:
+        description: >-
+          Plain-language rule for combining the inputs when it is not a direct
+          copy, such as "parent people minus person_id values in the deaths
+          output" or a join across two views.
+      translation_contract:
+        range: PopulationTranslationContractReference
+        inlined: true
+        description: >-
+          Optional reviewed translation contract holding the full rules,
+          residues, and approvals behind this mapping.
+
+  CoreFieldFromView:
+    description: One view column supplying one field of a core table.
+    attributes:
+      view_kind:
+        required: true
+        description: Kind of view holding the column.
+      view_column:
+        required: true
+        description: Column name in the view, resolved against the view's schema_contract.
+      core_field:
+        required: true
+        description: >-
+          Attribute of the facet's core table class, such as household_id on
+          CoreHouseholdMembership.
+      write_policy:
+        range: WritePolicy
+        description: >-
+          Policy controlling whether this field derivation preserves unmodeled prior
+          values, conditions on prior state, or directly overwrites.
+      transformation:
+        description: >-
+          Optional plain-language rule when the value is not copied directly,
+          such as a cast or an ID prefix.
+
+  CoreFacetMappingCatalog:
+    description: >-
+      Versioned set of CoreFacetMappings, maintained separately from any run
+      and cited by ledgers.
+    attributes:
+      catalog_id:
+        identifier: true
+        required: true
+        description: Stable identifier for this catalog revision.
+      mappings:
+        range: CoreFacetMapping
+        multivalued: true
+        required: true
+        inlined_as_list: true
+        description: Mappings in this catalog.
+
+  FacetDerivation:
+    description: >-
+      One core facet produced by a step: the mapping applied and the step's
+      output views it read. Parent facet content named by the mapping's
+      input_facets comes from the parent state.
+    attributes:
+      facet:
+        range: CoreFacet
+        required: true
+        description: Core facet produced.
+      mapping:
+        required: true
+        description: ID of the CoreFacetMapping applied, from the ledger's mapping catalog.
+      views:
+        range: ModelView
+        multivalued: true
+        inlined: false
+        description: Output views of this step the facet was derived from.

@@ -26,3 +26,7 @@ class CheckResult:
     @property
     def exit_code(self) -> int:
         return 1 if any(item.severity == "error" for item in self.diagnostics) else 0
+
+    @property
+    def passed(self) -> bool:
+        return self.exit_code == 0
