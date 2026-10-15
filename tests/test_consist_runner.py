@@ -120,3 +120,130 @@ def test_consist_runner_full_cycle_and_caching(tmp_path: Path) -> None:
     output_links = [link for link in links if link[2] == "output"]
     assert len(input_links) > 0
     assert len(output_links) > 0
+
+
+@pytest.mark.skipif(not HAS_CONSIST, reason="Consist library not available")
+def test_consist_runner_multi_year_state_preservation(tmp_path: Path) -> None:
+    """Verify multi-year state preservation across prior core facets in consist_runner.
+
+    Ensures surviving persons retain prior race/hispanic, non-moving surviving households
+    retain prior latitude/longitude/taz, and vehicles.parquet carries forward when
+    vehicles_path is omitted in year t > t_0.
+    """
+    import pyarrow as pa
+    import pyarrow.parquet as pq
+
+    demos_dir = tmp_path / "demos_multi_year"
+    demos_dir.mkdir(parents=True)
+
+    # Year t0 inputs
+    hh_t0 = demos_dir / "hh_t0.csv"
+    p_t0 = demos_dir / "p_t0.csv"
+    hh_t0.write_text(
+        "household,block_id,lcm_county_id,age_of_head,workers,race_of_head,income,persons,is_reorg_household\n"
+        "101,48453000100,48453,45.0,2.0,1.0,120000.0,2,False\n"
+    )
+    p_t0.write_text(
+        "person,relp,gender,education,income,id,age,household,marital_status,employment,school_enrollment\n"
+        "1001,0,1,21,70000.0,0.0,45,101,1,1.0,1.0\n"
+        "1002,1,2,21,50000.0,1.0,43,101,1,1.0,1.0\n"
+    )
+
+    veh_t0 = demos_dir / "vehicles_t0.parquet"
+    pq.write_table(
+        pa.table(
+            {
+                "vehicle_id": pa.array([9001], type=pa.int64()),
+                "household_id": pa.array([101], type=pa.int64()),
+                "type_id": pa.array([12], type=pa.int32()),
+            }
+        ),
+        veh_t0,
+    )
+
+    out_t0 = tmp_path / "out_t0"
+    run_simulation_with_consist(
+        demos_households_path=hh_t0,
+        demos_persons_path=p_t0,
+        vehicles_path=veh_t0,
+        output_dir=out_t0,
+        seed_prefix="seed-t0",
+        income_deflator=1.0,
+    )
+
+    # Enrich t0 prior facets with distinct non-head demographics and geocoded coordinates
+    prior_facets_dir = out_t0 / "core_facets"
+    pq.write_table(
+        pa.table(
+            {
+                "person_id": pa.array([1001, 1002], type=pa.int64()),
+                "age": pa.array([45, 43], type=pa.int32()),
+                "sex": pa.array([1, 2], type=pa.int32()),
+                "race": pa.array([1, 6], type=pa.int32()),
+                "hispanic": pa.array([0, 1], type=pa.int32()),
+            }
+        ),
+        prior_facets_dir / "person_demographics.parquet",
+    )
+    pq.write_table(
+        pa.table(
+            {
+                "household_id": pa.array([101], type=pa.int64()),
+                "latitude": pa.array([30.2999], type=pa.float64()),
+                "longitude": pa.array([-97.7999], type=pa.float64()),
+                "tract": pa.array([48453000100], type=pa.int64()),
+                "block_group": pa.array([1], type=pa.int32()),
+                "taz": pa.array([555], type=pa.int32()),
+            }
+        ),
+        prior_facets_dir / "household_location.parquet",
+    )
+
+    # Year t1 inputs (household 101 stays at same block_id; person 1002 survives; new hh 103 added)
+    hh_t1 = demos_dir / "hh_t1.csv"
+    p_t1 = demos_dir / "p_t1.csv"
+    hh_t1.write_text(
+        "household,block_id,lcm_county_id,age_of_head,workers,race_of_head,income,persons,is_reorg_household\n"
+        "101,48453000100,48453,46.0,2.0,1.0,125000.0,2,False\n"
+        "103,48453000300,48453,29.0,1.0,2.0,80000.0,1,False\n"
+    )
+    p_t1.write_text(
+        "person,relp,gender,education,income,id,age,household,marital_status,employment,school_enrollment\n"
+        "1001,0,1,21,72000.0,0.0,46,101,1,1.0,1.0\n"
+        "1002,1,2,21,53000.0,1.0,44,101,1,1.0,1.0\n"
+        "3001,0,2,19,80000.0,0.0,29,103,5,1.0,1.0\n"
+    )
+
+    out_t1 = tmp_path / "out_t1"
+    run_simulation_with_consist(
+        demos_households_path=hh_t1,
+        demos_persons_path=p_t1,
+        prior_core_dir=prior_facets_dir,
+        vehicles_path=None,
+        output_dir=out_t1,
+        seed_prefix="seed-t1",
+        income_deflator=0.97,
+    )
+
+    t1_facets_dir = out_t1 / "core_facets"
+
+    # 1. Verify surviving person 1002 retained prior race=6 and hispanic=1
+    p_demo_t1 = pq.read_table(t1_facets_dir / "person_demographics.parquet").to_pylist()
+    by_pid = {row["person_id"]: row for row in p_demo_t1}
+    assert by_pid[1002]["race"] == 6
+    assert by_pid[1002]["hispanic"] == 1
+    assert by_pid[1002]["age"] == 44
+
+    # 2. Verify non-moving surviving household 101 retained prior latitude/longitude/taz
+    hh_loc_t1 = pq.read_table(t1_facets_dir / "household_location.parquet").to_pylist()
+    by_hhid = {row["household_id"]: row for row in hh_loc_t1}
+    assert by_hhid[101]["latitude"] == pytest.approx(30.2999)
+    assert by_hhid[101]["longitude"] == pytest.approx(-97.7999)
+    assert by_hhid[101]["taz"] == 555
+
+    # 3. Verify vehicles.parquet carried forward from prior_core_dir when vehicles_path=None
+    veh_t1 = pq.read_table(t1_facets_dir / "vehicles.parquet").to_pylist()
+    assert len(veh_t1) == 1
+    assert veh_t1[0]["vehicle_id"] == 9001
+    assert veh_t1[0]["household_id"] == 101
+    assert veh_t1[0]["type_id"] == 12

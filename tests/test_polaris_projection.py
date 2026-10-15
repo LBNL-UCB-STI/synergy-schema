@@ -316,9 +316,9 @@ def test_projected_sqlite_matches_linkml_schema(
         with sqlite3.connect(output_sqlite) as con:
             cur = con.cursor()
             mapping = {
-                "Household": "PolarisDemandDatabaseV1Household",
-                "Person": "PolarisDemandDatabaseV1Person",
-                "Vehicle": "PolarisDemandDatabaseV1Vehicle",
+                "Household": "PolarisDemandDatabaseHousehold",
+                "Person": "PolarisDemandDatabasePerson",
+                "Vehicle": "PolarisDemandDatabaseVehicle",
             }
             for tbl, cls_name in mapping.items():
                 cur.execute(f"PRAGMA table_info({tbl});")

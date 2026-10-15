@@ -11,13 +11,13 @@ AGGREGATE_SCHEMA_PATH = SCHEMA_DIR / "synergy_schema.yaml"
 OBSERVED_ROOTS = {
     "AtlasHouseholdFleetOutputExampleV1",
     "AtlasVehicleFleetOutputExampleV1",
-    "DemosPolarisMappedHouseholdExampleV1",
-    "DemosPolarisMappedPersonExampleV1",
-    "PolarisDemandDatabaseV1Household",
-    "PolarisDemandDatabaseV1Person",
-    "PolarisDemandDatabaseV1Vehicle",
-    "PolarisDemandDatabaseV1VehicleClass",
-    "PolarisDemandDatabaseV1VehicleType",
+    "DemosPolarisMappedHousehold",
+    "DemosPolarisMappedPerson",
+    "PolarisDemandDatabaseHousehold",
+    "PolarisDemandDatabasePerson",
+    "PolarisDemandDatabaseVehicle",
+    "PolarisDemandDatabaseVehicleClass",
+    "PolarisDemandDatabaseVehicleType",
 }
 
 

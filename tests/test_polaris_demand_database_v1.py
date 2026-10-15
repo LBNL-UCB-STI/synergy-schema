@@ -22,18 +22,18 @@ def test_v1_is_a_provisional_observed_record_set() -> None:
     assert view.schema.annotations["status"].value == "provisional"
     assert "observed example" in view.schema.annotations["coverage"].value
     assert set(view.all_classes()) == {
-        "PolarisDemandDatabaseV1Household",
-        "PolarisDemandDatabaseV1Person",
-        "PolarisDemandDatabaseV1Vehicle",
-        "PolarisDemandDatabaseV1VehicleClass",
-        "PolarisDemandDatabaseV1VehicleType",
+        "PolarisDemandDatabaseHousehold",
+        "PolarisDemandDatabasePerson",
+        "PolarisDemandDatabaseVehicle",
+        "PolarisDemandDatabaseVehicleClass",
+        "PolarisDemandDatabaseVehicleType",
     }
 
 
 def test_selected_roots_have_observed_physical_keys_and_names() -> None:
     view = SchemaView(str(SCHEMA_PATH))
     expected = {
-        "PolarisDemandDatabaseV1Household": {
+        "PolarisDemandDatabaseHousehold": {
             "household",
             "hhold",
             "location",
@@ -52,7 +52,7 @@ def test_selected_roots_have_observed_physical_keys_and_names() -> None:
             "num_meals",
             "time_in_home",
         },
-        "PolarisDemandDatabaseV1Person": {
+        "PolarisDemandDatabasePerson": {
             "person",
             "household",
             "id",
@@ -81,7 +81,7 @@ def test_selected_roots_have_observed_physical_keys_and_names() -> None:
             "work_location_id",
             "worker_class",
         },
-        "PolarisDemandDatabaseV1Vehicle": {
+        "PolarisDemandDatabaseVehicle": {
             "vehicle_id",
             "hhold",
             "parking",
@@ -91,7 +91,7 @@ def test_selected_roots_have_observed_physical_keys_and_names() -> None:
             "fleet",
             "subtype",
         },
-        "PolarisDemandDatabaseV1VehicleClass": {
+        "PolarisDemandDatabaseVehicleClass": {
             "class_id",
             "class_type",
             "capacity",
@@ -101,7 +101,7 @@ def test_selected_roots_have_observed_physical_keys_and_names() -> None:
             "max_decel",
             "ev_ml_class",
         },
-        "PolarisDemandDatabaseV1VehicleType": {
+        "PolarisDemandDatabaseVehicleType": {
             "type_id",
             "vehicle_class",
             "connectivity_type",
@@ -125,7 +125,7 @@ def test_selected_roots_have_observed_physical_keys_and_names() -> None:
 
 def test_hhold_is_distinct_from_household_and_not_unique() -> None:
     view = SchemaView(str(SCHEMA_PATH))
-    household = view.induced_class("PolarisDemandDatabaseV1Household")
+    household = view.induced_class("PolarisDemandDatabaseHousehold")
     hhold = household.attributes["hhold"]
     assert hhold.identifier is not True
     assert "alias_of" not in hhold.annotations
@@ -135,10 +135,10 @@ def test_hhold_is_distinct_from_household_and_not_unique() -> None:
 def test_population_joins_are_external_validation_checks() -> None:
     view = SchemaView(str(SCHEMA_PATH))
     for class_name, slot_name, target in [
-        ("PolarisDemandDatabaseV1Person", "household", ".household"),
-        ("PolarisDemandDatabaseV1Vehicle", "hhold", ".household"),
-        ("PolarisDemandDatabaseV1Vehicle", "type", ".type_id"),
-        ("PolarisDemandDatabaseV1VehicleType", "vehicle_class", ".class_id"),
+        ("PolarisDemandDatabasePerson", "household", ".household"),
+        ("PolarisDemandDatabaseVehicle", "hhold", ".household"),
+        ("PolarisDemandDatabaseVehicle", "type", ".type_id"),
+        ("PolarisDemandDatabaseVehicleType", "vehicle_class", ".class_id"),
     ]:
         slot = view.induced_slot(slot_name, class_name)
         assert slot.annotations["relationship_target"].value.endswith(target)

@@ -2,9 +2,9 @@ id: https://w3id.org/LBNL-UCB-STI/synergy-schema/models/polaris/demand-database-
 name: polaris_demand_database_v1
 title: POLARIS demand database table description v1
 description: >-
-  Model-associated description of the population tables in the POLARIS demand
-  database, aligned with the native translation catalog and the DEMOS/ATLAS to
-  POLARIS interface specification.
+  Model-associated description of the population and vehicle dimension tables in
+  the POLARIS demand database, aligned with the native translation catalog and
+  the DEMOS/ATLAS to POLARIS interface specification.
 
 prefixes:
   synergy_schema: https://w3id.org/LBNL-UCB-STI/synergy-schema/
@@ -29,12 +29,16 @@ annotations:
     description does not declare SQLite foreign keys.
 
 classes:
-  PolarisDemandDatabaseV1Household:
+  PolarisDemandDatabaseHousehold:
     description: >-
-      Household table row description in the POLARIS demand database (17 columns).
+      Authoritative Household table schema for the POLARIS Demand SQLite database (17 columns).
+    aliases:
+      - PolarisHousehold
     annotations:
       table_name: Household
       model_association: POLARIS demand database
+      schema_status: authoritative
+      status: active
       coverage: provisional observed record set
     attributes:
       household:
@@ -55,6 +59,7 @@ classes:
         required: true
         annotations:
           physical_name: location
+          foreign_key: UrbanSimZonalTotals.zone_id
         description: "Physical household location identifier."
       persons:
         range: integer
@@ -141,12 +146,16 @@ classes:
           physical_name: time_in_home
         description: "Longitudinal residence duration in years in current home."
 
-  PolarisDemandDatabaseV1Person:
+  PolarisDemandDatabasePerson:
     description: >-
-      Person table row description in the POLARIS demand database (27 columns).
+      Authoritative Person table schema for the POLARIS Demand SQLite database (27 columns).
+    aliases:
+      - PolarisPerson
     annotations:
       table_name: Person
       model_association: POLARIS demand database
+      schema_status: authoritative
+      status: active
       coverage: provisional observed record set
     attributes:
       person:
@@ -161,7 +170,8 @@ classes:
         required: true
         annotations:
           physical_name: household
-          relationship_target: PolarisDemandDatabaseV1Household.household
+          relationship_target: PolarisDemandDatabaseHousehold.household
+          foreign_key: PolarisDemandDatabaseHousehold.household
           validation_boundary: external conformance check, not a SQLite foreign key
         description: "Physical household join value checked externally against Household.household."
       id:
@@ -259,7 +269,7 @@ classes:
         required: true
         annotations:
           physical_name: race
-        description: "Physical race code (ACS RAC1P: 1..9)."
+        description: "Physical race category code (crosswalk X-P1: 1..9)."
       school_enrollment:
         range: integer
         required: true
@@ -315,12 +325,16 @@ classes:
           physical_name: escooter_use_level
         description: "E-scooter usage frequency level (0..3)."
 
-  PolarisDemandDatabaseV1Vehicle:
+  PolarisDemandDatabaseVehicle:
     description: >-
-      Vehicle table row description in the POLARIS demand database (8 columns).
+      Authoritative Vehicle table schema for the POLARIS Demand SQLite database (8 columns).
+    aliases:
+      - PolarisVehicle
     annotations:
       table_name: Vehicle
       model_association: POLARIS demand database
+      schema_status: authoritative
+      status: active
       coverage: provisional observed record set
     attributes:
       vehicle_id:
@@ -329,13 +343,14 @@ classes:
         required: true
         annotations:
           physical_name: vehicle_id
-        description: "Physical within-household vehicle identifier."
+        description: "Physical within-household or fleet vehicle identifier."
       hhold:
         range: integer
         required: true
         annotations:
           physical_name: hhold
-          relationship_target: PolarisDemandDatabaseV1Household.household
+          relationship_target: PolarisDemandDatabaseHousehold.household
+          foreign_key: PolarisDemandDatabaseHousehold.household
           validation_boundary: external conformance check, not a SQLite foreign key
         description: "Physical household join value checked externally against Household.household."
       parking:
@@ -361,7 +376,8 @@ classes:
         required: false
         annotations:
           physical_name: type
-          relationship_target: PolarisDemandDatabaseV1VehicleType.type_id
+          relationship_target: PolarisDemandDatabaseVehicleType.type_id
+          foreign_key: PolarisDemandDatabaseVehicleType.type_id
           validation_boundary: external conformance check, not a SQLite foreign key
         description: "Physical foreign key referencing Vehicle_Type.type_id."
       fleet:
@@ -377,12 +393,16 @@ classes:
           physical_name: subtype
         description: "Physical vehicle subtype identifier."
 
-  PolarisDemandDatabaseV1VehicleClass:
+  PolarisDemandDatabaseVehicleClass:
     description: >-
-      Vehicle_Class dimension table row description in the POLARIS demand database (8 columns).
+      Authoritative Vehicle_Class dimension table schema in the POLARIS Demand SQLite database (8 columns).
+    aliases:
+      - PolarisVehicleClass
     annotations:
       table_name: Vehicle_Class
       model_association: POLARIS demand database
+      schema_status: authoritative
+      status: active
       coverage: provisional observed record set
     attributes:
       class_id:
@@ -435,12 +455,16 @@ classes:
           physical_name: ev_ml_class
         description: "EV machine learning powertrain class."
 
-  PolarisDemandDatabaseV1VehicleType:
+  PolarisDemandDatabaseVehicleType:
     description: >-
-      Vehicle_Type dimension table row description in the POLARIS demand database (9 columns).
+      Authoritative Vehicle_Type dimension table schema in the POLARIS Demand SQLite database (9 columns).
+    aliases:
+      - PolarisVehicleType
     annotations:
       table_name: Vehicle_Type
       model_association: POLARIS demand database
+      schema_status: authoritative
+      status: active
       coverage: provisional observed record set
     attributes:
       type_id:
@@ -455,7 +479,8 @@ classes:
         required: false
         annotations:
           physical_name: vehicle_class
-          relationship_target: PolarisDemandDatabaseV1VehicleClass.class_id
+          relationship_target: PolarisDemandDatabaseVehicleClass.class_id
+          foreign_key: PolarisDemandDatabaseVehicleClass.class_id
           validation_boundary: external conformance check, not a SQLite foreign key
         description: "Reference to Vehicle_Class.class_id."
       connectivity_type:

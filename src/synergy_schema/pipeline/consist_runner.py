@@ -51,6 +51,11 @@ def _step_derive(
     demos_households_path: Path,
     demos_persons_path: Path,
     prior_households_path: Path | None = None,
+    prior_people_path: Path | None = None,
+    prior_person_demographics_path: Path | None = None,
+    prior_household_location_path: Path | None = None,
+    prior_household_membership_path: Path | None = None,
+    prior_household_income_path: Path | None = None,
     income_deflator: float = 1.0,
     output_dir: Path | str | None = None,
 ) -> dict[str, Path]:
@@ -58,8 +63,17 @@ def _step_derive(
     assert output_dir is not None
     out_d = Path(output_dir)
     prior_facets: dict[str, Path] = {}
-    if prior_households_path and Path(prior_households_path).exists():
-        prior_facets["households"] = Path(prior_households_path)
+    prior_path_map = {
+        "households": prior_households_path,
+        "people": prior_people_path,
+        "person_demographics": prior_person_demographics_path,
+        "household_location": prior_household_location_path,
+        "household_membership": prior_household_membership_path,
+        "household_income": prior_household_income_path,
+    }
+    for facet_name, facet_path in prior_path_map.items():
+        if facet_path and Path(facet_path).exists():
+            prior_facets[facet_name] = Path(facet_path)
 
     con = duckdb.connect()
     derive_core_from_demos(
@@ -256,8 +270,18 @@ def run_simulation_with_consist(
             "demos_households_path": dh_p,
             "demos_persons_path": dp_p,
         }
-        if prior_p and (prior_p / "households.parquet").exists():
-            derive_inputs["prior_households_path"] = prior_p / "households.parquet"
+        if prior_p:
+            for facet_name in (
+                "households",
+                "people",
+                "person_demographics",
+                "household_location",
+                "household_membership",
+                "household_income",
+            ):
+                candidate = prior_p / f"{facet_name}.parquet"
+                if candidate.exists():
+                    derive_inputs[f"prior_{facet_name}_path"] = candidate
 
         r_derive = tracker.run(
             fn=_step_derive,
@@ -347,6 +371,9 @@ def run_simulation_with_consist(
         v_out_path = facets_dir / "vehicles.parquet"
         if vehicles_path and Path(vehicles_path).exists():
             v_tbl = pq.read_table(Path(vehicles_path))
+            pq.write_table(v_tbl, v_out_path)
+        elif prior_p and (prior_p / "vehicles.parquet").exists():
+            v_tbl = pq.read_table(prior_p / "vehicles.parquet")
             pq.write_table(v_tbl, v_out_path)
         elif not v_out_path.exists():
             v_tbl = pa.table(

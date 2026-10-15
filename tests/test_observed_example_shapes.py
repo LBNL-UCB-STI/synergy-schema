@@ -117,15 +117,15 @@ def test_candidate_rows_validate_after_explicit_physical_header_binding() -> Non
         "type_id": 1,
     }
 
-    assert _messages(demos_household, "DemosPolarisMappedHouseholdExampleV1") == []
-    assert _messages(demos_person_without_id, "DemosPolarisMappedPersonExampleV1") == []
+    assert _messages(demos_household, "DemosPolarisMappedHousehold") == []
+    assert _messages(demos_person_without_id, "DemosPolarisMappedPerson") == []
     assert _messages(atlas_household, "AtlasHouseholdFleetOutputExampleV1") == []
     assert _messages(atlas_vehicle, "AtlasVehicleFleetOutputExampleV1") == []
-    assert _messages(polaris_household, "PolarisDemandDatabaseV1Household") == []
-    assert _messages(polaris_person, "PolarisDemandDatabaseV1Person") == []
-    assert _messages(polaris_vehicle, "PolarisDemandDatabaseV1Vehicle") == []
-    assert _messages(polaris_vehicle_class, "PolarisDemandDatabaseV1VehicleClass") == []
-    assert _messages(polaris_vehicle_type, "PolarisDemandDatabaseV1VehicleType") == []
+    assert _messages(polaris_household, "PolarisDemandDatabaseHousehold") == []
+    assert _messages(polaris_person, "PolarisDemandDatabasePerson") == []
+    assert _messages(polaris_vehicle, "PolarisDemandDatabaseVehicle") == []
+    assert _messages(polaris_vehicle_class, "PolarisDemandDatabaseVehicleClass") == []
+    assert _messages(polaris_vehicle_type, "PolarisDemandDatabaseVehicleType") == []
 
 
 def test_candidate_shape_rejects_missing_required_or_unobserved_columns() -> None:
@@ -145,6 +145,4 @@ def test_candidate_shape_rejects_missing_required_or_unobserved_columns() -> Non
     }
 
     assert _messages(missing_atlas_household_key, "AtlasHouseholdFleetOutputExampleV1")
-    assert _messages(
-        demos_person_with_unobserved_hhold, "DemosPolarisMappedPersonExampleV1"
-    )
+    assert _messages(demos_person_with_unobserved_hhold, "DemosPolarisMappedPerson")
