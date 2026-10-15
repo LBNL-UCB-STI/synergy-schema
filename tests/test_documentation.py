@@ -260,6 +260,8 @@ def test_docs_build_generates_identity_diagram_and_contract_review_copy() -> Non
     assert "mermaid_diagram" in script
     assert "interactive_diagram" in script
     assert "contract-at-a-glance.md" in script
+    assert "Has_Residential_Charging.md" in script
+    assert "has_residential_charging.md" in script
     ci = (ROOT / ".github/workflows/ci.yml").read_text()
     assert (
         "UV_CACHE_DIR=/tmp/synergy-schema-uv-cache scripts/preview-schema-docs build"
