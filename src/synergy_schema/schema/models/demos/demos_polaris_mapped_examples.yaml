@@ -103,13 +103,13 @@ classes:
         range: integer
         required: true
         annotations:
-          crosswalk: X-P2
+          crosswalk: X-P1
         description: Physical gender code column.
       education:
         range: integer
         required: true
         annotations:
-          crosswalk: X-P4
+          crosswalk: X-P1, X-P6
         description: Physical education code column.
       income:
         range: float
@@ -137,18 +137,21 @@ classes:
       marital_status:
         range: integer
         required: true
+        annotations:
+          crosswalk: X-P1
+          donor_draw: D-P3a
         description: Physical marital-status code column.
       employment:
         range: float
         required: true
         annotations:
-          crosswalk: X-P5
+          crosswalk: X-P1, X-P2
         description: Physical employment code column.
       school_enrollment:
         range: float
         required: true
         annotations:
-          crosswalk: X-P6
+          crosswalk: X-P1
         description: Physical school-enrollment code column.
       serialno_pums:
         range: string

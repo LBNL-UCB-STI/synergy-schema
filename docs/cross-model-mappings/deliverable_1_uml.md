@@ -67,6 +67,18 @@ POLARIS, and Travel Network Skims (.omx).
         POL_Supply --> POL_DTA
         POL_Demand --> POL_DTA
         POL_DTA --> SkimsOut
+
+        %% Interactive Clickable Schema Links
+        click SkimsIn "../schema/InputNetworkSkims/" "View InputNetworkSkims LinkML documentation"
+        click US_Block "../schema/UrbanSimBlockMarginals/" "View UrbanSimBlockMarginals LinkML documentation"
+        click US_Map "../schema/BlockToTazMapping/" "View BlockToTazMapping LinkML documentation"
+        click US_Zone "../schema/UrbanSimZonalTotals/" "View UrbanSimZonalTotals LinkML documentation"
+        click DEMOS_HH "../schema/DemosPolarisMappedHousehold/" "View DemosPolarisMappedHousehold LinkML documentation"
+        click DEMOS_P "../schema/DemosPolarisMappedPerson/" "View DemosPolarisMappedPerson LinkML documentation"
+        click ATLAS_HH "../schema/AtlasHouseholdFleetOutput/" "View AtlasHouseholdFleetOutput LinkML documentation"
+        click ATLAS_V "../schema/AtlasVehicleFleetOutput/" "View AtlasVehicleFleetOutput LinkML documentation"
+        click POL_Demand "../schema/PolarisDemandDatabaseHousehold/" "View POLARIS Demand Database LinkML documentation"
+        click SkimsOut "../schema/NextYearNetworkSkims/" "View NextYearNetworkSkims LinkML documentation"
     ```
 
 === "LBL Counterpart Workflow: ActivitySim Demand & BEAM Dynamic Simulation"
@@ -149,6 +161,79 @@ POLARIS, and Travel Network Skims (.omx).
 
         BEAM_Sim --> BEAM_Out
         BEAM_Sim --> BEAM_Skims
+
+        %% Interactive Clickable Schema Links
+        click SkimsIn_B "../schema/InputNetworkSkims/" "View InputNetworkSkims LinkML documentation"
+        click US_Block_B "../schema/UrbanSimBlockMarginals/" "View UrbanSimBlockMarginals LinkML documentation"
+        click US_Map_B "../schema/BlockToTazMapping/" "View BlockToTazMapping LinkML documentation"
+        click US_Zone_B "../schema/UrbanSimZonalTotals/" "View UrbanSimZonalTotals LinkML documentation"
+        click DEMOS_HH_B "../schema/DemosPolarisMappedHousehold/" "View DemosPolarisMappedHousehold LinkML documentation"
+        click DEMOS_P_B "../schema/DemosPolarisMappedPerson/" "View DemosPolarisMappedPerson LinkML documentation"
+        click ATLAS_HH_B "../schema/AtlasHouseholdFleetOutput/" "View AtlasHouseholdFleetOutput LinkML documentation"
+        click ATLAS_V_B "../schema/AtlasVehicleFleetOutput/" "View AtlasVehicleFleetOutput LinkML documentation"
+        click AS_Pop "../schema/ActivitySimHouseholdInputRecord/" "View ActivitySim Population LinkML documentation"
+        click BEAM_Pop "../schema/BeamHouseholdRecord/" "View BEAM Population LinkML documentation"
+        click BEAM_Veh "../schema/BeamVehicleRecord/" "View BEAM Vehicle LinkML documentation"
+        click BEAM_Plans "../schema/BeamPlanRecord/" "View BeamPlanRecord LinkML documentation"
+        click BEAM_Out "../schema/BeamPlanOutputRecord/" "View BeamPlanOutputRecord LinkML documentation"
+        click BEAM_Skims "../schema/BeamODSkimsRecord/" "View BeamODSkimsRecord LinkML documentation"
+    ```
+
+=== "Freight & Commercial Demand Pipeline: SynthFirm to POLARIS & BEAM"
+
+    SynthFirm synthesizes regional business establishments, carrier licensing, and B2B freight flows
+    from macro-economic trade projections and UrbanSim zonal employment. It provides commercial vehicle
+    fleets and trip demands to POLARIS and BEAM:
+
+    ```mermaid
+    flowchart TD
+        subgraph Inputs_F ["Macro & Network Inputs"]
+            SkimsIn_F["Input Network Skims (.omx)<br/><i>Zone-to-Zone Impedance & Distances</i>"]
+            FAF5["FAF5 Commodity Trade Data<br/><i>Inter-Regional Baseline Flows</i>"]
+        end
+
+        subgraph UrbanSim_F ["UrbanSim (Zonal Marginals)"]
+            US_Marg_F["UrbanSimBlockMarginals<br/><i>Census Block Group Employment</i>"]
+            US_Zone_F["UrbanSimZonalTotals<br/><i>TAZ Employment & Floor Space</i>"]
+        end
+
+        subgraph SynthFirm ["SynthFirm (Freight & Firm Synthesis)"]
+            SF_Firm["SynthFirmEstablishmentRecord<br/><i>Firms, Depots & Private Fleets</i>"]
+            SF_Carrier["SynthFirmCarrierRecord<br/><i>For-Hire Trucking Operators</i>"]
+            SF_B2B["SynthFirmB2BShipmentRecord<br/><i>B2B Commodity Flows (SCTG 1-5)</i>"]
+            SF_Intl["SynthFirmInternationalFreightRecord<br/><i>Port & Airport Drayage Flows</i>"]
+        end
+
+        subgraph Consumers ["Demand & Traffic Simulators"]
+            POL_CV["POLARIS Demand.sqlite<br/><i>Commercial Vehicle Fleet & Cordon Trips</i>"]
+            BEAM_Freight["BEAM Simulation<br/><i>Freight Plans, Tours & Depot Charging</i>"]
+        end
+
+        %% Connections
+        US_Marg_F -->|Employment by Industry / Zone| SF_Firm
+        US_Zone_F -->|Zonal Commercial Space| SF_Firm
+        FAF5 -->|Inter-Regional Control Totals| SF_B2B
+        SkimsIn_F -->|Distance & Travel Time| SF_B2B
+
+        SF_Firm --> SF_Carrier
+        SF_Firm -->|Shipper / Receiver Depots| SF_B2B
+        SF_Firm -->|Import / Export Facilities| SF_Intl
+
+        SF_Firm -->|Commercial Vehicle Allocations| POL_CV
+        SF_B2B -->|Truck Tour Generation & DTA| POL_CV
+        SF_Firm -->|Depot Locations & EV Powertrains| BEAM_Freight
+        SF_B2B -->|Freight Plans & Multi-Stop Tours| BEAM_Freight
+
+        %% Interactive Clickable Schema Links
+        click SkimsIn_F "../schema/InputNetworkSkims/" "View InputNetworkSkims LinkML documentation"
+        click US_Marg_F "../schema/UrbanSimBlockMarginals/" "View UrbanSimBlockMarginals LinkML documentation"
+        click US_Zone_F "../schema/UrbanSimZonalTotals/" "View UrbanSimZonalTotals LinkML documentation"
+        click SF_Firm "../schema/SynthFirmEstablishmentRecord/" "View SynthFirmEstablishmentRecord LinkML documentation"
+        click SF_Carrier "../schema/SynthFirmCarrierRecord/" "View SynthFirmCarrierRecord LinkML documentation"
+        click SF_B2B "../schema/SynthFirmB2BShipmentRecord/" "View SynthFirmB2BShipmentRecord LinkML documentation"
+        click SF_Intl "../schema/SynthFirmInternationalFreightRecord/" "View SynthFirmInternationalFreightRecord LinkML documentation"
+        click POL_CV "../schema/PolarisDemandDatabaseVehicle/" "View POLARIS Commercial Vehicles LinkML documentation"
+        click BEAM_Freight "../schema/BeamVehicleRecord/" "View BEAM Commercial Fleet LinkML documentation"
     ```
 
 ---
@@ -156,8 +241,8 @@ POLARIS, and Travel Network Skims (.omx).
 ## 2. UrbanSim Land Use & Zonal Marginals Schema
 
 UrbanSim operates as a macro-spatial forecasting model. It predicts marginal household/population
-totals and land-use capacities at the atomic Census Block level, aggregated to macro-zones (TAZ)
-via an explicit spatial crosswalk.
+totals and land-use capacities at the atomic Census Block level ([`UrbanSimBlockMarginals`](../schema/UrbanSimBlockMarginals.md)),
+aggregated to macro-zones ([`UrbanSimZonalTotals`](../schema/UrbanSimZonalTotals.md)) via an explicit spatial crosswalk ([`BlockToTazMapping`](../schema/BlockToTazMapping.md)).
 
 ```mermaid
 classDiagram
@@ -202,6 +287,9 @@ classDiagram
     }
     UrbanSimBlockMarginals "1" --> "0..*" BlockToTazMapping : spatial_weights
     BlockToTazMapping "0..*" --> "1" UrbanSimZonalTotals : rolls_up_to
+    link UrbanSimBlockMarginals "../schema/UrbanSimBlockMarginals/" "View UrbanSimBlockMarginals LinkML documentation"
+    link BlockToTazMapping "../schema/BlockToTazMapping/" "View BlockToTazMapping LinkML documentation"
+    link UrbanSimZonalTotals "../schema/UrbanSimZonalTotals/" "View UrbanSimZonalTotals LinkML documentation"
 ```
 
 ---
@@ -209,7 +297,7 @@ classDiagram
 ## 3. DEMOS Synthetic Population Schema
 
 DEMOS models the demographic evolution of synthetic agents. It preserves Census PUMS seed
-traceability (`SERIALNO_PUMS`, `SPORDER`) while providing microdata agents to ATLAS and POLARIS.
+traceability (`SERIALNO_PUMS`, `SPORDER`) while providing microdata agents ([`DemosPolarisMappedHousehold`](../schema/DemosPolarisMappedHousehold.md), [`DemosPolarisMappedPerson`](../schema/DemosPolarisMappedPerson.md)) to ATLAS and POLARIS.
 
 ```mermaid
 classDiagram
@@ -230,17 +318,19 @@ classDiagram
         +int household [FK]
         +float id [Ordinal]
         +int age
-        +int gender [Crosswalk X-P2]
+        +int gender [Crosswalk X-P1]
         +int relp [Crosswalk X-P1]
-        +int education [Crosswalk X-P4]
-        +float employment [Crosswalk X-P5]
-        +float school_enrollment [Crosswalk X-P6]
+        +int education [Crosswalk X-P1, X-P6]
+        +float employment [Crosswalk X-P1, X-P2]
+        +float school_enrollment [Crosswalk X-P1]
         +float income
-        +int marital_status
+        +int marital_status [Crosswalk X-P1 / D-P3a]
         +string serialno_pums [PUMS Trace]
         +float sporder [PUMS Order]
     }
     DemosPolarisMappedHousehold "1" --> "1..*" DemosPolarisMappedPerson : contains
+    link DemosPolarisMappedHousehold "../schema/DemosPolarisMappedHousehold/" "View DemosPolarisMappedHousehold LinkML documentation"
+    link DemosPolarisMappedPerson "../schema/DemosPolarisMappedPerson/" "View DemosPolarisMappedPerson LinkML documentation"
 ```
 
 ---
@@ -248,7 +338,8 @@ classDiagram
 ## 4. ATLAS Vehicle Fleet Synthesis Schema
 
 ATLAS models household vehicle ownership and technology adoption across the 6-county Austin region,
-predicting body types and powertrains (ICE, HEV, PHEV, AEV).
+predicting body types and powertrains (ICE, HEV, PHEV, AEV) via [`AtlasHouseholdFleetOutput`](../schema/AtlasHouseholdFleetOutput.md)
+and [`AtlasVehicleFleetOutput`](../schema/AtlasVehicleFleetOutput.md).
 
 ```mermaid
 classDiagram
@@ -282,15 +373,19 @@ classDiagram
     AtlasHouseholdFleetOutput "1" --> "0..*" AtlasVehicleFleetOutput : owns
     AtlasVehicleFleetOutput ..> AtlasBodyTypeEnum : classified_by
     AtlasVehicleFleetOutput ..> AtlasPowertrainEnum : powered_by
+    link AtlasHouseholdFleetOutput "../schema/AtlasHouseholdFleetOutput/" "View AtlasHouseholdFleetOutput LinkML documentation"
+    link AtlasVehicleFleetOutput "../schema/AtlasVehicleFleetOutput/" "View AtlasVehicleFleetOutput LinkML documentation"
+    link AtlasBodyTypeEnum "../schema/AtlasBodyTypeEnum/" "View AtlasBodyTypeEnum LinkML documentation"
+    link AtlasPowertrainEnum "../schema/AtlasPowertrainEnum/" "View AtlasPowertrainEnum LinkML documentation"
 ```
 
 ---
 
 ## 5. POLARIS Activity-Based Demand & Network Skims Schema
 
-POLARIS consumes the integrated demographic, land-use, and vehicle microdata into its Demand.sqlite
-and Supply.sqlite relational databases, runs activity-based traffic simulation, and emits updated
-dynamic network skims.
+POLARIS consumes the integrated demographic, land-use, and vehicle microdata into its [`PolarisDemandDatabaseHousehold`](../schema/PolarisDemandDatabaseHousehold.md),
+[`PolarisDemandDatabasePerson`](../schema/PolarisDemandDatabasePerson.md), [`PolarisDemandDatabaseVehicle`](../schema/PolarisDemandDatabaseVehicle.md), [`PolarisDemandDatabaseVehicleClass`](../schema/PolarisDemandDatabaseVehicleClass.md), and [`PolarisDemandDatabaseVehicleType`](../schema/PolarisDemandDatabaseVehicleType.md) relational tables,
+runs activity-based traffic simulation, and emits updated dynamic network skims ([`NextYearNetworkSkims`](../schema/NextYearNetworkSkims.md)).
 
 ```mermaid
 classDiagram
@@ -308,11 +403,12 @@ classDiagram
         +int household [FK]
         +int id [Ordinal]
         +int age
-        +int gender [Crosswalk X-P2]
+        +int gender [Crosswalk X-P1]
         +int relate [Crosswalk X-P1]
-        +int education [Crosswalk X-P4]
-        +int worker_type [Crosswalk X-P5]
-        +int student_status [Crosswalk X-P6]
+        +int education [Crosswalk X-P1, X-P6]
+        +int employment [Crosswalk X-P1, X-P2]
+        +int school_enrollment [Crosswalk X-P1]
+        +int school_grade_level [Crosswalk X-P3..X-P5]
         +int income
     }
     class PolarisDemandDatabaseVehicle {
@@ -343,6 +439,11 @@ classDiagram
     }
     PolarisDemandDatabaseHousehold "1" --> "1..*" PolarisDemandDatabasePerson : members
     PolarisDemandDatabaseHousehold "1" --> "0..*" PolarisDemandDatabaseVehicle : vehicles
+    link PolarisDemandDatabaseHousehold "../schema/PolarisDemandDatabaseHousehold/" "View PolarisDemandDatabaseHousehold LinkML documentation"
+    link PolarisDemandDatabasePerson "../schema/PolarisDemandDatabasePerson/" "View PolarisDemandDatabasePerson LinkML documentation"
+    link PolarisDemandDatabaseVehicle "../schema/PolarisDemandDatabaseVehicle/" "View PolarisDemandDatabaseVehicle LinkML documentation"
+    link InputNetworkSkims "../schema/InputNetworkSkims/" "View InputNetworkSkims LinkML documentation"
+    link NextYearNetworkSkims "../schema/NextYearNetworkSkims/" "View NextYearNetworkSkims LinkML documentation"
 ```
 
 ---
@@ -355,10 +456,10 @@ travel demand modeling and BEAM multi-agent dynamic traffic, transit, and chargi
 
 ### ActivitySim Demand & Population Schema
 
-ActivitySim consumes synthetic households and persons staged from DEMOS, coupled with zonal
-land-use totals from UrbanSim, to model activity schedules, tour generation, destination choice,
-and mode selection. ATLAS modifies the input household table by updating the number of cars per
-household (`cars`), providing authoritative auto ownership for mode choice modeling.
+ActivitySim consumes synthetic households and persons staged from DEMOS ([`ActivitySimHouseholdInputRecord`](../schema/ActivitySimHouseholdInputRecord.md),
+[`ActivitySimPersonInputRecord`](../schema/ActivitySimPersonInputRecord.md)), coupled with zonal land-use totals from UrbanSim, to model activity schedules,
+tour generation, destination choice, and mode selection. ATLAS modifies the input household table by updating the number of cars per
+household (`cars` via [`AtlasHouseholdFleetOutput`](../schema/AtlasHouseholdFleetOutput.md)), providing authoritative auto ownership for mode choice modeling.
 
 ```mermaid
 classDiagram
@@ -383,12 +484,16 @@ classDiagram
     }
     ActivitySimHouseholdInputRecord "1" --> "1..*" ActivitySimPersonInputRecord : members
     AtlasHouseholdFleetOutput "1" ..> "1" ActivitySimHouseholdInputRecord : updates cars (nvehicles)
+    link ActivitySimHouseholdInputRecord "../schema/ActivitySimHouseholdInputRecord/" "View ActivitySimHouseholdInputRecord LinkML documentation"
+    link ActivitySimPersonInputRecord "../schema/ActivitySimPersonInputRecord/" "View ActivitySimPersonInputRecord LinkML documentation"
+    link AtlasHouseholdFleetOutput "../schema/AtlasHouseholdFleetOutput/" "View AtlasHouseholdFleetOutput LinkML documentation"
 ```
 
 ### BEAM Multi-Agent Population, Fleet, Plans & Skims Schema
 
-BEAM receives enriched demographic agents, the ATLAS-synthesized vehicle fleet with powertrain
-classifications, and ActivitySim-generated daily activity-travel plans. It simulates microscopic
+BEAM receives enriched demographic agents ([`BeamHouseholdRecord`](../schema/BeamHouseholdRecord.md), [`BeamPersonRecord`](../schema/BeamPersonRecord.md)),
+the ATLAS-synthesized vehicle fleet with powertrain classifications ([`BeamVehicleRecord`](../schema/BeamVehicleRecord.md)), and ActivitySim-generated
+daily activity-travel plans ([`BeamPlanRecord`](../schema/BeamPlanRecord.md), [`BeamPlanOutputRecord`](../schema/BeamPlanOutputRecord.md)). It simulates microscopic
 agent interactions, congestion, and energy/charging profiles.
 
 ```mermaid
@@ -444,4 +549,71 @@ classDiagram
     BeamHouseholdRecord "1" --> "1..*" BeamPersonRecord : members
     BeamHouseholdRecord "1" --> "0..*" BeamVehicleRecord : vehicles
     BeamPersonRecord "1" --> "0..*" BeamPlanRecord : plans
+    link BeamHouseholdRecord "../schema/BeamHouseholdRecord/" "View BeamHouseholdRecord LinkML documentation"
+    link BeamPersonRecord "../schema/BeamPersonRecord/" "View BeamPersonRecord LinkML documentation"
+    link BeamVehicleRecord "../schema/BeamVehicleRecord/" "View BeamVehicleRecord LinkML documentation"
+    link BeamPlanRecord "../schema/BeamPlanRecord/" "View BeamPlanRecord LinkML documentation"
+    link BeamNetworkSkims "../schema/BeamNetworkSkims/" "View BeamNetworkSkims LinkML documentation"
+```
+
+---
+
+## 7. SynthFirm Synthetic Firm, Fleet, and Freight Flow Schema
+
+SynthFirm models synthetic business establishments ([`SynthFirmEstablishmentRecord`](../schema/SynthFirmEstablishmentRecord.md)),
+commercial carrier licensing ([`SynthFirmCarrierRecord`](../schema/SynthFirmCarrierRecord.md)), private and for-hire vehicle fleets,
+and business-to-business (B2B) commodity shipments ([`SynthFirmB2BShipmentRecord`](../schema/SynthFirmB2BShipmentRecord.md),
+[`SynthFirmInternationalFreightRecord`](../schema/SynthFirmInternationalFreightRecord.md)). It translates macro-economic Freight Analysis
+Framework (FAF5) trade forecasts into microscopic freight movement and commercial vehicle tours.
+
+```mermaid
+classDiagram
+    class SynthFirmEstablishmentRecord {
+        +int BusID [PK]
+        +string MESOZONE [FK]
+        +string Industry_NAICS6_Make
+        +int Emp
+        +float Gross_Output
+        +int fleet_id [Depot Fleet]
+        +int n_trucks
+        +int n_diesel
+        +int n_electric
+    }
+    class SynthFirmCarrierRecord {
+        +int BusID [PK, FK]
+        +int CarrierType
+        +int SCTG1 [Licensing]
+        +int SCTG2 [Licensing]
+        +int SCTG3 [Licensing]
+        +int SCTG4 [Licensing]
+        +int SCTG5 [Licensing]
+    }
+    class SynthFirmB2BShipmentRecord {
+        +int shipment_id [PK]
+        +int SellerID [FK]
+        +int BuyerID [FK]
+        +int Commodity_SCTG
+        +float TruckLoad [Tons]
+        +int CarrierType
+        +int fleet_id [FK]
+        +int Mode
+        +float Distance [Miles]
+    }
+    class SynthFirmInternationalFreightRecord {
+        +int bundle_id [PK]
+        +int PORTID [FK]
+        +string PORTZONE [FK]
+        +int SellerID [FK]
+        +int BuyerID [FK]
+        +int Direction [Import / Export]
+        +float DrayageTons
+    }
+    SynthFirmEstablishmentRecord "1" --> "0..*" SynthFirmB2BShipmentRecord : produces / ships
+    SynthFirmEstablishmentRecord "1" --> "0..*" SynthFirmB2BShipmentRecord : consumes / receives
+    SynthFirmEstablishmentRecord "1" --> "0..1" SynthFirmCarrierRecord : specializes as for-hire
+    SynthFirmEstablishmentRecord "1" --> "0..*" SynthFirmInternationalFreightRecord : gateway trade
+    link SynthFirmEstablishmentRecord "../schema/SynthFirmEstablishmentRecord/" "View SynthFirmEstablishmentRecord LinkML documentation"
+    link SynthFirmCarrierRecord "../schema/SynthFirmCarrierRecord/" "View SynthFirmCarrierRecord LinkML documentation"
+    link SynthFirmB2BShipmentRecord "../schema/SynthFirmB2BShipmentRecord/" "View SynthFirmB2BShipmentRecord LinkML documentation"
+    link SynthFirmInternationalFreightRecord "../schema/SynthFirmInternationalFreightRecord/" "View SynthFirmInternationalFreightRecord LinkML documentation"
 ```

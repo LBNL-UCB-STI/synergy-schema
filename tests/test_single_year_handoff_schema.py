@@ -117,6 +117,24 @@ def test_single_year_package_instance_validates() -> None:
                 ],
                 "residues": [],
             },
+            {
+                "channel_id": "SYNTHFIRM_TO_POLARIS_CV",
+                "source_model": "SynthFirm",
+                "source_artifact": "synthetic_firms_with_location_fleet_MC.csv",
+                "target_model": "POLARIS",
+                "target_artifact": "Demand.sqlite/Vehicle",
+                "channel_type": "tabular_microdata",
+                "join_keys": ["BusID", "fleet_id"],
+                "field_mappings": [
+                    {
+                        "source_field": "diesel_class_1_2a..electric_class_7_8_vocational",
+                        "target_field": "type",
+                        "transformation_mode": "wide_to_long",
+                        "description": "Unpivot 13 wide fuel x FHWA-class count columns into discrete commercial vehicle rows mapped to PolarisDemandDatabaseVehicleType",
+                    }
+                ],
+                "residues": [],
+            },
         ],
         "crosswalks": [
             {

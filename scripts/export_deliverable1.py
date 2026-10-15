@@ -70,11 +70,13 @@ The full interactive schema reference, searchable dictionary, and visual UML dia
 │   │   │   ├── polaris_demand_database_v1.yaml
 │   │   │   └── polaris_skims.yaml
 │   │   ├── activitysim/activitysim_population.yaml
-│   │   └── beam/
-│   │       ├── beam.yaml
-│   │       ├── beam_population.yaml
-│   │       ├── beam_plans.yaml
-│   │       └── beam_skims.yaml
+│   │   ├── beam/
+│   │   │   ├── beam.yaml
+│   │   │   ├── beam_population.yaml
+│   │   │   ├── beam_plans.yaml
+│   │   │   └── beam_skims.yaml
+│   │   └── synthfirm/
+│   │       └── synthfirm.yaml
 │   └── mappings/
 │       └── single_year_handoff.yaml
 ├── pyproject.toml             # Python configuration & dependencies for LinkML & Zensical
@@ -194,6 +196,9 @@ STANDALONE_EXTRA_CSS = """/* Custom styling for Synergy Schema documentation */
 STANDALONE_ZENSICAL = """[project]
 site_name = "SYNERGY Static Cross-Model Schema"
 site_description = "Static cross-model LinkML schemas and categorical crosswalks across UrbanSim, DEMOS, ATLAS, POLARIS, ActivitySim, BEAM, and Travel Skims"
+site_url = "https://LBNL-UCB-STI.github.io/synergy-static-schema/"
+repo_url = "https://github.com/LBNL-UCB-STI/synergy-static-schema"
+repo_name = "LBNL-UCB-STI/synergy-static-schema"
 docs_dir = "docs"
 site_dir = "site"
 extra_javascript = [
@@ -325,13 +330,15 @@ STANDALONE_INDEX_MD = """# SYNERGY Static Cross-Model Schema Specification (Deli
 
 Welcome to the official specification and reference documentation for **Deliverable #1: Static Single-Year Cross-Model Schema**.
 
-This project establishes the authoritative structural contracts, join keys, and categorical crosswalks governing data exchange between four primary transportation, land use, and demographic models:
+This project establishes the authoritative structural contracts, join keys, and categorical crosswalks governing data exchange between primary transportation, land use, demographic, and freight models:
 
 1. **UrbanSim** — Land use, residential capacity, employment allocation, and atomic Census Block marginals.
 2. **DEMOS** — Dynamic demographic simulation, household synthesis, person attribute evolution, and Census PUMS seed lineage.
 3. **ATLAS** — Household vehicle fleet synthesis, ownership counts, body types, and discrete powertrain adoption (ICE, Hybrid, PHEV, AEV).
 4. **POLARIS** — Activity-based demand modeling (`Demand.sqlite`), multi-modal network supply (`Supply.sqlite`), and dynamic traffic assignment (DTA).
 5. **Open Matrix Network Skims (`.omx`)** — Zone-to-zone highway and transit travel times, distances, and toll impedances.
+6. **ActivitySim & BEAM** — Tour-based travel demand synthesis and multi-agent dynamic simulation with depot charging infrastructure.
+7. **SynthFirm** — Synthetic business establishments, commercial carrier licensing, private/for-hire fleets, and B2B freight commodity flows.
 
 ---
 
@@ -393,6 +400,7 @@ def export_package(target_dir: Path) -> None:
         "models/beam/beam_population.yaml",
         "models/beam/beam_plans.yaml",
         "models/beam/beam_skims.yaml",
+        "models/synthfirm/synthfirm.yaml",
         "mappings/single_year_handoff.yaml",
     ]
 
@@ -419,7 +427,10 @@ def export_package(target_dir: Path) -> None:
 
     # Contract at a glance
     glance_src = REPO_ROOT / "docs" / "cross-model-mappings" / "contract-at-a-glance.md"
-    shutil.copy2(glance_src, docs_dest / "contract-at-a-glance.md")
+    glance_content = glance_src.read_text(encoding="utf-8").replace(
+        "](../schema/", "](schema/"
+    )
+    (docs_dest / "contract-at-a-glance.md").write_text(glance_content, encoding="utf-8")
 
     # Authoritative mapping interface workbook
     resources_dest = docs_dest / "resources"
@@ -456,7 +467,7 @@ def export_package(target_dir: Path) -> None:
         (css_dest / "extra.css").write_text(STANDALONE_EXTRA_CSS, encoding="utf-8")
 
     # Deliverable 1 UML
-    uml_content = render_deliverable_1_uml()
+    uml_content = render_deliverable_1_uml(schema_prefix="schema")
     (docs_dest / "deliverable_1_uml.md").write_text(uml_content, encoding="utf-8")
 
     # Database ER Diagram page (Mermaid)
@@ -464,6 +475,7 @@ def export_package(target_dir: Path) -> None:
     generate_interactive_diagram(
         schema_path=master_yaml,
         output_path=docs_dest / "interactive-schema.md",
+        schema_prefix="schema",
     )
 
     # LinkML gen-doc
@@ -523,11 +535,26 @@ def export_package(target_dir: Path) -> None:
         "PolarisDemandDatabaseHousehold",
         "PolarisDemandDatabasePerson",
         "PolarisDemandDatabaseVehicle",
+        "PolarisDemandDatabaseVehicleClass",
+        "PolarisDemandDatabaseVehicleType",
         "InputNetworkSkims",
         "NextYearNetworkSkims",
         "SingleYearModelHandoffPackage",
         "ModelHandoffChannel",
         "CategoricalCrosswalkRule",
+        "ActivitySimHouseholdInputRecord",
+        "ActivitySimPersonInputRecord",
+        "BeamHouseholdRecord",
+        "BeamPersonRecord",
+        "BeamVehicleRecord",
+        "BeamPlanRecord",
+        "BeamPlanOutputRecord",
+        "BeamNetworkSkims",
+        "BeamODSkimsRecord",
+        "SynthFirmEstablishmentRecord",
+        "SynthFirmCarrierRecord",
+        "SynthFirmB2BShipmentRecord",
+        "SynthFirmInternationalFreightRecord",
     }
     assert expected_classes.issubset(set(view.all_classes())), (
         "Missing classes in export"

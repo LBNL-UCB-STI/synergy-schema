@@ -11,17 +11,21 @@ It reflects the authoritative specification established in the multi-agency inte
 
 ## 1. Table-to-Table Exchange Summary Matrix
 
-| Channel ID | Source Model & Artifact | Target Model & Artifact | Channel Type | Join / Reference Key | Core Attributes Transferred |
-| :--- | :--- | :--- | :--- | :--- | :--- |
-| **SKIM-IN-US** | `InputNetworkSkims` (.omx) | **UrbanSim** (`input_skims`) | Matrix Skims | Zone (i, j) | `sov_time_am`, `sov_distance`, transit accessibility |
-| **SKIM-IN-AT** | `InputNetworkSkims` (.omx) | **ATLAS** (`input_skims`) | Matrix Skims | Zone (i, j) | `sov_time_am`, `sov_time_md`, `sov_distance` |
-| **US-SUPPLY** | `UrbanSimZonalTotals` | **POLARIS** `Supply.sqlite/Zone` | Zonal Aggregation | `zone_id` ↔ `zone` | `residential_area`, `commercial_area`, `pop_households`, `employment_*` |
-| **US-DEMOS** | `UrbanSimBlockMarginals` | **DEMOS** (`marginal_targets`) | Control Totals | `block_id` | `total_households`, `total_population`, `total_workers` |
-| **DEMOS-POL-H**| `DEMOS` Household | **POLARIS** `Demand.sqlite/Household` | Tabular Microdata | `household` | `income`, `workers`, `persons`, `age_of_head`, `race_of_head`, `type`, `location` |
-| **DEMOS-POL-P**| `DEMOS` Person | **POLARIS** `Demand.sqlite/Person` | Tabular Microdata | `(household, id)` | `age`, `gender`, `relp`, `education`, `employment`, `school_enrollment` |
-| **DEMOS-AT-H** | `DEMOS` Household | **ATLAS** `atlas_hh` | Tabular Microdata | `household` ↔ `HOUSEID` | Household identity, composition, and income |
-| **AT-POL-V** | `ATLAS` Vehicle | **POLARIS** `Demand.sqlite/Vehicle` | Tabular Microdata | `(HOUSEID, VEHID)` ↔ `(household, id)` | `bodytype`, `pred_power`, `modelyear`, `annual_mileage` |
-| **POL-SKIM-OUT**| **POLARIS** DTA Solver | `NextYearNetworkSkims` (.omx) | Matrix Skims | Zone (i, j) | `sov_time_am`, `sov_time_pm`, `congestion_index` |
+| Source Model & Artifact | Target Model & Artifact | Exchange Type | Join / Reference Key | Core Attributes Transferred |
+| :--- | :--- | :--- | :--- | :--- |
+| [`InputNetworkSkims`](../schema/InputNetworkSkims.md) (.omx) | **UrbanSim** (`input_skims`) | Matrix Skims | Zone (i, j) | `sov_time_am`, `sov_distance`, transit accessibility |
+| [`InputNetworkSkims`](../schema/InputNetworkSkims.md) (.omx) | **ATLAS** (`input_skims`) | Matrix Skims | Zone (i, j) | `sov_time_am`, `sov_time_md`, `sov_distance` |
+| [`UrbanSimZonalTotals`](../schema/UrbanSimZonalTotals.md) | **POLARIS** `Supply.sqlite/Zone` | Zonal Aggregation | `zone_id` ↔ `zone` | `residential_area`, `commercial_area`, `pop_households`, `employment_*` |
+| [`UrbanSimBlockMarginals`](../schema/UrbanSimBlockMarginals.md) | **DEMOS** (`marginal_targets`) | Control Totals | `block_id` | `total_households`, `total_population`, `total_workers` |
+| `DEMOS` Household ([`DemosPolarisMappedHousehold`](../schema/DemosPolarisMappedHousehold.md)) | **POLARIS** `Demand.sqlite/Household` ([`PolarisDemandDatabaseHousehold`](../schema/PolarisDemandDatabaseHousehold.md)) | Tabular Microdata | `household` | `income`, `workers`, `persons`, `age_of_head`, `race_of_head`, `type`, `location` |
+| `DEMOS` Person ([`DemosPolarisMappedPerson`](../schema/DemosPolarisMappedPerson.md)) | **POLARIS** `Demand.sqlite/Person` ([`PolarisDemandDatabasePerson`](../schema/PolarisDemandDatabasePerson.md)) | Tabular Microdata | `(household, id)` | `age`, `gender`, `relp`, `education`, `employment`, `school_enrollment` |
+| `DEMOS` Household ([`DemosPolarisMappedHousehold`](../schema/DemosPolarisMappedHousehold.md)) | **ATLAS** `atlas_hh` | Tabular Microdata | `household` ↔ `HOUSEID` | Household identity, composition, and income |
+| `ATLAS` Vehicle ([`AtlasVehicleFleetOutput`](../schema/AtlasVehicleFleetOutput.md)) | **POLARIS** `Demand.sqlite/Vehicle` ([`PolarisDemandDatabaseVehicle`](../schema/PolarisDemandDatabaseVehicle.md)) | Tabular Microdata | `(HOUSEID, VEHID)` ↔ `(household, id)` | `bodytype`, `pred_power`, `modelyear`, `annual_mileage` |
+| **POLARIS** DTA Solver | [`NextYearNetworkSkims`](../schema/NextYearNetworkSkims.md) (.omx) | Matrix Skims | Zone (i, j) | `sov_time_am`, `sov_time_pm`, `congestion_index` |
+| [`UrbanSimBlockMarginals`](../schema/UrbanSimBlockMarginals.md) | **SynthFirm** [`SynthFirmEstablishmentRecord`](../schema/SynthFirmEstablishmentRecord.md) | Zonal Control | `block_id` ↔ `MESOZONE` | Zonal employment by NAICS industry, commercial/industrial floor space |
+| **SynthFirm** Establishments | **SynthFirm** [`SynthFirmB2BShipmentRecord`](../schema/SynthFirmB2BShipmentRecord.md) | Freight Contracts | `BusID` ↔ `SellerID`/`BuyerID` | Commodity SCTG 1–5, shipment tonnage, truckload, private/for-hire carrier |
+| **SynthFirm** Fleets ([`SynthFirmEstablishmentRecord`](../schema/SynthFirmEstablishmentRecord.md)) | **POLARIS** `Demand.sqlite/Vehicle` ([`PolarisDemandDatabaseVehicle`](../schema/PolarisDemandDatabaseVehicle.md)) | Commercial Fleets (`wide_to_long`) | `BusID` ↔ `hhold` / `fleet_id` ↔ `fleet` | Wide fleet counts (`diesel_class_1_2a`..`electric_class_7_8_vocational`, `EV_powertrain`) unpivoted to discrete vehicles (`vehicle_id`, `fleet`, `type` via `Vehicle_Type`) |
+| **SynthFirm** Shipments | **BEAM** `freight-plans.xml` ([`BeamPlanRecord`](../schema/BeamPlanRecord.md)) | Freight Tours | `BusID` ↔ `depot_id` | Commercial multi-stop tours, payload, and depot charging profiles |
 
 ---
 
@@ -100,6 +104,40 @@ It reflects the authoritative specification established in the multi-agency inte
     | `employment_government`| `employment_government`| `direct`| Public administration & government employment. |
     | `employment_manufacturing`| `employment_manufacturing`| `direct`| Manufacturing sector employment. |
     | `hh_inc_avg` | `hh_inc_avg` | `direct` | Mean household income within zone. |
+
+=== "UrbanSim → SynthFirm Establishments"
+
+    | UrbanSim Column | SynthFirm Column | Mode | Description & Allocation Handling |
+    | :--- | :--- | :--- | :--- |
+    | `block_id` | `MESOZONE` | `direct` | 11-digit Census Block Group FIPS identifier anchoring the establishment. |
+    | `county_id` | `CBPZONE` | `derived` | County identifier used for CBP marginal employment scaling. |
+    | `jobs_total` | `Emp` | `derived` | Establishment synthetic employment scaled to match zonal total employment controls. |
+    | `commercial_sqft`| — | *Residue* | Floor space capacity constraint used during spatial firm synthesis. |
+    | `jobs_retail` | — | *Residue* | Subsector retail employment control total. |
+    | `jobs_service` | — | *Residue* | Subsector service employment control total. |
+
+=== "SynthFirm Fleets → POLARIS Commercial Vehicles"
+
+    `SynthFirmEstablishmentRecord` stores commercial fleets in **wide format** across 13 fuel × FHWA-class count columns (`diesel_class_1_2a` .. `electric_class_7_8_vocational`), `EV_powertrain`, and aggregate `n_trucks`. A `wide_to_long` unpivot expands non-zero fleet counts into discrete commercial vehicle records targeting `PolarisDemandDatabaseVehicle` (and `PolarisDemandDatabaseVehicleType`):
+
+    | SynthFirm Column | POLARIS Column | Mode | Rule / Crosswalk | Description & Residue Handling |
+    | :--- | :--- | :--- | :--- | :--- |
+    | `BusID`, `MESOZONE` | `hhold` *(or depot TAZ)* | `derived` | Depot / Owner Link | Establishment identifier (`BusID`) and zone (`MESOZONE`) anchor the commercial vehicle owner (`Vehicle.hhold`) and depot TAZ location (`PolarisDemandDatabaseVehicle` has no `location` column). |
+    | `fleet_id` *(unpivoted index)* | `vehicle_id`, `fleet` | `wide_to_long` | Sequence | Sub-fleet allocation index (`fleet_id`) expanded across `n_trucks` to assign unique `Vehicle.vehicle_id` and commercial `Vehicle.fleet` indicator. |
+    | `diesel_class_1_2a` .. `electric_class_7_8_vocational` | `Vehicle_Type.vehicle_class`, `Vehicle_Type.fuel_type`, `Vehicle.type` | `wide_to_long` | **X-V1**, **X-V3**, **X-V5** | 13 wide fuel × class count columns unpivoted into discrete vehicle rows; FHWA class and fuel resolve to composite `Vehicle_Type.type_id` (`Vehicle.type`). |
+    | `EV_powertrain` | `Vehicle_Type.powertrain_type` | `enum_crosswalk` | **X-V2**, **X-V5** | Maps `SynthFirmPowertrainEnum` (`BEV`, `PHEV`, `FCEV`) to `Vehicle_Type.powertrain_type` (and `fuel_type` = Electricity/H2) when resolving `Vehicle.type`. |
+    | `n_trucks` | — | *Residue* | Unpivot Total Check | Aggregate establishment truck count; equals the sum of unpivoted commercial vehicle rows generated for `(BusID, fleet_id)`. |
+
+=== "SynthFirm B2B Shipments → BEAM Freight Plans"
+
+    | SynthFirm Column | BEAM Column | Mode | Rule / Crosswalk | Description & Residue Handling |
+    | :--- | :--- | :--- | :--- | :--- |
+    | `shipment_id` | `payload_id` | `direct` | — | Unique shipment payload identifier. |
+    | `SellerID` | `origin_depot` | `derived` | Depot Lookup | Seller business establishment depot location (lat/lon). |
+    | `BuyerID` | `destination` | `derived` | Facility Lookup | Buyer business establishment receiving location (lat/lon). |
+    | `Commodity_SCTG`| `commodity_type`| `direct` | SCTG 1–5 | Commodity class (1=Ag/Mining, 2=Mfg, 3=Chemical, 4=Equip, 5=Misc). |
+    | `TruckLoad` | `payload_tons` | `direct` | Tons | Weight of shipment in US short tons. |
+    | `Mode` | `mode` | `enum_crosswalk`| Mode Choice | Private Truck, For-Hire Truck, or Rail drayage. |
 
 ---
 

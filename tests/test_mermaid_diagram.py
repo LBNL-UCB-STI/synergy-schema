@@ -111,11 +111,12 @@ def test_render_database_erd_markdown() -> None:
     assert "## 3. Foreign Key & Pipeline Linkage Reference Table" in rendered
 
     # Verify Mermaid erDiagrams are embedded for core population and tabbed regional views
-    assert rendered.count("erDiagram") == 5
+    assert rendered.count("erDiagram") == 6
     assert '=== "Complete Regional Architecture (Cascaded Vertical Flow)"' in rendered
     assert '=== "Primary POLARIS Regional Flow"' in rendered
     assert '=== "ActivitySim & BEAM Multi-Agent Flow"' in rendered
     assert '=== "Spatial Aggregation & Skim Feedback"' in rendered
+    assert '=== "SynthFirm Freight & Commercial Flow"' in rendered
     assert "Graphviz" not in rendered
     assert "schema-explorer" not in rendered
     assert "Interactive Schema Inspector" not in rendered

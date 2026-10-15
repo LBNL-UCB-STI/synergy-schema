@@ -38,6 +38,14 @@ def test_dist_contains_all_deliverable_schemas_and_files() -> None:
         schema_dir / "models" / "polaris" / "polaris_demand_database_v1.yaml"
     ).exists()
     assert (schema_dir / "models" / "polaris" / "polaris_skims.yaml").exists()
+    assert (
+        schema_dir / "models" / "activitysim" / "activitysim_population.yaml"
+    ).exists()
+    assert (schema_dir / "models" / "beam" / "beam.yaml").exists()
+    assert (schema_dir / "models" / "beam" / "beam_population.yaml").exists()
+    assert (schema_dir / "models" / "beam" / "beam_plans.yaml").exists()
+    assert (schema_dir / "models" / "beam" / "beam_skims.yaml").exists()
+    assert (schema_dir / "models" / "synthfirm" / "synthfirm.yaml").exists()
     assert (schema_dir / "mappings" / "single_year_handoff.yaml").exists()
     assert (
         DIST_DIR / "docs" / "resources" / "DEMOS_and_ATLAS_to_POLARIS_interface.xlsx"
@@ -72,6 +80,19 @@ def test_dist_site_is_compiled_with_all_sections() -> None:
         DIST_DIR / "docs" / "schema" / "HandoffChannelType.md"
     ).read_text(encoding="utf-8")
     assert "Open Matrix OMX travel impedance matrices" in channel_type_md
+
+    # Verify no link escapes above repository root via ../../schema/
+    for html_file in site_dir.rglob("*.html"):
+        content = html_file.read_text(encoding="utf-8")
+        assert 'href="../../schema/' not in content, (
+            f"Found broken root-escaping schema link in {html_file.relative_to(site_dir)}"
+        )
+
+    # Verify interactive-schema link resolves correctly to ../schema/
+    interactive_html = (site_dir / "interactive-schema" / "index.html").read_text(
+        encoding="utf-8"
+    )
+    assert '<a href="../schema/BlockToTazMapping/">' in interactive_html
 
 
 def test_dist_isolation_from_fy27_longitudinal_ledger() -> None:
@@ -108,10 +129,25 @@ def test_dist_schema_resolves_cleanly() -> None:
         "PolarisDemandDatabaseHousehold",
         "PolarisDemandDatabasePerson",
         "PolarisDemandDatabaseVehicle",
+        "PolarisDemandDatabaseVehicleClass",
+        "PolarisDemandDatabaseVehicleType",
         "InputNetworkSkims",
         "NextYearNetworkSkims",
         "SingleYearModelHandoffPackage",
         "ModelHandoffChannel",
         "CategoricalCrosswalkRule",
+        "ActivitySimHouseholdInputRecord",
+        "ActivitySimPersonInputRecord",
+        "BeamHouseholdRecord",
+        "BeamPersonRecord",
+        "BeamVehicleRecord",
+        "BeamPlanRecord",
+        "BeamPlanOutputRecord",
+        "BeamNetworkSkims",
+        "BeamODSkimsRecord",
+        "SynthFirmEstablishmentRecord",
+        "SynthFirmCarrierRecord",
+        "SynthFirmB2BShipmentRecord",
+        "SynthFirmInternationalFreightRecord",
     }
     assert expected.issubset(classes)

@@ -37,13 +37,84 @@
     });
   });
 
-  if (typeof document$ !== 'undefined') {
-    document$.subscribe(initMermaidFullscreen);
-  } else if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initMermaidFullscreen);
-  } else {
-    initMermaidFullscreen();
+  // Interactive Diagram Linking to LinkML Schema Reference
+  const KNOWN_CLASSES = new Set([
+    'UrbanSimBlockMarginals', 'BlockToTazMapping', 'UrbanSimZonalTotals',
+    'DemosPolarisMappedHousehold', 'DemosPolarisMappedPerson',
+    'AtlasHouseholdFleetOutput', 'AtlasVehicleFleetOutput',
+    'AtlasBodyTypeEnum', 'AtlasPowertrainEnum', 'AtlasVintageCategoryEnum',
+    'PolarisDemandDatabaseHousehold', 'PolarisDemandDatabasePerson', 'PolarisDemandDatabaseVehicle',
+    'PolarisTransitSkimsRecord', 'PolarisHighwaySkimsRecord', 'InputNetworkSkims', 'NextYearNetworkSkims',
+    'ActivitySimHouseholdInputRecord', 'ActivitySimPersonInputRecord', 'ActivitySimLandUseZoneRecord',
+    'BeamHouseholdRecord', 'BeamPersonRecord', 'BeamVehicleRecord',
+    'BeamPlanRecord', 'BeamPlanOutputRecord', 'BeamNetworkSkims', 'BeamODSkimsRecord',
+    'SynthFirmEstablishmentRecord', 'SynthFirmCarrierRecord',
+    'SynthFirmB2BShipmentRecord', 'SynthFirmInternationalFreightRecord',
+    'SynthFirmModeChoiceEnum', 'SynthFirmPowertrainEnum', 'SynthFirmPortTypeEnum'
+  ]);
+
+  function getSchemaUrl(className) {
+    let base = '..';
+    const configEl = document.getElementById('__config');
+    if (configEl) {
+      try {
+        const config = JSON.parse(configEl.textContent);
+        if (config.base !== undefined) base = config.base;
+      } catch (e) {}
+    }
+    const prefix = base ? `${base}/` : '';
+    return `${prefix}schema/${className}/`;
   }
 
-  setInterval(initMermaidFullscreen, 500);
+  function initDiagramLinks() {
+    document.querySelectorAll('.mermaid svg').forEach((svg) => {
+      svg.querySelectorAll('g.node, g.classGroup, g[id^="entity-"], g[id^="classId-"]').forEach((group) => {
+        if (group.dataset.linkmlBound) return;
+
+        let matchedClass = null;
+        const textElements = group.querySelectorAll('text, span');
+        for (const t of textElements) {
+          const raw = t.textContent.trim();
+          const word = raw.split(/[\s<([{]/)[0];
+          if (KNOWN_CLASSES.has(word)) {
+            matchedClass = word;
+            break;
+          }
+        }
+
+        if (matchedClass) {
+          group.dataset.linkmlBound = 'true';
+          group.style.cursor = 'pointer';
+
+          let titleEl = group.querySelector('title');
+          if (!titleEl) {
+            titleEl = document.createElementNS('http://www.w3.org/2000/svg', 'title');
+            group.appendChild(titleEl);
+          }
+          titleEl.textContent = `View ${matchedClass} LinkML schema specification`;
+
+          group.addEventListener('click', (e) => {
+            if (e.target.closest('.mermaid-fullscreen-btn')) return;
+            e.stopPropagation();
+            window.location.href = getSchemaUrl(matchedClass);
+          });
+        }
+      });
+    });
+  }
+
+  function initAll() {
+    initMermaidFullscreen();
+    initDiagramLinks();
+  }
+
+  if (typeof document$ !== 'undefined') {
+    document$.subscribe(initAll);
+  } else if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initAll);
+  } else {
+    initAll();
+  }
+
+  setInterval(initAll, 500);
 })();

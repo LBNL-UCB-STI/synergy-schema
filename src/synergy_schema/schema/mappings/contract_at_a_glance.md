@@ -67,17 +67,21 @@ flowchart TD
 
 ## 2. Table-to-Table Exchange Summary Matrix
 
-| Channel ID | Source Model & Artifact | Target Model & Artifact | Channel Type | Join / Reference Key | Core Attributes Transferred |
-| :--- | :--- | :--- | :--- | :--- | :--- |
-| **SKIM-IN-US** | `InputNetworkSkims` (.omx) | **UrbanSim** (`input_skims`) | Matrix Skims | Zone (i, j) | `sov_time_am`, `sov_distance`, transit accessibility |
-| **SKIM-IN-AT** | `InputNetworkSkims` (.omx) | **ATLAS** (`input_skims`) | Matrix Skims | Zone (i, j) | `sov_time_am`, `sov_time_md`, `sov_distance` |
-| **US-SUPPLY** | `UrbanSimZonalTotals` | **POLARIS** `Supply.sqlite/Zone` | Zonal Aggregation | `zone_id` ↔ `zone` | `residential_area`, `commercial_area`, `pop_households`, `employment_*` |
-| **US-DEMOS** | `UrbanSimBlockMarginals` | **DEMOS** (`marginal_targets`) | Control Totals | `block_id` | `total_households`, `total_population`, `total_workers` |
-| **DEMOS-POL-H**| `DEMOS` Household | **POLARIS** `Demand.sqlite/Household` | Tabular Microdata | `household` | `income`, `workers`, `persons`, `age_of_head`, `race_of_head`, `type`, `location` |
-| **DEMOS-POL-P**| `DEMOS` Person | **POLARIS** `Demand.sqlite/Person` | Tabular Microdata | `(household, id)` | `age`, `gender`, `relp`, `education`, `employment`, `school_enrollment` |
-| **DEMOS-AT-H** | `DEMOS` Household | **ATLAS** `atlas_hh` | Tabular Microdata | `household` ↔ `HOUSEID` | Household identity, composition, and income |
-| **AT-POL-V** | `ATLAS` Vehicle | **POLARIS** `Demand.sqlite/Vehicle` | Tabular Microdata | `(HOUSEID, VEHID)` ↔ `(household, id)` | `bodytype`, `pred_power`, `modelyear`, `annual_mileage` |
-| **POL-SKIM-OUT**| **POLARIS** DTA Solver | `NextYearNetworkSkims` (.omx) | Matrix Skims | Zone (i, j) | `sov_time_am`, `sov_time_pm`, `congestion_index` |
+| Source Model & Artifact | Target Model & Artifact | Exchange Type | Join / Reference Key | Core Attributes Transferred |
+| :--- | :--- | :--- | :--- | :--- |
+| `InputNetworkSkims` (.omx) | **UrbanSim** (`input_skims`) | Matrix Skims | Zone (i, j) | `sov_time_am`, `sov_distance`, transit accessibility |
+| `InputNetworkSkims` (.omx) | **ATLAS** (`input_skims`) | Matrix Skims | Zone (i, j) | `sov_time_am`, `sov_time_md`, `sov_distance` |
+| `UrbanSimZonalTotals` | **POLARIS** `Supply.sqlite/Zone` | Zonal Aggregation | `zone_id` ↔ `zone` | `residential_area`, `commercial_area`, `pop_households`, `employment_*` |
+| `UrbanSimBlockMarginals` | **DEMOS** (`marginal_targets`) | Control Totals | `block_id` | `total_households`, `total_population`, `total_workers` |
+| `DEMOS` Household | **POLARIS** `Demand.sqlite/Household` | Tabular Microdata | `household` | `income`, `workers`, `persons`, `age_of_head`, `race_of_head`, `type`, `location` |
+| `DEMOS` Person | **POLARIS** `Demand.sqlite/Person` | Tabular Microdata | `(household, id)` | `age`, `gender`, `relp`, `education`, `employment`, `school_enrollment` |
+| `DEMOS` Household | **ATLAS** `atlas_hh` | Tabular Microdata | `household` ↔ `HOUSEID` | Household identity, composition, and income |
+| `ATLAS` Vehicle | **POLARIS** `Demand.sqlite/Vehicle` | Tabular Microdata | `(HOUSEID, VEHID)` ↔ `(household, id)` | `bodytype`, `pred_power`, `modelyear`, `annual_mileage` |
+| **POLARIS** DTA Solver | `NextYearNetworkSkims` (.omx) | Matrix Skims | Zone (i, j) | `sov_time_am`, `sov_time_pm`, `congestion_index` |
+| `UrbanSimBlockMarginals` | **SynthFirm** `SynthFirmEstablishmentRecord` | Zonal Control | `block_id` ↔ `MESOZONE` | Zonal employment by NAICS industry, commercial/industrial floor space |
+| **SynthFirm** Establishments | **SynthFirm** `SynthFirmB2BShipmentRecord` | Freight Contracts | `BusID` ↔ `SellerID`/`BuyerID` | Commodity SCTG 1–5, shipment tonnage, truckload, private/for-hire carrier |
+| **SynthFirm** Fleets (`SynthFirmEstablishmentRecord`) | **POLARIS** `Demand.sqlite/Vehicle` | Commercial Fleets (`wide_to_long`) | `BusID` ↔ `hhold` / `fleet_id` ↔ `fleet` | Wide fleet counts (`diesel_class_1_2a`..`electric_class_7_8_vocational`, `EV_powertrain`) unpivoted to discrete vehicles (`vehicle_id`, `fleet`, `type` via `Vehicle_Type`) |
+| **SynthFirm** Shipments | **BEAM** `freight-plans.xml` | Freight Tours | `BusID` ↔ `depot_id` | Commercial multi-stop tours, payload, and depot charging profiles |
 
 ---
 

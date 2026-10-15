@@ -43,6 +43,8 @@ enums:
         description: Spatial or group rollup sum or weighted average.
       derived:
         description: Computed from multiple source fields via explicit business logic.
+      wide_to_long:
+        description: Unpivot wide count columns (e.g. fuel x vehicle class counts) into discrete record rows.
 
   ResidueKind:
     description: Categorization of unmapped fields or synthetic residues.
