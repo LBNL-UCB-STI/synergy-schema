@@ -45,15 +45,15 @@ def render_database_erd_markdown(
 
     return f"""# Database Schema & Entity-Relationship Diagrams
 
-This page presents the compiled Entity-Relationship (ER) diagrams and foreign key contracts linking the multi-model population, vehicle fleet, land-use, freight commodity flows, and network skim tables across **UrbanSim**, **DEMOS**, **ATLAS**, **POLARIS**, **ActivitySim**, **BEAM**, **SynthFirm**, and **OMX Skims** for Deliverable #1.
+This page renders entity-relationship (ER) diagrams and foreign-key contracts across **UrbanSim**, **DEMOS**, **ATLAS**, **POLARIS**, **ActivitySim**, **BEAM**, **SynthFirm**, and **Network Skims** (`.omx` / `.zarr`).
 
-All tables, column definitions, primary keys, foreign keys, and cross-model handoff relationships are **generated directly from the LinkML schema contracts** (`schema/deliverable_1_static_schema.yaml`).
+Every table, column type, primary key, foreign key, and cross-model link below is compiled directly from [`schema/deliverable_1_static_schema.yaml`]({schema_prefix}/index.md). Model owners can use these diagrams and the linkage table in Section 3 to verify join keys and cardinalities at each boundary.
 
 ---
 
 ## 1. Core Population & Vehicle Fleet ERD
 
-The diagram below isolates the synthetic agent tables across DEMOS, ATLAS, and POLARIS with explicit relational cardinalities and crow's feet notation:
+Relational cardinalities across the core demographic and household fleet tables (**DEMOS**, **ATLAS**, and **POLARIS** `Demand.sqlite`):
 
 ```mermaid
 {pop_mermaid}
@@ -63,7 +63,7 @@ The diagram below isolates the synthetic agent tables across DEMOS, ATLAS, and P
 
 ## 2. Complete Multi-Model Regional Architecture ERD
 
-The regional architecture diagrams link the tables across the modeling suite. To provide both a unified multi-tier architecture and focused subsystem layouts that fit comfortably on vertical viewports without horizontal sprawl, four tabbed perspectives are provided:
+Use the tabs below to inspect either the full multi-model cascade or individual workflow subsystems:
 
 === "Complete Regional Architecture (Cascaded Vertical Flow)"
 
@@ -100,7 +100,7 @@ The regional architecture diagrams link the tables across the modeling suite. To
 
 ## 3. Foreign Key & Pipeline Linkage Reference Table
 
-The table below documents every intra-model foreign key and cross-model handoff contract compiled from the schema:
+Intra-model foreign keys and cross-model join contracts compiled from the LinkML schema:
 
 | Child Table | Child Column | Parent Table | Parent Column | Cardinality | Link Type | Pipeline Purpose |
 | :--- | :--- | :--- | :--- | :---: | :--- | :--- |
