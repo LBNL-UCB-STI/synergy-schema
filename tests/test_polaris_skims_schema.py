@@ -28,6 +28,10 @@ def test_polaris_skims_classes_and_annotations() -> None:
     assert in_cls.annotations["default_skim_representation"].value is True
     assert in_cls.attributes["file_path"].identifier is True
     assert in_cls.attributes["zone_count"].required is True
+    assert in_cls.attributes["omx_version"].ifabsent == "string(0.2)"
+    assert [d.alias for d in in_cls.attributes["zone_lookup"].array.dimensions] == [
+        "origin_zone"
+    ]
 
     # 2D OD matrix dimensions [origin_zone, destination_zone]
     for slot_name in (
@@ -54,7 +58,12 @@ def test_polaris_skims_classes_and_annotations() -> None:
     assert out_cls.annotations["format"].value == "omx"
     assert out_cls.annotations["default_skim_representation"].value is True
     assert out_cls.annotations["producer_model"].value == "POLARIS"
+    assert "PolarisNetworkSkims" in out_cls.aliases
     assert out_cls.attributes["file_path"].identifier is True
+    assert out_cls.attributes["omx_version"].ifabsent == "string(0.2)"
+    assert [d.alias for d in out_cls.attributes["zone_lookup"].array.dimensions] == [
+        "origin_zone"
+    ]
     assert out_cls.attributes["iteration_count"].range == "integer"
 
     for slot_name in (

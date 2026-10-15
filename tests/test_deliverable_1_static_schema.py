@@ -43,6 +43,7 @@ def test_deliverable_1_schema_contains_all_models_and_channels() -> None:
     # ActivitySim
     assert "ActivitySimHouseholdInputRecord" in classes
     assert "ActivitySimPersonInputRecord" in classes
+    assert "ActivitySimNetworkSkims" in classes
 
     # BEAM
     assert "BeamHouseholdRecord" in classes

@@ -22,6 +22,7 @@ imports:
   - models/polaris/polaris_demand_database_v1
   - models/polaris/polaris_skims
   - models/activitysim/activitysim_population
+  - models/activitysim/activitysim_skims
   - models/beam/beam
   - models/synthfirm/synthfirm
   - mappings/single_year_handoff

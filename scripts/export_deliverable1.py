@@ -69,7 +69,9 @@ The full interactive schema reference, searchable dictionary, and visual UML dia
 │   │   ├── polaris/
 │   │   │   ├── polaris_demand_database_v1.yaml
 │   │   │   └── polaris_skims.yaml
-│   │   ├── activitysim/activitysim_population.yaml
+│   │   ├── activitysim/
+│   │   │   ├── activitysim_population.yaml
+│   │   │   └── activitysim_skims.yaml
 │   │   ├── beam/
 │   │   │   ├── beam.yaml
 │   │   │   ├── beam_population.yaml
@@ -396,6 +398,7 @@ def export_package(target_dir: Path) -> None:
         "models/polaris/polaris_demand_database_v1.yaml",
         "models/polaris/polaris_skims.yaml",
         "models/activitysim/activitysim_population.yaml",
+        "models/activitysim/activitysim_skims.yaml",
         "models/beam/beam.yaml",
         "models/beam/beam_population.yaml",
         "models/beam/beam_plans.yaml",
@@ -546,6 +549,7 @@ def export_package(target_dir: Path) -> None:
         "CategoricalCrosswalkRule",
         "ActivitySimHouseholdInputRecord",
         "ActivitySimPersonInputRecord",
+        "ActivitySimNetworkSkims",
         "BeamHouseholdRecord",
         "BeamPersonRecord",
         "BeamVehicleRecord",

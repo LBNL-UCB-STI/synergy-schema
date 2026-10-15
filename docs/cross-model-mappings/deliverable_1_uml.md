@@ -490,7 +490,8 @@ travel demand modeling and BEAM multi-agent dynamic traffic, transit, and chargi
 ### ActivitySim Demand & Population Schema
 
 ActivitySim consumes synthetic households and persons staged from DEMOS ([`ActivitySimHouseholdInputRecord`](../schema/ActivitySimHouseholdInputRecord.md),
-[`ActivitySimPersonInputRecord`](../schema/ActivitySimPersonInputRecord.md)), coupled with zonal land-use totals from UrbanSim, to model activity schedules,
+[`ActivitySimPersonInputRecord`](../schema/ActivitySimPersonInputRecord.md)), coupled with zonal land-use totals from UrbanSim and canonical
+Open Matrix / Zarr network skims ([`ActivitySimNetworkSkims`](../schema/ActivitySimNetworkSkims.md)), to model activity schedules,
 tour generation, destination choice, and mode selection. ATLAS modifies the input household table by updating the number of cars per
 household (`cars` via [`AtlasHouseholdFleetOutput`](../schema/AtlasHouseholdFleetOutput.md)), providing authoritative auto ownership for mode choice modeling.
 
@@ -511,6 +512,16 @@ classDiagram
         +int work_zone_id [FK]
         +int school_zone_id [FK]
     }
+    class ActivitySimNetworkSkims {
+        +string file_path [PK]
+        +string omx_version [default=0.2]
+        +int zone_count [FK]
+        +int_1D zone_lookup [origin_zone]
+        +float_2D DIST [origin_zone, destination_zone]
+        +float_2D DISTWALK [origin_zone, destination_zone]
+        +float_3D SOV_TIME [time_period, origin_zone, destination_zone]
+        +float_3D WLK_TRN_WLK_IVT [time_period, origin_zone, destination_zone]
+    }
     class AtlasHouseholdFleetOutput {
         +int houseid [PK]
         +int nvehicles
@@ -519,6 +530,7 @@ classDiagram
     AtlasHouseholdFleetOutput "1" ..> "1" ActivitySimHouseholdInputRecord : updates cars (nvehicles)
     link ActivitySimHouseholdInputRecord "../schema/ActivitySimHouseholdInputRecord/" "View ActivitySimHouseholdInputRecord LinkML documentation"
     link ActivitySimPersonInputRecord "../schema/ActivitySimPersonInputRecord/" "View ActivitySimPersonInputRecord LinkML documentation"
+    link ActivitySimNetworkSkims "../schema/ActivitySimNetworkSkims/" "View ActivitySimNetworkSkims LinkML documentation"
     link AtlasHouseholdFleetOutput "../schema/AtlasHouseholdFleetOutput/" "View AtlasHouseholdFleetOutput LinkML documentation"
 ```
 
@@ -527,7 +539,7 @@ classDiagram
 BEAM receives enriched demographic agents ([`BeamHouseholdRecord`](../schema/BeamHouseholdRecord.md), [`BeamPersonRecord`](../schema/BeamPersonRecord.md)),
 the ATLAS-synthesized vehicle fleet with powertrain classifications ([`BeamVehicleRecord`](../schema/BeamVehicleRecord.md)), and ActivitySim-generated
 daily activity-travel plans ([`BeamPlanRecord`](../schema/BeamPlanRecord.md), [`BeamPlanOutputRecord`](../schema/BeamPlanOutputRecord.md)). It simulates microscopic
-agent interactions, congestion, and energy/charging profiles, emitting [`BeamNetworkSkims`](../schema/BeamNetworkSkims.md) (`.omx` / `.zarr` multi-dimensional LinkML arrays) as the default skim representation.
+agent interactions, congestion, and energy/charging profiles, emitting [`BeamNetworkSkims`](../schema/BeamNetworkSkims.md) (`.omx` / `.zarr` multi-dimensional LinkML arrays) as the default skim representation (note: the required vs. optional mode split between `DIST`/`DISTWALK`/`SOV_*`/`WLK_TRN_WLK_*` and optional managed-lane/HOV/submode skims is provisional and worth verifying).
 
 ```mermaid
 classDiagram
@@ -573,11 +585,14 @@ classDiagram
     class BeamNetworkSkims {
         +string file_path [PK]
         +string format [default=omx]
+        +string omx_version [default=0.2]
         +int zone_count [FK]
-        +float_2D sov_time_am [origin_zone, destination_zone]
-        +float_2D sov_distance [origin_zone, destination_zone]
+        +int_1D zone_lookup [origin_zone]
+        +float_2D DIST [origin_zone, destination_zone]
+        +float_2D DISTWALK [origin_zone, destination_zone]
+        +float_3D SOV_TIME [time_period, origin_zone, destination_zone]
+        +float_3D WLK_TRN_WLK_IVT [time_period, origin_zone, destination_zone]
         +float_3D transit_in_vehicle_time [time_period, origin_zone, destination_zone]
-        +float_3D transit_fare [time_period, origin_zone, destination_zone]
         +float_3D ridehail_solo_cost [time_period, origin_zone, destination_zone]
     }
     BeamHouseholdRecord "1" --> "1..*" BeamPersonRecord : members
