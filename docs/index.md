@@ -1,118 +1,78 @@
 # Synergy Schema
 
-A transportation modeling workflow can pass perfectly readable files from one
-model to the next and still leave a basic question open: were all the models
-working on the same scenario, the same population, and the same year? Synergy
-Schema gives independently maintained models a shared way to answer that
-question.
-
-## The short version
-
-Synergy sits alongside the models. It does not replace their tables or their
-code. It writes down the few things the models need to agree on (the scenario,
-the population, how fields map between models, and exactly which files were
-exchanged) so that anyone can later see what crossed each boundary.
+Synergy Schema defines the LinkML data schemas and cross-model field mappings that connect the BEAM CORE modeling suite (**UrbanSim**, **DEMOS**, **ATLAS**, **SynthFirm**, **ActivitySim**, **BEAM**) and **POLARIS**. The schemas document the tables, keys, value codes, and matrix dimensions exchanged at each model handoff so tools can run alone or in coordinated workflows while keeping their native file formats.
 
 ```mermaid
-flowchart LR
-  land["Land use and demand\nUrbanSim / ActivitySim / DEMOS"]
-  fleet["Vehicle fleet\nATLAS"]
-  traffic["Traffic simulation\nPOLARIS"]
-  synergy["Synergy Schema\nshared context, mappings, checks"]
+flowchart TD
+  urbansim["UrbanSim\nLand use & spatial development (t to t+1)"]
+  demos["DEMOS\nDemographic evolution (t to t+1)"]
+  atlas["ATLAS\nHousehold vehicle fleet ownership (t+1)"]
+  synthfirm["SynthFirm\nEstablishments, commercial fleets & freight (t+1)"]
+  demand["POLARIS / ActivitySim + BEAM\nTenure, workplace, demand & DTA (t+1)"]
 
-  land -->|population inputs| fleet
-  fleet -->|vehicle inputs| traffic
-  synergy -. describes and checks .-> land
-  synergy -. describes and checks .-> fleet
-  synergy -. describes and checks .-> traffic
+  urbansim -->|"block marginals M_t+1"| demos
+  urbansim -->|"employment & land use"| synthfirm
+  demos -->|"evolved population P_t+1"| atlas
+  atlas -->|"households, persons & vehicles"| demand
+  synthfirm -->|"commercial fleets & freight shipments"| demand
+  demand -.->|"network skims Skim_t"| urbansim
+  demand -.->|"population state P_t"| demos
 ```
 
-The sections below introduce the coordination problem and how the schema is
-organized. For a runnable walkthrough, the
-[one-year mapping handshake](bring-an-existing-mapping/one-year-mapping-handshake.md)
-connects real inputs and outputs across ATLAS, DEMOS, and POLARIS.
+## What this specification contains
 
-## The coordination problem
+| Section | Contents |
+| --- | --- |
+| [Schema reference](schema/index.md) | LinkML schemas for land use, demographic evolution, household and commercial vehicle fleets, travel demand, traffic simulation, and travel skims. |
+| [Field Mappings](cross-model-mappings/contract-at-a-glance.md) | Field mappings, category recodes, survey imputation rules for missing downstream attributes, and the step-by-step staging pipeline. |
+| [Database ER Diagrams](cross-model-mappings/interactive-schema.md) | Entity-relationship diagrams showing tables, primary keys, and foreign keys within and across models. |
+| [Architecture & UML](cross-model-mappings/deliverable_1_uml.md) | Workflow diagrams and per-model class diagrams comparing the POLARIS, ActivitySim + BEAM, and SynthFirm pathways. |
+| [Shared structure](shared-structure/index.md) | Scenario definitions, multi-year population tracking, file checksums, review records, and run logs. |
 
-Integrated studies often chain together land-use, travel-demand, vehicle, and
-traffic models. Each one has its own settings, tables, IDs, release schedule,
-and team. That leads to familiar problems:
+For a step-by-step example on Austin pilot data, see the [one-year mapping handshake](bring-an-existing-mapping/one-year-mapping-handshake.md).
 
-- A policy called `zev_mandate` in one model is a database value in another.
-- A household ID stays the same across years in one file, but is just a row
-  number in the next.
-- A file path still exists, but the file's contents have changed.
+## How the models connect
 
-Passing files around doesn't answer questions like:
+The schemas separate upstream population and fleet generation from downstream travel simulation so teams can run three workflow patterns from the same regional inputs:
 
-- Which scenario assumptions did each model actually use?
-- Which population, random draw, and year does this file describe?
-- Which IDs are stable across models or years, and which are just row numbers?
-- Which mapping rules and which code produced the translated rows?
-- Did the model teams sign off on those rules?
-- Exactly which input and output files did this run use?
-
-When the answers live only in filenames, meeting notes, or someone's memory,
-two workflows can look aligned while quietly modeling different worlds.
+1. **Land use, demographics, and household fleets**: **UrbanSim** outputs Census Block household and employment totals alongside a Block-to-TAZ geographic lookup. **DEMOS** evolves household and person tables from year `t` to `t+1`, and **ATLAS** assigns vehicles, body types, ages, and powertrains (`ICE`, `Hybrid`, `PHEV`, `AEV`) to those households.
+2. **Passenger travel demand and network assignment**: Using the same upstream **UrbanSim**, **DEMOS**, and **ATLAS** tables, the workflow feeds either **POLARIS** (`Demand.sqlite` and `Supply.sqlite` for activity scheduling and dynamic traffic assignment) or **ActivitySim** and **BEAM** (tour generation followed by multi-agent traffic, transit, and charging simulation).
+3. **Commercial freight and next-year feedback**: **SynthFirm** generates business establishments, truck fleets, and freight shipments for commercial tour simulation in POLARIS and BEAM. At the end of the simulation year, travel time skims flow back to **UrbanSim** and updated population records flow back to **DEMOS** for the next iteration.
 
 ## One shared universe, several modeling systems
 
-Synergy treats a study as one shared world seen through several models. The
-models only need to agree on a small set of facts: the scenario version, the
-random draw, the year, who is in the population, how those people relate to
-each other, and which files were exchanged. Beyond that, the
-PILATES modeling pipeline and POLARIS, along with ATLAS and other models,
-keep their own schemas, settings, and results.
+Participating models share a small set of common facts: the scenario, random seed, simulation year, household and person IDs, geographic lookups, and the files passed at each step. Outside of those handoff files, the PILATES modeling pipeline and POLARIS, along with ATLAS, DEMOS, and SynthFirm, keep their own schemas and internal tables.
 
-So different predictions are not automatically a problem. Models can
-legitimately produce different model-specific results. There is a conflict
-only when two authoritative records disagree about a fact the workflows have
-agreed to share. If a model simply can't represent a shared assumption, that is
-recorded as a visible gap rather than a conflict.
+Because each model represents travel and network behavior at a different level of detail, models can produce different model-specific results. A conflict happens only when two models disagree on a shared input or handoff file. When a downstream model needs a column that an upstream model does not produce, the mapping rules fill the gap using documented defaults or Census and travel survey draws rather than undocumented script assumptions.
 
 ## What Synergy records, and why
 
-Each kind of record exists to head off a specific coordination problem.
+In addition to the LinkML table schemas, the repository defines six record types for tracking mappings and model runs across multi-year studies:
 
-| Record | Why it exists |
+| Record | Role in workflow checks |
 | --- | --- |
-| Interface descriptions | Point to where a shared idea lives inside a model (a setting, a file key, a table column) without taking over that model's schema. |
-| Mapping descriptions | Spell out how source values become target values, including defaults, lookups, dropped rows, and anything that gets lost along the way. |
-| Review records | Capture who signed off on which exact version of the rules. "We agreed in a meeting" stops being useful once the mapping changes. |
-| Implementation links | Name the SQL or script that is supposed to apply the reviewed rules. The rules and the code can drift apart. |
-| Receipts and evidence | Tie a scenario and year to the run, code, inputs, and outputs actually used. Evidence backs up a specific claim about an exchange; it doesn't prove a model is scientifically right. |
-| Content digests | Fingerprint files and definitions so a check can tell an edited file from one that was merely moved or renamed. |
+| Interface descriptions | List the files, tables, and columns that a model reads or writes at a handoff. |
+| Mapping descriptions | Specify how source columns translate into target columns, including category recodes, survey draws, unit conversions, and unused fields. |
+| Review records | Record model-owner sign-off on a mapping version and its assumptions. |
+| Implementation links | Point each mapping rule to the SQL query or Python function that runs it. |
+| Receipts and evidence | Log the run parameters, code version, and input/output files for a simulation year. |
+| Content digests | Checksum tables and schema files so automated checks can tell whether data values changed. |
 
-Together these let the checker test declared consistency: whether the records
-agree with each other. Showing that the models actually used those files still
-takes evidence from the runs that produced and consumed them.
+Together these records let automated checks verify declared consistency across a workflow and pair mapping rules with evidence from the runs that produced and read the handoff files.
 
 ## Scope and limits
 
-Synergy does not build one universal population table, rename native fields,
-or require models to predict the same things. It records only the shared facts
-needed for coordination and leaves everything else with the model that owns
-it.
+Synergy does not merge models into a single database or rename native model columns. It documents the files and columns exchanged between models while leaving internal model parameters and solver tables untouched.
 
-The POLARIS material describes a proposed exchange that has been tested with
-examples. It is not a finished POLARIS integration. The guides say which parts
-are current, proposed, or out of scope wherever that matters.
-
-## How the documentation builds
-
-Each section stands on its own, but they build on each other in roughly this
-order.
+## Where to go next
 
 | Documentation area | Question it answers |
 | --- | --- |
-| [Shared structure](shared-structure/index.md) | What do the models share, and what stays with each model? |
-| [Cross-model mappings](cross-model-mappings/index.md) | How do IDs, assumptions, and fields line up across models? |
-| [Workflow structures](workflow-structures/index.md) | How do the pieces fit together at real handoffs (PILATES, proposed POLARIS, staged populations)? |
-| [Bring an existing mapping](bring-an-existing-mapping/index.md) | How can an existing spreadsheet, SQL script, or column list become something reviewable in an adoption pilot? |
-| [Design rationale](design-rationale/index.md) | Why is it split up this way, and when is something simpler enough? |
-| [Model contract review](model-contracts/index.md) | What does each participating model's interface contract look like? |
-| [Glossary](shared-structure/glossary.md) | What do the recurring terms mean in plain language? |
-| [Generated schema reference](schema/index.md) | What are the exact fields, types, and required values? |
-
-The generated reference is the authority on field-level details. The guides
-explain the problem, the boundaries, and why the fields exist.
+| [Shared structure](shared-structure/index.md) | How are scenarios, multi-year populations, snapshots, and table checksums organized? |
+| [Cross-model mappings](cross-model-mappings/index.md) | How do column mappings, survey draws, ER diagrams, and workflow diagrams connect the models? |
+| [Workflow structures](workflow-structures/index.md) | How are staged population handoffs organized for the PILATES and POLARIS pipelines? |
+| [Bring an existing mapping](bring-an-existing-mapping/index.md) | How does an existing interface spreadsheet or SQL script become a checked mapping? |
+| [Design rationale](design-rationale/index.md) | Why is the design split between model schemas, handoff mappings, and multi-year tracking? |
+| [Model contract review](model-contracts/index.md) | Which tables and columns belong to each participating model? |
+| [Glossary](shared-structure/glossary.md) | What do terms used across the documentation mean? |
+| [Generated schema reference](schema/index.md) | What are the exact LinkML classes, slots, types, and enumerations? |

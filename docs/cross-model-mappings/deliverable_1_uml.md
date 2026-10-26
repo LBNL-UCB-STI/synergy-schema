@@ -1,7 +1,7 @@
 # Architecture & Per-Model UML Class Diagrams
 
-This page maps the single-year data exchange workflows and class structures across **UrbanSim**, **DEMOS**, **ATLAS**, **POLARIS**, **ActivitySim**, **BEAM**, **SynthFirm**, and **Network Skims** (`.omx` / `.zarr`).
-Click any node or class header in a diagram to open its LinkML field specification.
+This page maps the single-year module entry points, workflow pipelines, and class structures across **UrbanSim**, **DEMOS**, **ATLAS**, **POLARIS**, **ActivitySim**, **BEAM**, **SynthFirm**, and **Network Skims** (`.omx` / `.zarr`).
+These interfaces allow BEAM CORE tools and POLARIS to run as standalone components or in coordinated serial and parallel workflows. Click any node or class header in a diagram to open its LinkML field specification.
 
 ---
 
@@ -34,39 +34,41 @@ Click any node or class header in a diagram to open its LinkML field specificati
             ATLAS_V["AtlasVehicle<br/><i>Body Type, Powertrain (ICE/HEV/PHEV/AEV)</i>"]
         end
 
-        subgraph POLARIS ["POLARIS (Activity-Based Demand & Supply)"]
+        subgraph POLARIS ["POLARIS (Activity-Based Demand & Supply, t+1)"]
             POL_Supply["Supply.sqlite<br/><i>Zone & Location Tables</i>"]
             POL_Demand["Demand.sqlite<br/><i>Household, Person, Vehicle</i>"]
-            POL_DTA["Dynamic Traffic Assignment (DTA)"]
+            POL_DTA["POLARIS Simulation (t+1)<br/><i>Job & Household Tenure, Workplace/Destination/Mode Choice, Activity Scheduling & DTA</i>"]
         end
 
-        subgraph Outputs ["Downstream Outputs & Feedback"]
-            POL_StateOut["PolarisPersonStateOutput & PolarisHouseholdStateOutput<br/><i>Resolved Work/School Locations & Long-Term Choices (A23, A30)</i>"]
-            SkimsOut["Next-Year Network Skims (.omx)<br/><i>Simulated Highway/Transit Impedance</i>"]
+        subgraph Outputs ["Downstream Outputs & Feedback to Next Iteration"]
+            POL_StateOut["PolarisPersonStateOutput & PolarisHouseholdStateOutput<br/><i>Population State P_t: Work/School Locations & Tenure Choices (A23, A30)</i>"]
+            SkimsOut["Next-Year Network Skims (.omx)<br/><i>Simulated Highway/Transit Impedance (Skim_t)</i>"]
         end
 
         %% Connections
-        SkimsIn -->|Accessibility Logsums| US_Block
-        SkimsIn -->|Commute Times/Distances| ATLAS_V
-        PUMS -->|Seed Lineage| DEMOS_HH
-        PUMS -->|Seed Lineage| DEMOS_P
+        SkimsIn -->|"Accessibility Logsums (Skim_t)"| US_Block
+        PUMS -->|"Base-Year Seed Lineage"| DEMOS_HH
+        PUMS -->|"Base-Year Seed Lineage"| DEMOS_P
 
-        US_Block -->|Area/Housing Allocation| US_Map
+        US_Block -->|"Area/Housing Allocation"| US_Map
         US_Map --> US_Zone
-        US_Zone -->|Zonal Capacity & Employment| POL_Supply
-        US_Block -.->|Zonal Marginal Controls| DEMOS_HH
+        US_Zone -->|"Zonal Capacity & Employment"| POL_Supply
+        US_Block -->|"Block-Level Spatial Marginals (M_t+1)"| DEMOS_HH
 
-        DEMOS_HH -->|Household Identifiers & Income| ATLAS_HH
-        DEMOS_HH -->|Demographic Agent Records| POL_Demand
-        DEMOS_P -->|Person Agent Records| POL_Demand
+        DEMOS_HH -->|"Evolved Population (P_t+1)"| ATLAS_HH
+        DEMOS_HH -->|"Household Records (P_t+1)"| POL_Demand
+        DEMOS_P -->|"Person Records (P_t+1)"| POL_Demand
 
         ATLAS_HH --> ATLAS_V
-        ATLAS_V -->|Vehicle Inventory & Powertrains| POL_Demand
+        ATLAS_HH -->|"Household Vehicle Counts"| POL_Demand
+        ATLAS_V -->|"Vehicle Inventory & Powertrains"| POL_Demand
 
         POL_Supply --> POL_DTA
         POL_Demand --> POL_DTA
         POL_DTA --> POL_StateOut
         POL_DTA --> SkimsOut
+        POL_StateOut -.->|"Population Feedback (P_t)"| DEMOS_HH
+        SkimsOut -.->|"Skim_t Feedback to Next Iteration"| US_Block
 
         %% Interactive Clickable Schema Links
         click SkimsIn "../schema/InputNetworkSkims/" "View InputNetworkSkims LinkML documentation"
@@ -128,31 +130,30 @@ Click any node or class header in a diagram to open its LinkML field specificati
         end
 
         %% Connections
-        SkimsIn_B -->|Accessibility Logsums| US_Block_B
-        SkimsIn_B -->|Travel Skims| AS_Core
-        SkimsIn_B -->|Commute Times/Distances| ATLAS_V_B
-        PUMS_B -->|Seed Lineage| DEMOS_HH_B
-        PUMS_B -->|Seed Lineage| DEMOS_P_B
+        SkimsIn_B -->|"Accessibility Logsums (Skim_t)"| US_Block_B
+        SkimsIn_B -->|"Travel Skims"| AS_Core
+        PUMS_B -->|"Base-Year Seed Lineage"| DEMOS_HH_B
+        PUMS_B -->|"Base-Year Seed Lineage"| DEMOS_P_B
 
-        US_Block_B -->|Area/Housing Allocation| US_Map_B
+        US_Block_B -->|"Area/Housing Allocation"| US_Map_B
         US_Map_B --> US_Zone_B
-        US_Zone_B -->|Zonal Land Use & Employment| AS_Pop
-        US_Block_B -.->|Zonal Marginal Controls| DEMOS_HH_B
+        US_Zone_B -->|"Zonal Land Use & Employment"| AS_Pop
+        US_Block_B -->|"Block-Level Spatial Marginals (M_t+1)"| DEMOS_HH_B
 
-        DEMOS_HH_B -->|Household Identifiers & Income| ATLAS_HH_B
-        DEMOS_HH_B -->|Household Records| AS_Pop
-        DEMOS_P_B -->|Person Records| AS_Pop
+        DEMOS_HH_B -->|"Evolved Population (P_t+1)"| ATLAS_HH_B
+        DEMOS_HH_B -->|"Household Records (P_t+1)"| AS_Pop
+        DEMOS_P_B -->|"Person Records (P_t+1)"| AS_Pop
 
         ATLAS_HH_B --> ATLAS_V_B
-        ATLAS_HH_B ==>|Updates cars per household| AS_Pop
-        ATLAS_V_B -->|Staged Vehicle Fleet| BEAM_Veh
+        ATLAS_HH_B ==>|"Updates cars per household"| AS_Pop
+        ATLAS_V_B -->|"Staged Vehicle Fleet"| BEAM_Veh
 
         AS_Pop --> AS_Core
         AS_Core --> AS_Plans
 
-        DEMOS_HH_B -->|Household Records & Attributes| BEAM_Pop
-        DEMOS_P_B -->|Person Demographics & VOT| BEAM_Pop
-        AS_Plans -->|Activity & Leg Sequences| BEAM_Plans
+        DEMOS_HH_B -->|"Household Records & Attributes"| BEAM_Pop
+        DEMOS_P_B -->|"Person Demographics & VOT"| BEAM_Pop
+        AS_Plans -->|"Activity & Leg Sequences"| BEAM_Plans
 
         BEAM_Pop --> BEAM_Sim
         BEAM_Veh --> BEAM_Sim
@@ -160,6 +161,8 @@ Click any node or class header in a diagram to open its LinkML field specificati
 
         BEAM_Sim --> BEAM_Out
         BEAM_Sim --> BEAM_Skims
+        BEAM_Out -.->|"Population State Feedback (P_t)"| DEMOS_HH_B
+        BEAM_Skims -.->|"Skim_t Feedback to Next Iteration"| US_Block_B
 
         %% Interactive Clickable Schema Links
         click SkimsIn_B "../schema/InputNetworkSkims/" "View InputNetworkSkims LinkML documentation"
@@ -207,19 +210,19 @@ Click any node or class header in a diagram to open its LinkML field specificati
         end
 
         %% Connections
-        US_Marg_F -->|Employment by Industry / Zone| SF_Firm
-        US_Zone_F -->|Zonal Commercial Space| SF_Firm
-        FAF5 -->|Inter-Regional Control Totals| SF_B2B
-        SkimsIn_F -->|Distance & Travel Time| SF_B2B
+        US_Marg_F -->|"Employment by Industry / Zone"| SF_Firm
+        US_Zone_F -->|"Zonal Commercial Space"| SF_Firm
+        FAF5 -->|"Inter-Regional Control Totals"| SF_B2B
+        SkimsIn_F -->|"Distance & Travel Time"| SF_B2B
 
         SF_Firm --> SF_Carrier
-        SF_Firm -->|Shipper / Receiver Depots| SF_B2B
-        SF_Firm -->|Import / Export Facilities| SF_Intl
+        SF_Firm -->|"Shipper / Receiver Depots"| SF_B2B
+        SF_Firm -->|"Import / Export Facilities"| SF_Intl
 
-        SF_Firm -->|Commercial Vehicle Allocations| POL_CV
-        SF_B2B -->|Truck Tour Generation & DTA| POL_CV
-        SF_Firm -->|Depot Locations & EV Powertrains| BEAM_Freight
-        SF_B2B -->|Freight Plans & Multi-Stop Tours| BEAM_Freight
+        SF_Firm -->|"Commercial Vehicle Allocations"| POL_CV
+        SF_B2B -->|"Truck Tour Generation & DTA"| POL_CV
+        SF_Firm -->|"Depot Locations & EV Powertrains"| BEAM_Freight
+        SF_B2B -->|"Freight Plans & Multi-Stop Tours"| BEAM_Freight
 
         %% Interactive Clickable Schema Links
         click SkimsIn_F "../schema/InputNetworkSkims/" "View InputNetworkSkims LinkML documentation"
@@ -377,7 +380,7 @@ classDiagram
 ## 5. POLARIS Activity-Based Demand & Network Skims Schema
 
 POLARIS ingests households, persons, and vehicles into `Demand.sqlite` ([`PolarisDemandDatabaseHousehold`](../schema/PolarisDemandDatabaseHousehold.md), [`PolarisDemandDatabasePerson`](../schema/PolarisDemandDatabasePerson.md), [`PolarisDemandDatabaseVehicle`](../schema/PolarisDemandDatabaseVehicle.md), [`PolarisDemandDatabaseVehicleClass`](../schema/PolarisDemandDatabaseVehicleClass.md), [`PolarisDemandDatabaseVehicleType`](../schema/PolarisDemandDatabaseVehicleType.md)).
-After simulation, POLARIS produces converged network skims ([`NextYearNetworkSkims`](../schema/NextYearNetworkSkims.md)) and post-run population state updates ([`PolarisHouseholdStateOutput`](../schema/PolarisHouseholdStateOutput.md), [`PolarisPersonStateOutput`](../schema/PolarisPersonStateOutput.md) — marked **provisional** for collaborator verification of exact SQLite output column names under assumptions A20–A31).
+After simulation, POLARIS produces converged network skims ([`NextYearNetworkSkims`](../schema/NextYearNetworkSkims.md)) and post-run population state updates ([`PolarisHouseholdStateOutput`](../schema/PolarisHouseholdStateOutput.md), [`PolarisPersonStateOutput`](../schema/PolarisPersonStateOutput.md), marked **provisional** pending ANL verification of exact SQLite output column names under assumptions A20 to A31).
 
 ```mermaid
 classDiagram
@@ -548,7 +551,7 @@ classDiagram
 
 BEAM ingests demographic agents ([`BeamHouseholdRecord`](../schema/BeamHouseholdRecord.md), [`BeamPersonRecord`](../schema/BeamPersonRecord.md)),
 the ATLAS vehicle fleet ([`BeamVehicleRecord`](../schema/BeamVehicleRecord.md)), and ActivitySim daily plans ([`BeamPlanRecord`](../schema/BeamPlanRecord.md), [`BeamPlanOutputRecord`](../schema/BeamPlanOutputRecord.md)),
-and outputs [`BeamNetworkSkims`](../schema/BeamNetworkSkims.md) (`.omx` / `.zarr` LinkML arrays). Only `DIST`, `DISTWALK`, `SOV_*`, and `WLK_TRN_WLK_*` are currently marked required; the required vs. optional boundary across managed-lane, HOV, transit submode, and ridehail skims is **provisional** and flagged for collaborator verification.
+and outputs [`BeamNetworkSkims`](../schema/BeamNetworkSkims.md) (`.omx` / `.zarr` LinkML arrays). The Austin `skims.omx` baseline requires `DIST`, `DISTWALK`, `SOV_*`, and `WLK_TRN_WLK_*` arrays, while marking managed-lane, HOV, transit submode, and ridehail skims as **provisional** optional extensions pending collaborator verification.
 
 ```mermaid
 classDiagram

@@ -6,10 +6,9 @@ description: >-
   across the integrated modeling workflow. Network skims quantify zone-to-zone
   (TAZ x TAZ) travel impedance across time-of-day periods (AM, PM, Mid-Day, Overnight)
   and modes (auto SOV/HOV, transit) using LinkML array dimensions. InputNetworkSkims
-  are consumed by UrbanSim (for real estate development and accessibility) and ATLAS
-  (for vehicle fleet and powertrain choice). NextYearNetworkSkims are produced as
-  output by POLARIS dynamic traffic assignment (DTA) representing the updated highway
-  and transit equilibrium.
+  are consumed by UrbanSim (for real estate development, spatial marginals, and
+  accessibility). NextYearNetworkSkims are produced as output by POLARIS dynamic
+  traffic assignment (DTA) representing the updated highway and transit equilibrium.
 
 prefixes:
   synergy_schema: https://w3id.org/LBNL-UCB-STI/synergy-schema/
@@ -37,14 +36,14 @@ classes:
       Open Matrix (.omx) container representing baseline zone-to-zone travel
       times, distances, generalized costs (2D origin_zone x destination_zone matrices),
       and zonal accessibility vectors (1D origin_zone arrays) provided as input to
-      UrbanSim and ATLAS.
+      UrbanSim for spatial development and block-level marginal generation.
     annotations:
       model_association: transportation_network
       contract_family: network_skims
       format: omx
       default_skim_representation: true
       status: formal_contract
-      consumer_models: "UrbanSim, ATLAS"
+      consumer_models: "UrbanSim"
     attributes:
       file_path:
         range: string

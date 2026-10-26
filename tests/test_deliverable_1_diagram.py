@@ -48,7 +48,7 @@ def test_deliverable_1_uml_contains_all_models_and_diagrams() -> None:
     assert rendered.count("```mermaid") == 10
 
     # ATLAS updating ActivitySim cars
-    assert "ATLAS_HH_B ==>|Updates cars per household| AS_Pop" in rendered
+    assert 'ATLAS_HH_B ==>|"Updates cars per household"| AS_Pop' in rendered
     assert (
         'AtlasHouseholdFleetOutput "1" ..> "1" ActivitySimHouseholdInputRecord : updates cars'
         in rendered

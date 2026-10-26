@@ -67,7 +67,7 @@ def test_dist_site_is_compiled_with_all_sections() -> None:
     assert (site_dir / "javascripts" / "fullscreen.js").exists()
 
     index_html = (site_dir / "index.html").read_text(encoding="utf-8")
-    assert "<li><strong>LinkML Source Schemas</strong>" in index_html
+    assert "What this specification contains" in index_html
     assert "mathjax.js" in index_html
 
     contract_html = (site_dir / "contract-at-a-glance" / "index.html").read_text(

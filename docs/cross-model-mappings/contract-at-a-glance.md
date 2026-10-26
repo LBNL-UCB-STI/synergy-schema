@@ -1,16 +1,16 @@
-# Cross-Model Data Contract at a Glance
+# Field Mappings & Table Handoffs
 
-This reference summarizes the single-year table handoffs, join keys, categorical crosswalks (`X-H1`–`X-V5`), stratified donor draws (`D-H1`–`D-V2`), and unmapped residue fields across **UrbanSim**, **DEMOS**, **ATLAS**, **POLARIS**, **ActivitySim**, **BEAM**, **SynthFirm**, and **Network Skims** (`.omx` / `.zarr`).
+This reference specifies the single-year table handoffs, module entry points, join keys, categorical crosswalks (`X-H1` to `X-V5`), probabilistic donor draws (`D-H1` to `D-V2`), and unmapped residue fields across **UrbanSim**, **DEMOS**, **ATLAS**, **POLARIS**, **ActivitySim**, **BEAM**, **SynthFirm**, and **Network Skims** (`.omx` / `.zarr`).
 
-The **DEMOS / ATLAS → POLARIS** mappings implement the joint multi-team specification in `docs/resources/DEMOS_and_ATLAS_to_POLARIS_interface.xlsx` (Section 5). Counterpart handoffs for **ActivitySim**, **BEAM**, **SynthFirm**, and post-run state feedback are documented alongside them so model owners can review and verify how their interfaces are represented.
+The **DEMOS / ATLAS → POLARIS** mappings implement the multi-team specification in `docs/resources/DEMOS_and_ATLAS_to_POLARIS_interface.xlsx` (Section 5), validated on the Austin regional pilot datasets. Counterpart module entry points for **ActivitySim**, **BEAM**, **SynthFirm**, and post-run state feedback appear alongside them so model teams at ANL, NLR, and LBNL can verify interface compatibility across both serial and parallel workflows.
 
 > **Visual Diagrams**: See [Database ER Diagrams](interactive-schema.md) for crow's-foot relational schemas and [Architecture & UML](deliverable_1_uml.md) for workflow pipelines and class diagrams.
 >
-> **From Static Contract to Executable Pipeline (Next-Phase Bridge)**: Once verified with model owners, the rules on this page translate directly into the next project phase's automated multi-year workflow across three execution tiers:
+> **From Static Contract to Multi-Year Execution**: These boundary rules map into three execution tiers for multi-year simulation workflows:
 >
-> 1. **Relational SQL Projections (`direct`, `renamed`, `aggregated`, `wide_to_long`, and `X-H1`–`X-V5` crosswalks)**: Deterministic table joins, `CASE WHEN` / lookup-table recodes, within-household `ROW_NUMBER()` indexing, and wide-to-long fleet unpivots executed via SQL over boundary tables.
-> 2. **Seeded Python Refinement (`D-H1`–`D-V2` donor draws & longitudinal progression `X-P4`–`X-P5`)**: Reproducible, hash-seeded Python operators that impute missing attributes from PUMS/NHTS donor distributions and carry forward time-invariant demographics and locations across simulation years.
-> 3. **Runtime Travel-Model Assignment (`work_location_id`, `school_location_id`, `journey_to_work_*`, `ecom`, `num_groceries`, `num_meals`)**: Initialized with schema-valid defaults at the handoff boundary and populated at runtime by POLARIS or ActivitySim/BEAM.
+> 1. **Relational SQL Projections (`direct`, `renamed`, `aggregated`, `wide_to_long`, and `X-H1` to `X-V5` crosswalks)**: SQL queries execute deterministic table joins, `CASE WHEN` and lookup-table recodes, within-household `ROW_NUMBER()` indexing, and wide-to-long fleet unpivots over boundary tables.
+> 2. **Probabilistic Donor Imputation & Longitudinal Progression (`D-H1` to `D-V2` donor draws & `X-P4` to `X-P5`)**: Hash-seeded Python operators impute missing attributes from stratified ACS PUMS and NHTS donor pools to maintain data compatibility across models, while carrying forward time-invariant demographics and locations across simulation years.
+> 3. **Runtime Travel-Model Assignment (`work_location_id`, `school_location_id`, `journey_to_work_*`, `ecom`, `num_groceries`, `num_meals`)**: Handoff projections initialize these columns with schema-valid defaults so POLARIS or ActivitySim and BEAM can populate them during simulation.
 
 ---
 
@@ -19,9 +19,8 @@ The **DEMOS / ATLAS → POLARIS** mappings implement the joint multi-team specif
 | Source Model & Artifact | Target Model & Artifact | Exchange Type | Join / Reference Key | Core Attributes Transferred |
 | :--- | :--- | :--- | :--- | :--- |
 | [`InputNetworkSkims`](../schema/InputNetworkSkims.md) (.omx) | **UrbanSim** (`input_skims`) | Matrix Skims (1D/2D `array`) | `[origin_zone, destination_zone]` / `[origin_zone]` | `sov_time_am`, `sov_distance`, `transit_accessibility_index` |
-| [`InputNetworkSkims`](../schema/InputNetworkSkims.md) (.omx) | **ATLAS** (`input_skims`) | Matrix Skims (2D `array`) | `[origin_zone, destination_zone]` | `sov_time_am`, `sov_time_md`, `sov_distance` |
 | [`UrbanSimZonalTotals`](../schema/UrbanSimZonalTotals.md) | **POLARIS** `Supply.sqlite/Zone` | Zonal Aggregation | `zone_id` ↔ `zone` | `residential_area`, `commercial_area`, `pop_households`, `employment_*` |
-| [`UrbanSimBlockMarginals`](../schema/UrbanSimBlockMarginals.md) | **DEMOS** (`marginal_targets`) | Control Totals | `block_id` | `total_households`, `total_population`, `total_workers` |
+| [`UrbanSimBlockMarginals`](../schema/UrbanSimBlockMarginals.md) | **DEMOS** (`marginal_targets`) | Control Totals (`M_t+1`) | `block_id` | `total_households`, `total_population`, `total_workers`, `jobs_total` |
 | `DEMOS` Household ([`DemosPolarisMappedHousehold`](../schema/DemosPolarisMappedHousehold.md)) | **POLARIS** `Demand.sqlite/Household` ([`PolarisDemandDatabaseHousehold`](../schema/PolarisDemandDatabaseHousehold.md)) | Tabular Microdata | `household` | `income`, `workers`, `persons`, `age_of_head`, `race_of_head`, `type`, `location` |
 | `DEMOS` Person ([`DemosPolarisMappedPerson`](../schema/DemosPolarisMappedPerson.md)) | **POLARIS** `Demand.sqlite/Person` ([`PolarisDemandDatabasePerson`](../schema/PolarisDemandDatabasePerson.md)) | Tabular Microdata | `(household, id)` | `age`, `gender`, `relp`, `education`, `employment`, `school_enrollment` |
 | `DEMOS` Household ([`DemosPolarisMappedHousehold`](../schema/DemosPolarisMappedHousehold.md)) | **ATLAS** `atlas_hh` | Tabular Microdata | `household` ↔ `HOUSEID` | Household identity, composition, and income |
@@ -30,15 +29,15 @@ The **DEMOS / ATLAS → POLARIS** mappings implement the joint multi-team specif
 | **POLARIS** Post-Run State ([`PolarisHouseholdStateOutput`](../schema/PolarisHouseholdStateOutput.md), [`PolarisPersonStateOutput`](../schema/PolarisPersonStateOutput.md)) | **Year t+1 Core Population** (`Demand.sqlite` / `Result.sqlite`, provisional) | Longitudinal State Feedback | `household`, `person` | `location`, `time_in_home`, `ecom`, `work_location_id`, `school_location_id`, `journey_to_work_*`, `telecommute_level`, `transit_pass`, `escooter_use_level`, `time_in_job`, `is_long_term_chooser` (A20, A21, A23, A30, A31) |
 | **BEAM** Dynamic Simulation | [`BeamNetworkSkims`](../schema/BeamNetworkSkims.md) & [`ActivitySimNetworkSkims`](../schema/ActivitySimNetworkSkims.md) (.omx / .zarr, default) | Matrix Skims (1D/2D/3D `array`) | `[time_period, origin_zone, destination_zone]` / `/lookup` `[origin_zone]` | Required core (provisional): `DIST`, `DISTWALK`, `SOV_{TIME,DIST,BTOLL}`, `WLK_TRN_WLK_{IVT,IWAIT,XWAIT,WACC,WAUX,WEGR}`; Optional (provisional): `DISTBIKE`, `SOVTOLL_*`, `HOV2*`, `HOV3*`, submode transit `WLK_{LOC,LRF,EXP,HVY,COM}_*` / `DRV_*`, `ridehail_*` |
 | [`UrbanSimBlockMarginals`](../schema/UrbanSimBlockMarginals.md) | **SynthFirm** [`SynthFirmEstablishmentRecord`](../schema/SynthFirmEstablishmentRecord.md) | Zonal Control | `block_id` ↔ `MESOZONE` | Zonal employment by NAICS industry, commercial/industrial floor space |
-| **SynthFirm** Establishments | **SynthFirm** [`SynthFirmB2BShipmentRecord`](../schema/SynthFirmB2BShipmentRecord.md) | Freight Contracts | `BusID` ↔ `SellerID`/`BuyerID` | Commodity SCTG 1–5, shipment tonnage, truckload, private/for-hire carrier |
+| **SynthFirm** Establishments | **SynthFirm** [`SynthFirmB2BShipmentRecord`](../schema/SynthFirmB2BShipmentRecord.md) | Freight Contracts | `BusID` ↔ `SellerID`/`BuyerID` | Commodity SCTG 1 to 5, shipment tonnage, truckload, private/for-hire carrier |
 | **SynthFirm** Fleets ([`SynthFirmEstablishmentRecord`](../schema/SynthFirmEstablishmentRecord.md)) | **POLARIS** `Demand.sqlite/Vehicle` ([`PolarisDemandDatabaseVehicle`](../schema/PolarisDemandDatabaseVehicle.md)) | Commercial Fleets (`wide_to_long`) | `BusID` ↔ `hhold` / `fleet_id` ↔ `fleet` | Wide fleet counts (`diesel_class_1_2a`..`electric_class_7_8_vocational`, `EV_powertrain`) unpivoted to discrete vehicles (`vehicle_id`, `fleet`, `type` via `Vehicle_Type`) |
 | **SynthFirm** Shipments | **BEAM** `freight-plans.xml` ([`BeamPlanRecord`](../schema/BeamPlanRecord.md)) | Freight Tours | `BusID` ↔ `depot_id` | Commercial multi-stop tours, payload, and depot charging profiles |
 
 > **Provisional Boundaries Flagged for Collaborator Verification**
 >
-> - **OMX / Zarr Skim Mode Split (`BeamNetworkSkims` & `ActivitySimNetworkSkims`)**: Based on the canonical `skims.omx` (`OMX_VERSION = '0.2'`, `SHAPE = [N_zones, N_zones]`), only static distances (`DIST`, `DISTWALK`), free-lane SOV auto (`SOV_TIME`, `SOV_DIST`, `SOV_BTOLL`), and walk-transit-walk accessibility skims (`WLK_TRN_WLK_{IVT,IWAIT,XWAIT,WACC,WAUX,WEGR}`) are marked `required: true`. Managed-lane (`SOVTOLL_*`, `HOV2*`, `HOV3*`), bike (`DISTBIKE`), transit submode (`WLK_{LOC,LRF,EXP,HVY,COM}_*`, `DRV_*`), and ridehail (`RH_*`) arrays are marked `required: false` (`status: provisional`).
-> - **POLARIS Post-Run State Feedback (`PolarisHouseholdStateOutput` & `PolarisPersonStateOutput`)**: Models the post-simulation household and person state attributes feeding Year $t+1$ (`A20`, `A21`, `A23`, `A30`, `A31`); exact SQLite output table and column names are flagged `status: provisional` pending ANL confirmation.
-> - **SynthFirm Commercial Fleet Unpivot**: `SynthFirmEstablishmentRecord` stores truck fleets in 13 wide fuel × FHWA-class columns; mapping into `PolarisDemandDatabaseVehicle` requires a `wide_to_long` expansion and depot-to-`hhold` convention.
+> - **OMX / Zarr Skim Mode Split (`BeamNetworkSkims` & `ActivitySimNetworkSkims`)**: Based on the Austin `skims.omx` contract (`OMX_VERSION = '0.2'`, `SHAPE = [N_zones, N_zones]`), the schema requires static distances (`DIST`, `DISTWALK`), free-lane SOV auto (`SOV_TIME`, `SOV_DIST`, `SOV_BTOLL`), and walk-transit-walk accessibility skims (`WLK_TRN_WLK_{IVT,IWAIT,XWAIT,WACC,WAUX,WEGR}`), while setting `required: false` (`status: provisional`) on managed-lane (`SOVTOLL_*`, `HOV2*`, `HOV3*`), bike (`DISTBIKE`), transit submode (`WLK_{LOC,LRF,EXP,HVY,COM}_*`, `DRV_*`), and ridehail (`RH_*`) arrays.
+> - **POLARIS Post-Run State Feedback (`PolarisHouseholdStateOutput` & `PolarisPersonStateOutput`)**: Captures the post-simulation household and person state attributes feeding Year `t+1` (`A20`, `A21`, `A23`, `A30`, `A31`); exact SQLite output table and column names carry `status: provisional` pending ANL confirmation.
+> - **SynthFirm Commercial Fleet Unpivot**: `SynthFirmEstablishmentRecord` stores truck fleets in 13 wide fuel-by-FHWA-class columns; mapping into `PolarisDemandDatabaseVehicle` applies a `wide_to_long` expansion and links establishment `BusID` to `Vehicle.hhold`.
 
 ---
 
@@ -48,29 +47,29 @@ The **DEMOS / ATLAS → POLARIS** mappings implement the joint multi-team specif
 
     | DEMOS Column | POLARIS Column | Mode | Rule / Crosswalk | Description & Residue Handling |
     | :--- | :--- | :--- | :--- | :--- |
-    | `household` | `household` | `direct` | — | Integer household primary key (identifies surviving vs. new households). |
+    | `household` | `household` | `direct` | Identity | Integer household primary key (identifies surviving vs. new households). |
     | `income` | `income` | `derived` | Deflated & Rounded | Deflated to base-year USD and rounded to nearest integer dollar. |
     | `persons` | `size` | `renamed` | Count | Total count of individuals in household. |
     | `workers` | `workers` | `derived` | **X-P2** | Count of persons with ESR 1 or 4 (employed and at work). |
-    | `age_of_head` | `age_of_head` | `direct` | — | Age of reference person (`relp = 0`). |
-    | `race_of_head`| `race` | `enum_crosswalk`| **X-P1** / **D-P3b** | Census PUMS race code to POLARIS race (1–9). |
-    | `lcm_county_id`| `county` | `direct` | — | 5-digit State/County FIPS (e.g. 48453). |
+    | `age_of_head` | `age_of_head` | `direct` | Pass-through | Age of reference person (`relp = 0`). |
+    | `race_of_head`| `race` | `enum_crosswalk`| **X-P1** / **D-P3b** | Census PUMS race code to POLARIS race (1 to 9). |
+    | `lcm_county_id`| `county` | `direct` | Pass-through | 5-digit State/County FIPS (e.g. 48453). |
     | `block_id` | `location` | `derived` | **D-H1** | 11-digit Census tract GEOID (`popsyn_region`). New households draw dwelling location via **D-H1**. Surviving households retain location. |
     | *(Composition)*| `type` | `derived` | **X-H1**, **X-H2** | Recomputed from composition: HHT × tenure → POLARIS `HHTYPE` (1..11). |
     | *(D-H1)* | `housing_unit_type`| `derived` | **X-H3** / **D-H1** | Carried for surviving households; drawn with dwelling for new households. |
-    | *(D-H1)* | `Has_Residential_Charging`| `derived` | **D-H1** | Drawn jointly with dwelling; preserved for surviving households. |
-    | `SERIALNO_PUMS`| — | *Residue* | Lineage Trace | Census PUMS seed record identifier; retained for auditability, not stored in POLARIS. |
-    | `is_reorg_household`| — | *Residue* | Internal State | DEMOS demographic restructuring flag; unmapped in POLARIS. |
+    | *(D-H1)* | `Has_Residential_Charging`| `derived` | **D-H1** | Drawn together with dwelling; preserved for surviving households. |
+    | `SERIALNO_PUMS`| None | *Residue* | Lineage Trace | Census PUMS seed record identifier; retained for auditability, not stored in POLARIS. |
+    | `is_reorg_household`| None | *Residue* | Internal State | DEMOS demographic restructuring flag; unmapped in POLARIS. |
     | *(Aggregated)* | `vehicles` | `aggregated`| **X-V1..X-V5** | Count of associated vehicle records from ATLAS fleet output (or **D-H2** interim). |
 
 === "DEMOS Person → POLARIS"
 
     | DEMOS Column | POLARIS Column | Mode | Rule / Crosswalk | Description & Residue Handling |
     | :--- | :--- | :--- | :--- | :--- |
-    | `household` | `household` | `direct` | — | Foreign key to Household table. |
+    | `household` | `household` | `direct` | Foreign Key | Foreign key to Household table. |
     | `id` | `id` | `derived` | 0..n-1 Ordinal | Regenerated within-household ordinal index (0, 1, ..., n-1). |
-    | `person` | — | *Residue* | Lineage Trace | Global synthetic person identifier; preserved in DEMOS outputs. |
-    | `age` | `age` | `direct` | — | Person chronological age in years. |
+    | `person` | None | *Residue* | Lineage Trace | Global synthetic person identifier; preserved in DEMOS outputs. |
+    | `age` | `age` | `direct` | Pass-through | Person chronological age in years. |
     | `gender` | `gender` | `direct` | **X-P1** | 1 = Male, 2 = Female. |
     | `relp` | `relp` | `direct` | **X-P1** | PUMS relationship code (0..15) mapped to POLARIS RELP (0..17). |
     | `education` | `education` | `direct` | **X-P1**, **X-P6** | 0..24 ACS SCHL code; K-12 consistency enforced via **X-P6**. |
@@ -81,22 +80,22 @@ The **DEMOS / ATLAS → POLARIS** mappings implement the joint multi-team specif
     | *(Derived)* | `school_grade_level`| `derived` | **X-P3..X-P5** | Continuing students advance via **X-P4**; entrants draw via **X-P5**. |
     | *(D-P1)* | `worker_class`, `industry`, `work_hours` | `derived` | **D-P1**, **X-P7** | Donor draw conditioned on county × sex × age group × education group. |
     | *(D-P2)* | Commute attributes | `derived` | **D-P2** | Mode, travel time, occupancy, arrival time drawn for at-work persons. |
-    | `SERIALNO_PUMS`| — | *Residue* | Lineage Trace | Census PUMS household seed identifier. |
-    | `SPORDER` | — | *Residue* | Lineage Trace | Census PUMS person seed sequence ordinal. |
+    | `SERIALNO_PUMS`| None | *Residue* | Lineage Trace | Census PUMS household seed identifier. |
+    | `SPORDER` | None | *Residue* | Lineage Trace | Census PUMS person seed sequence ordinal. |
 
 === "ATLAS Vehicle → POLARIS"
 
     | ATLAS Column | POLARIS Column | Mode | Rule / Crosswalk | Description & Residue Handling |
     | :--- | :--- | :--- | :--- | :--- |
-    | `HOUSEID` | `hhold` | `renamed` | — | Owning household ID. Must exist in POLARIS population. |
+    | `HOUSEID` | `hhold` | `renamed` | Foreign Key | Owning household ID. Must exist in POLARIS population. |
     | `VEHID` | `vehicle_id` | `derived` | Sequence | Retained vehicles keep previous ID; new vehicles take next available ID. |
     | `bodytype` | `vehicle_class` | `derived` | **X-V1**, **D-V1** | Retained keep size; new vehicles draw size class within body type via **D-V1**. |
     | `pred_power` | `powertrain_type`| `enum_crosswalk`| **X-V2** | ICE → Conventional (0), Hybrid → HEV (1), PHEV → PHEV (2), AEV → BEV_long (3). |
     | *(Derived)* | `fuel_type` | `derived` | **X-V3**, **D-V2** | BEV → Elec (4); HEV/PHEV → Gas (0); Conventional draws Gas (0) or Diesel (1) via **D-V2**. |
-    | `modelyear` | `vintage_type` | `derived` | **X-V4** | Recomputed yearly from age = SimulationYear - modelyear (0 = 0–5y, 1 = 6–10y, 2 = 10+y). |
+    | `modelyear` | `vintage_type` | `derived` | **X-V4** | Recomputed each year from age = SimulationYear - modelyear (0 = 0 to 5y, 1 = 6 to 10y, 2 = 10+y). |
     | *(Composite)* | `type` | `derived` | **X-V5** | Looked up in POLARIS `Vehicle_Type` on `(class, connectivity, powertrain, automation, fuel, vintage)`. |
-    | `annual_mileage`| — | *Residue* | Behavioral Model | Estimated annual VMT; used for activity allocation. |
-    | `vintage_category`| — | *Residue* | Validation | Categorical vintage cross-checked against `modelyear`. |
+    | `annual_mileage`| None | *Residue* | Behavioral Model | Estimated annual VMT; used for activity allocation. |
+    | `vintage_category`| None | *Residue* | Validation | Categorical vintage cross-checked against `modelyear`. |
 
 === "UrbanSim Zonal Totals → POLARIS Supply"
 
@@ -125,13 +124,13 @@ The **DEMOS / ATLAS → POLARIS** mappings implement the joint multi-team specif
     | `block_id` | `MESOZONE` | `direct` | 11-digit Census Block Group FIPS identifier anchoring the establishment. |
     | `county_id` | `CBPZONE` | `derived` | County identifier used for CBP marginal employment scaling. |
     | `jobs_total` | `Emp` | `derived` | Establishment synthetic employment scaled to match zonal total employment controls. |
-    | `commercial_sqft`| — | *Residue* | Floor space capacity constraint used during spatial firm synthesis. |
-    | `jobs_retail` | — | *Residue* | Subsector retail employment control total. |
-    | `jobs_service` | — | *Residue* | Subsector service employment control total. |
+    | `commercial_sqft`| None | *Residue* | Floor space capacity constraint used during spatial firm synthesis. |
+    | `jobs_retail` | None | *Residue* | Subsector retail employment control total. |
+    | `jobs_service` | None | *Residue* | Subsector service employment control total. |
 
 === "SynthFirm Fleets → POLARIS Commercial Vehicles"
 
-    `SynthFirmEstablishmentRecord` stores commercial fleets in **wide format** across 13 fuel × FHWA-class count columns (`diesel_class_1_2a` .. `electric_class_7_8_vocational`), `EV_powertrain`, and aggregate `n_trucks`. A `wide_to_long` unpivot expands non-zero fleet counts into discrete commercial vehicle records targeting `PolarisDemandDatabaseVehicle` (and `PolarisDemandDatabaseVehicleType`):
+    `SynthFirmEstablishmentRecord` stores commercial fleets in **wide format** across 13 fuel-by-FHWA-class count columns (`diesel_class_1_2a` .. `electric_class_7_8_vocational`), `EV_powertrain`, and aggregate `n_trucks`. A `wide_to_long` unpivot expands non-zero fleet counts into discrete commercial vehicle records targeting `PolarisDemandDatabaseVehicle` (and `PolarisDemandDatabaseVehicleType`):
 
     | SynthFirm Column | POLARIS Column | Mode | Rule / Crosswalk | Description & Residue Handling |
     | :--- | :--- | :--- | :--- | :--- |
@@ -139,16 +138,16 @@ The **DEMOS / ATLAS → POLARIS** mappings implement the joint multi-team specif
     | `fleet_id` *(unpivoted index)* | `vehicle_id`, `fleet` | `wide_to_long` | Sequence | Sub-fleet allocation index (`fleet_id`) expanded across `n_trucks` to assign unique `Vehicle.vehicle_id` and commercial `Vehicle.fleet` indicator. |
     | `diesel_class_1_2a` .. `electric_class_7_8_vocational` | `Vehicle_Type.vehicle_class`, `Vehicle_Type.fuel_type`, `Vehicle.type` | `wide_to_long` | **X-V1**, **X-V3**, **X-V5** | 13 wide fuel × class count columns unpivoted into discrete vehicle rows; FHWA class and fuel resolve to composite `Vehicle_Type.type_id` (`Vehicle.type`). |
     | `EV_powertrain` | `Vehicle_Type.powertrain_type` | `enum_crosswalk` | **X-V2**, **X-V5** | Maps `SynthFirmPowertrainEnum` (`BEV`, `PHEV`, `FCEV`) to `Vehicle_Type.powertrain_type` (and `fuel_type` = Electricity/H2) when resolving `Vehicle.type`. |
-    | `n_trucks` | — | *Residue* | Unpivot Total Check | Aggregate establishment truck count; equals the sum of unpivoted commercial vehicle rows generated for `(BusID, fleet_id)`. |
+    | `n_trucks` | None | *Residue* | Unpivot Total Check | Aggregate establishment truck count; equals the sum of unpivoted commercial vehicle rows generated for `(BusID, fleet_id)`. |
 
 === "SynthFirm B2B Shipments → BEAM Freight Plans"
 
     | SynthFirm Column | BEAM Column | Mode | Rule / Crosswalk | Description & Residue Handling |
     | :--- | :--- | :--- | :--- | :--- |
-    | `shipment_id` | `payload_id` | `direct` | — | Unique shipment payload identifier. |
+    | `shipment_id` | `payload_id` | `direct` | Identity | Unique shipment payload identifier. |
     | `SellerID` | `origin_depot` | `derived` | Depot Lookup | Seller business establishment depot location (lat/lon). |
     | `BuyerID` | `destination` | `derived` | Facility Lookup | Buyer business establishment receiving location (lat/lon). |
-    | `Commodity_SCTG`| `commodity_type`| `direct` | SCTG 1–5 | Commodity class (1=Ag/Mining, 2=Mfg, 3=Chemical, 4=Equip, 5=Misc). |
+    | `Commodity_SCTG`| `commodity_type`| `direct` | SCTG 1 to 5 | Commodity class (1=Ag/Mining, 2=Mfg, 3=Chemical, 4=Equip, 5=Misc). |
     | `TruckLoad` | `payload_tons` | `direct` | Tons | Weight of shipment in US short tons. |
     | `Mode` | `mode` | `enum_crosswalk`| Mode Choice | Private Truck, For-Hire Truck, or Rail drayage. |
 
@@ -168,7 +167,7 @@ The **DEMOS / ATLAS → POLARIS** mappings implement the joint multi-team specif
     4. Else if `persons = 1` → **Nonfamily, living alone**
     5. Otherwise → **Nonfamily, not living alone**
 
-    *(Nonrelatives with `relp` 11–15 do not constitute a family).*
+    *(Nonrelatives with `relp` 11 to 15 do not constitute a family).*
 
     ### Crosswalk X-H2: Tenure × HHT → POLARIS Type (`HHTYPE`)
 
@@ -184,7 +183,7 @@ The **DEMOS / ATLAS → POLARIS** mappings implement the joint multi-team specif
     ### Crosswalk X-H3: Housing Unit Type (`HU_TYPE`)
 
     - `1` → `HU_SINGLE_FAMILY` (Single Family Detached)
-    - `2` → `HU_SMALL_APT_BLD` (2–9 units)
+    - `2` → `HU_SMALL_APT_BLD` (2 to 9 units)
     - `3` → `HU_LARGE_APT_BLD` (10+ units)
     - `4` → `HU_OTHER` (Mobile home, RV, boat)
     - `5` → `HU_GROUP_QUARTERS` (GQ institutional / non-institutional)
@@ -193,11 +192,11 @@ The **DEMOS / ATLAS → POLARIS** mappings implement the joint multi-team specif
 
     ### Crosswalk X-P1: DEMOS Person Variables → POLARIS
 
-    - `relp`: 0–15 → 0–17 (RELP; 16 and 17 reserved for Group Quarters).
+    - `relp`: 0 to 15 → 0 to 17 (RELP; 16 and 17 reserved for Group Quarters).
     - `gender`: 1 Male, 2 Female.
     - `age`: Integer → Integer.
-    - `education`: 0–24 (ACS SCHL code).
-    - `employment`: 0–6 (ACS ESR code).
+    - `education`: 0 to 24 (ACS SCHL code).
+    - `employment`: 0 to 6 (ACS ESR code).
     - `school_enrollment`: 0 NA, 1 None, 2 Public, 3 Private.
     - `marital_status`: 1 Married, 2 Widowed, 3 Divorced, 4 Separated, 5 Never married. Code `0` resolved via fallback **D-P3a**.
     - `income`: Deflated and rounded to integer dollars.
@@ -220,8 +219,8 @@ The **DEMOS / ATLAS → POLARIS** mappings implement the joint multi-team specif
     - `0` (GRADE_NA) → None
     - `1` (Preschool) → `PREK`
     - `2` (Kindergarten) → `K-8`
-    - `3–10` (Grades 1–8) → `K-8`
-    - `11–14` (Grades 9–12) → `9-12`
+    - `3–10` (Grades 1 to 8) → `K-8`
+    - `11–14` (Grades 9 to 12) → `9-12`
     - `15` (Undergraduate) → `Higher education`
     - `16` (Graduate) → `Higher education`
 
@@ -235,10 +234,10 @@ The **DEMOS / ATLAS → POLARIS** mappings implement the joint multi-team specif
 
     ### Crosswalk X-P5: Entry Grade for School Entrants
 
-    - **Ages 3–17**: Draw from reference distribution of grades among enrolled persons of same age.
+    - **Ages 3 to 17**: Draw from reference distribution of grades among enrolled persons of same age.
     - **Ages 18+**: Draw conditioned on educational attainment:
-      - ≤ 15: Mostly Grade 14.
-      - 16–20: Mostly Undergraduate (Grade 15).
+      - ≤ 15: Primary weight on Grade 14.
+      - 16 to 20: Primary weight on Undergraduate (Grade 15).
       - ≥ 21: Graduate (Grade 16) or Undergraduate (Grade 15).
 
     ### Crosswalk X-P6: K-12 Education Consistency
@@ -252,11 +251,11 @@ The **DEMOS / ATLAS → POLARIS** mappings implement the joint multi-team specif
 
     Maps Census ACS INDP codes to POLARIS `EMPLOYMENT_INDUSTRY_SIMPLE`:
 
-    - **INDUSTRIAL**: INDP ≤ 770 or 6070–6390.
-    - **MANUFACTURING**: INDP 771–3990.
-    - **RETAIL**: INDP 3991–5790.
-    - **SERVICE**: INDP 5791–7790 (except 6070–6390) or 8660–9290.
-    - **GOVERNMENT**: INDP 7860–7890 or 9370–9870.
+    - **INDUSTRIAL**: INDP ≤ 770 or 6070 to 6390.
+    - **MANUFACTURING**: INDP 771 to 3990.
+    - **RETAIL**: INDP 3991 to 5790.
+    - **SERVICE**: INDP 5791 to 7790 (except 6070 to 6390) or 8660 to 9290.
+    - **GOVERNMENT**: INDP 7860 to 7890 or 9370 to 9870.
     - **OTHER**: All remaining codes.
 
 === "Vehicle Crosswalks (X-V1 – X-V5)"
@@ -288,10 +287,10 @@ The **DEMOS / ATLAS → POLARIS** mappings implement the joint multi-team specif
 
     ### Crosswalk X-V4: Vehicle Modelyear → Vintage Type
 
-    Recomputed yearly from vehicle age (`age = SimulationYear - modelyear`):
+    Recomputed each year from vehicle age (`age = SimulationYear - modelyear`):
 
-    - age ≤ 5 → `0` (0–5 years)
-    - 6 ≤ age ≤ 10 → `1` (6–10 years)
+    - age ≤ 5 → `0` (0 to 5 years)
+    - 6 ≤ age ≤ 10 → `1` (6 to 10 years)
     - age ≥ 11 → `2` (10+ years)
 
     ### Crosswalk X-V5: POLARIS `Vehicle_Type` Composite Key Reference
@@ -306,7 +305,7 @@ The **DEMOS / ATLAS → POLARIS** mappings implement the joint multi-team specif
 
 === "Donor Draws Specification Register (D-H1 – D-V2)"
 
-    Attributes not synthesized directly by DEMOS or ATLAS are imputed from the base-year POLARIS reference population using stratified donor pools:
+    When POLARIS requires household, person, or vehicle attributes that UrbanSim, DEMOS, or ATLAS do not generate, probabilistic imputation draws those fields from stratified ACS PUMS, NHTS, and base-year reference pools:
 
     | Draw ID | Target Entity | Donor Attributes Copied | Stratification / Segmentation | Fallback / Collapse Order |
     | :--- | :--- | :--- | :--- | :--- |
@@ -336,36 +335,38 @@ The **DEMOS / ATLAS → POLARIS** mappings implement the joint multi-team specif
     12. **Step 12 (Household Wrap-up)**: Update `time_in_home` and vehicle counts.
     13. **Step 13 (Output & Validation)**: Append unchanged Group Quarters, run integrity assertions, and emit final `Demand.sqlite`.
 
-=== "Network Skims Feedback Loop (.omx)"
+=== "Network Skims & Population Feedback Loop"
 
     ```mermaid
     sequenceDiagram
         autonumber
-        participant OMX_In as InputNetworkSkims (.omx)
-        participant US as UrbanSim
-        participant AT as ATLAS
-        participant DEMOS as DEMOS
-        participant POL as POLARIS DTA
+        participant OMX_In as InputNetworkSkims (.omx, Skim_t)
+        participant US as UrbanSim (t to t+1)
+        participant DEMOS as DEMOS (t to t+1)
+        participant AT as ATLAS (t+1)
+        participant POL as POLARIS (t+1)
         participant OMX_Out as NextYearNetworkSkims (.omx)
 
-        Note over OMX_In: Baseline Year t Skims
-        OMX_In->>US: Zone Accessibility Logsums (AM/MD/PM)
-        OMX_In->>AT: Commute Travel Times & Distances
-        US->>DEMOS: Zonal Marginal Growth Targets
-        DEMOS->>AT: Household Agent Identities & Incomes
-        DEMOS->>POL: Household & Person Agent Microdata
-        AT->>POL: Vehicle Fleet & Powertrain Assignments
+        Note over OMX_In,DEMOS: Year t Base Inputs
+        OMX_In->>US: Zone Accessibility & Travel Impedance (Skim_t)
+        US->>DEMOS: Block-Level Spatial Marginals (M_t+1)
+        Note over DEMOS,POL: Year t+1 Evolution & Simulation
+        DEMOS->>AT: Evolved Population (P_t+1 conforming with M_t+1)
+        DEMOS->>POL: Evolved Household & Person Microdata (P_t+1)
+        AT->>POL: Households with Vehicles & Vehicle Attributes
         US->>POL: Zonal Land Use & Employment Capacities
-        Note over POL: Travel Demand & Highway/Transit Simulation
-        POL->>OMX_Out: Emits Converged Travel Times & Impedance (Year t+1)
+        Note over POL: Job/Household Tenure, Workplace, Activity, Mode & DTA
+        POL->>OMX_Out: Emits Converged Travel Times & Skims (Year t+1)
+        POL-->>DEMOS: Feedback to Next Iteration (POLARIS Population, P_t)
+        OMX_Out-->>US: Feedback to Next Iteration (POLARIS Skim_t)
     ```
 
 ---
 
-## 5. Joint Interface Specification Workbook
+## 5. Multi-Team Interface Specification Workbook
 
-Field-level formulas, donor stratification tables, and assumption logs (`A1`–`A31`) for the DEMOS / ATLAS → POLARIS handoff are maintained in the shared workbook:
+The DEMOS (NLR), ATLAS (LBNL), and POLARIS (ANL) modeling teams maintain field-level formulas, donor stratification tables, and assumption logs (`A1` to `A31`) in the shared workbook:
 
 - **File**: `docs/resources/DEMOS_and_ATLAS_to_POLARIS_interface.xlsx`
-- **Contributors**: DEMOS (NLR, formerly NREL), ATLAS (LBNL), and POLARIS (ANL) modeling teams.
+- **Contributors**: DEMOS (NLR), ATLAS (LBNL), and POLARIS (ANL) modeling teams.
 - **Sheets**: `Overview`, `Households`, `Persons`, `Vehicles`, `Draws`, `Crosswalks`, `Assumptions`, `Open questions`, `Inputs`, `Record classes & events`, and `Process & settings`.
