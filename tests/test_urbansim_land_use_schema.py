@@ -38,14 +38,9 @@ def test_urbansim_classes_and_annotations() -> None:
     zone_cls = view.induced_class("UrbanSimZonalTotals")
     assert zone_cls.annotations["spatial_granularity"].value == "taz_zone"
     assert zone_cls.attributes["zone_id"].identifier is True
-    assert (
-        zone_cls.attributes["pop_households"].annotations["physical_name"].value
-        == "pop_households"
-    )
-    assert (
-        zone_cls.attributes["employment_total"].annotations["physical_name"].value
-        == "employment_total"
-    )
+    assert zone_cls.attributes["zone_id"].annotations["physical_name"].value == "zone"
+    assert "pop_households" in zone_cls.attributes
+    assert "employment_total" in zone_cls.attributes
 
 
 def test_urbansim_instances_validate() -> None:

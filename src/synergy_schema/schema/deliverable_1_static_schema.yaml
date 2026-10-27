@@ -4,7 +4,7 @@ title: Synergy Static Cross-Model Schema Specification
 description: >-
   Master LinkML schema bundle defining the static input-output contracts,
   module entry points, spatial crosswalks, foreign-key relationships, and
-  categorical translations connecting UrbanSim, DEMOS, ATLAS, POLARIS,
+  categorical code crosswalks connecting UrbanSim, DEMOS, ATLAS, POLARIS,
   ActivitySim, BEAM, SynthFirm, and Travel Network Skims for a single
   simulation year.
 

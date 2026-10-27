@@ -41,7 +41,7 @@ These interfaces allow BEAM CORE tools and POLARIS to run as standalone componen
         end
 
         subgraph Outputs ["Downstream Outputs & Feedback to Next Iteration"]
-            POL_StateOut["PolarisPersonStateOutput & PolarisHouseholdStateOutput<br/><i>Population State P_t: Work/School Locations & Tenure Choices (A23, A30)</i>"]
+            POL_StateOut["PolarisPersonStateOutput & PolarisHouseholdStateOutput<br/><i>Population State P_t: Work/School Locations & Tenure Choices</i>"]
             SkimsOut["Next-Year Network Skims (.omx)<br/><i>Simulated Highway/Transit Impedance (Skim_t)</i>"]
         end
 
@@ -380,7 +380,7 @@ classDiagram
 ## 5. POLARIS Activity-Based Demand & Network Skims Schema
 
 POLARIS ingests households, persons, and vehicles into `Demand.sqlite` ([`PolarisDemandDatabaseHousehold`](../schema/PolarisDemandDatabaseHousehold.md), [`PolarisDemandDatabasePerson`](../schema/PolarisDemandDatabasePerson.md), [`PolarisDemandDatabaseVehicle`](../schema/PolarisDemandDatabaseVehicle.md), [`PolarisDemandDatabaseVehicleClass`](../schema/PolarisDemandDatabaseVehicleClass.md), [`PolarisDemandDatabaseVehicleType`](../schema/PolarisDemandDatabaseVehicleType.md)).
-After simulation, POLARIS produces converged network skims ([`NextYearNetworkSkims`](../schema/NextYearNetworkSkims.md)) and post-run population state updates ([`PolarisHouseholdStateOutput`](../schema/PolarisHouseholdStateOutput.md), [`PolarisPersonStateOutput`](../schema/PolarisPersonStateOutput.md), marked **provisional** pending ANL verification of exact SQLite output column names under assumptions A20 to A31).
+After simulation, POLARIS produces converged network skims ([`NextYearNetworkSkims`](../schema/NextYearNetworkSkims.md)) and post-run population state updates ([`PolarisHouseholdStateOutput`](../schema/PolarisHouseholdStateOutput.md), [`PolarisPersonStateOutput`](../schema/PolarisPersonStateOutput.md), marked **provisional** pending ANL verification of exact SQLite output column names).
 
 ```mermaid
 classDiagram

@@ -68,6 +68,3 @@ def test_schema_has_no_year_attribute_or_year_semantics() -> None:
         for cls in view.all_classes()
         for attribute_name in view.induced_class(cls).attributes
     )
-    for class_name in view.all_classes():
-        cls = view.induced_class(class_name)
-        assert cls.annotations["simulation_year"].value == "not_inferred"

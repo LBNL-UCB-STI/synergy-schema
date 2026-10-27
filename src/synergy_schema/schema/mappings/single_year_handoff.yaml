@@ -4,8 +4,8 @@ title: Static Single-Year Multi-Model Data Handoff and Crosswalk Specification
 description: >-
   Formal LinkML specification governing the static structural relationships,
   join keys, foreign references, categorical crosswalks (X-H1 through X-V5),
-  and residue classifications across UrbanSim, DEMOS, ATLAS, POLARIS, and
-  Network Skims for a single simulation year.
+  and unmapped field classifications across UrbanSim, DEMOS, ATLAS, SynthFirm,
+  POLARIS, ActivitySim, BEAM, and Network Skims for a single simulation year.
 
 prefixes:
   synergy_schema: https://w3id.org/LBNL-UCB-STI/synergy-schema/
@@ -41,7 +41,7 @@ enums:
       renamed:
         description: 1-to-1 copy with target field rename.
       enum_crosswalk:
-        description: Categorical translation using an explicit code crosswalk.
+        description: Categorical code mapping using an explicit code crosswalk.
       aggregated:
         description: Spatial or group rollup sum or weighted average.
       derived:
@@ -50,7 +50,7 @@ enums:
         description: Unpivot wide count columns (e.g. fuel x vehicle class counts) into discrete record rows.
 
   ResidueKind:
-    description: Categorization of unmapped fields or synthetic residues.
+    description: Categorization of unmapped source fields or downstream default values.
     permissible_values:
       unmapped_source:
         description: Source column not required or consumed by the downstream model.
@@ -133,7 +133,7 @@ classes:
         range: MappingResidueSpec
         multivalued: true
         inlined: true
-        description: Columns deliberately retained as residue or assigned defaults.
+        description: Source columns not transferred downstream or target columns assigned default values.
 
   FieldMappingSpec:
     description: Detailed mapping specification for a single column.

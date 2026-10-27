@@ -32,7 +32,6 @@ classes:
       model_association: BEAM
       schema_status: authoritative
       status: active
-      enforcement_status: PILATES-observed
     attributes:
       household_id:
         range: integer
@@ -161,7 +160,6 @@ classes:
       model_association: BEAM
       schema_status: authoritative
       status: active
-      enforcement_status: PILATES-observed
     attributes:
       person_id:
         range: integer
@@ -323,7 +321,6 @@ classes:
       model_association: BEAM
       schema_status: authoritative
       status: active
-      enforcement_status: PILATES-observed
     attributes:
       vehicle_id:
         range: string

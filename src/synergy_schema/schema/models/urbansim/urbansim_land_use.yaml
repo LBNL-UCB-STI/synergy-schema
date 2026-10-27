@@ -4,9 +4,9 @@ title: UrbanSim land use, employment, and zonal marginal totals schema
 description: >-
   Notional schema representing the land use, employment allocation, and marginal
   population targets forecasted by UrbanSim for a single simulation year.
-  UrbanSim operates as a macro-spatial provider of control totals at the atomic
-  census block level, aggregated to macro-zones (TAZ) via an explicit spatial
-  mapping crosswalk. It does not generate synthetic individual micro-population records.
+  UrbanSim provides census-block-level population, household, housing-unit, and
+  employment totals that roll up to Traffic Analysis Zones (TAZs) via a spatial
+  crosswalk. It does not generate individual synthetic household or person records.
 
 prefixes:
   synergy_schema: https://w3id.org/LBNL-UCB-STI/synergy-schema/
@@ -163,122 +163,82 @@ classes:
       residential_area:
         range: float
         minimum_value: 0.0
-        annotations:
-          physical_name: residential_area
         description: Total residential floor or lot area.
       commercial_area:
         range: float
         minimum_value: 0.0
-        annotations:
-          physical_name: commercial_area
         description: Total commercial floor or lot area.
       office_area:
         range: float
         minimum_value: 0.0
-        annotations:
-          physical_name: office_area
         description: Total office floor area.
       retail_area:
         range: float
         minimum_value: 0.0
-        annotations:
-          physical_name: retail_area
         description: Total retail floor area.
       industrial_area:
         range: float
         minimum_value: 0.0
-        annotations:
-          physical_name: industrial_area
         description: Total industrial/warehouse floor area.
       institutional_area:
         range: float
         minimum_value: 0.0
-        annotations:
-          physical_name: institutional_area
         description: Institutional / medical / civic land area.
       mixed_use_area:
         range: float
         minimum_value: 0.0
-        annotations:
-          physical_name: mixed_use_area
         description: Mixed-use development area.
       pop_households:
         range: integer
         minimum_value: 0
-        annotations:
-          physical_name: pop_households
         description: Zonal total households matching POLARIS Zone.pop_households.
       pop_persons:
         range: integer
         minimum_value: 0
-        annotations:
-          physical_name: pop_persons
         description: Zonal total persons matching POLARIS Zone.pop_persons.
       pop_group_quarters:
         range: integer
         minimum_value: 0
-        annotations:
-          physical_name: pop_group_quarters
         description: Group quarters population (dorms, barracks, correctional).
       employment_total:
         range: integer
         minimum_value: 0
-        annotations:
-          physical_name: employment_total
         description: Total zonal employment matching POLARIS Zone.employment_total.
       employment_retail:
         range: integer
         minimum_value: 0
-        annotations:
-          physical_name: employment_retail
         description: Retail employment.
       employment_services:
         range: integer
         minimum_value: 0
-        annotations:
-          physical_name: employment_services
         description: Service industry employment.
       employment_government:
         range: integer
         minimum_value: 0
-        annotations:
-          physical_name: employment_government
         description: Government/civic employment.
       employment_manufacturing:
         range: integer
         minimum_value: 0
-        annotations:
-          physical_name: employment_manufacturing
         description: Manufacturing employment.
       employment_industrial:
         range: integer
         minimum_value: 0
-        annotations:
-          physical_name: employment_industrial
         description: Industrial employment.
       employment_other:
         range: integer
         minimum_value: 0
-        annotations:
-          physical_name: employment_other
         description: Other employment categories.
       hh_inc_avg:
         range: float
         minimum_value: 0.0
-        annotations:
-          physical_name: hh_inc_avg
         description: Average household income within the zone.
       percent_white:
         range: float
         minimum_value: 0.0
         maximum_value: 1.0
-        annotations:
-          physical_name: percent_white
         description: Proportion of Caucasian population.
       percent_black:
         range: float
         minimum_value: 0.0
         maximum_value: 1.0
-        annotations:
-          physical_name: percent_black
         description: Proportion of African American population.

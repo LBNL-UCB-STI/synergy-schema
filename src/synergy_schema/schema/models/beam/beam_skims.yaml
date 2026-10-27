@@ -8,14 +8,9 @@ description: >-
   quantifying zone-to-zone (TAZ x TAZ) travel impedance across multiple time
   periods (Early AM, AM peak, Midday, PM peak, Evening) and modes (auto SOV/HOV,
   transit, active, and ridehail/TNC) using LinkML 1D, 2D, and 3D array dimensions.
-  Modeled on the canonical production MTC/ActivitySim/BEAM skims.omx HDF5 layout
+  Modeled on the production MTC/ActivitySim/BEAM skims.omx HDF5 layout
   (root attributes OMX_VERSION='0.2' and SHAPE=[N_zones, N_zones], /data 2D float64
-  OD matrices, and /lookup 1D zone index lookup tables). NOTE (PROVISIONAL): The
-  exact boundary between required core skims (DIST, DISTWALK, SOV_*, and
-  WLK_TRN_WLK_* marked required: true) and optional mode skims (DISTBIKE,
-  SOVTOLL_*, HOV2*, HOV3*, submode transit WLK_{LOC,LRF,EXP,HVY,COM}_* / DRV_*,
-  and ridehail marked required: false) is provisional and should be verified
-  against target regional model configurations.
+  OD matrices, and /lookup 1D zone index lookup tables).
 
 prefixes:
   synergy_schema: https://w3id.org/LBNL-UCB-STI/synergy-schema/
@@ -54,18 +49,6 @@ classes:
       and all other modes like DISTBIKE, SOVTOLL_*, HOV2*, HOV3*, submode transit
       WLK_{LOC,LRF,EXP,HVY,COM}_* / DRV_*, and ridehail as required: false) are
       provisional and worth verifying against target regional model configurations.
-    comments:
-      - >-
-        PROVISIONAL REQUIRED/OPTIONAL SPLIT: Only static distances (DIST, DISTWALK),
-        free-lane single-occupant auto (SOV_TIME, SOV_DIST, SOV_BTOLL across EA, AM,
-        MD, PM, EV), and generic walk-transit-walk accessibility skims
-        (WLK_TRN_WLK_{IVT,IWAIT,XWAIT,WACC,WAUX,WEGR} across AM, MD, PM) are marked
-        required: true. Managed-lane/HOV auto skims (SOVTOLL_*, HOV2*, HOV3*), bike
-        distance (DISTBIKE), transit submode skims (WLK_{LOC,LRF,EXP,HVY,COM}_WLK_*,
-        DRV_{LOC,LRF,EXP,HVY,COM}_WLK_*, WLK_{LOC,LRF,EXP,HVY,COM}_DRV_*), and
-        ridehail skims (RH_*) are marked required: false. This required vs. optional
-        boundary is provisional and should be verified against target regional
-        model configurations.
     aliases:
       - BeamSkims
       - BeamSkimsOutput
@@ -80,7 +63,6 @@ classes:
       required_optional_mode_split_status: provisional
       producer_model: BEAM
       consumer_models: "UrbanSim, ATLAS, ActivitySim, POLARIS"
-      enforcement_status: PILATES-observed
     attributes:
       file_path:
         range: string
@@ -146,7 +128,7 @@ classes:
           status: provisional
         description: >-
           2D static OD matrix [origin_zone, destination_zone] of all-day highway/drive
-          network distance in miles (OMX: /data/DIST). Provisional required core skim.
+          network distance in miles (OMX: /data/DIST).
       DISTWALK:
         range: NonNegativeFloat
         required: true
@@ -160,7 +142,7 @@ classes:
           status: provisional
         description: >-
           2D static OD matrix [origin_zone, destination_zone] of all-day walk network
-          distance in miles (OMX: /data/DISTWALK). Provisional required core skim.
+          distance in miles (OMX: /data/DISTWALK).
       SOV_TIME:
         range: NonNegativeFloat
         required: true
@@ -177,7 +159,6 @@ classes:
           3D time-dependent OD array [time_period, origin_zone, destination_zone] of
           single-occupant vehicle (SOV) in-vehicle travel time in minutes across
           periods EA, AM, MD, PM, EV (OMX: /data/SOV_TIME__{EA,AM,MD,PM,EV}).
-          Provisional required core skim.
       SOV_DIST:
         range: NonNegativeFloat
         required: true
@@ -194,7 +175,6 @@ classes:
           3D time-dependent OD array [time_period, origin_zone, destination_zone] of
           single-occupant vehicle (SOV) travel distance in miles across periods
           EA, AM, MD, PM, EV (OMX: /data/SOV_DIST__{EA,AM,MD,PM,EV}).
-          Provisional required core skim.
       SOV_BTOLL:
         range: NonNegativeFloat
         required: true
@@ -211,7 +191,6 @@ classes:
           3D time-dependent OD array [time_period, origin_zone, destination_zone] of
           single-occupant vehicle (SOV) bridge toll cost across periods
           EA, AM, MD, PM, EV (OMX: /data/SOV_BTOLL__{EA,AM,MD,PM,EV}).
-          Provisional required core skim.
       WLK_TRN_WLK_IVT:
         range: NonNegativeFloat
         required: true
@@ -228,7 +207,6 @@ classes:
           3D time-dependent OD array [time_period, origin_zone, destination_zone] of
           generic walk-transit-walk in-vehicle time in minutes used for accessibility
           calculations (OMX: /data/WLK_TRN_WLK_IVT__{AM,MD,PM}).
-          Provisional required core skim.
       WLK_TRN_WLK_IWAIT:
         range: NonNegativeFloat
         required: true
@@ -245,7 +223,6 @@ classes:
           3D time-dependent OD array [time_period, origin_zone, destination_zone] of
           generic walk-transit-walk initial wait time in minutes used for accessibility
           calculations (OMX: /data/WLK_TRN_WLK_IWAIT__{AM,MD,PM}).
-          Provisional required core skim.
       WLK_TRN_WLK_XWAIT:
         range: NonNegativeFloat
         required: true
@@ -262,7 +239,6 @@ classes:
           3D time-dependent OD array [time_period, origin_zone, destination_zone] of
           generic walk-transit-walk transfer wait time in minutes used for accessibility
           calculations (OMX: /data/WLK_TRN_WLK_XWAIT__{AM,MD,PM}).
-          Provisional required core skim.
       WLK_TRN_WLK_WACC:
         range: NonNegativeFloat
         required: true
@@ -279,7 +255,6 @@ classes:
           3D time-dependent OD array [time_period, origin_zone, destination_zone] of
           generic walk-transit-walk walk access time in minutes used for accessibility
           calculations (OMX: /data/WLK_TRN_WLK_WACC__{AM,MD,PM}).
-          Provisional required core skim.
       WLK_TRN_WLK_WAUX:
         range: NonNegativeFloat
         required: true
@@ -296,7 +271,6 @@ classes:
           3D time-dependent OD array [time_period, origin_zone, destination_zone] of
           generic walk-transit-walk auxiliary walk time in minutes used for accessibility
           calculations (OMX: /data/WLK_TRN_WLK_WAUX__{AM,MD,PM}).
-          Provisional required core skim.
       WLK_TRN_WLK_WEGR:
         range: NonNegativeFloat
         required: true
@@ -313,7 +287,6 @@ classes:
           3D time-dependent OD array [time_period, origin_zone, destination_zone] of
           generic walk-transit-walk walk egress time in minutes used for accessibility
           calculations (OMX: /data/WLK_TRN_WLK_WEGR__{AM,MD,PM}).
-          Provisional required core skim.
 
       # ========================================================================
       # Canonical Optional Mode Families (required: false, status: provisional)
@@ -331,7 +304,7 @@ classes:
           status: provisional
         description: >-
           2D static OD matrix [origin_zone, destination_zone] of all-day bicycle
-          network distance in miles (OMX: /data/DISTBIKE). Provisional optional skim.
+          network distance in miles (OMX: /data/DISTBIKE).
       SOVTOLL_TIME:
         range: NonNegativeFloat
         required: false
@@ -749,7 +722,7 @@ classes:
         annotations:
           matrix_name: WLK_TRN_WLK_TOTIVT
         description: >-
-          3D multi-period OD skim tensor [time_period, origin_zone, destination_zone]
+          3D multi-period OD array [time_period, origin_zone, destination_zone]
           of total transit in-vehicle travel time in minutes.
       transit_initial_wait_time:
         range: NonNegativeFloat
@@ -762,7 +735,7 @@ classes:
         annotations:
           matrix_name: WLK_EXP_WLK_IWAIT
         description: >-
-          3D multi-period OD skim tensor [time_period, origin_zone, destination_zone]
+          3D multi-period OD array [time_period, origin_zone, destination_zone]
           of transit initial waiting time in minutes.
       transit_transfer_wait_time:
         range: NonNegativeFloat
@@ -773,7 +746,7 @@ classes:
             - alias: origin_zone
             - alias: destination_zone
         description: >-
-          3D multi-period OD skim tensor [time_period, origin_zone, destination_zone]
+          3D multi-period OD array [time_period, origin_zone, destination_zone]
           of transit transfer waiting time in minutes.
       transit_fare:
         range: NonNegativeFloat
@@ -786,7 +759,7 @@ classes:
         annotations:
           matrix_name: WLK_TRN_WLK_FAR
         description: >-
-          3D multi-period OD skim tensor [time_period, origin_zone, destination_zone]
+          3D multi-period OD array [time_period, origin_zone, destination_zone]
           of transit monetary fare cost in dollars ($).
       transit_failures:
         range: NonNegativeFloat
@@ -799,7 +772,7 @@ classes:
         annotations:
           matrix_name: WLK_TRN_WLK_FAILURES
         description: >-
-          3D multi-period OD skim tensor [time_period, origin_zone, destination_zone]
+          3D multi-period OD array [time_period, origin_zone, destination_zone]
           of count or probability of transit routing or boarding capacity failures.
       walk_distance:
         range: NonNegativeFloat
@@ -837,7 +810,7 @@ classes:
           matrix_name: RH_SOLO_WAIT
           status: provisional
         description: >-
-          3D multi-period OD skim tensor [time_period, origin_zone, destination_zone]
+          3D multi-period OD array [time_period, origin_zone, destination_zone]
           of average passenger wait time for solo ridehail/TNC pickup in minutes.
       ridehail_solo_cost:
         range: NonNegativeFloat
@@ -851,7 +824,7 @@ classes:
           matrix_name: RH_SOLO_COST
           status: provisional
         description: >-
-          3D multi-period OD skim tensor [time_period, origin_zone, destination_zone]
+          3D multi-period OD array [time_period, origin_zone, destination_zone]
           of average monetary fare for solo ridehail/TNC trip in dollars ($).
       ridehail_pooled_wait_time:
         range: NonNegativeFloat
@@ -865,7 +838,7 @@ classes:
           matrix_name: RH_POOLED_WAIT
           status: provisional
         description: >-
-          3D multi-period OD skim tensor [time_period, origin_zone, destination_zone]
+          3D multi-period OD array [time_period, origin_zone, destination_zone]
           of average passenger wait time for pooled ridehail/TNC pickup in minutes.
       ridehail_pooled_cost:
         range: NonNegativeFloat
@@ -879,7 +852,7 @@ classes:
           matrix_name: RH_POOLED_COST
           status: provisional
         description: >-
-          3D multi-period OD skim tensor [time_period, origin_zone, destination_zone]
+          3D multi-period OD array [time_period, origin_zone, destination_zone]
           of average monetary fare for pooled ridehail/TNC trip in dollars ($).
       ridehail_pooled_rejection_prob:
         range: UnitIntervalFloat
@@ -893,7 +866,7 @@ classes:
           matrix_name: RH_POOLED_REJECTIONPROB
           status: provisional
         description: >-
-          3D multi-period OD skim tensor [time_period, origin_zone, destination_zone]
+          3D multi-period OD array [time_period, origin_zone, destination_zone]
           of probability of pooled ridehail ride request rejection or unavailability (0.0 to 1.0).
       ridehail_solo_trips:
         range: NonNegativeFloat
@@ -907,7 +880,7 @@ classes:
           matrix_name: RH_SOLO_TRIPS
           status: provisional
         description: >-
-          3D multi-period OD skim tensor [time_period, origin_zone, destination_zone]
+          3D multi-period OD array [time_period, origin_zone, destination_zone]
           of total simulated solo ridehail trip volume between zone pairs.
       ridehail_pooled_trips:
         range: NonNegativeFloat
@@ -921,7 +894,7 @@ classes:
           matrix_name: RH_POOLED_TRIPS
           status: provisional
         description: >-
-          3D multi-period OD skim tensor [time_period, origin_zone, destination_zone]
+          3D multi-period OD array [time_period, origin_zone, destination_zone]
           of total simulated pooled ridehail trip volume between zone pairs.
 
   BeamODSkimsRecord:
@@ -938,7 +911,6 @@ classes:
       default_skim_representation: false
       schema_status: authoritative
       status: active
-      enforcement_status: PILATES-observed
     attributes:
       time_period:
         range: string
