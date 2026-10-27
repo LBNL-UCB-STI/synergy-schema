@@ -37,7 +37,7 @@ This repository publishes the LinkML schema definitions, module entry points, ca
 - **SynthFirm** *(LBNL)*: Synthetic business establishments, commercial vehicle fleets, and B2B commodity shipments.
 - **Network Travel Skims (`.omx` / `.zarr`)**: Multi-dimensional zone-to-zone highway, transit, and ridehail travel impedance arrays.
 
-These schemas define the module entry points that allow BEAM CORE tools (PILATES) and POLARIS Studio to operate either as standalone modules or in coordinated serial and parallel workflows. Validated against multi-year Austin regional pilot datasets, the specification gives model teams at Argonne (POLARIS), NLR (DEMOS), and Berkeley Lab (ATLAS, BEAM, SynthFirm, ActivitySim, and containerized UrbanSim) a shared reference for table structures, join keys, categorical crosswalks (`X-H1` to `X-V5`), and probabilistic donor imputations (`D-H1` to `D-V2`). The same contracts also specify the SQL projection queries and seeded Python refinement operators used in multi-year workflow execution.
+These schemas define the module entry points that allow BEAM CORE tools (PILATES) and POLARIS Studio to operate either as standalone modules or in coordinated serial and parallel workflows. Grounded in Austin regional pilot datasets (DEMOS, ATLAS, POLARIS), San Francisco Bay Area baseline outputs (SynthFirm, MTC skims), and PILATES reference contracts (ActivitySim, BEAM, UrbanSim), the specification gives model teams at Argonne (POLARIS), NLR (DEMOS), and Berkeley Lab (ATLAS, BEAM, SynthFirm, ActivitySim, and containerized UrbanSim) a shared reference for table structures, join keys, categorical crosswalks (`X-H1` to `X-V5`), and probabilistic donor imputations (`D-H1` to `D-V2`). The same contracts also specify the SQL projection queries and seeded Python refinement operators used in multi-year workflow execution.
 
 ---
 
@@ -55,7 +55,7 @@ Browse the compiled documentation, ER diagrams, mapping matrices, and LinkML cla
 ├── .github/workflows/
 │   └── deploy-pages.yml       # GitHub Actions workflow deploying docs to GitHub Pages
 ├── docs/                      # Markdown source files for documentation site
-│   ├── index.md               # Overview, model entry points, and Austin pilot scope
+│   ├── index.md               # Overview, model entry points, and reference data grounding
 │   ├── interactive-schema.md  # Compiled crow's-foot ER diagrams & foreign-key table
 │   ├── deliverable_1_uml.md   # Workflow pipelines & per-model UML class diagrams
 │   ├── contract-at-a-glance.md# Handoff matrix, crosswalks (X-H1..X-V5), & donor draws
@@ -377,19 +377,19 @@ The schemas separate upstream population and fleet generation from downstream tr
 
 ---
 
-## Participating Models & Austin Pilot Grounding
+## Participating Models & Reference Data Grounding
 
-Every schema class and mapping rule is checked against sample inputs and outputs from the Austin regional pilot study:
+Every schema class and mapping rule is grounded in reference model inputs, outputs, and interface specifications from the Austin regional pilot, the San Francisco Bay Area (MTC) baseline, and PILATES workflow contracts:
 
-| Model / Interface | Role in Regional Workflow | Austin Pilot Data |
+| Model / Interface | Role in Regional Workflow | Reference Data & Grounding |
 | :--- | :--- | :--- |
-| **UrbanSim** | Block-level household and employment totals; Block-to-TAZ lookups; zonal land-use tables | Austin Census Block (`15-character GEOID`) and TAZ (`zone_id`) geometry |
-| **DEMOS** | Demographic synthesis and multi-year household and person evolution | Austin evolved household and person tables (`hh_out_*.csv`, `pop_out_*.csv`) linked to Texas ACS PUMS records |
-| **ATLAS** | Household vehicle counts, body types, vehicle age, and powertrains (`ICE`, `Hybrid`, `PHEV`, `AEV`) | 6-county Austin metro output (`household_*.csv`, `vehicles_*.csv`) covering Bastrop, Burnet, Caldwell, Hays, Travis, and Williamson counties |
-| **POLARIS** | Activity-based travel demand (`Demand.sqlite`), network supply (`Supply.sqlite`), and post-run state feedback (`Result.sqlite`) | Austin `Demand.sqlite` tables, `Vehicle_Class` / `Vehicle_Type` codes, and `.omx` skim matrices |
-| **ActivitySim & BEAM** | Tour-based travel demand (ActivitySim) and multi-agent traffic and charging simulation (BEAM) | Austin ActivitySim household/person CSVs, `.omx` skims, and BEAM `households`, `persons`, `vehicles`, and `plans` tables |
-| **SynthFirm** | Business establishments, commercial vehicle fleets, and B2B freight shipments | Austin establishment, carrier, B2B shipment, and international freight tables |
-| **Travel Network Skims** | Origin-destination travel time, distance, cost, and transit/ridehail matrices | `.omx` (HDF5) and `.zarr` multi-dimensional array schemas |
+| **UrbanSim** | Block-level household and employment totals; Block-to-TAZ lookups; zonal land-use tables | PILATES UrbanSim output specification (`status: notional`), aligned with Austin 15-digit Census Block (`block_id`, `48453...`) and TAZ (`Zone`) keys in DEMOS and POLARIS |
+| **DEMOS** | Demographic synthesis and multi-year household and person evolution | Austin 2018 and 2019 POLARIS-mapped household and person CSV exports (`Household2018_POLARIS_mapped.csv`, `Person2018_POLARIS_mapped.csv`), `DEMOS_input_output.xlsx`, and Texas ACS PUMS donor linkage (`serialno`, `pnum`) |
+| **ATLAS** | Household vehicle counts, body types, vehicle age, and powertrains (`ICE`, `Hybrid`, `PHEV`, `AEV`) | 6-county Austin metro output (`48.{021,053,055,209,453,491}.atlas_hh.csv` and `*.atlas_veh.csv` covering Bastrop, Burnet, Caldwell, Hays, Travis, and Williamson counties) and `ATLAS_Input_Output.xlsx` |
+| **POLARIS** | Activity-based travel demand (`Demand.sqlite`), network supply (`Supply.sqlite`), and post-run state feedback (`Result.sqlite`) | Austin `Austin-Demand_incl_relp_hh_matches_acs.sqlite` (`Household`, `Person`, `Vehicle`, `Vehicle_Class`, `Vehicle_Type`), `Austin-Supply.sqlite` (`Zone`, `Location`), `POLARIS_variables.xlsx`, and `DEMOS_and_ATLAS_to_POLARIS_interface.xlsx` |
+| **ActivitySim & BEAM** | Tour-based travel demand (ActivitySim) and multi-agent traffic and charging simulation (BEAM) | PILATES reference contracts (`HouseholdsBeamIn`, `PersonsBeamIn`, `VehiclesBeamIn`, `PlansBeamIn`) and production MTC / ActivitySim / BEAM `skims.omx` layout |
+| **SynthFirm** | Business establishments, commercial vehicle fleets, and B2B freight shipments | San Francisco Bay Area baseline dataset (`SF_baseline011226`, 2018 & 2050: `synthetic_firms_with_fleet_mc_adjusted.csv`, `synthetic_carriers.csv`, `B2B_Flow`, and import/export OD tables) |
+| **Travel Network Skims** | Origin-destination travel time, distance, cost, and transit/ridehail matrices | Production MTC / ActivitySim / BEAM `skims.omx` (OMX v0.2 HDF5) and `.zarr` multi-dimensional array schemas; POLARIS skim interface specification |
 """
 
 

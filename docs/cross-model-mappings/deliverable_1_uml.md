@@ -551,7 +551,7 @@ classDiagram
 
 BEAM ingests demographic agents ([`BeamHouseholdRecord`](../schema/BeamHouseholdRecord.md), [`BeamPersonRecord`](../schema/BeamPersonRecord.md)),
 the ATLAS vehicle fleet ([`BeamVehicleRecord`](../schema/BeamVehicleRecord.md)), and ActivitySim daily plans ([`BeamPlanRecord`](../schema/BeamPlanRecord.md), [`BeamPlanOutputRecord`](../schema/BeamPlanOutputRecord.md)),
-and outputs [`BeamNetworkSkims`](../schema/BeamNetworkSkims.md) (`.omx` / `.zarr` LinkML arrays). The Austin `skims.omx` baseline requires `DIST`, `DISTWALK`, `SOV_*`, and `WLK_TRN_WLK_*` arrays, while marking managed-lane, HOV, transit submode, and ridehail skims as **provisional** optional extensions pending collaborator verification.
+and outputs [`BeamNetworkSkims`](../schema/BeamNetworkSkims.md) (`.omx` / `.zarr` LinkML arrays). The production MTC / BEAM `skims.omx` baseline requires `DIST`, `DISTWALK`, `SOV_*`, and `WLK_TRN_WLK_*` arrays, while marking managed-lane, HOV, transit submode, and ridehail skims as **provisional** optional extensions pending collaborator verification.
 
 ```mermaid
 classDiagram

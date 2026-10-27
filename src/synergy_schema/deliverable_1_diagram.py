@@ -565,7 +565,7 @@ def render_deliverable_1_uml(
         "",
         f"BEAM ingests demographic agents ([`BeamHouseholdRecord`]({schema_prefix}/BeamHouseholdRecord.md), [`BeamPersonRecord`]({schema_prefix}/BeamPersonRecord.md)),",
         f"the ATLAS vehicle fleet ([`BeamVehicleRecord`]({schema_prefix}/BeamVehicleRecord.md)), and ActivitySim daily plans ([`BeamPlanRecord`]({schema_prefix}/BeamPlanRecord.md), [`BeamPlanOutputRecord`]({schema_prefix}/BeamPlanOutputRecord.md)),",
-        f"and outputs [`BeamNetworkSkims`]({schema_prefix}/BeamNetworkSkims.md) (`.omx` / `.zarr` LinkML arrays). The Austin `skims.omx` baseline requires `DIST`, `DISTWALK`, `SOV_*`, and `WLK_TRN_WLK_*` arrays, while marking managed-lane, HOV, transit submode, and ridehail skims as **provisional** optional extensions pending collaborator verification.",
+        f"and outputs [`BeamNetworkSkims`]({schema_prefix}/BeamNetworkSkims.md) (`.omx` / `.zarr` LinkML arrays). The production MTC / BEAM `skims.omx` baseline requires `DIST`, `DISTWALK`, `SOV_*`, and `WLK_TRN_WLK_*` arrays, while marking managed-lane, HOV, transit submode, and ridehail skims as **provisional** optional extensions pending collaborator verification.",
         "",
         "```mermaid",
         "classDiagram",
