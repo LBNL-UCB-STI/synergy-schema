@@ -82,6 +82,19 @@ def test_dist_site_is_compiled_with_all_sections() -> None:
     ).read_text(encoding="utf-8")
     assert "Open Matrix OMX travel impedance matrices" in channel_type_md
 
+    schema_index_md = (DIST_DIR / "docs" / "schema" / "index.md").read_text(
+        encoding="utf-8"
+    )
+    assert "## Schema Modules & Subsets" in schema_index_md
+    assert "## Classes by Model & Domain" in schema_index_md
+    assert "### UrbanSim Land Use & Spatial Crosswalk" in schema_index_md
+    assert "### POLARIS Demand & Post-Run State" in schema_index_md
+    assert "| Table / File Artifact |" in schema_index_md
+    assert (
+        "Open Matrix (.omx) container representing baseline zone-to-zone travel"
+        in schema_index_md
+    )
+
     # Verify no link escapes above repository root via ../../schema/
     for html_file in site_dir.rglob("*.html"):
         content = html_file.read_text(encoding="utf-8")

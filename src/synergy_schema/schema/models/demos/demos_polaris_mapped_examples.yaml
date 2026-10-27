@@ -16,14 +16,27 @@ default_range: string
 imports:
   - linkml:types
 
+subsets:
+  demos:
+    title: "DEMOS Demographic Evolution"
+    rank: 20
+    description: >-
+      Synthetic household and person records evolved across simulation years by
+      DEMOS with Census ACS PUMS seed lineage.
+
 classes:
   DemosPolarisMappedHousehold:
+    in_subset:
+      - demos
+    rank: 1
     description: >-
       Authoritative household schema for DEMOS synthetic population mapped
       for POLARIS simulation. Physical columns match the DEMOS household export.
     aliases:
       - DemosHousehold
     annotations:
+      model_association: DEMOS
+      artifact_table: "Household2018_POLARIS_mapped.csv"
       schema_status: authoritative
       status: active
     attributes:
@@ -76,12 +89,17 @@ classes:
         description: Source Census ACS PUMS household serial number for seed lineage tracking.
 
   DemosPolarisMappedPerson:
+    in_subset:
+      - demos
+    rank: 2
     description: >-
       Authoritative person schema for DEMOS synthetic population mapped for
       POLARIS simulation. Physical columns match the DEMOS person export.
     aliases:
       - DemosPerson
     annotations:
+      model_association: DEMOS
+      artifact_table: "Person2018_POLARIS_mapped.csv"
       schema_status: authoritative
       status: active
     attributes:

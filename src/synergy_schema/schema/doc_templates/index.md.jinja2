@@ -1,0 +1,141 @@
+# {% if schema.title %}{{ schema.title }}{% else %}{{ schema.name }}{% endif %}
+
+{% if schema.description %}{{ schema.description }}{% endif %}
+
+- **Schema URI:** `{{ schema.id }}`
+- **Schema Name:** `{{ schema.name }}`
+{% if schema.version %}- **Version:** `{{ schema.version }}`
+{% endif %}
+
+{% if include_top_level_diagram %}
+
+## Schema Diagram
+
+```{{ gen.mermaid_directive() }}
+{{ gen.mermaid_diagram() }}
+```
+{% endif %}
+
+## Schema Modules & Subsets
+
+Classes and enumerations in this schema are organized into [LinkML subsets](https://linkml.io/linkml-model/latest/docs/SubsetDefinition/) corresponding to each participating model and interface domain:
+
+| Subset | Model / Domain | Source YAML | Description |
+| --- | --- | --- | --- |
+{% for s in schemaview.all_subsets().values() | selectattr('rank', 'defined') | selectattr('rank', 'ne', none) | sort(attribute='rank') -%}
+{% set s_ann = schemaview.annotation_dict(s.name) -%}
+| {{ gen.link(s, True) }} | **{{ s.title or s.name }}** | `{{ s_ann.get('source_yaml', '—') }}` | {{ s.description|enshorten }} |
+{% endfor %}
+
+---
+
+## Classes by Model & Domain
+
+{% for s in schemaview.all_subsets().values() | selectattr('rank', 'defined') | selectattr('rank', 'ne', none) | sort(attribute='rank') %}
+{% set s_ann = schemaview.annotation_dict(s.name) %}
+### {{ s.title or s.name }}
+
+{{ s.description }}
+
+- **Subset page:** {{ gen.link(s, True) }}{% if s_ann.get('source_yaml') %} · **Source YAML:** `{{ s_ann.get('source_yaml') }}`{% endif %}
+
+| Class | Table / File Artifact | Description |
+| --- | --- | --- |
+{% set ranked_classes = [] -%}
+{% set unranked_classes = [] -%}
+{% for c in gen.all_class_objects() -%}
+{% if c.in_subset and s.name in c.in_subset -%}
+{% if c.rank is not none -%}
+{% set _ = ranked_classes.append(c) -%}
+{% else -%}
+{% set _ = unranked_classes.append(c) -%}
+{% endif -%}
+{% endif -%}
+{% endfor -%}
+{% for c in (ranked_classes | sort(attribute='rank')) + (unranked_classes | sort(attribute=sort_by)) -%}
+{% set c_ann = schemaview.annotation_dict(c.name) -%}
+| {{ gen.link(c, True) }}{% if c.is_a %}<br><small>inherits {{ gen.link(schemaview.get_class(c.is_a), True) }}</small>{% endif %} | {% if c_ann.get('artifact_table') %}`{{ c_ann.get('artifact_table') }}`{% else %}—{% endif %} | {{ c.description|enshorten }} |
+{% endfor %}
+{% endfor -%}
+{%- set ungrouped_classes = [] -%}
+{%- for c in gen.all_class_objects() -%}
+{%- if not c.in_subset -%}
+{%- set _ = ungrouped_classes.append(c) -%}
+{%- endif -%}
+{%- endfor -%}
+{%- if ungrouped_classes %}
+
+### Other Classes
+
+| Class | Description |
+| --- | --- |
+{% for c in ungrouped_classes | sort(attribute=sort_by) -%}
+| {{ gen.link(c, True) }} | {{ c.description|enshorten }} |
+{% endfor %}
+{% endif %}
+
+---
+
+## Enumerations
+
+| Enumeration | Subset / Domain | Description |
+| --- | --- | --- |
+{% for s in schemaview.all_subsets().values() | selectattr('rank', 'defined') | selectattr('rank', 'ne', none) | sort(attribute='rank') -%}
+{% set ranked_enums = [] -%}
+{% set unranked_enums = [] -%}
+{% for e in gen.all_enum_objects() -%}
+{% if e.in_subset and s.name in e.in_subset -%}
+{% if e.rank is not none -%}
+{% set _ = ranked_enums.append(e) -%}
+{% else -%}
+{% set _ = unranked_enums.append(e) -%}
+{% endif -%}
+{% endif -%}
+{% endfor -%}
+{% for e in (ranked_enums | sort(attribute='rank')) + (unranked_enums | sort(attribute=sort_by)) -%}
+| {{ gen.link(e, True) }} | {{ gen.link(s, True) }} | {{ e.description|enshorten }} |
+{% endfor -%}
+{% endfor -%}
+{% for e in gen.all_enum_objects() | sort(attribute=sort_by) -%}
+{% if not e.in_subset -%}
+| {{ gen.link(e, True) }} | — | {{ e.description|enshorten }} |
+{% endif -%}
+{% endfor %}
+
+---
+
+## Domain Types & Complete Slot Index
+
+### Custom Domain Types
+
+| Type | Base Type | Description |
+| --- | --- | --- |
+{% for t in gen.all_type_objects() | sort(attribute=sort_by) -%}
+{% if t.typeof -%}
+| {{ gen.link(t, True) }} | `{{ t.typeof }}` | {{ t.description|enshorten }} |
+{% endif -%}
+{% endfor %}
+
+<details markdown="1">
+<summary><strong>Built-in LinkML Scalar Types</strong></summary>
+
+| Type | Python / XSD Base | URI | Description |
+| --- | --- | --- | --- |
+{% for t in gen.all_type_objects() | sort(attribute=sort_by) -%}
+{% if not t.typeof -%}
+| {{ gen.link(t, True) }} | `{{ t.base }}` | `{{ t.uri }}` | {{ t.description|enshorten }} |
+{% endif -%}
+{% endfor %}
+
+</details>
+
+<details markdown="1">
+<summary><strong>Complete Alphabetical Slot / Attribute Index ({{ gen.all_slot_objects() | list | length }} attributes)</strong></summary>
+
+| Slot | Description |
+| --- | --- |
+{% for s in gen.all_slot_objects() | sort(attribute=sort_by) -%}
+| {{ gen.link(s, True) }} | {{ s.description|enshorten }} |
+{% endfor %}
+
+</details>

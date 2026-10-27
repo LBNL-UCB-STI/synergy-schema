@@ -22,6 +22,11 @@ default_range: string
 imports:
   - linkml:types
 
+subsets:
+  network_skims:
+    title: Network Travel Skims (.omx / .zarr)
+    description: Zone-to-zone travel time, distance, and cost impedance matrices exchanged across models.
+
 types:
   NonNegativeFloat:
     typeof: float
@@ -35,19 +40,22 @@ types:
 
 classes:
   BeamNetworkSkims:
+    in_subset:
+      - network_skims
+    rank: 4
     description: >-
       Default and authoritative multi-modal, multi-period zone-to-zone impedance
       matrix container emitted by BEAM simulation, packaged in Open Matrix (.omx)
       or Zarr (.zarr) array format. In HDF5 .omx storage, root attributes define
-      OMX_VERSION = '0.2' and SHAPE = [N_zones, N_zones], group /lookup holds 1D
-      [origin_zone] zone index lookup tables, and group /data holds 2D float64
-      [origin_zone, destination_zone] matrices where time-dependent modes are
-      stored per period as /data/<MODE>_<MEASURE>__<PERIOD> (corresponding to 3D
-      [time_period, origin_zone, destination_zone] arrays when stacked along
-      time_period or in Zarr). Provisional note: the required vs. optional mode
-      rules (marking DIST, DISTWALK, SOV_*, and WLK_TRN_WLK_* as required: true
-      and all other modes like DISTBIKE, SOVTOLL_*, HOV2*, HOV3*, submode transit
-      WLK_{LOC,LRF,EXP,HVY,COM}_* / DRV_*, and ridehail as required: false) are
+      `OMX_VERSION = '0.2'` and `SHAPE = [N_zones, N_zones]`, group `/lookup` holds 1D
+      `[origin_zone]` zone index lookup tables, and group `/data` holds 2D float64
+      `[origin_zone, destination_zone]` matrices where time-dependent modes are
+      stored per period as `/data/<MODE>_<MEASURE>__<PERIOD>` (corresponding to 3D
+      `[time_period, origin_zone, destination_zone]` arrays when stacked along
+      `time_period` or in Zarr). Provisional note: the required vs. optional mode
+      rules (marking `DIST`, `DISTWALK`, `SOV_*`, and `WLK_TRN_WLK_*` as `required: true`
+      and all other modes like `DISTBIKE`, `SOVTOLL_*`, `HOV2*`, `HOV3*`, submode transit
+      `WLK_{LOC,LRF,EXP,HVY,COM}_*` / `DRV_*`, and ridehail as `required: false`) are
       provisional and worth verifying against target regional model configurations.
     aliases:
       - BeamSkims
@@ -55,6 +63,7 @@ classes:
     annotations:
       owner: BEAM
       model_association: BEAM
+      artifact_table: "skims.omx / skims.zarr (BEAM)"
       contract_family: network_skims
       format: "omx, zarr"
       default_skim_representation: true
@@ -898,6 +907,9 @@ classes:
           of total simulated pooled ridehail trip volume between zone pairs.
 
   BeamODSkimsRecord:
+    in_subset:
+      - network_skims
+    rank: 5
     description: >-
       Secondary intermediate router origin-destination CSV record schema emitted by
       the BEAM router (e.g. skimsActivitySimOD_current.csv.gz) prior to multi-dimensional
@@ -907,6 +919,7 @@ classes:
     annotations:
       owner: BEAM
       table_name: skimsActivitySimOD_current
+      artifact_table: "skimsActivitySimOD_current.csv.gz"
       model_association: BEAM
       default_skim_representation: false
       schema_status: authoritative

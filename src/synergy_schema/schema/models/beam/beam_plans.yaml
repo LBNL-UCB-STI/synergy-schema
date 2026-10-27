@@ -18,8 +18,16 @@ default_range: string
 imports:
   - linkml:types
 
+subsets:
+  beam:
+    title: BEAM — Dynamic Multi-Modal Supply Simulation
+    description: Agent population, vehicle inputs, and travel plans for the BEAM dynamic network simulation engine.
+
 classes:
   BeamPlanRecord:
+    in_subset:
+      - beam
+    rank: 4
     description: >-
       Authoritative travel plan element schema provided as input to BEAM,
       corresponding to PlansBeamIn in the PILATES reference implementation.
@@ -32,6 +40,7 @@ classes:
     annotations:
       owner: BEAM
       table_name: plans
+      artifact_table: "plans.csv / .parquet"
       model_association: BEAM
       schema_status: authoritative
       status: active
@@ -132,6 +141,9 @@ classes:
         description: Serialized space-delimited list of network link IDs traversed along the route.
 
   BeamPlanOutputRecord:
+    in_subset:
+      - beam
+    rank: 5
     description: >-
       Executed travel plan element schema emitted as output by BEAM dynamic
       traffic simulation, corresponding to BeamPlansOut in PILATES.
@@ -142,6 +154,7 @@ classes:
     annotations:
       owner: BEAM
       table_name: executedPlans
+      artifact_table: "executedPlans.csv / beamPlans.parquet"
       model_association: BEAM
       schema_status: authoritative
       status: active

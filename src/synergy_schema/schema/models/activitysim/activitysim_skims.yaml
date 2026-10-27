@@ -22,6 +22,11 @@ default_range: string
 imports:
   - linkml:types
 
+subsets:
+  network_skims:
+    title: Network Travel Skims (.omx / .zarr)
+    description: Zone-to-zone travel time, distance, and cost impedance matrices exchanged across models.
+
 types:
   NonNegativeFloat:
     typeof: float
@@ -30,19 +35,22 @@ types:
 
 classes:
   ActivitySimNetworkSkims:
+    in_subset:
+      - network_skims
+    rank: 3
     description: >-
       Canonical multi-modal, multi-period zone-to-zone impedance matrix container
       consumed by ActivitySim in Open Matrix (.omx) or Zarr (.zarr) array format.
-      In HDF5 .omx storage, root attributes define OMX_VERSION = '0.2' and
-      SHAPE = [N_zones, N_zones], group /lookup holds 1D [origin_zone] zone index
-      lookup vectors, and group /data holds 2D float64 (origin_zone, destination_zone)
+      In HDF5 .omx storage, root attributes define `OMX_VERSION = '0.2'` and
+      `SHAPE = [N_zones, N_zones]`, group `/lookup` holds 1D `[origin_zone]` zone index
+      lookup vectors, and group `/data` holds 2D float64 `(origin_zone, destination_zone)`
       matrices where time-dependent modes are stored per period as
-      /data/<MODE>_<MEASURE>__<PERIOD> (periods EA, AM, MD, PM, EV for auto and
-      transit submodes; AM, MD, PM for WLK_TRN_WLK accessibility skims), corresponding
-      to 3D [time_period, origin_zone, destination_zone] arrays in stacked or Zarr
-      representation. Provisional note: the classification of DIST, DISTWALK, SOV_*,
-      and WLK_TRN_WLK_* as required: true and all other mode families (DISTBIKE,
-      SOVTOLL_*, HOV2*, HOV3*, and transit submodes) as required: false is provisional
+      `/data/<MODE>_<MEASURE>__<PERIOD>` (periods EA, AM, MD, PM, EV for auto and
+      transit submodes; AM, MD, PM for `WLK_TRN_WLK` accessibility skims), corresponding
+      to 3D `[time_period, origin_zone, destination_zone]` arrays in stacked or Zarr
+      representation. Provisional note: the classification of `DIST`, `DISTWALK`, `SOV_*`,
+      and `WLK_TRN_WLK_*` as `required: true` and all other mode families (`DISTBIKE`,
+      `SOVTOLL_*`, `HOV2*`, `HOV3*`, and transit submodes) as `required: false` is provisional
       and worth verifying against target regional model configurations.
     aliases:
       - ActivitySimSkims
@@ -50,6 +58,7 @@ classes:
     annotations:
       owner: ActivitySim
       model_association: ActivitySim
+      artifact_table: "skims.omx / skims.zarr (ActivitySim)"
       contract_family: network_skims
       format: "omx, zarr"
       default_skim_representation: true

@@ -16,8 +16,19 @@ default_range: string
 imports:
   - linkml:types
 
+subsets:
+  activitysim:
+    title: "ActivitySim Travel Demand"
+    rank: 50
+    description: >-
+      Household, person, and Traffic Analysis Zone (TAZ) land-use input tables
+      consumed by ActivitySim for tour and mode choice modeling.
+
 classes:
   ActivitySimHouseholdInputRecord:
+    in_subset:
+      - activitysim
+    rank: 1
     description: >-
       Household input record consumed by ActivitySim, linking household identity,
       residential census block and traffic analysis zone (TAZ), and household
@@ -25,6 +36,7 @@ classes:
     annotations:
       owner: ActivitySim
       model_association: ActivitySim
+      artifact_table: "households.csv"
       schema_status: authoritative
       status: active
     attributes:
@@ -60,12 +72,16 @@ classes:
           Household auto ownership level or vehicle count used by ActivitySim choice models.
 
   ActivitySimPersonInputRecord:
+    in_subset:
+      - activitysim
+    rank: 2
     description: >-
       Person input record consumed by ActivitySim, linking each synthetic person
       to their household and home, workplace, and school zones.
     annotations:
       owner: ActivitySim
       model_association: ActivitySim
+      artifact_table: "persons.csv"
       schema_status: authoritative
       status: active
     attributes:
@@ -106,11 +122,15 @@ classes:
         description: School Traffic Analysis Zone (TAZ) identifier.
 
   ActivitySimLandUseZoneRecord:
+    in_subset:
+      - activitysim
+    rank: 3
     description: >-
       Traffic Analysis Zone (TAZ) land-use input record consumed by ActivitySim.
     annotations:
       owner: ActivitySim
       model_association: ActivitySim
+      artifact_table: "land_use.csv"
       schema_status: authoritative
       status: active
     attributes:

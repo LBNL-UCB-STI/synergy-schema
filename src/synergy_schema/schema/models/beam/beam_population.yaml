@@ -17,8 +17,16 @@ default_range: string
 imports:
   - linkml:types
 
+subsets:
+  beam:
+    title: BEAM — Dynamic Multi-Modal Supply Simulation
+    description: Agent population, vehicle inputs, and travel plans for the BEAM dynamic network simulation engine.
+
 classes:
   BeamHouseholdRecord:
+    in_subset:
+      - beam
+    rank: 1
     description: >-
       Authoritative household input schema for the BEAM simulation engine,
       corresponding to HouseholdsBeamIn in the PILATES reference implementation.
@@ -29,6 +37,7 @@ classes:
     annotations:
       owner: BEAM
       table_name: households
+      artifact_table: "households.csv / .parquet"
       model_association: BEAM
       schema_status: authoritative
       status: active
@@ -147,6 +156,9 @@ classes:
         description: Population expansion sample rate or weight.
 
   BeamPersonRecord:
+    in_subset:
+      - beam
+    rank: 2
     description: >-
       Authoritative person input schema for the BEAM simulation engine,
       corresponding to PersonsBeamIn in the PILATES reference implementation.
@@ -157,6 +169,7 @@ classes:
     annotations:
       owner: BEAM
       table_name: persons
+      artifact_table: "persons.csv / .parquet"
       model_association: BEAM
       schema_status: authoritative
       status: active
@@ -308,6 +321,9 @@ classes:
         description: Indicator for rideshare/TNC app access.
 
   BeamVehicleRecord:
+    in_subset:
+      - beam
+    rank: 3
     description: >-
       Authoritative vehicle input schema for the BEAM simulation engine,
       corresponding to VehiclesBeamIn in the PILATES reference implementation.
@@ -318,6 +334,7 @@ classes:
     annotations:
       owner: BEAM
       table_name: vehicles
+      artifact_table: "vehicles.csv / .parquet"
       model_association: BEAM
       schema_status: authoritative
       status: active

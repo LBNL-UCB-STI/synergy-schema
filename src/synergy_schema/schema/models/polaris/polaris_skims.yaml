@@ -20,6 +20,11 @@ default_range: string
 imports:
   - linkml:types
 
+subsets:
+  network_skims:
+    title: Network Travel Skims (.omx / .zarr)
+    description: Zone-to-zone travel time, distance, and cost impedance matrices exchanged across models.
+
 types:
   NonNegativeFloat:
     typeof: float
@@ -32,6 +37,9 @@ types:
 
 classes:
   InputNetworkSkims:
+    in_subset:
+      - network_skims
+    rank: 1
     description: >-
       Open Matrix (.omx) container representing baseline zone-to-zone travel
       times, distances, generalized costs (2D origin_zone x destination_zone matrices),
@@ -39,6 +47,7 @@ classes:
       UrbanSim for spatial development and block-level marginal generation.
     annotations:
       model_association: transportation_network
+      artifact_table: "input_skims.omx (UrbanSim input)"
       contract_family: network_skims
       format: omx
       default_skim_representation: true
@@ -139,6 +148,9 @@ classes:
           or job count reachable within a travel threshold.
 
   NextYearNetworkSkims:
+    in_subset:
+      - network_skims
+    rank: 2
     description: >-
       Converged dynamic traffic assignment (DTA) network skims emitted as output
       by POLARIS at the conclusion of Year t travel simulation in Open Matrix (.omx)
@@ -149,6 +161,7 @@ classes:
       - PolarisNetworkSkims
     annotations:
       model_association: POLARIS
+      artifact_table: "next_year_skims.omx (POLARIS output)"
       contract_family: network_skims
       format: omx
       default_skim_representation: true

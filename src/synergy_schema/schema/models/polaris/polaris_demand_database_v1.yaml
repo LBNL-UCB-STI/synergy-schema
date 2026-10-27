@@ -27,14 +27,26 @@ annotations:
     Vehicle_Class.class_id, are external conformance checks; this table
     description does not declare SQLite foreign keys.
 
+subsets:
+  polaris:
+    title: "POLARIS Demand & Post-Run State"
+    rank: 40
+    description: >-
+      SQLite input tables (Household, Person, Vehicle, Vehicle_Type, Vehicle_Class)
+      in Demand.sqlite and post-run state feedback tables in Result.sqlite.
+
 classes:
   PolarisDemandDatabaseHousehold:
+    in_subset:
+      - polaris
+    rank: 1
     description: >-
       Authoritative Household table schema for the POLARIS Demand SQLite database (17 columns).
     aliases:
       - PolarisHousehold
     annotations:
       table_name: Household
+      artifact_table: "Household (Demand.sqlite)"
       model_association: POLARIS demand database
       schema_status: authoritative
       status: active
@@ -112,12 +124,16 @@ classes:
         description: "Duration of residence in the current home in years."
 
   PolarisDemandDatabasePerson:
+    in_subset:
+      - polaris
+    rank: 2
     description: >-
       Authoritative Person table schema for the POLARIS Demand SQLite database (27 columns).
     aliases:
       - PolarisPerson
     annotations:
       table_name: Person
+      artifact_table: "Person (Demand.sqlite)"
       model_association: POLARIS demand database
       schema_status: authoritative
       status: active
@@ -237,12 +253,16 @@ classes:
         description: "Shared e-scooter usage frequency level (0..3)."
 
   PolarisDemandDatabaseVehicle:
+    in_subset:
+      - polaris
+    rank: 3
     description: >-
       Authoritative Vehicle table schema for the POLARIS Demand SQLite database (8 columns).
     aliases:
       - PolarisVehicle
     annotations:
       table_name: Vehicle
+      artifact_table: "Vehicle (Demand.sqlite)"
       model_association: POLARIS demand database
       schema_status: authoritative
       status: active
@@ -290,12 +310,16 @@ classes:
         description: "Vehicle subtype classification code."
 
   PolarisDemandDatabaseVehicleClass:
+    in_subset:
+      - polaris
+    rank: 5
     description: >-
       Authoritative Vehicle_Class dimension table schema in the POLARIS Demand SQLite database (8 columns).
     aliases:
       - PolarisVehicleClass
     annotations:
       table_name: Vehicle_Class
+      artifact_table: "Vehicle_Class (Demand.sqlite)"
       model_association: POLARIS demand database
       schema_status: authoritative
       status: active
@@ -335,12 +359,16 @@ classes:
         description: "Electric vehicle energy-consumption machine learning class index."
 
   PolarisDemandDatabaseVehicleType:
+    in_subset:
+      - polaris
+    rank: 4
     description: >-
       Authoritative Vehicle_Type dimension table schema in the POLARIS Demand SQLite database (9 columns).
     aliases:
       - PolarisVehicleType
     annotations:
       table_name: Vehicle_Type
+      artifact_table: "Vehicle_Type (Demand.sqlite)"
       model_association: POLARIS demand database
       schema_status: authoritative
       status: active
@@ -388,6 +416,9 @@ classes:
         description: "Vehicle operating cost per mile in dollars."
 
   PolarisHouseholdStateOutput:
+    in_subset:
+      - polaris
+    rank: 6
     description: >-
       Provisional post-run household state output schema from POLARIS at the end of a simulation
       year, capturing resolved residential location, residence duration, and household delivery
@@ -396,6 +427,7 @@ classes:
       - PolarisHouseholdOutput
     annotations:
       table_name: Household
+      artifact_table: "Household (Result.sqlite)"
       model_association: POLARIS result / post-run demand database
       schema_status: provisional
       status: provisional_placeholder
@@ -439,6 +471,9 @@ classes:
         description: "Simulated count of prepared-meal delivery orders."
 
   PolarisPersonStateOutput:
+    in_subset:
+      - polaris
+    rank: 7
     description: >-
       Provisional post-run person state output schema from POLARIS at the end of a simulation
       year, capturing resolved workplace and school locations (replacing -1 sentinels),
@@ -447,6 +482,7 @@ classes:
       - PolarisPersonOutput
     annotations:
       table_name: Person
+      artifact_table: "Person (Result.sqlite)"
       model_association: POLARIS result / post-run demand database
       schema_status: provisional
       status: provisional_placeholder

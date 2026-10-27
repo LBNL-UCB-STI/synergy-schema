@@ -18,14 +18,26 @@ default_range: string
 imports:
   - linkml:types
 
+subsets:
+  urbansim:
+    title: "UrbanSim Land Use & Spatial Crosswalk"
+    rank: 10
+    description: >-
+      Census Block household and employment control totals, Block-to-TAZ spatial
+      allocation weights, and TAZ-level land-use summaries forecasted by UrbanSim.
+
 classes:
   UrbanSimBlockMarginals:
+    in_subset:
+      - urbansim
+    rank: 1
     description: >-
       Atomic census block / block-group marginal control totals and land-use
       capacities forecasted by UrbanSim. These totals act as demographic and
       housing targets for downstream micro-population synthesis and evolution.
     annotations:
       model_association: UrbanSim
+      artifact_table: "block_marginals (CSV / Parquet)"
       contract_family: land_use_marginals
       spatial_granularity: census_block
       status: notional
@@ -98,11 +110,15 @@ classes:
         description: Office/professional employment located in this block.
 
   BlockToTazMapping:
+    in_subset:
+      - urbansim
+    rank: 2
     description: >-
       Spatial crosswalk relationship mapping atomic Census Blocks to macro-zones
       (TAZs), supporting deterministic rollup and aggregation.
     annotations:
       model_association: UrbanSim
+      artifact_table: "block_to_taz (CSV)"
       contract_family: spatial_crosswalk
       status: notional
     unique_keys:
@@ -140,11 +156,15 @@ classes:
         description: Proportion of block employment allocated to this TAZ.
 
   UrbanSimZonalTotals:
+    in_subset:
+      - urbansim
+    rank: 3
     description: >-
       Aggregated macro-zone (TAZ) land use, marginal population, and employment
       totals matching POLARIS Supply.sqlite Zone table attributes.
     annotations:
       model_association: UrbanSim
+      artifact_table: "Zone (Supply.sqlite / CSV)"
       contract_family: zonal_supply_forecast
       spatial_granularity: taz_zone
       status: notional
