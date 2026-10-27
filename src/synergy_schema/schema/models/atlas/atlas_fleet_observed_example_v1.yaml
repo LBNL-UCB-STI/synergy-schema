@@ -48,6 +48,7 @@ classes:
         required: true
         annotations:
           physical_name: HOUSEID
+          foreign_key: DemosPolarisMappedHousehold.household
         description: Household identifier matching the synthetic population household ID.
       nvehicles:
         range: integer

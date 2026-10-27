@@ -45,14 +45,16 @@ classes:
         description: Unique household identifier.
       block_id:
         range: string
+        annotations:
+          foreign_key: UrbanSimBlockMarginals.block_id
         description: >-
           15-digit Census Block FIPS identifier for the household location, preserving leading zeros.
       taz:
-        range: ActivitySimLandUseZoneRecord
-        inlined: false
+        range: integer
         annotations:
           physical_name: TAZ
           relationship_target: ActivitySimLandUseZoneRecord
+          foreign_key: ActivitySimLandUseZoneRecord.taz
         description: Residential Traffic Analysis Zone (TAZ) reference.
       cars:
         range: integer
@@ -63,6 +65,7 @@ classes:
         annotations:
           source_table: AtlasHouseholdFleetOutput
           source_column: nvehicles
+          foreign_key: AtlasHouseholdFleetOutput.nvehicles
       auto_ownership:
         range: integer
         minimum_value: 0
@@ -88,22 +91,22 @@ classes:
         required: true
         description: Unique person identifier.
       household_id:
-        range: ActivitySimHouseholdInputRecord
-        inlined: false
+        range: integer
         required: true
         annotations:
           relationship_target: ActivitySimHouseholdInputRecord
+          foreign_key: ActivitySimHouseholdInputRecord.household_id
         description: Household identifier referencing ActivitySimHouseholdInputRecord.
       member_id:
         range: integer
         required: true
         description: Within-household person sequence number (1..hhsize).
       taz:
-        range: ActivitySimLandUseZoneRecord
-        inlined: false
+        range: integer
         annotations:
           physical_name: TAZ
           relationship_target: ActivitySimLandUseZoneRecord
+          foreign_key: ActivitySimLandUseZoneRecord.taz
         description: Residential Traffic Analysis Zone (TAZ) reference.
       work_zone_id:
         range: integer

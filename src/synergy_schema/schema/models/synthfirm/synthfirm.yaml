@@ -113,6 +113,8 @@ classes:
       MESOZONE:
         range: string
         required: true
+        annotations:
+          foreign_key: UrbanSimBlockMarginals.block_id
         description: Micro-zone spatial identifier (11-digit US Census Block Group FIPS within the region, or 5-digit external zone).
       lat:
         range: float

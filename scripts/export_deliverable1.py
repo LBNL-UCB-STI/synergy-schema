@@ -65,7 +65,9 @@ Browse the compiled documentation, ER diagrams, mapping matrices, and LinkML cla
 ├── schema/                    # Pure LinkML YAML schema source contracts
 │   ├── deliverable_1_static_schema.yaml  # Top-level entry point bundle
 │   ├── doc_templates/
-│   │   └── index.md.jinja2    # LinkML gen-doc template grouping classes by subset
+│   │   ├── index.md.jinja2    # LinkML gen-doc template grouping classes by subset
+│   │   ├── class.md.jinja2    # LinkML gen-doc template for 1-hop relational class diagrams
+│   │   └── subset.md.jinja2   # LinkML gen-doc template for module subset pages & diagrams
 │   ├── models/
 │   │   ├── urbansim/urbansim_land_use.yaml
 │   │   ├── demos/demos_polaris_mapped_examples.yaml
@@ -425,6 +427,8 @@ def export_package(target_dir: Path) -> None:
     schema_files = [
         "deliverable_1_static_schema.yaml",
         "doc_templates/index.md.jinja2",
+        "doc_templates/class.md.jinja2",
+        "doc_templates/subset.md.jinja2",
         "models/urbansim/urbansim_land_use.yaml",
         "models/demos/demos_polaris_mapped_examples.yaml",
         "models/atlas/atlas_fleet_observed_example_v1.yaml",

@@ -109,6 +109,7 @@ classes:
         annotations:
           omx_path: /lookup/zone_id
           hdf5_group: /lookup
+          foreign_key: UrbanSimZonalTotals.zone_id
         description: >-
           1D zone index lookup array [origin_zone] stored under OMX HDF5 group
           /lookup/<name> mapping 0-based matrix row/column indices to canonical TAZ IDs.
@@ -930,10 +931,14 @@ classes:
       orig_taz:
         range: integer
         required: true
+        annotations:
+          foreign_key: UrbanSimZonalTotals.zone_id
         description: Origin Traffic Analysis Zone (TAZ).
       dest_taz:
         range: integer
         required: true
+        annotations:
+          foreign_key: UrbanSimZonalTotals.zone_id
         description: Destination Traffic Analysis Zone (TAZ).
       path_type:
         range: string

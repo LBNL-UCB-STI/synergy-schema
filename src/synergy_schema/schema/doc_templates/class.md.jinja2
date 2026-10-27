@@ -1,0 +1,431 @@
+---
+search:
+  boost: {% if element.deprecated %}0.5{% else %}10.0{% endif %}
+---
+
+{%- if element.title %}
+    {%- set title = element.title ~ ' (' ~ element.name ~ ')' -%}
+{%- else %}
+    {%- if gen.use_class_uris -%}
+        {%- set title = element.name -%}
+    {%- else -%}
+        {%- set title = gen.name(element) -%}
+    {%- endif -%}
+{%- endif -%}
+
+{% macro compute_range(slot) -%}
+    {%- if slot.any_of or slot.exactly_one_of -%}
+        {%- for subslot_range in schemaview.slot_range_as_union(slot) -%}
+            {{ gen.link(subslot_range) }}
+            {%- if not loop.last -%}
+                &nbsp;or&nbsp;<br />
+            {%- endif -%}
+        {%- endfor -%}
+    {%- else -%}
+        {{ gen.link(slot.range) }}
+    {%- endif -%}
+    {%- if slot.annotations and "foreign_key" in slot.annotations and slot.annotations["foreign_key"].value -%}
+        {%- set fk_val = slot.annotations["foreign_key"].value|string -%}
+        {%- set fk_cls_name = fk_val.split('.')[0] -%}
+        {%- set fk_col_name = fk_val.split('.')[1] if '.' in fk_val else '' -%}
+        {%- set fk_elem = schemaview.get_element(fk_cls_name) -%}
+        {%- if fk_elem is not none -%}
+            <br/>FK &rarr; {{ gen.link(fk_elem) }}{% if fk_col_name %}.`{{ fk_col_name }}`{% endif %}
+        {%- endif -%}
+    {%- endif -%}
+{% endmacro %}
+
+# Class: {{ title }} {% if element.deprecated %} <span style="color: red;"><strong> (DEPRECATED) </strong></span> {% endif %}
+
+{%- if header -%}
+{{ header }}
+{%- endif -%}
+
+{% if element.description %}
+{% set element_description_lines = element.description.split('\n') %}
+{% for element_description_line in element_description_lines %}
+_{{ element_description_line }}_
+{% endfor %}
+{% endif %}
+
+<div data-search-exclude markdown="1">
+
+{% if element.abstract %}
+* __NOTE__: this is an abstract class and should not be instantiated directly
+{% endif %}
+
+URI: {{ gen.uri_link(element) }}
+
+{% set clicked_nodes = [element.name] %}
+{% set drawn_edges = [] %}
+```{{ gen.mermaid_directive() }}
+ classDiagram
+    class {{ gen.name(element) }}
+    click {{ gen.name(element) }} href "{{ gen.link_mermaid(element) }}"
+{%- for p_name in schemaview.class_parents(element.name)|sort %}
+  {%- set p_elem = schemaview.get_element(p_name) %}
+  {%- if p_elem is not none %}
+    {{ gen.name(p_elem) }} <|-- {{ gen.name(element) }}
+    {%- if p_elem.name not in clicked_nodes %}
+    click {{ gen.name(p_elem) }} href "{{ gen.link_mermaid(p_elem) }}"
+      {%- set _ = clicked_nodes.append(p_elem.name) %}
+    {%- endif %}
+  {%- endif %}
+{%- endfor %}
+{%- for c_name in schemaview.class_children(element.name)|sort %}
+  {%- set c_elem = schemaview.get_element(c_name) %}
+  {%- if c_elem is not none %}
+    {{ gen.name(element) }} <|-- {{ gen.name(c_elem) }}
+    {%- if c_elem.name not in clicked_nodes %}
+    click {{ gen.name(c_elem) }} href "{{ gen.link_mermaid(c_elem) }}"
+      {%- set _ = clicked_nodes.append(c_elem.name) %}
+    {%- endif %}
+  {%- endif %}
+{%- endfor %}
+{%- for s in schemaview.class_induced_slots(element.name)|sort(attribute='name') %}
+    {{ gen.name(element) }} : {{ gen.name(s) }}
+  {%- set target_name = none %}
+  {%- if s.range is not none and s.range not in gen.all_type_object_names() %}
+    {%- set target_name = s.range %}
+  {%- elif s.annotations and "foreign_key" in s.annotations and s.annotations["foreign_key"].value %}
+    {%- set target_name = (s.annotations["foreign_key"].value|string).split('.')[0] %}
+  {%- elif s.annotations and "relationship_target" in s.annotations and s.annotations["relationship_target"].value %}
+    {%- set target_name = (s.annotations["relationship_target"].value|string).split('.')[0] %}
+  {%- elif s.annotations and "source_table" in s.annotations and s.annotations["source_table"].value %}
+    {%- set target_name = (s.annotations["source_table"].value|string).split('.')[0] %}
+  {%- endif %}
+  {%- if target_name is not none %}
+    {%- set target_elem = schemaview.get_element(target_name) %}
+    {%- if target_elem is not none %}
+      {%- set edge_key = element.name ~ "->" ~ target_elem.name ~ ":" ~ s.name %}
+      {%- if edge_key not in drawn_edges %}
+        {%- set _ = drawn_edges.append(edge_key) %}
+    {{ gen.name(element) }} --> "{{ gen.cardinality(s) }}" {{ gen.name(target_elem) }} : {{ gen.name(s) }}
+        {%- if target_elem.name not in clicked_nodes %}
+    click {{ gen.name(target_elem) }} href "{{ gen.link_mermaid(target_elem) }}"
+          {%- set _ = clicked_nodes.append(target_elem.name) %}
+        {%- endif %}
+      {%- endif %}
+    {%- endif %}
+  {%- endif %}
+{%- endfor %}
+{%- for other_cls_name in schemaview.all_classes()|sort %}
+  {%- if other_cls_name != element.name %}
+    {%- set other_elem = schemaview.get_element(other_cls_name) %}
+    {%- if other_elem is not none %}
+      {%- for other_s in gen.get_direct_slots(other_elem)|sort(attribute='name') %}
+        {%- set other_target = none %}
+        {%- if other_s.range is not none and other_s.range not in gen.all_type_object_names() %}
+          {%- set other_target = other_s.range %}
+        {%- elif other_s.annotations and "foreign_key" in other_s.annotations and other_s.annotations["foreign_key"].value %}
+          {%- set other_target = (other_s.annotations["foreign_key"].value|string).split('.')[0] %}
+        {%- elif other_s.annotations and "relationship_target" in other_s.annotations and other_s.annotations["relationship_target"].value %}
+          {%- set other_target = (other_s.annotations["relationship_target"].value|string).split('.')[0] %}
+        {%- elif other_s.annotations and "source_table" in other_s.annotations and other_s.annotations["source_table"].value %}
+          {%- set other_target = (other_s.annotations["source_table"].value|string).split('.')[0] %}
+        {%- endif %}
+        {%- if other_target == element.name %}
+          {%- set edge_key = other_elem.name ~ "->" ~ element.name ~ ":" ~ other_s.name %}
+          {%- if edge_key not in drawn_edges %}
+            {%- set _ = drawn_edges.append(edge_key) %}
+    {{ gen.name(other_elem) }} --> "{{ gen.cardinality(other_s) }}" {{ gen.name(element) }} : {{ gen.name(other_s) }}
+            {%- if other_elem.name not in clicked_nodes %}
+    click {{ gen.name(other_elem) }} href "{{ gen.link_mermaid(other_elem) }}"
+              {%- set _ = clicked_nodes.append(other_elem.name) %}
+            {%- endif %}
+          {%- endif %}
+        {%- endif %}
+      {%- endfor %}
+    {%- endif %}
+  {%- endif %}
+{%- endfor %}
+```
+
+{% if schemaview.class_parents(element.name) or schemaview.class_children(element.name, mixins=False) %}
+
+## Inheritance
+{{ gen.inheritance_tree(element, mixins=True) }}
+{% else %}
+<!-- no inheritance hierarchy -->
+{% endif %}
+
+{%- set has_class_props = element.class_uri or element.tree_root or element.mixin
+    or element.subclass_of or element.union_of or element.disjoint_with
+    or element.slot_names_unique or element.represents_relationship
+    or element.children_are_mutually_disjoint %}
+
+{%- if has_class_props %}
+## Class Properties
+
+| Property | Value |
+| --- | --- |
+{%- if element.class_uri %}
+| Class URI | {{ gen.uri_link(element.class_uri) }} |
+{%- endif %}
+{%- if element.mixin %}
+| Mixin | Yes |
+{%- endif %}
+{%- if element.tree_root %}
+| Tree Root | Yes |
+{%- endif %}
+{%- if element.slot_names_unique %}
+| Slot Names Unique | Yes |
+{%- endif %}
+{%- if element.represents_relationship %}
+| Represents Relationship | Yes |
+{%- endif %}
+{%- if element.subclass_of %}
+| Subclass Of | {{ gen.links(element.subclass_of) | join(', ') }} |
+{%- endif %}
+{%- if element.union_of %}
+| Union Of | {{ gen.links(element.union_of) | join(', ') }} |
+{%- endif %}
+{%- if element.disjoint_with %}
+| Disjoint With | {{ gen.links(element.disjoint_with) | join(', ') }} |
+{%- endif %}
+{%- if element.children_are_mutually_disjoint %}
+| Children Are Mutually Disjoint | Yes |
+{%- endif %}
+
+{% endif %}
+## Slots
+
+| Name | Cardinality and Range | Description | Inheritance |
+| ---  | --- | --- | --- |
+{% if gen.get_direct_slots(element)|length > 0 %}
+{%- for slot in gen.get_direct_slots(element) -%}
+| {{ gen.link(slot) }} | {{ gen.cardinality(slot) }} <br/> {{ compute_range(slot) }} | {{ slot.description|enshorten }} | direct |
+{% endfor -%}
+{% endif -%}
+{% if gen.get_indirect_slots(element)|length > 0 %}
+{%- for slot in gen.get_indirect_slots(element) -%}
+| {{ gen.link(slot) }} | {{ gen.cardinality(slot) }} <br/> {{ compute_range(slot) }} | {{ slot.description|enshorten }} | {{ gen.links(gen.get_slot_inherited_from(element.name, slot.name))|join(', ') }} |
+{% endfor -%}
+{% endif %}
+
+{%- if element.unique_keys %}
+## Unique Keys
+
+{% for uk in element.unique_keys.values() %}
+### {{ uk.unique_key_name }}
+
+**Unique key slots:** {{ uk.unique_key_slots | join(', ') }}
+{%- if uk.consider_nulls_inequal %}
+
+Considers null values as inequal
+{%- endif %}
+{% endfor %}
+{% endif %}
+
+{%- if element.defining_slots %}
+## Defining Slots
+
+This class is defined by the following slots:
+
+{% for slot_name in element.defining_slots %}
+* {{ gen.link(slot_name) }}
+{%- endfor %}
+{% endif %}
+
+{%- set has_expressions = element.any_of or element.all_of or element.exactly_one_of
+    or element.none_of or element.slot_conditions %}
+
+{%- if has_expressions %}
+<details>
+<summary>Expressions & Logic</summary>
+
+{%- if element.any_of %}
+#### Any Of
+
+The class must satisfy at least one of:
+
+{%- for expr in element.any_of %}
+- {{ expr }}
+{%- endfor %}
+{%- endif %}
+
+{%- if element.all_of %}
+#### All Of
+
+The class must satisfy all of:
+
+{%- for expr in element.all_of %}
+- {{ expr }}
+{%- endfor %}
+{%- endif %}
+
+{%- if element.exactly_one_of %}
+#### Exactly One Of
+
+The class must satisfy exactly one of:
+
+{%- for expr in element.exactly_one_of %}
+- {{ expr }}
+{%- endfor %}
+{%- endif %}
+
+{%- if element.none_of %}
+#### None Of
+
+The class must not satisfy any of:
+
+{%- for expr in element.none_of %}
+- {{ expr }}
+{%- endfor %}
+{%- endif %}
+
+{%- if element.slot_conditions %}
+#### Slot Conditions
+
+{%- for slot_name, conditions in element.slot_conditions.items() %}
+- **{{ gen.link(slot_name) }}**: {{ conditions }}
+{%- endfor %}
+{%- endif %}
+
+</details>
+{% endif %}
+
+{% if schemaview.is_mixin(element.name) %}
+## Mixin Usage
+
+| mixed into | description |
+| --- | --- |
+{% for c in schemaview.class_children(element.name, is_a=False) -%}
+| {{ gen.link(c) }} | {{ schemaview.get_class(c).description|enshorten }} |
+{% endfor %}
+{% endif %}
+
+{% if schemaview.usage_index().get(element.name) %}
+## Usages
+
+| used by | used in | type | used |
+| ---  | --- | --- | --- |
+{% for usage in schemaview.usage_index().get(element.name) -%}
+| {{ gen.link(usage.used_by) }} | {{ gen.link(usage.slot) }} | {{ usage.metaslot }} | {{ gen.link(usage.used) }} |
+{% endfor %}
+{% endif %}
+
+{% if element.rules %}
+## Rules
+
+{% for rule in gen.classrule_to_dict_view(element) %}
+### {{ rule.title }}
+
+| Rule Applied | Preconditions | Postconditions | Elseconditions |
+|--------------|---------------|----------------|----------------|
+{%- set _pre = rule.preconditions or {} %}
+{%- set _post = rule.postconditions or {} %}
+{%- set _else = rule.elseconditions or {} %}
+{%- set _all_keys = ((_pre.keys()|list) + (_post.keys()|list) + (_else.keys()|list))|unique %}
+{% for key in _all_keys -%}
+| {{ key }} |
+{%- if _pre[key] is defined and _pre[key] -%}
+```{{ _pre[key] }}```
+{%- endif %} |
+{%- if _post[key] is defined and _post[key] -%}
+```{{ _post[key] }}```
+{%- endif %} |
+{%- if _else[key] is defined and _else[key] -%}
+```{{ _else[key] }}```
+{%- endif %} |
+{% endfor %}
+
+{% endfor %}
+{% endif %}
+
+{% if element.in_subset %}
+## In Subsets
+
+{% for subset in element.in_subset %}
+* {{ gen.link(subset) }}
+{%- endfor %}
+
+{% endif %}
+{% if element.aliases %}
+## Aliases
+
+{% for alias in element.aliases %}
+* {{ alias }}
+{%- endfor %}
+{% endif %}
+
+{% if element.see_also -%}
+## See Also
+
+{% for x in element.see_also -%}
+* {{ gen.uri_link(x) }}
+{% endfor %}
+{% endif -%}
+
+## Identifier and Mapping Information
+
+{% if element.annotations %}
+### Annotations
+
+| property | value |
+| --- | --- |
+{% for a in element.annotations -%}
+{%- if a|string|first != '_' -%}
+| {{ a }} | {{ element.annotations[a].value }} |
+{% endif -%}
+{% endfor %}
+{% endif %}
+
+{% if element.from_schema or element.imported_from %}
+### Schema Source
+
+{% if element.from_schema %}
+* from schema: {{ element.from_schema }}
+{% endif %}
+{% if element.imported_from %}
+* imported from: {{ element.imported_from }}
+{% endif %}
+{% endif %}
+
+{% if schemaview.get_mappings(element.name).items() -%}
+## Mappings
+
+| Mapping Type | Mapped Value |
+| ---  | ---  |
+{% for m, mt in schemaview.get_mappings(element.name).items() -%}
+{% if mt|length > 0 -%}
+| {{ m }} | {{ mt|join(', ') }} |
+{% endif -%}
+{% endfor %}
+
+{% endif -%}
+
+{% if gen.example_object_blobs(element.name) -%}
+## Examples
+{% for name, blob in gen.example_object_blobs(element.name) -%}
+### Example: {{ name }}
+
+```yaml
+{{ blob }}
+```
+{% endfor %}
+{% endif %}
+
+## LinkML Source
+
+### Direct
+
+<details>
+```yaml
+{{ gen.yaml(element) }}
+```
+</details>
+
+### Induced
+
+<details>
+```yaml
+{{ gen.yaml(element, inferred=True) }}
+```
+</details>
+
+{%- if footer -%}
+{{ footer }}
+{%- endif -%}
+
+</div>
