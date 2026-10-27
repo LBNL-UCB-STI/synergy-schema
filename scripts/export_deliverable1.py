@@ -25,7 +25,7 @@ from synergy_schema.interactive_diagram import generate_interactive_diagram
 REPO_ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_DIST = REPO_ROOT / "dist" / "synergy-static-schema"
 
-STANDALONE_README = """# SYNERGY Static Cross-Model Schema
+STANDALONE_README = """# Synergy Static Cross-Model Schema
 
 This repository publishes the LinkML schema definitions, module entry points, categorical crosswalks, and visual documentation for single-year data exchange across the LBNL, ANL, and NLR regional transportation modeling suite:
 
@@ -198,7 +198,7 @@ STANDALONE_EXTRA_CSS = """/* Custom styling for Synergy Schema documentation */
 """
 
 STANDALONE_ZENSICAL = """[project]
-site_name = "SYNERGY Static Cross-Model Schema"
+site_name = "Synergy Static Cross-Model Schema"
 site_description = "Static cross-model LinkML schemas and categorical crosswalks across UrbanSim, DEMOS, ATLAS, POLARIS, ActivitySim, BEAM, and Travel Skims"
 site_url = "https://LBNL-UCB-STI.github.io/synergy-static-schema/"
 repo_url = "https://github.com/LBNL-UCB-STI/synergy-static-schema"
@@ -333,7 +333,7 @@ site/
 .DS_Store
 """
 
-STANDALONE_INDEX_MD = """# SYNERGY Static Cross-Model Schema
+STANDALONE_INDEX_MD = """# Synergy Static Cross-Model Schema
 
 Synergy Schema defines the LinkML data schemas and cross-model field mappings that connect the BEAM CORE modeling suite (**UrbanSim**, **DEMOS**, **ATLAS**, **SynthFirm**, **ActivitySim**, **BEAM**) and **POLARIS** for a single simulation year. The schemas document the tables, keys, value codes, and matrix dimensions exchanged at each model handoff so tools can run alone or in coordinated workflows while keeping their native file formats.
 
