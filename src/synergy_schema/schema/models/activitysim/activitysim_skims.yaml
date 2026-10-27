@@ -37,7 +37,6 @@ classes:
   ActivitySimNetworkSkims:
     in_subset:
       - network_skims
-    rank: 3
     description: >-
       Canonical multi-modal, multi-period zone-to-zone impedance matrix container
       consumed by ActivitySim in Open Matrix (.omx) or Zarr (.zarr) array format.

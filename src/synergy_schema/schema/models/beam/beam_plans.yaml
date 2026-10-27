@@ -27,7 +27,6 @@ classes:
   BeamPlanRecord:
     in_subset:
       - beam
-    rank: 4
     description: >-
       Authoritative travel plan element schema provided as input to BEAM,
       corresponding to PlansBeamIn in the PILATES reference implementation.
@@ -143,7 +142,6 @@ classes:
   BeamPlanOutputRecord:
     in_subset:
       - beam
-    rank: 5
     description: >-
       Executed travel plan element schema emitted as output by BEAM dynamic
       traffic simulation, corresponding to BeamPlansOut in PILATES.

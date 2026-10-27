@@ -26,7 +26,6 @@ enums:
   HandoffChannelType:
     in_subset:
       - handoff_mappings
-    rank: 1
     description: Technical mechanism and format of data transfer between models.
     permissible_values:
       tabular_microdata:
@@ -44,7 +43,6 @@ enums:
   FieldTransformationMode:
     in_subset:
       - handoff_mappings
-    rank: 2
     description: Transformation logic required to map a source field to a target field.
     permissible_values:
       direct:
@@ -63,7 +61,6 @@ enums:
   ResidueKind:
     in_subset:
       - handoff_mappings
-    rank: 3
     description: Categorization of unmapped source fields or downstream default values.
     permissible_values:
       unmapped_source:
@@ -79,10 +76,9 @@ classes:
   SingleYearModelHandoffPackage:
     in_subset:
       - handoff_mappings
-    rank: 1
     annotations:
       artifact_table: "Handoff package root"
-    description: Master container for single-year cross-model handoff contracts.
+    description: Root container for single-year cross-model handoff contracts.
     attributes:
       package_id:
         range: string
@@ -114,7 +110,6 @@ classes:
   ModelHandoffChannel:
     in_subset:
       - handoff_mappings
-    rank: 2
     annotations:
       artifact_table: "Model-to-model channel specification"
     description: Contract specifying data transfer between a source and target model.
@@ -162,7 +157,6 @@ classes:
   FieldMappingSpec:
     in_subset:
       - handoff_mappings
-    rank: 3
     annotations:
       artifact_table: "Column mapping rule"
     description: Detailed mapping specification for a single column.
@@ -189,7 +183,6 @@ classes:
   MappingResidueSpec:
     in_subset:
       - handoff_mappings
-    rank: 4
     annotations:
       artifact_table: "Unmapped source / target default rule"
     description: Specification of an unmapped column or required default value.
@@ -212,7 +205,6 @@ classes:
   CategoricalCrosswalkRule:
     in_subset:
       - handoff_mappings
-    rank: 5
     annotations:
       artifact_table: "Categorical crosswalk (X-H1..X-V5)"
     description: Discrete code crosswalk between source and target categorical values.
@@ -242,7 +234,6 @@ classes:
   CategoryValueMapping:
     in_subset:
       - handoff_mappings
-    rank: 6
     annotations:
       artifact_table: "Code-to-code mapping entry"
     description: Individual categorical code mapping entry.

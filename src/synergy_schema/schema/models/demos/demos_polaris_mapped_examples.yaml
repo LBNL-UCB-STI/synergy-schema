@@ -19,7 +19,6 @@ imports:
 subsets:
   demos:
     title: "DEMOS Demographic Evolution"
-    rank: 20
     description: >-
       Synthetic household and person records evolved across simulation years by
       DEMOS with Census ACS PUMS seed lineage.
@@ -28,7 +27,6 @@ classes:
   DemosPolarisMappedHousehold:
     in_subset:
       - demos
-    rank: 1
     description: >-
       Authoritative household schema for DEMOS synthetic population mapped
       for POLARIS simulation. Physical columns match the DEMOS household export.
@@ -91,7 +89,6 @@ classes:
   DemosPolarisMappedPerson:
     in_subset:
       - demos
-    rank: 2
     description: >-
       Authoritative person schema for DEMOS synthetic population mapped for
       POLARIS simulation. Physical columns match the DEMOS person export.

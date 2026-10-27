@@ -90,10 +90,17 @@ def test_dist_site_is_compiled_with_all_sections() -> None:
     assert "### UrbanSim Land Use & Spatial Crosswalk" in schema_index_md
     assert "### POLARIS Demand & Post-Run State" in schema_index_md
     assert "| Table / File Artifact |" in schema_index_md
+    assert "Master LinkML schema bundle" not in schema_index_md
     assert (
         "Open Matrix (.omx) container representing baseline zone-to-zone travel"
         in schema_index_md
     )
+
+    polaris_subset_md = (DIST_DIR / "docs" / "schema" / "polaris.md").read_text(
+        encoding="utf-8"
+    )
+    assert "**Rank:**" not in polaris_subset_md
+    assert "### Administrative Metadata" not in polaris_subset_md
 
     # Verify no link escapes above repository root via ../../schema/
     for html_file in site_dir.rglob("*.html"):

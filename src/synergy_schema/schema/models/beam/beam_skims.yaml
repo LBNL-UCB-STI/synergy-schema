@@ -42,7 +42,6 @@ classes:
   BeamNetworkSkims:
     in_subset:
       - network_skims
-    rank: 4
     description: >-
       Default and authoritative multi-modal, multi-period zone-to-zone impedance
       matrix container emitted by BEAM simulation, packaged in Open Matrix (.omx)
@@ -909,7 +908,6 @@ classes:
   BeamODSkimsRecord:
     in_subset:
       - network_skims
-    rank: 5
     description: >-
       Secondary intermediate router origin-destination CSV record schema emitted by
       the BEAM router (e.g. skimsActivitySimOD_current.csv.gz) prior to multi-dimensional

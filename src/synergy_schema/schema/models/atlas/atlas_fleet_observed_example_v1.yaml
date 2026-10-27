@@ -19,7 +19,6 @@ imports:
 subsets:
   atlas:
     title: "ATLAS Household Vehicle Fleet"
-    rank: 30
     description: >-
       Household vehicle counts and vehicle-level body type, age bracket, annual
       mileage, and powertrain assignments produced by ATLAS.
@@ -29,7 +28,6 @@ classes:
   AtlasHouseholdFleetOutput:
     in_subset:
       - atlas
-    rank: 1
     description: >-
       Authoritative household-side fleet summary row contract produced by ATLAS.
       Summarizes total vehicle counts (nvehicles) by household identifier (HOUSEID).
@@ -61,7 +59,6 @@ classes:
   AtlasVehicleFleetOutput:
     in_subset:
       - atlas
-    rank: 2
     description: >-
       Authoritative vehicle fleet row contract produced by ATLAS.
       Details vehicle body type, discrete powertrain technology, model year,
@@ -120,7 +117,6 @@ enums:
   AtlasBodyTypeEnum:
     in_subset:
       - atlas
-    rank: 1
     description: Observed vehicle body type categories in ATLAS fleet outputs.
     permissible_values:
       car:
@@ -135,7 +131,6 @@ enums:
   AtlasVintageCategoryEnum:
     in_subset:
       - atlas
-    rank: 2
     description: Observed vehicle age / vintage categories in ATLAS fleet outputs.
     permissible_values:
       "0~5 years":
@@ -148,7 +143,6 @@ enums:
   AtlasPowertrainEnum:
     in_subset:
       - atlas
-    rank: 3
     description: Observed vehicle powertrain types in ATLAS fleet outputs.
     permissible_values:
       AEV:

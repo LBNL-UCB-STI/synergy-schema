@@ -30,7 +30,6 @@ annotations:
 subsets:
   polaris:
     title: "POLARIS Demand & Post-Run State"
-    rank: 40
     description: >-
       SQLite input tables (Household, Person, Vehicle, Vehicle_Type, Vehicle_Class)
       in Demand.sqlite and post-run state feedback tables in Result.sqlite.
@@ -39,7 +38,6 @@ classes:
   PolarisDemandDatabaseHousehold:
     in_subset:
       - polaris
-    rank: 1
     description: >-
       Authoritative Household table schema for the POLARIS Demand SQLite database (17 columns).
     aliases:
@@ -126,7 +124,6 @@ classes:
   PolarisDemandDatabasePerson:
     in_subset:
       - polaris
-    rank: 2
     description: >-
       Authoritative Person table schema for the POLARIS Demand SQLite database (27 columns).
     aliases:
@@ -255,7 +252,6 @@ classes:
   PolarisDemandDatabaseVehicle:
     in_subset:
       - polaris
-    rank: 3
     description: >-
       Authoritative Vehicle table schema for the POLARIS Demand SQLite database (8 columns).
     aliases:
@@ -312,7 +308,6 @@ classes:
   PolarisDemandDatabaseVehicleClass:
     in_subset:
       - polaris
-    rank: 5
     description: >-
       Authoritative Vehicle_Class dimension table schema in the POLARIS Demand SQLite database (8 columns).
     aliases:
@@ -361,7 +356,6 @@ classes:
   PolarisDemandDatabaseVehicleType:
     in_subset:
       - polaris
-    rank: 4
     description: >-
       Authoritative Vehicle_Type dimension table schema in the POLARIS Demand SQLite database (9 columns).
     aliases:
@@ -418,7 +412,6 @@ classes:
   PolarisHouseholdStateOutput:
     in_subset:
       - polaris
-    rank: 6
     description: >-
       Provisional post-run household state output schema from POLARIS at the end of a simulation
       year, capturing resolved residential location, residence duration, and household delivery
@@ -473,7 +466,6 @@ classes:
   PolarisPersonStateOutput:
     in_subset:
       - polaris
-    rank: 7
     description: >-
       Provisional post-run person state output schema from POLARIS at the end of a simulation
       year, capturing resolved workplace and school locations (replacing -1 sentinels),

@@ -19,7 +19,6 @@ imports:
 subsets:
   activitysim:
     title: "ActivitySim Travel Demand"
-    rank: 50
     description: >-
       Household, person, and Traffic Analysis Zone (TAZ) land-use input tables
       consumed by ActivitySim for tour and mode choice modeling.
@@ -28,7 +27,6 @@ classes:
   ActivitySimHouseholdInputRecord:
     in_subset:
       - activitysim
-    rank: 1
     description: >-
       Household input record consumed by ActivitySim, linking household identity,
       residential census block and traffic analysis zone (TAZ), and household
@@ -74,7 +72,6 @@ classes:
   ActivitySimPersonInputRecord:
     in_subset:
       - activitysim
-    rank: 2
     description: >-
       Person input record consumed by ActivitySim, linking each synthetic person
       to their household and home, workplace, and school zones.
@@ -124,7 +121,6 @@ classes:
   ActivitySimLandUseZoneRecord:
     in_subset:
       - activitysim
-    rank: 3
     description: >-
       Traffic Analysis Zone (TAZ) land-use input record consumed by ActivitySim.
     annotations:

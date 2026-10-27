@@ -27,7 +27,6 @@ enums:
   SynthFirmModeChoiceEnum:
     in_subset:
       - synthfirm
-    rank: 1
     description: Discrete freight transportation mode choice for B2B commodity shipments.
     permissible_values:
       For-hire Truck:
@@ -38,7 +37,6 @@ enums:
   SynthFirmPowertrainEnum:
     in_subset:
       - synthfirm
-    rank: 2
     description: Alternative clean powertrain technology adopted by commercial vehicle fleet.
     permissible_values:
       Battery Electric:
@@ -53,7 +51,6 @@ enums:
   SynthFirmPortTypeEnum:
     in_subset:
       - synthfirm
-    rank: 3
     description: Gateway facility type for international freight trade.
     permissible_values:
       Airport:
@@ -65,7 +62,6 @@ classes:
   SynthFirmEstablishmentRecord:
     in_subset:
       - synthfirm
-    rank: 1
     description: >-
       Synthetic business establishment synthesizing establishment-level firm demographics,
       NAICS industry sector, employment count, spatial coordinates, and commercial vehicle
@@ -223,7 +219,6 @@ classes:
     is_a: SynthFirmEstablishmentRecord
     in_subset:
       - synthfirm
-    rank: 2
     description: >-
       Synthetic for-hire motor freight trucking carrier (NAICS 484000/492000), extending
       the base establishment record with commodity group transport licensing authorizations.
@@ -264,7 +259,6 @@ classes:
   SynthFirmB2BShipmentRecord:
     in_subset:
       - synthfirm
-    rank: 3
     description: >-
       Synthesized business-to-business (B2B) commodity freight shipment representing a discrete
       truckload or cargo flow between a selling establishment and a buying establishment.
@@ -368,7 +362,6 @@ classes:
   SynthFirmInternationalFreightRecord:
     in_subset:
       - synthfirm
-    rank: 4
     description: >-
       International import/export freight drayage cargo flow connecting regional port
       and airport gateways with domestic buyers or sellers.
