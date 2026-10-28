@@ -148,8 +148,9 @@ def test_simulation_runner_full_cycle(tmp_path: Path) -> None:
 
 def test_simulation_runner_with_real_demos_sample(tmp_path: Path) -> None:
     """Verify execution using sample extract of real DEMOS CSV files."""
-    real_hh_path = Path("evidence/demos_outputs/Household2018_POLARIS_mapped.csv")
-    real_p_path = Path("evidence/demos_outputs/Person2018_POLARIS_mapped.csv")
+    repo_root = Path(__file__).parents[1]
+    real_hh_path = repo_root / "evidence/demos_outputs/Household2018_POLARIS_mapped.csv"
+    real_p_path = repo_root / "evidence/demos_outputs/Person2018_POLARIS_mapped.csv"
 
     if not (real_hh_path.exists() and real_p_path.exists()):
         pytest.skip("Evidence DEMOS files not available")

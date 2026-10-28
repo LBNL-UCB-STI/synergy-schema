@@ -212,8 +212,9 @@ def test_demos_derivation_writes_and_recomputes_digests(tmp_path):
 
 def test_demos_derivation_with_real_demos_sample(tmp_path: Path) -> None:
     """Verify derivation against a sample extracted from real DEMOS CSV outputs."""
-    real_hh = Path("evidence/demos_outputs/Household2018_POLARIS_mapped.csv")
-    real_p = Path("evidence/demos_outputs/Person2018_POLARIS_mapped.csv")
+    repo_root = Path(__file__).parents[1]
+    real_hh = repo_root / "evidence/demos_outputs/Household2018_POLARIS_mapped.csv"
+    real_p = repo_root / "evidence/demos_outputs/Person2018_POLARIS_mapped.csv"
 
     if not (real_hh.exists() and real_p.exists()):
         pytest.skip("Evidence DEMOS files not available")

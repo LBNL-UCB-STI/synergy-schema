@@ -55,8 +55,10 @@ enums:
     permissible_values:
       Airport:
         description: Air cargo gateway facility (e.g., SFO cargo terminal).
+      Port:
+        description: Maritime container or bulk port terminal as encoded in SynthFirm international OD tables (e.g., Port of Oakland).
       Seaport:
-        description: Maritime container or bulk port terminal (e.g., Port of Oakland).
+        description: Maritime container or bulk port terminal (canonical alias for Port).
 
 classes:
   SynthFirmEstablishmentRecord:
