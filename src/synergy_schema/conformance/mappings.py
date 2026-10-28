@@ -5,12 +5,13 @@ from __future__ import annotations
 from hashlib import sha256
 import json
 from pathlib import Path
-from typing import Any, Mapping
+from typing import Any, Mapping, Sequence
 
 from linkml_runtime.utils.schemaview import SchemaView
 
 from synergy_schema.native_catalog import (
     CatalogValidationError,
+    NativeCatalog,
     catalog_identity,
     resolve_catalog_reference,
 )
@@ -82,8 +83,8 @@ def semantic_mapping_projection(contract: Mapping[str, Any]) -> dict[str, Any]:
     projection = {
         "source_catalog": _catalog_identity(contract["source_catalog"]),
         "target_catalog": _catalog_identity(contract["target_catalog"]),
-        "field_mappings": sorted(mappings, key=lambda item: item["id"]),
-        "residue_records": sorted(residues, key=lambda item: item["id"]),
+        "field_mappings": sorted(mappings, key=lambda item: str(item["id"])),
+        "residue_records": sorted(residues, key=lambda item: str(item["id"])),
     }
     for name in ("source_schema_contract", "target_schema_contract"):
         projection[name] = _schema_contract_identity(contract, name)
@@ -118,7 +119,7 @@ def _validate_elements(
         mapping[identity] = mapping.get(identity, 0) + 1
 
     def resolved_element(
-        element: object, expected_catalog: object
+        element: object, expected_catalog: NativeCatalog
     ) -> tuple[bool, Mapping[str, Any]]:
         if not isinstance(element, Mapping):
             return False, {}
@@ -255,7 +256,9 @@ def _validate_approval(
 
 
 def _validate_implementations(
-    contract: Mapping[str, Any], implementations: list[Mapping[str, Any]], strict: bool
+    contract: Mapping[str, Any],
+    implementations: Sequence[Mapping[str, Any]],
+    strict: bool,
 ) -> list[Diagnostic]:
     diagnostics: list[Diagnostic] = []
     digest = contract.get("semantic_content_digest")

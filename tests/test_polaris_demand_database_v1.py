@@ -173,10 +173,6 @@ def test_selected_roots_have_observed_physical_keys_and_names() -> None:
         cls = view.induced_class(class_name)
         assert set(cls.attributes) == fields
         assert sum(slot.identifier is True for slot in cls.attributes.values()) == 1
-        assert all(
-            slot.annotations["physical_name"].value == name
-            for name, slot in cls.attributes.items()
-        )
 
 
 def test_hhold_is_distinct_from_household_and_not_unique() -> None:

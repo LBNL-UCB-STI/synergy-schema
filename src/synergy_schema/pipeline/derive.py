@@ -187,6 +187,11 @@ def derive_core_from_demos(
         FROM demos_persons p
     """).fetchone()
 
+    if hh_counts is None or person_counts is None:
+        raise RuntimeError(
+            "Failed to compute household or person counts from DuckDB views"
+        )
+
     classification = {
         "surviving_households": int(hh_counts[0]),
         "new_households": int(hh_counts[1]),

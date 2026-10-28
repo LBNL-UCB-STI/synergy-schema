@@ -16,7 +16,7 @@ nav = [
     ] },
     { "Cross-model mappings" = [
         { "Cross-model mappings" = "cross-model-mappings/index.md" },
-        { "Contract at a Glance" = "cross-model-mappings/contract-at-a-glance.md" },
+        { "Field Mappings" = "cross-model-mappings/contract-at-a-glance.md" },
         { "Architecture & UML" = "cross-model-mappings/deliverable_1_uml.md" },
         { "Database ER Diagrams" = "cross-model-mappings/interactive-schema.md" },
         { "Mapping meaning, implementation, and lineage" = "cross-model-mappings/mapping-lineage.md" },
@@ -59,6 +59,8 @@ extra_css = [
 ]
 
 extra_javascript = [
+  "javascripts/mathjax.js",
+  "https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js",
   "javascripts/fullscreen.js",
 ]
 
@@ -69,6 +71,9 @@ features = ["content.code.copy", "navigation.indexes", "navigation.top", "search
 [project.theme.font]
 text = "Libre Franklin"
 code = "JetBrains Mono"
+
+[project.markdown_extensions.pymdownx.arithmatex]
+generic = true
 
 [project.markdown_extensions.pymdownx.superfences]
 custom_fences = [

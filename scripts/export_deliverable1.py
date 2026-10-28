@@ -5,7 +5,7 @@ This script creates a clean, self-contained distribution at dist/synergy-static-
 suitable for publishing as a standalone public GitHub repository (e.g. LBNL-UCB-STI/synergy-static-schema)
 with automated GitHub Pages hosting.
 
-Crucially, it enforces isolation: no FY27 longitudinal ledger code, core identity assemblies,
+It enforces strict package isolation: no FY27 longitudinal ledger code, core identity assemblies,
 or DuckDB pipelines are included.
 """
 
@@ -25,25 +25,23 @@ from synergy_schema.interactive_diagram import generate_interactive_diagram
 REPO_ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_DIST = REPO_ROOT / "dist" / "synergy-static-schema"
 
-STANDALONE_README = """# SYNERGY Static Cross-Model Schema (Deliverable 1)
+STANDALONE_README = """# Synergy Static Cross-Model Schema
 
-This repository publishes the LinkML schema definitions, categorical crosswalks,
-and visual documentation for the single-year data exchange across the LBNL, ANL,
-and NLR regional modeling suite (DOE Deliverable #1):
+This repository publishes the LinkML schema definitions, module entry points, categorical crosswalks, and visual documentation for single-year data exchange across the LBNL, ANL, and NLR regional transportation modeling suite:
 
-- **UrbanSim** *(containerized land-use model run by LBNL; not currently a funded collaborator)*: Zonal land-use totals, Census Block marginals, and Block-to-TAZ spatial weights.
-- **DEMOS** *(NLR, formerly NREL)*: Synthetic household and person evolution with Census PUMS seed lineage.
-- **ATLAS** *(LBNL)*: Household vehicle fleet counts, body types, and powertrains (`ICE`, `Hybrid`, `PHEV`, `AEV`).
-- **POLARIS** *(ANL)*: Activity-based demand tables (`Demand.sqlite`), network supply (`Supply.sqlite`), and post-run state feedback (`Result.sqlite`).
-- **ActivitySim & BEAM** *(LBNL)*: LBNL's maintained ActivitySim demand implementation and BEAM multi-agent traffic/charging simulation consuming the same upstream scenario state.
-- **SynthFirm** *(LBNL)*: Business establishments, commercial vehicle fleets, and B2B commodity shipments.
+- **UrbanSim** *(containerized land-use model run at LBNL)*: Zonal land-use totals, Census Block marginals, and Block-to-TAZ spatial weights.
+- **DEMOS** *(NLR)*: Synthetic household and person demographic evolution with Census PUMS seed lineage (`serialno`, `pnum`).
+- **ATLAS** *(LBNL)*: Household vehicle fleet counts, body types, vintage, and powertrains (`ICE`, `Hybrid`, `PHEV`, `AEV`).
+- **POLARIS** *(ANL)*: Activity-based travel demand (`Demand.sqlite`), multimodal network supply (`Supply.sqlite`), and post-run state feedback (`Result.sqlite`).
+- **ActivitySim & BEAM** *(LBNL)*: LBNL's maintained ActivitySim tour-based demand implementation and BEAM multi-agent traffic and charging simulation consuming the shared upstream scenario state.
+- **SynthFirm** *(LBNL)*: Synthetic business establishments, commercial vehicle fleets, and B2B commodity shipments.
 - **Network Travel Skims (`.omx` / `.zarr`)**: Multi-dimensional zone-to-zone highway, transit, and ridehail travel impedance arrays.
 
-Beyond fulfilling Deliverable #1, this package serves as a verification reference for model owners at Argonne (POLARIS), NLR (DEMOS), and Berkeley Lab (ATLAS, BEAM, SynthFirm, and LBNL's maintained ActivitySim implementation) to inspect how their model inputs, outputs, join keys, and provisional boundary assumptions are represented—and as the direct specification for the SQL projection queries and seeded Python refinement operators in the next project phase's automated multi-year workflow.
+These schemas define the module entry points that allow BEAM CORE tools (PILATES) and POLARIS Studio to operate either as standalone modules or in coordinated serial and parallel workflows. Grounded in Austin regional pilot datasets (DEMOS, ATLAS, POLARIS), San Francisco Bay Area baseline outputs (SynthFirm, MTC skims), and PILATES reference contracts (ActivitySim, BEAM, UrbanSim), the specification gives model teams at Argonne (POLARIS), NLR (DEMOS), and Berkeley Lab (ATLAS, BEAM, SynthFirm, ActivitySim, and containerized UrbanSim) a shared reference for table structures, join keys, categorical crosswalks (`X-H1` to `X-V5`), and probabilistic donor imputations (`D-H1` to `D-V2`). The same contracts also specify the SQL projection queries and seeded Python refinement operators used in multi-year workflow execution.
 
 ---
 
-## Deliverable Documentation Site
+## Documentation Site
 
 Browse the compiled documentation, ER diagrams, mapping matrices, and LinkML class reference at:
 **[https://LBNL-UCB-STI.github.io/synergy-static-schema/](https://LBNL-UCB-STI.github.io/synergy-static-schema/)**
@@ -57,7 +55,7 @@ Browse the compiled documentation, ER diagrams, mapping matrices, and LinkML cla
 ├── .github/workflows/
 │   └── deploy-pages.yml       # GitHub Actions workflow deploying docs to GitHub Pages
 ├── docs/                      # Markdown source files for documentation site
-│   ├── index.md               # Overview, model scope, and collaborator review guide
+│   ├── index.md               # Overview, model entry points, and reference data grounding
 │   ├── interactive-schema.md  # Compiled crow's-foot ER diagrams & foreign-key table
 │   ├── deliverable_1_uml.md   # Workflow pipelines & per-model UML class diagrams
 │   ├── contract-at-a-glance.md# Handoff matrix, crosswalks (X-H1..X-V5), & donor draws
@@ -65,7 +63,11 @@ Browse the compiled documentation, ER diagrams, mapping matrices, and LinkML cla
 │   │   └── DEMOS_and_ATLAS_to_POLARIS_interface.xlsx
 │   └── schema/                # LinkML autogenerated reference for all classes & slots
 ├── schema/                    # Pure LinkML YAML schema source contracts
-│   ├── deliverable_1_static_schema.yaml  # Master entry point bundle
+│   ├── deliverable_1_static_schema.yaml  # Top-level entry point bundle
+│   ├── doc_templates/
+│   │   ├── index.md.jinja2    # LinkML gen-doc template grouping classes by subset
+│   │   ├── class.md.jinja2    # LinkML gen-doc template for 1-hop relational class diagrams
+│   │   └── subset.md.jinja2   # LinkML gen-doc template for module subset pages & diagrams
 │   ├── models/
 │   │   ├── urbansim/urbansim_land_use.yaml
 │   │   ├── demos/demos_polaris_mapped_examples.yaml
@@ -110,19 +112,19 @@ for cls_name in sorted(view.all_classes()):
     print(cls_name)
 ```
 
-### 2. Building the Documentation Site Locally
+### 2. Building the Documentation Site
 
-To preview the documentation site locally with hot-reloading:
+To preview the documentation site with hot-reloading:
 ```bash
 uv run zensical serve
 ```
-Then open `http://127.0.0.1:8000/` in your browser.
+Then open `http://127.0.0.1:8000/` in a browser.
 
 To compile the static HTML site:
 ```bash
 uv run zensical build
 ```
-The compiled HTML will be output to `site/`.
+The compiled HTML outputs to `site/`.
 """
 
 STANDALONE_LICENSE = """Copyright (c) 2026, The Regents of the University of California,
@@ -200,7 +202,7 @@ STANDALONE_EXTRA_CSS = """/* Custom styling for Synergy Schema documentation */
 """
 
 STANDALONE_ZENSICAL = """[project]
-site_name = "SYNERGY Static Cross-Model Schema"
+site_name = "Synergy Static Cross-Model Schema"
 site_description = "Static cross-model LinkML schemas and categorical crosswalks across UrbanSim, DEMOS, ATLAS, POLARIS, ActivitySim, BEAM, and Travel Skims"
 site_url = "https://LBNL-UCB-STI.github.io/synergy-static-schema/"
 repo_url = "https://github.com/LBNL-UCB-STI/synergy-static-schema"
@@ -220,7 +222,7 @@ nav = [
     { "Overview" = "index.md" },
     { "Database ER Diagrams" = "interactive-schema.md" },
     { "Architecture & UML" = "deliverable_1_uml.md" },
-    { "Contract at a Glance" = "contract-at-a-glance.md" },
+    { "Field Mappings" = "contract-at-a-glance.md" },
     { "Schema Reference" = [
         { "Reference Index" = "schema/index.md" },
     ] },
@@ -229,6 +231,9 @@ nav = [
 [project.theme]
 language = "en"
 features = ["content.code.copy", "navigation.indexes", "navigation.top", "search.highlight", "toc.integrate"]
+
+[project.markdown_extensions.pymdownx.arithmatex]
+generic = true
 
 [project.markdown_extensions.pymdownx.superfences]
 custom_fences = [
@@ -298,7 +303,7 @@ jobs:
       - name: Generate LinkML Schema Documentation
         run: |
           mkdir -p docs/schema
-          uv run gen-doc --render-imports --directory docs/schema schema/deliverable_1_static_schema.yaml
+          uv run gen-doc --render-imports --truncate-descriptions false --template-directory schema/doc_templates --directory docs/schema schema/deliverable_1_static_schema.yaml
 
       - name: Build Static Site with Zensical
         run: uv run zensical build
@@ -332,35 +337,63 @@ site/
 .DS_Store
 """
 
-STANDALONE_INDEX_MD = """# SYNERGY Static Cross-Model Schema (Deliverable 1)
+STANDALONE_INDEX_MD = """# Synergy Static Cross-Model Schema
 
-This site documents **Deliverable #1: Static Single-Year Cross-Model Schema** for the DOE SYNERGY project. It serves three roles:
+Synergy Schema defines the LinkML data schemas and cross-model field mappings that connect the BEAM CORE modeling suite (**UrbanSim**, **DEMOS**, **ATLAS**, **SynthFirm**, **ActivitySim**, **BEAM**) and **POLARIS** for a single simulation year. The schemas document the tables, keys, value codes, and matrix dimensions exchanged at each model handoff so tools can run alone or in coordinated workflows while keeping their native file formats.
 
-1. **DOE Deliverable #1**: A machine-readable LinkML specification and reference guide for single-year data exchange across the LBNL, ANL, and NLR regional modeling suite.
-2. **Collaborator Review & Verification**: A working contract where model owners at Argonne (**POLARIS**), NLR, formerly NREL (**DEMOS**), and Berkeley Lab (**ATLAS**, **BEAM**, **SynthFirm**, and the project's maintained **ActivitySim** implementation, plus LBNL's containerized **UrbanSim** pipeline) can inspect table schemas, join keys, categorical crosswalks, and provisional boundaries.
-3. **Blueprint for Next-Phase Executable Workflows**: Every join key, categorical crosswalk (`X-H1`–`X-V5`), and donor draw rule (`D-H1`–`D-V2`) defined here translates directly into executable SQL projections and seeded Python refinement operators in the next project phase's automated multi-year pipeline.
+```mermaid
+flowchart TD
+  urbansim["UrbanSim\nLand use & spatial development (t to t+1)"]
+  demos["DEMOS\nDemographic evolution (t to t+1)"]
+  atlas["ATLAS\nHousehold vehicle fleet ownership (t+1)"]
+  synthfirm["SynthFirm\nEstablishments, commercial fleets & freight (t+1)"]
+  demand["POLARIS / ActivitySim + BEAM\nTenure, workplace, demand & DTA (t+1)"]
+
+  urbansim -->|"block marginals M_t+1"| demos
+  urbansim -->|"employment & land use"| synthfirm
+  demos -->|"evolved population P_t+1"| atlas
+  atlas -->|"households, persons & vehicles"| demand
+  synthfirm -->|"commercial fleets & freight shipments"| demand
+  demand -.->|"network skims Skim_t"| urbansim
+  demand -.->|"population state P_t"| demos
+```
 
 ---
 
-## Participating Models
+## What this specification contains
 
-1. **UrbanSim** *(containerized at LBNL; not currently a funded collaborator)* — Parcel/block land use, residential capacity, employment allocation, and Census Block marginals.
-2. **DEMOS** *(NLR, formerly NREL)* — Household and person demographic synthesis, evolution, and Census PUMS donor lineage (`serialno`, `pnum`).
-3. **ATLAS** *(LBNL)* — Household vehicle ownership counts, body types, vintage, and powertrain adoption (ICEV, HEV, PHEV, BEV).
-4. **POLARIS** *(ANL)* — Activity-based travel demand (`Demand.sqlite`), multi-modal network supply (`Supply.sqlite`), and dynamic traffic assignment.
-5. **ActivitySim & BEAM** *(LBNL)* — LBNL's maintained ActivitySim tour-based demand implementation and BEAM multi-agent dynamic network simulation.
-6. **Network Skim Cubes (`.omx` / `.zarr`)** — 3D/4D zone-to-zone travel time, distance, and cost arrays (`LinkML Array` specifications).
-7. **SynthFirm** *(LBNL)* — Synthetic business establishments, commercial vehicle fleets, and B2B freight tours.
+| Section | Contents |
+| :--- | :--- |
+| [Schema Reference](schema/index.md) | LinkML schemas for land use, demographic evolution, household and commercial vehicle fleets, travel demand, traffic simulation, and travel skims (`schema/`). |
+| [Field Mappings](contract-at-a-glance.md) | Field mappings, category recodes, survey imputation rules for missing downstream attributes, and the step-by-step staging pipeline. |
+| [Database ER Diagrams](interactive-schema.md) | Entity-relationship diagrams showing tables, primary keys, and foreign keys within and across models. |
+| [Architecture & UML](deliverable_1_uml.md) | Workflow diagrams and per-model class diagrams comparing the POLARIS, ActivitySim + BEAM, and SynthFirm pathways. |
 
 ---
 
-## What to Review
+## How the models connect
 
-- **LinkML Source Schemas**: Machine-readable YAML specifications declaring classes, slots, primary/foreign keys, and multi-dimensional array shapes under `schema/`.
-- **Database ER Diagrams**: [Interactive Entity-Relationship Explorer](interactive-schema.md) showing per-model primary keys, intra-model foreign keys, and cross-model handoff edges.
-- **Architecture & Workflow UML**: [Multi-Model Architecture & UML](deliverable_1_uml.md) comparing the POLARIS workflow, the ActivitySim/BEAM counterpart workflow, and the SynthFirm freight pipeline.
-- **Crosswalks, Donor Draws & Provisional Items**: [Contract at a Glance](contract-at-a-glance.md) detailing column mappings, categorical crosswalks (`X-H1`–`X-V5`), PUMS/NHTS donor draws (`D-H1`–`D-V2`), and three provisional boundaries flagged for collaborator confirmation.
-- **Generated Class & Enum Catalog**: [Schema Reference](schema/index.md) with full slot tables for every model entity.
+The schemas separate upstream population and fleet generation from downstream travel simulation so teams can run three workflow patterns from the same regional inputs:
+
+1. **Land use, demographics, and household fleets**: **UrbanSim** outputs Census Block household and employment totals alongside a Block-to-TAZ geographic lookup. **DEMOS** evolves household and person tables from year `t` to `t+1`, and **ATLAS** assigns vehicles, body types, ages, and powertrains (`ICE`, `Hybrid`, `PHEV`, `AEV`) to those households.
+2. **Passenger travel demand and network assignment**: Using the same upstream **UrbanSim**, **DEMOS**, and **ATLAS** tables, the workflow feeds either **POLARIS** (`Demand.sqlite` and `Supply.sqlite` for activity scheduling and dynamic traffic assignment, with year-end `Result.sqlite` outputs) or **ActivitySim** and **BEAM** (tour generation followed by multi-agent traffic, transit, and charging simulation).
+3. **Commercial freight and next-year feedback**: **SynthFirm** generates business establishments, truck fleets, and freight shipments for commercial tour simulation in POLARIS and BEAM. At the end of the simulation year, travel time skims flow back to **UrbanSim** and updated population records flow back to **DEMOS** for the next iteration.
+
+---
+
+## Participating Models & Reference Data Grounding
+
+Every schema class and mapping rule is grounded in reference model inputs, outputs, and interface specifications from the Austin regional pilot, the San Francisco Bay Area (MTC) baseline, and PILATES workflow contracts:
+
+| Model / Interface | Role in Regional Workflow | Reference Data & Grounding |
+| :--- | :--- | :--- |
+| **UrbanSim** | Block-level household and employment totals; Block-to-TAZ lookups; zonal land-use tables | PILATES UrbanSim output specification (`status: notional`), aligned with Austin 15-digit Census Block (`block_id`, `48453...`) and TAZ (`Zone`) keys in DEMOS and POLARIS |
+| **DEMOS** | Demographic synthesis and multi-year household and person evolution | Austin 2018 and 2019 POLARIS-mapped household and person CSV exports (`Household2018_POLARIS_mapped.csv`, `Person2018_POLARIS_mapped.csv`), `DEMOS_input_output.xlsx`, and Texas ACS PUMS donor linkage (`serialno`, `pnum`) |
+| **ATLAS** | Household vehicle counts, body types, vehicle age, and powertrains (`ICE`, `Hybrid`, `PHEV`, `AEV`) | 6-county Austin metro output (`48.{021,053,055,209,453,491}.atlas_hh.csv` and `*.atlas_veh.csv` covering Bastrop, Burnet, Caldwell, Hays, Travis, and Williamson counties) and `ATLAS_Input_Output.xlsx` |
+| **POLARIS** | Activity-based travel demand (`Demand.sqlite`), network supply (`Supply.sqlite`), and post-run state feedback (`Result.sqlite`) | Austin `Austin-Demand_incl_relp_hh_matches_acs.sqlite` (`Household`, `Person`, `Vehicle`, `Vehicle_Class`, `Vehicle_Type`), `Austin-Supply.sqlite` (`Zone`, `Location`), `POLARIS_variables.xlsx`, and `DEMOS_and_ATLAS_to_POLARIS_interface.xlsx` |
+| **ActivitySim & BEAM** | Tour-based travel demand (ActivitySim) and multi-agent traffic and charging simulation (BEAM) | PILATES reference contracts (`HouseholdsBeamIn`, `PersonsBeamIn`, `VehiclesBeamIn`, `PlansBeamIn`) and production MTC / ActivitySim / BEAM `skims.omx` layout |
+| **SynthFirm** | Business establishments, commercial vehicle fleets, and B2B freight shipments | San Francisco Bay Area baseline dataset (`SF_baseline011226`, 2018 & 2050: `synthetic_firms_with_fleet_mc_adjusted.csv`, `synthetic_carriers.csv`, `B2B_Flow`, and import/export OD tables) |
+| **Travel Network Skims** | Origin-destination travel time, distance, cost, and transit/ridehail matrices | Production MTC / ActivitySim / BEAM `skims.omx` (OMX v0.2 HDF5) and `.zarr` multi-dimensional array schemas; POLARIS skim interface specification |
 """
 
 
@@ -393,6 +426,9 @@ def export_package(target_dir: Path) -> None:
     schema_source_root = REPO_ROOT / "src" / "synergy_schema" / "schema"
     schema_files = [
         "deliverable_1_static_schema.yaml",
+        "doc_templates/index.md.jinja2",
+        "doc_templates/class.md.jinja2",
+        "doc_templates/subset.md.jinja2",
         "models/urbansim/urbansim_land_use.yaml",
         "models/demos/demos_polaris_mapped_examples.yaml",
         "models/atlas/atlas_fleet_observed_example_v1.yaml",
@@ -486,6 +522,7 @@ def export_package(target_dir: Path) -> None:
     gen_doc_dir = docs_dest / "schema"
     gen_doc_dir.mkdir(parents=True, exist_ok=True)
     master_yaml = schema_dest / "deliverable_1_static_schema.yaml"
+    template_dir = schema_dest / "doc_templates"
     print("  Running LinkML gen-doc...")
     subprocess.run(
         [
@@ -493,6 +530,10 @@ def export_package(target_dir: Path) -> None:
             "run",
             "gen-doc",
             "--render-imports",
+            "--truncate-descriptions",
+            "false",
+            "--template-directory",
+            str(template_dir),
             "--directory",
             str(gen_doc_dir),
             str(master_yaml),

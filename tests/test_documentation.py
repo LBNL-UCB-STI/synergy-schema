@@ -56,7 +56,7 @@ def test_navigation_has_approved_sections_and_existing_leaves() -> None:
         "Glossary",
         "PILATES post-ATLAS population",
         "POLARIS translated population",
-        "Contract at a Glance",
+        "Field Mappings",
         "Architecture & UML",
         "Database ER Diagrams",
         "Population identity",
@@ -180,25 +180,27 @@ def test_concept_heavy_guides_link_selected_first_uses_to_the_glossary() -> None
 
 def test_overview_explains_the_shared_universe_and_why_records_matter() -> None:
     overview = (DOCS / "index.md").read_text()
-    assert overview.startswith("# Synergy Schema\n\nA transportation modeling workflow")
+    assert overview.startswith(
+        "# Synergy Schema\n\nSynergy Schema defines the LinkML data schemas"
+    )
     for heading in (
-        "## The coordination problem",
+        "## What this specification contains",
+        "## How the models connect",
         "## One shared universe, several modeling systems",
         "## What Synergy records, and why",
         "## Scope and limits",
-        "## How the documentation builds",
+        "## Where to go next",
     ):
         assert heading in overview
     assert "declared consistency" in overview
     assert "Interface descriptions" in overview
     assert "Review records" in overview
-    assert "Evidence" in overview
+    assert "Evidence" in overview or "evidence from the" in overview
     assert "evidence from the" in overview
     assert "PILATES modeling pipeline" in overview
     assert "and POLARIS" in overview
     assert "keep their own schemas" in overview
-    assert "legitimately produce different" in overview
-    assert "model-specific results" in overview
+    assert "produce different model-specific results" in overview
     assert "| Documentation area | Question it answers |" in overview
     assert "Bring an existing mapping" in overview
     assert "one-year mapping handshake" in overview
@@ -302,3 +304,22 @@ def test_maintained_surfaces_avoid_ambiguous_release_jargon() -> None:
     lineage = (DOCS / "cross-model-mappings/mapping-lineage.md").read_text()
     assert "| Record | Question it answers |" in lineage
     assert "approved rules, wrong script" in lineage
+
+
+def test_mermaid_edge_labels_quote_parentheses() -> None:
+    for path in sorted(DOCS.rglob("*.md")):
+        blocks = re.findall(r"```mermaid\n(.*?)```", path.read_text(), re.S)
+        for block in blocks:
+            for line in block.splitlines():
+                match = re.search(
+                    r"-->\|([^|]+)\||==>\|([^|]+)\||-\.->\|([^|]+)\|", line
+                )
+                if not match:
+                    continue
+                label = next(
+                    group for group in match.groups() if group is not None
+                ).strip()
+                if "(" in label or ")" in label:
+                    assert label.startswith('"') and label.endswith('"'), (
+                        f"Unquoted parentheses in Mermaid edge label in {path}: {line}"
+                    )

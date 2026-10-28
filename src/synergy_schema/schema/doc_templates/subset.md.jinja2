@@ -1,0 +1,218 @@
+---
+search:
+  boost: {% if element.deprecated %}0.5{% else %}1.0{% endif %}
+---
+
+
+# Subset: {% if element.title %}{{ element.title }} (`{{ gen.name(element) }}`){% else %}{{ gen.name(element) }}{% endif %} {% if element.deprecated %} <span style="color: red;"><strong> (DEPRECATED) </strong></span> {% endif %}
+
+{%- if header -%}
+{{ header }}
+{%- endif -%}
+
+{% if element.description %}
+{% set element_description_lines = element.description.split('\n') %}
+{% for element_description_line in element_description_lines %}
+_{{ element_description_line }}_
+{% endfor %}
+{% endif %}
+
+<div data-search-exclude markdown="1">
+
+URI: {{ gen.link(element) }}
+
+{% set classes_in_subset = [] %}
+{% set subset_class_names = [] %}
+{% set slots_in_subset = [] %}
+{% set enums_in_subset = [] %}
+
+{# Collect classes, slots, and enumerations in subset preserving YAML definition order #}
+{%- for c in gen.all_class_objects() -%}
+    {%- if element.name in c.in_subset -%}
+        {%- set _ = classes_in_subset.append(c) -%}
+        {%- set _ = subset_class_names.append(c.name) -%}
+    {%- endif -%}
+{%- endfor -%}
+
+{%- for s in gen.all_slot_objects()|sort(attribute=sort_by) -%}
+    {%- if element.name in s.in_subset -%}
+        {%- set _ = slots_in_subset.append(s) -%}
+    {%- endif -%}
+{%- endfor -%}
+
+{%- for e in schemaview.all_enums().values() -%}
+    {%- if element.name in e.in_subset -%}
+        {%- set _ = enums_in_subset.append(e) -%}
+    {%- endif -%}
+{%- endfor %}
+
+{% if classes_in_subset %}
+{% set clicked_nodes = [] %}
+{% set drawn_edges = [] %}
+```{{ gen.mermaid_directive() }}
+ classDiagram
+{%- for c in classes_in_subset %}
+    class {{ gen.name(c) }}
+    click {{ gen.name(c) }} href "{{ gen.link_mermaid(c) }}"
+    {%- set _ = clicked_nodes.append(c.name) %}
+{%- endfor %}
+{%- for c in classes_in_subset %}
+  {%- for p_name in schemaview.class_parents(c.name)|sort %}
+    {%- set p_elem = schemaview.get_element(p_name) %}
+    {%- if p_elem is not none %}
+    {{ gen.name(p_elem) }} <|-- {{ gen.name(c) }}
+      {%- if p_elem.name not in clicked_nodes %}
+    click {{ gen.name(p_elem) }} href "{{ gen.link_mermaid(p_elem) }}"
+        {%- set _ = clicked_nodes.append(p_elem.name) %}
+      {%- endif %}
+    {%- endif %}
+  {%- endfor %}
+  {%- for s in gen.get_direct_slots(c)|sort(attribute='name') %}
+    {%- set target_name = none %}
+    {%- if s.range is not none and s.range not in gen.all_type_object_names() %}
+      {%- set target_name = s.range %}
+    {%- elif s.annotations and "foreign_key" in s.annotations and s.annotations["foreign_key"].value %}
+      {%- set target_name = (s.annotations["foreign_key"].value|string).split('.')[0] %}
+    {%- elif s.annotations and "relationship_target" in s.annotations and s.annotations["relationship_target"].value %}
+      {%- set target_name = (s.annotations["relationship_target"].value|string).split('.')[0] %}
+    {%- elif s.annotations and "source_table" in s.annotations and s.annotations["source_table"].value %}
+      {%- set target_name = (s.annotations["source_table"].value|string).split('.')[0] %}
+    {%- endif %}
+    {%- if target_name is not none %}
+      {%- set target_elem = schemaview.get_element(target_name) %}
+      {%- if target_elem is not none %}
+        {%- set edge_key = c.name ~ "->" ~ target_elem.name ~ ":" ~ s.name %}
+        {%- if edge_key not in drawn_edges %}
+          {%- set _ = drawn_edges.append(edge_key) %}
+    {{ gen.name(c) }} --> "{{ gen.cardinality(s) }}" {{ gen.name(target_elem) }} : {{ gen.name(s) }}
+          {%- if target_elem.name not in clicked_nodes %}
+    click {{ gen.name(target_elem) }} href "{{ gen.link_mermaid(target_elem) }}"
+            {%- set _ = clicked_nodes.append(target_elem.name) %}
+          {%- endif %}
+        {%- endif %}
+      {%- endif %}
+    {%- endif %}
+  {%- endfor %}
+{%- endfor %}
+{%- for other_cls_name in schemaview.all_classes()|sort %}
+  {%- if other_cls_name not in subset_class_names %}
+    {%- set other_elem = schemaview.get_element(other_cls_name) %}
+    {%- if other_elem is not none %}
+      {%- for other_s in gen.get_direct_slots(other_elem)|sort(attribute='name') %}
+        {%- set other_target = none %}
+        {%- if other_s.range is not none and other_s.range not in gen.all_type_object_names() %}
+          {%- set other_target = other_s.range %}
+        {%- elif other_s.annotations and "foreign_key" in other_s.annotations and other_s.annotations["foreign_key"].value %}
+          {%- set other_target = (other_s.annotations["foreign_key"].value|string).split('.')[0] %}
+        {%- elif other_s.annotations and "relationship_target" in other_s.annotations and other_s.annotations["relationship_target"].value %}
+          {%- set other_target = (other_s.annotations["relationship_target"].value|string).split('.')[0] %}
+        {%- elif other_s.annotations and "source_table" in other_s.annotations and other_s.annotations["source_table"].value %}
+          {%- set other_target = (other_s.annotations["source_table"].value|string).split('.')[0] %}
+        {%- endif %}
+        {%- if other_target in subset_class_names %}
+          {%- set target_elem = schemaview.get_element(other_target) %}
+          {%- set edge_key = other_elem.name ~ "->" ~ target_elem.name ~ ":" ~ other_s.name %}
+          {%- if edge_key not in drawn_edges %}
+            {%- set _ = drawn_edges.append(edge_key) %}
+    {{ gen.name(other_elem) }} --> "{{ gen.cardinality(other_s) }}" {{ gen.name(target_elem) }} : {{ gen.name(other_s) }}
+            {%- if other_elem.name not in clicked_nodes %}
+    click {{ gen.name(other_elem) }} href "{{ gen.link_mermaid(other_elem) }}"
+              {%- set _ = clicked_nodes.append(other_elem.name) %}
+            {%- endif %}
+          {%- endif %}
+        {%- endif %}
+      {%- endfor %}
+    {%- endif %}
+  {%- endif %}
+{%- endfor %}
+```
+
+## Classes in subset
+
+| Class | Description |
+| --- | --- |
+{% for c in classes_in_subset -%}
+{%- if element.name in c.in_subset -%}
+| {{ gen.link(c) }} | {{ c.description|enshorten }} |
+{% endif -%}
+{% endfor %}
+
+{% for c in classes_in_subset -%}
+{%- if element.name in c.in_subset -%}
+
+{% set induced_slots = gen.class_induced_slots(c.name)|sort(attribute=sort_by) %}
+
+{%- set filtered_slots = [] -%}
+{%- for s in induced_slots|sort(attribute=sort_by) -%}
+    {%- if element.name in s.in_subset or element.name in schemaview.get_slot(s.name).in_subset -%}
+        {% set _ = filtered_slots.append(s) %}
+    {%- endif -%}
+{%- endfor %}
+
+{%- if filtered_slots|length > 0 -%}
+### Slots from {{ gen.link(c) }} also in _{{ element.name }}_
+
+| Name | Cardinality and Range | Description |
+| ---  | ---  | --- |
+{% for s in filtered_slots -%}
+| {{ gen.link(s) }} | {{ gen.cardinality(s) }} <br/> {{ gen.link(s.range) }} | {{ s.description|enshorten }} {% if s.identifier %}**identifier**{% endif %} |
+{% endfor %}
+{%- endif %}
+
+{%- endif %}
+{% endfor %}
+
+{%- endif %}
+
+{% if slots_in_subset %}
+## Slots in subset
+
+| Slot | Description |
+| --- | --- |
+{% for s in slots_in_subset|sort(attribute=sort_by) -%}
+{%- if element.name in s.in_subset -%}
+| {{ gen.link(s) }} | {{ s.description|enshorten }} |
+{%- endif %}
+{% endfor %}
+
+{%- endif %}
+
+{% if enums_in_subset %}
+## Enumerations in subset
+
+| Enumeration | Description |
+| --- | --- |
+{% for e in enums_in_subset|sort(attribute='name') -%}
+{% if element.name in e.in_subset -%}
+| {{ gen.link(e) }} | {{ e.description|enshorten }} |
+{%- endif %}
+{% endfor %}
+
+{%- endif %}
+
+## Identifier and Mapping Information
+
+{% if element.annotations %}
+### Annotations
+
+| property | value |
+| --- | --- |
+{% for a in element.annotations -%}
+{%- if a|string|first != '_' -%}
+| {{ a }} | {{ element.annotations[a].value }} |
+{% endif -%}
+{% endfor %}
+{% endif %}
+
+{% if element.from_schema or element.imported_from %}
+### Schema Source
+
+{% if element.from_schema %}
+* from schema: {{ element.from_schema }}
+{% endif %}
+{% if element.imported_from %}
+* imported from: {{ element.imported_from }}
+{% endif %}
+{% endif %}
+
+</div>

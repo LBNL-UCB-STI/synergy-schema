@@ -1,11 +1,10 @@
 id: https://w3id.org/LBNL-UCB-STI/synergy-schema/models/demos/polaris-mapped-examples
 name: demos_polaris_mapped_examples
-title: DEMOS provisional POLARIS-mapped exports
+title: DEMOS Synthetic Population and Demographic Evolution Exports
 description: >-
-  Provisional row contracts for the DEMOS POLARIS-mapped CSV exports found in
-  local evidence. These classes preserve physical headers; they do not assert
-  a shared handoff, verified POLARIS ingestion, year semantics, or cross-year
-  continuity.
+  LinkML schema defining the household and person synthetic population exports
+  produced by the DEMOS demographic evolution model and formatted for downstream
+  travel demand and vehicle fleet modeling.
 
 prefixes:
   synergy_schema: https://w3id.org/LBNL-UCB-STI/synergy-schema/
@@ -17,157 +16,164 @@ default_range: string
 imports:
   - linkml:types
 
+subsets:
+  demos:
+    title: "DEMOS Demographic Evolution"
+    description: >-
+      Synthetic household and person records evolved across simulation years by
+      DEMOS with Census ACS PUMS seed lineage.
+
 classes:
   DemosPolarisMappedHousehold:
+    in_subset:
+      - demos
     description: >-
       Authoritative household schema for DEMOS synthetic population mapped
       for POLARIS simulation. Physical columns match the DEMOS household export.
     aliases:
       - DemosHousehold
     annotations:
+      model_association: DEMOS
+      artifact_table: "Household2018_POLARIS_mapped.csv"
       schema_status: authoritative
       status: active
-      authority_status: approved
     attributes:
       household:
         range: integer
         identifier: true
         required: true
-        description: Physical household identifier column.
+        description: Unique household identifier.
       block_id:
         range: integer
         required: true
         annotations:
           foreign_key: UrbanSimBlockMarginals.block_id
-        description: Physical block identifier column.
+        description: Residential Census Block Group or Block FIPS identifier.
       lcm_county_id:
         range: integer
         required: true
-        description: Physical LCM county identifier column.
+        description: Five-digit state and county FIPS identifier (e.g. 48453 for Travis County).
       age_of_head:
         range: float
         required: true
-        description: Physical household-head age column.
+        description: Age of the household head in years.
       workers:
         range: float
         required: true
-        description: Physical household workers column.
+        description: Number of employed workers in the household.
       race_of_head:
         range: float
         required: true
-        description: Physical household-head race code column.
+        description: Race category code of the household head (ACS PUMS RAC1P coding).
       income:
         range: float
         required: true
-        description: Physical household income column.
+        description: Annual household income in dollars.
       persons:
         range: integer
         required: true
-        description: Physical household persons-count column.
+        description: Total number of persons residing in the household.
       is_reorg_household:
         range: boolean
         required: true
-        description: Physical household reorganization indicator column.
+        description: Flag indicating whether the household was newly formed or reorganized during demographic evolution.
       serialno_pums:
         range: string
         required: false
         annotations:
           physical_name: SERIALNO_PUMS
           observed_value_gap: >-
-            Blank values occur in the supplied examples for reorganized households
-            or unlinked synthetic records.
-        description: Physical Census PUMS seed household identifier column.
+            Optional for newly formed or reorganized synthetic households without a direct PUMS seed record.
+        description: Source Census ACS PUMS household serial number for seed lineage tracking.
 
   DemosPolarisMappedPerson:
+    in_subset:
+      - demos
     description: >-
       Authoritative person schema for DEMOS synthetic population mapped for
       POLARIS simulation. Physical columns match the DEMOS person export.
     aliases:
       - DemosPerson
     annotations:
+      model_association: DEMOS
+      artifact_table: "Person2018_POLARIS_mapped.csv"
       schema_status: authoritative
       status: active
-      authority_status: approved
     attributes:
       person:
         range: integer
         required: true
-        description: Physical person identifier column.
+        description: Within-household person index or person identifier.
       relp:
         range: integer
         required: true
         annotations:
           crosswalk: X-P1
-        description: Physical relationship-to-household code column.
+        description: Relationship to household head code (ACS PUMS RELP coding).
       gender:
         range: integer
         required: true
         annotations:
           crosswalk: X-P1
-        description: Physical gender code column.
+        description: Sex/gender code (1=Male, 2=Female).
       education:
         range: integer
         required: true
         annotations:
           crosswalk: X-P1, X-P6
-        description: Physical education code column.
+        description: Educational attainment category code.
       income:
         range: float
         required: true
-        description: Physical person income column.
+        description: Annual individual personal income in dollars.
       id:
         range: float
         annotations:
           observed_value_gap: >-
-            Blank values occur in the supplied examples, so this provisional row
-            shape does not require a value.
-        description: >-
-          Physical within-row/person ordinal-like column; it is optional in
-          this provisional shape and uniqueness is not asserted.
+            Optional internal DEMOS row index; not required on all evolved person records.
+        description: Optional internal person index exported by DEMOS.
       age:
         range: integer
         required: true
-        description: Physical person age column.
+        description: Person age in years.
       household:
         range: integer
         required: true
         annotations:
           foreign_key: DemosPolarisMappedHousehold.household
-        description: Physical household identifier column.
+        description: Household identifier linking the person to DemosPolarisMappedHousehold.
       marital_status:
         range: integer
         required: true
         annotations:
           crosswalk: X-P1
           donor_draw: D-P3a
-        description: Physical marital-status code column.
+        description: Marital status code (ACS PUMS MAR coding).
       employment:
         range: float
         required: true
         annotations:
           crosswalk: X-P1, X-P2
-        description: Physical employment code column.
+        description: Employment status category code (ACS PUMS ESR coding).
       school_enrollment:
         range: float
         required: true
         annotations:
           crosswalk: X-P1
-        description: Physical school-enrollment code column.
+        description: School enrollment and grade level code (ACS PUMS SCHG coding).
       serialno_pums:
         range: string
         required: false
         annotations:
           physical_name: SERIALNO_PUMS
           observed_value_gap: >-
-            Blank values occur in the supplied examples for newborn agents or
-            unlinked synthetic records.
-        description: Physical Census PUMS seed household identifier column.
+            Optional for simulated newborn agents or unlinked synthetic records.
+        description: Source Census ACS PUMS household serial number for seed lineage tracking.
       sporder:
         range: float
         required: false
         annotations:
           physical_name: SPORDER
           observed_value_gap: >-
-            Blank values occur in the supplied examples for newborn agents or
-            unlinked synthetic records.
-        description: Physical Census PUMS seed person sequence order column.
+            Optional for simulated newborn agents or unlinked synthetic records.
+        description: Source Census ACS PUMS person sequence number within the seed household.

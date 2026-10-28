@@ -1,10 +1,10 @@
 id: https://w3id.org/LBNL-UCB-STI/synergy-schema/models/atlas/fleet-observed-example-v1
 name: atlas_fleet_observed_example_v1
-title: ATLAS provisional fleet output v1
+title: ATLAS Household Vehicle Fleet Output Schema
 description: >-
-  Provisional schema for the two observed ATLAS fleet-output tables retained
-  in evidence/atlas_outputs. It records a v1 schema for those rows for owner
-  review; it is not evidence of a shared cross-model handoff.
+  LinkML schema defining the household vehicle count and vehicle-level fleet
+  composition tables produced by the ATLAS household vehicle fleet evolution
+  and technology adoption model.
 
 prefixes:
   synergy_schema: https://w3id.org/LBNL-UCB-STI/synergy-schema/
@@ -16,9 +16,18 @@ default_range: string
 imports:
   - linkml:types
 
+subsets:
+  atlas:
+    title: "ATLAS Household Vehicle Fleet"
+    description: >-
+      Household vehicle counts and vehicle-level body type, age bracket, annual
+      mileage, and powertrain assignments produced by ATLAS.
+
 classes:
   # Authoritative row schema for ATLAS household fleet output
   AtlasHouseholdFleetOutput:
+    in_subset:
+      - atlas
     description: >-
       Authoritative household-side fleet summary row contract produced by ATLAS.
       Summarizes total vehicle counts (nvehicles) by household identifier (HOUSEID).
@@ -28,11 +37,10 @@ classes:
       - AtlasHouseholdFleetOutputExampleV1
     annotations:
       model_association: ATLAS
+      artifact_table: "*.atlas_hh.csv"
       schema_status: authoritative
       status: active
       contract_family: fleet_output
-      producer_authority: approved
-      simulation_year: not_inferred
     attributes:
       houseid:
         range: integer
@@ -40,15 +48,18 @@ classes:
         required: true
         annotations:
           physical_name: HOUSEID
-        description: Authoritative household identifier in the ATLAS fleet output.
+          foreign_key: DemosPolarisMappedHousehold.household
+        description: Household identifier matching the synthetic population household ID.
       nvehicles:
         range: integer
         required: true
         minimum_value: 0
-        description: Household vehicle-count value.
+        description: Total number of vehicles owned or leased by the household.
 
   # Authoritative row schema for ATLAS vehicle fleet output
   AtlasVehicleFleetOutput:
+    in_subset:
+      - atlas
     description: >-
       Authoritative vehicle fleet row contract produced by ATLAS.
       Details vehicle body type, discrete powertrain technology, model year,
@@ -59,11 +70,10 @@ classes:
       - AtlasVehicleFleetOutputExampleV1
     annotations:
       model_association: ATLAS
+      artifact_table: "*.atlas_veh.csv"
       schema_status: authoritative
       status: active
       contract_family: fleet_output
-      producer_authority: approved
-      simulation_year: not_inferred
       geographic_scope: >-
         Austin Metropolitan Area (FIPS 48.021, 48.053, 48.055, 48.209, 48.453, 48.491)
     unique_keys:
@@ -87,25 +97,27 @@ classes:
         required: true
         annotations:
           physical_name: VEHID
-        description: Observed vehicle identifier within a household.
+        description: Within-household vehicle sequence identifier (1..nvehicles).
       bodytype:
         range: AtlasBodyTypeEnum
-        description: Observed bodytype value.
+        description: Vehicle body type category (car, pickup, suv, van).
       vintage_category:
         range: AtlasVintageCategoryEnum
-        description: Observed vintage_category value.
+        description: Vehicle age bracket (0~5 years, 6~11 years, 12+ years).
       annual_mileage:
         range: float
-        description: Observed annual_mileage value.
+        description: Projected annual vehicle miles traveled (VMT).
       pred_power:
         range: AtlasPowertrainEnum
-        description: Observed pred_power value.
+        description: Predicted vehicle powertrain technology (ICE, Hybrid, PHEV, AEV).
       modelyear:
         range: integer
-        description: Observed modelyear value.
+        description: Vehicle manufacturing model year (e.g. 2018).
 
 enums:
   AtlasBodyTypeEnum:
+    in_subset:
+      - atlas
     description: Observed vehicle body type categories in ATLAS fleet outputs.
     permissible_values:
       car:
@@ -118,6 +130,8 @@ enums:
         description: Minivans and passenger vans.
 
   AtlasVintageCategoryEnum:
+    in_subset:
+      - atlas
     description: Observed vehicle age / vintage categories in ATLAS fleet outputs.
     permissible_values:
       "0~5 years":
@@ -128,6 +142,8 @@ enums:
         description: Older vehicles (12 years or older).
 
   AtlasPowertrainEnum:
+    in_subset:
+      - atlas
     description: Observed vehicle powertrain types in ATLAS fleet outputs.
     permissible_values:
       AEV:

@@ -28,6 +28,7 @@ def test_parser_exposes_the_complete_conformance_surface() -> None:
         "check-scenario",
         "check-mappings",
         "check-ledger",
+        "check-empirical",
         "check-all",
         "create-day-zero-manifest",
         "render-mapping",

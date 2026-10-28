@@ -18,8 +18,15 @@ default_range: string
 imports:
   - linkml:types
 
+subsets:
+  beam:
+    title: BEAM — Dynamic Multi-Modal Supply Simulation
+    description: Agent population, vehicle inputs, and travel plans for the BEAM dynamic network simulation engine.
+
 classes:
   BeamPlanRecord:
+    in_subset:
+      - beam
     description: >-
       Authoritative travel plan element schema provided as input to BEAM,
       corresponding to PlansBeamIn in the PILATES reference implementation.
@@ -32,10 +39,10 @@ classes:
     annotations:
       owner: BEAM
       table_name: plans
+      artifact_table: "plans.csv / .parquet"
       model_association: BEAM
       schema_status: authoritative
       status: active
-      enforcement_status: PILATES-observed
     unique_keys:
       composite_plan_element:
         unique_key_name: composite_plan_element
@@ -61,7 +68,7 @@ classes:
         required: true
         annotations:
           physical_name: ActivityElement
-        description: Plan element discriminator type ('activity' or 'leg').
+        description: Plan element type ('activity' or 'leg').
       activitytype:
         range: string
         annotations:
@@ -133,6 +140,8 @@ classes:
         description: Serialized space-delimited list of network link IDs traversed along the route.
 
   BeamPlanOutputRecord:
+    in_subset:
+      - beam
     description: >-
       Executed travel plan element schema emitted as output by BEAM dynamic
       traffic simulation, corresponding to BeamPlansOut in PILATES.
@@ -143,10 +152,10 @@ classes:
     annotations:
       owner: BEAM
       table_name: executedPlans
+      artifact_table: "executedPlans.csv / beamPlans.parquet"
       model_association: BEAM
       schema_status: authoritative
       status: active
-      enforcement_status: PILATES-observed
     attributes:
       trip_id:
         range: integer
@@ -179,7 +188,7 @@ classes:
         range: string
         annotations:
           physical_name: planElementType
-        description: Executed plan element discriminator ('activity' or 'leg').
+        description: Executed plan element type ('activity' or 'leg').
       plan_element_index:
         range: integer
         annotations:

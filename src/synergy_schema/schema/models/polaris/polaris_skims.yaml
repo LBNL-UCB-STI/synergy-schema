@@ -6,10 +6,9 @@ description: >-
   across the integrated modeling workflow. Network skims quantify zone-to-zone
   (TAZ x TAZ) travel impedance across time-of-day periods (AM, PM, Mid-Day, Overnight)
   and modes (auto SOV/HOV, transit) using LinkML array dimensions. InputNetworkSkims
-  are consumed by UrbanSim (for real estate development and accessibility) and ATLAS
-  (for vehicle fleet and powertrain choice). NextYearNetworkSkims are produced as
-  output by POLARIS dynamic traffic assignment (DTA) representing the updated highway
-  and transit equilibrium.
+  are consumed by UrbanSim (for real estate development, spatial marginals, and
+  accessibility). NextYearNetworkSkims are produced as output by POLARIS dynamic
+  traffic assignment (DTA) representing the updated highway and transit equilibrium.
 
 prefixes:
   synergy_schema: https://w3id.org/LBNL-UCB-STI/synergy-schema/
@@ -20,6 +19,11 @@ default_range: string
 
 imports:
   - linkml:types
+
+subsets:
+  network_skims:
+    title: Network Travel Skims (.omx / .zarr)
+    description: Zone-to-zone travel time, distance, and cost impedance matrices exchanged across models.
 
 types:
   NonNegativeFloat:
@@ -33,18 +37,21 @@ types:
 
 classes:
   InputNetworkSkims:
+    in_subset:
+      - network_skims
     description: >-
       Open Matrix (.omx) container representing baseline zone-to-zone travel
       times, distances, generalized costs (2D origin_zone x destination_zone matrices),
       and zonal accessibility vectors (1D origin_zone arrays) provided as input to
-      UrbanSim and ATLAS.
+      UrbanSim for spatial development and block-level marginal generation.
     annotations:
       model_association: transportation_network
+      artifact_table: "input_skims.omx (UrbanSim input)"
       contract_family: network_skims
       format: omx
       default_skim_representation: true
       status: formal_contract
-      consumer_models: "UrbanSim, ATLAS"
+      consumer_models: "UrbanSim"
     attributes:
       file_path:
         range: string
@@ -73,6 +80,7 @@ classes:
         annotations:
           omx_path: /lookup/zone_id
           hdf5_group: /lookup
+          foreign_key: UrbanSimZonalTotals.zone_id
         description: >-
           1D zone index lookup array [origin_zone] stored under OMX HDF5 group
           /lookup/<name> mapping 0-based matrix row/column indices to canonical TAZ IDs.
@@ -140,6 +148,8 @@ classes:
           or job count reachable within a travel threshold.
 
   NextYearNetworkSkims:
+    in_subset:
+      - network_skims
     description: >-
       Converged dynamic traffic assignment (DTA) network skims emitted as output
       by POLARIS at the conclusion of Year t travel simulation in Open Matrix (.omx)
@@ -150,6 +160,7 @@ classes:
       - PolarisNetworkSkims
     annotations:
       model_association: POLARIS
+      artifact_table: "next_year_skims.omx (POLARIS output)"
       contract_family: network_skims
       format: omx
       default_skim_representation: true
@@ -183,6 +194,7 @@ classes:
         annotations:
           omx_path: /lookup/zone_id
           hdf5_group: /lookup
+          foreign_key: UrbanSimZonalTotals.zone_id
         description: >-
           1D zone index lookup array [origin_zone] stored under OMX HDF5 group
           /lookup/<name> mapping 0-based matrix row/column indices to canonical TAZ IDs.
@@ -193,7 +205,7 @@ classes:
       gap_metric:
         range: float
         minimum_value: 0.0
-        description: Relative duality gap or convergence metric attained by the DTA solver.
+        description: Relative convergence gap metric attained by the DTA solver.
       sov_time_am:
         range: NonNegativeFloat
         array:

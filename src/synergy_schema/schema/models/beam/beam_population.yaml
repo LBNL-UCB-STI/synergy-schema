@@ -17,8 +17,15 @@ default_range: string
 imports:
   - linkml:types
 
+subsets:
+  beam:
+    title: BEAM — Dynamic Multi-Modal Supply Simulation
+    description: Agent population, vehicle inputs, and travel plans for the BEAM dynamic network simulation engine.
+
 classes:
   BeamHouseholdRecord:
+    in_subset:
+      - beam
     description: >-
       Authoritative household input schema for the BEAM simulation engine,
       corresponding to HouseholdsBeamIn in the PILATES reference implementation.
@@ -29,10 +36,10 @@ classes:
     annotations:
       owner: BEAM
       table_name: households
+      artifact_table: "households.csv / .parquet"
       model_association: BEAM
       schema_status: authoritative
       status: active
-      enforcement_status: PILATES-observed
     attributes:
       household_id:
         range: integer
@@ -41,9 +48,13 @@ classes:
         description: Unique household identifier linking persons and vehicles.
       block_id:
         range: integer
+        annotations:
+          foreign_key: UrbanSimBlockMarginals.block_id
         description: Census block identifier for household location.
       home_zone_id:
         range: integer
+        annotations:
+          foreign_key: UrbanSimZonalTotals.zone_id
         description: Home Traffic Analysis Zone (TAZ) for the household.
       income:
         range: float
@@ -148,6 +159,8 @@ classes:
         description: Population expansion sample rate or weight.
 
   BeamPersonRecord:
+    in_subset:
+      - beam
     description: >-
       Authoritative person input schema for the BEAM simulation engine,
       corresponding to PersonsBeamIn in the PILATES reference implementation.
@@ -158,10 +171,10 @@ classes:
     annotations:
       owner: BEAM
       table_name: persons
+      artifact_table: "persons.csv / .parquet"
       model_association: BEAM
       schema_status: authoritative
       status: active
-      enforcement_status: PILATES-observed
     attributes:
       person_id:
         range: integer
@@ -310,6 +323,8 @@ classes:
         description: Indicator for rideshare/TNC app access.
 
   BeamVehicleRecord:
+    in_subset:
+      - beam
     description: >-
       Authoritative vehicle input schema for the BEAM simulation engine,
       corresponding to VehiclesBeamIn in the PILATES reference implementation.
@@ -320,10 +335,10 @@ classes:
     annotations:
       owner: BEAM
       table_name: vehicles
+      artifact_table: "vehicles.csv / .parquet"
       model_association: BEAM
       schema_status: authoritative
       status: active
-      enforcement_status: PILATES-observed
     attributes:
       vehicle_id:
         range: string
@@ -340,6 +355,7 @@ classes:
         range: integer
         annotations:
           physical_name: sourceVehicleId
+          foreign_key: AtlasVehicleFleetOutput.vehid
         description: Original ATLAS vehicle identifier preserved for provenance.
       maindriver_id:
         range: integer

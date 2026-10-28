@@ -1,11 +1,12 @@
 id: https://w3id.org/LBNL-UCB-STI/synergy-schema/deliverable-1-static-schema
 name: deliverable_1_static_schema
-title: Synergy Deliverable 1 - Static Cross-Model Schema Specification
+title: Synergy Static Cross-Model Schema Specification
 description: >-
-  Master LinkML schema bundle for Deliverable #1: defining the static structural
-  contracts, entities, spatial crosswalks, foreign relationships, and categorical
-  translations connecting UrbanSim, DEMOS, ATLAS, POLARIS, and Travel Network
-  Skims for a single simulation year.
+  LinkML schema bundle defining the static input-output contracts,
+  module entry points, spatial crosswalks, foreign-key relationships, and
+  categorical code crosswalks connecting UrbanSim, DEMOS, ATLAS, POLARIS,
+  ActivitySim, BEAM, SynthFirm, and Travel Network Skims for a single
+  simulation year.
 
 prefixes:
   synergy_schema: https://w3id.org/LBNL-UCB-STI/synergy-schema/
@@ -32,3 +33,78 @@ annotations:
   target_date: "2026-10-31"
   status: "active"
   scope: "Single-year multi-model data flow contracts and crosswalks"
+
+subsets:
+  urbansim:
+    title: "UrbanSim Land Use & Spatial Crosswalk"
+    description: >-
+      Census Block household and employment control totals, Block-to-TAZ spatial
+      allocation weights, and TAZ-level land-use summaries forecasted by UrbanSim.
+    annotations:
+      model_owner: "UrbanSim (LBNL)"
+      source_yaml: "schema/models/urbansim/urbansim_land_use.yaml"
+  demos:
+    title: "DEMOS Demographic Evolution"
+    description: >-
+      Synthetic household and person records evolved across simulation years by
+      DEMOS with Census ACS PUMS seed lineage.
+    annotations:
+      model_owner: "DEMOS (NLR)"
+      source_yaml: "schema/models/demos/demos_polaris_mapped_examples.yaml"
+  atlas:
+    title: "ATLAS Household Vehicle Fleet"
+    description: >-
+      Household vehicle counts and vehicle-level body type, age bracket, annual
+      mileage, and powertrain assignments produced by ATLAS.
+    annotations:
+      model_owner: "ATLAS (LBNL)"
+      source_yaml: "schema/models/atlas/atlas_fleet_observed_example_v1.yaml"
+  polaris:
+    title: "POLARIS Demand & Post-Run State"
+    description: >-
+      SQLite input tables (Household, Person, Vehicle, Vehicle_Type, Vehicle_Class)
+      in Demand.sqlite and post-run state feedback tables in Result.sqlite.
+    annotations:
+      model_owner: "POLARIS (ANL)"
+      source_yaml: "schema/models/polaris/polaris_demand_database_v1.yaml"
+  activitysim:
+    title: "ActivitySim Travel Demand"
+    description: >-
+      Household, person, and Traffic Analysis Zone (TAZ) land-use input tables
+      consumed by ActivitySim for tour and mode choice modeling.
+    annotations:
+      model_owner: "ActivitySim (LBNL)"
+      source_yaml: "schema/models/activitysim/activitysim_population.yaml"
+  beam:
+    title: "BEAM Agent Population & Plans"
+    description: >-
+      Agent-level household, person, vehicle, and daily activity-travel plan input
+      and output tables for BEAM multi-agent traffic simulation.
+    annotations:
+      model_owner: "BEAM (LBNL)"
+      source_yaml: "schema/models/beam/beam_population.yaml, schema/models/beam/beam_plans.yaml"
+  synthfirm:
+    title: "SynthFirm Commercial Fleets & Freight"
+    description: >-
+      Synthetic business establishments, commercial truck fleets, for-hire carriers,
+      B2B commodity shipments, and port import/export flows.
+    annotations:
+      model_owner: "SynthFirm (LBNL)"
+      source_yaml: "schema/models/synthfirm/synthfirm.yaml"
+  network_skims:
+    title: "Network Travel Skims (.omx / .zarr)"
+    description: >-
+      Multi-dimensional zone-to-zone travel time, distance, toll, transit, and
+      ridehail impedance matrices across POLARIS, ActivitySim, and BEAM.
+    annotations:
+      model_owner: "POLARIS / ActivitySim / BEAM"
+      source_yaml: "schema/models/polaris/polaris_skims.yaml, schema/models/activitysim/activitysim_skims.yaml, schema/models/beam/beam_skims.yaml"
+  handoff_mappings:
+    title: "Cross-Model Handoff & Crosswalk Metadata"
+    description: >-
+      Metadata classes describing model-to-model data channels, column mapping
+      rules, categorical code crosswalks (X-H1 through X-V5), and unmapped field
+      classifications.
+    annotations:
+      model_owner: "Synergy Schema"
+      source_yaml: "schema/mappings/single_year_handoff.yaml"

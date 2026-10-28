@@ -15,6 +15,12 @@ from linkml_runtime.utils.schemaview import SchemaView
 from .day_zero import create_day_zero_manifest, validate_day_zero_manifest
 from .diagnostics import CheckResult, InputError
 from .documents import load_list, load_mapping, load_showcase
+from .empirical import (
+    DEFAULT_EVIDENCE_DIR,
+    DEFAULT_SCHEMA_PATH,
+    render_empirical_report_markdown,
+    run_empirical_conformance_audit,
+)
 from .ledger import validate_ledger
 from .mappings import validate_mapping_release
 from .review import diff_mappings, import_mapping, render_mapping
@@ -26,6 +32,7 @@ _COMMANDS = (
     "check-mappings",
     "check-ledger",
     "check-all",
+    "check-empirical",
     "create-day-zero-manifest",
     "render-mapping",
     "diff-mappings",
@@ -101,6 +108,12 @@ def build_parser() -> argparse.ArgumentParser:
     imported = commands.add_parser("import-mapping")
     imported.add_argument("--review-dir", required=True)
     imported.add_argument("--out-release", required=True)
+    empirical = commands.add_parser("check-empirical")
+    empirical.add_argument("--schema", default=str(DEFAULT_SCHEMA_PATH))
+    empirical.add_argument("--evidence-dir", default=str(DEFAULT_EVIDENCE_DIR))
+    empirical.add_argument("--sample-size", type=int, default=20)
+    empirical.add_argument("--format", choices=("markdown", "json"), default="markdown")
+    empirical.add_argument("--out")
     return parser
 
 
@@ -241,6 +254,22 @@ def _dispatch(args: argparse.Namespace) -> CheckResult:
     if args.command == "import-mapping":
         import_mapping(args.review_dir, args.out_release)
         return CheckResult()
+    if args.command == "check-empirical":
+        report = run_empirical_conformance_audit(
+            schema_path=Path(args.schema),
+            evidence_dir=Path(args.evidence_dir),
+            sample_size=args.sample_size,
+        )
+        rendered = (
+            json.dumps(report.to_dict(), indent=2)
+            if args.format == "json"
+            else render_empirical_report_markdown(report)
+        )
+        if args.out:
+            Path(args.out).write_text(rendered, encoding="utf-8")
+        else:
+            print(rendered)
+        return report.to_check_result()
     raise InputError(f"{args.command} is not wired in this conformance foundation")
 
 
@@ -274,7 +303,11 @@ def main(argv: Sequence[str] | None = None) -> int:
         args = parser.parse_args(argv)
         result = _dispatch(args)
     except SystemExit as error:
-        return int(error.code)
+        if error.code is None:
+            return 0
+        if isinstance(error.code, int):
+            return error.code
+        return 1
     except KeyboardInterrupt:
         return 130
     except InputError as error:

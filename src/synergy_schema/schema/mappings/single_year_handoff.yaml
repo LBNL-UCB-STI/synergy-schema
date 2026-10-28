@@ -4,8 +4,8 @@ title: Static Single-Year Multi-Model Data Handoff and Crosswalk Specification
 description: >-
   Formal LinkML specification governing the static structural relationships,
   join keys, foreign references, categorical crosswalks (X-H1 through X-V5),
-  and residue classifications across UrbanSim, DEMOS, ATLAS, POLARIS, and
-  Network Skims for a single simulation year.
+  and unmapped field classifications across UrbanSim, DEMOS, ATLAS, SynthFirm,
+  POLARIS, ActivitySim, BEAM, and Network Skims for a single simulation year.
 
 prefixes:
   synergy_schema: https://w3id.org/LBNL-UCB-STI/synergy-schema/
@@ -17,8 +17,15 @@ default_range: string
 imports:
   - linkml:types
 
+subsets:
+  handoff_mappings:
+    title: Cross-Model Handoffs & Categorical Crosswalks
+    description: Structural meta-classes defining model-to-model data channels, field mappings, and code crosswalks.
+
 enums:
   HandoffChannelType:
+    in_subset:
+      - handoff_mappings
     description: Technical mechanism and format of data transfer between models.
     permissible_values:
       tabular_microdata:
@@ -34,6 +41,8 @@ enums:
           3D [time_period, origin_zone, destination_zone]) arrays modeled using LinkML array dimensions.
 
   FieldTransformationMode:
+    in_subset:
+      - handoff_mappings
     description: Transformation logic required to map a source field to a target field.
     permissible_values:
       direct:
@@ -41,7 +50,7 @@ enums:
       renamed:
         description: 1-to-1 copy with target field rename.
       enum_crosswalk:
-        description: Categorical translation using an explicit code crosswalk.
+        description: Categorical code mapping using an explicit code crosswalk.
       aggregated:
         description: Spatial or group rollup sum or weighted average.
       derived:
@@ -50,7 +59,9 @@ enums:
         description: Unpivot wide count columns (e.g. fuel x vehicle class counts) into discrete record rows.
 
   ResidueKind:
-    description: Categorization of unmapped fields or synthetic residues.
+    in_subset:
+      - handoff_mappings
+    description: Categorization of unmapped source fields or downstream default values.
     permissible_values:
       unmapped_source:
         description: Source column not required or consumed by the downstream model.
@@ -63,7 +74,11 @@ enums:
 
 classes:
   SingleYearModelHandoffPackage:
-    description: Master container for single-year cross-model handoff contracts.
+    in_subset:
+      - handoff_mappings
+    annotations:
+      artifact_table: "Handoff package root"
+    description: Root container for single-year cross-model handoff contracts.
     attributes:
       package_id:
         range: string
@@ -93,6 +108,10 @@ classes:
 
 
   ModelHandoffChannel:
+    in_subset:
+      - handoff_mappings
+    annotations:
+      artifact_table: "Model-to-model channel specification"
     description: Contract specifying data transfer between a source and target model.
     attributes:
       channel_id:
@@ -133,9 +152,13 @@ classes:
         range: MappingResidueSpec
         multivalued: true
         inlined: true
-        description: Columns deliberately retained as residue or assigned defaults.
+        description: Source columns not transferred downstream or target columns assigned default values.
 
   FieldMappingSpec:
+    in_subset:
+      - handoff_mappings
+    annotations:
+      artifact_table: "Column mapping rule"
     description: Detailed mapping specification for a single column.
     attributes:
       source_field:
@@ -158,6 +181,10 @@ classes:
         description: Semantic description of mapping rationale.
 
   MappingResidueSpec:
+    in_subset:
+      - handoff_mappings
+    annotations:
+      artifact_table: "Unmapped source / target default rule"
     description: Specification of an unmapped column or required default value.
     attributes:
       field_name:
@@ -176,6 +203,10 @@ classes:
         description: Justification for unmapped status or default value.
 
   CategoricalCrosswalkRule:
+    in_subset:
+      - handoff_mappings
+    annotations:
+      artifact_table: "Categorical crosswalk (X-H1..X-V5)"
     description: Discrete code crosswalk between source and target categorical values.
     attributes:
       crosswalk_id:
@@ -201,6 +232,10 @@ classes:
         description: Pairwise value translations.
 
   CategoryValueMapping:
+    in_subset:
+      - handoff_mappings
+    annotations:
+      artifact_table: "Code-to-code mapping entry"
     description: Individual categorical code mapping entry.
     attributes:
       source_value:

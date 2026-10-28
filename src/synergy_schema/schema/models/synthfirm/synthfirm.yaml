@@ -18,8 +18,15 @@ default_range: string
 imports:
   - linkml:types
 
+subsets:
+  synthfirm:
+    title: SynthFirm — Commercial Freight & Fleet Demand
+    description: Synthetic business establishments, commercial vehicle fleets, and domestic/international freight flows.
+
 enums:
   SynthFirmModeChoiceEnum:
+    in_subset:
+      - synthfirm
     description: Discrete freight transportation mode choice for B2B commodity shipments.
     permissible_values:
       For-hire Truck:
@@ -28,6 +35,8 @@ enums:
         description: Freight transported using establishment's own private vehicle fleet.
 
   SynthFirmPowertrainEnum:
+    in_subset:
+      - synthfirm
     description: Alternative clean powertrain technology adopted by commercial vehicle fleet.
     permissible_values:
       Battery Electric:
@@ -40,21 +49,28 @@ enums:
         description: Conventional internal combustion engine (Diesel or Gasoline).
 
   SynthFirmPortTypeEnum:
+    in_subset:
+      - synthfirm
     description: Gateway facility type for international freight trade.
     permissible_values:
       Airport:
         description: Air cargo gateway facility (e.g., SFO cargo terminal).
+      Port:
+        description: Maritime container or bulk port terminal as encoded in SynthFirm international OD tables (e.g., Port of Oakland).
       Seaport:
-        description: Maritime container or bulk port terminal (e.g., Port of Oakland).
+        description: Maritime container or bulk port terminal (canonical alias for Port).
 
 classes:
   SynthFirmEstablishmentRecord:
+    in_subset:
+      - synthfirm
     description: >-
       Synthetic business establishment synthesizing establishment-level firm demographics,
       NAICS industry sector, employment count, spatial coordinates, and commercial vehicle
       fleet inventory partitioned by weight class and fuel type.
     annotations:
       model_association: SynthFirm
+      artifact_table: "synthetic_firms_with_fleet_mc_adjusted.csv"
       contract_family: firm_and_fleet
       spatial_granularity: census_block_group
       status: authoritative
@@ -99,6 +115,8 @@ classes:
       MESOZONE:
         range: string
         required: true
+        annotations:
+          foreign_key: UrbanSimBlockMarginals.block_id
         description: Micro-zone spatial identifier (11-digit US Census Block Group FIPS within the region, or 5-digit external zone).
       lat:
         range: float
@@ -203,11 +221,14 @@ classes:
 
   SynthFirmCarrierRecord:
     is_a: SynthFirmEstablishmentRecord
+    in_subset:
+      - synthfirm
     description: >-
       Synthetic for-hire motor freight trucking carrier (NAICS 484000/492000), extending
       the base establishment record with commodity group transport licensing authorizations.
     annotations:
       model_association: SynthFirm
+      artifact_table: "synthetic_carriers.csv"
       contract_family: for_hire_carriers
       status: authoritative
     aliases:
@@ -240,11 +261,14 @@ classes:
         description: Binary flag indicating authority/capability to transport SCTG Group 5 (Mixed Freight / SCTG 43).
 
   SynthFirmB2BShipmentRecord:
+    in_subset:
+      - synthfirm
     description: >-
       Synthesized business-to-business (B2B) commodity freight shipment representing a discrete
       truckload or cargo flow between a selling establishment and a buying establishment.
     annotations:
       model_association: SynthFirm
+      artifact_table: "B2B_Flow / for_hire_truck_shipment.csv"
       contract_family: b2b_shipments
       status: authoritative
     aliases:
@@ -340,11 +364,14 @@ classes:
           foreign_key: SynthFirmEstablishmentRecord.fleet_id
 
   SynthFirmInternationalFreightRecord:
+    in_subset:
+      - synthfirm
     description: >-
       International import/export freight drayage cargo flow connecting regional port
       and airport gateways with domestic buyers or sellers.
     annotations:
       model_association: SynthFirm
+      artifact_table: "import_OD_with_buyer.csv / export_OD_with_seller.csv"
       contract_family: international_freight
       status: authoritative
     aliases:

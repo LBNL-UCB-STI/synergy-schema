@@ -27,6 +27,9 @@ def test_dist_contains_all_deliverable_schemas_and_files() -> None:
 
     schema_dir = DIST_DIR / "schema"
     assert (schema_dir / "deliverable_1_static_schema.yaml").exists()
+    assert (schema_dir / "doc_templates" / "index.md.jinja2").exists()
+    assert (schema_dir / "doc_templates" / "class.md.jinja2").exists()
+    assert (schema_dir / "doc_templates" / "subset.md.jinja2").exists()
     assert (schema_dir / "models" / "urbansim" / "urbansim_land_use.yaml").exists()
     assert (
         schema_dir / "models" / "demos" / "demos_polaris_mapped_examples.yaml"
@@ -67,7 +70,7 @@ def test_dist_site_is_compiled_with_all_sections() -> None:
     assert (site_dir / "javascripts" / "fullscreen.js").exists()
 
     index_html = (site_dir / "index.html").read_text(encoding="utf-8")
-    assert "<li><strong>LinkML Source Schemas</strong>" in index_html
+    assert "What this specification contains" in index_html
     assert "mathjax.js" in index_html
 
     contract_html = (site_dir / "contract-at-a-glance" / "index.html").read_text(
@@ -81,6 +84,47 @@ def test_dist_site_is_compiled_with_all_sections() -> None:
         DIST_DIR / "docs" / "schema" / "HandoffChannelType.md"
     ).read_text(encoding="utf-8")
     assert "Open Matrix OMX travel impedance matrices" in channel_type_md
+
+    schema_index_md = (DIST_DIR / "docs" / "schema" / "index.md").read_text(
+        encoding="utf-8"
+    )
+    assert "## Schema Modules & Subsets" in schema_index_md
+    assert "## Classes by Model & Domain" in schema_index_md
+    assert "### UrbanSim Land Use & Spatial Crosswalk" in schema_index_md
+    assert "### POLARIS Demand & Post-Run State" in schema_index_md
+    assert "| Table / File Artifact |" in schema_index_md
+    assert "Master LinkML schema bundle" not in schema_index_md
+    assert (
+        "Open Matrix (.omx) container representing baseline zone-to-zone travel"
+        in schema_index_md
+    )
+
+    polaris_subset_md = (DIST_DIR / "docs" / "schema" / "polaris.md").read_text(
+        encoding="utf-8"
+    )
+    assert "**Rank:**" not in polaris_subset_md
+    assert "### Administrative Metadata" not in polaris_subset_md
+    assert "classDiagram" in polaris_subset_md
+    assert (
+        'PolarisDemandDatabasePerson --> "1" PolarisDemandDatabaseHousehold : household'
+        in polaris_subset_md
+    )
+
+    polaris_hh_md = (
+        DIST_DIR / "docs" / "schema" / "PolarisDemandDatabaseHousehold.md"
+    ).read_text(encoding="utf-8")
+    assert (
+        'PolarisDemandDatabaseHousehold --> "1" UrbanSimZonalTotals : location'
+        in polaris_hh_md
+    )
+    assert (
+        'PolarisDemandDatabasePerson --> "1" PolarisDemandDatabaseHousehold : household'
+        in polaris_hh_md
+    )
+    assert (
+        "FK &rarr; [UrbanSimZonalTotals](UrbanSimZonalTotals.md).`zone_id`"
+        in polaris_hh_md
+    )
 
     # Verify no link escapes above repository root via ../../schema/
     for html_file in site_dir.rglob("*.html"):

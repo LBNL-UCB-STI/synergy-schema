@@ -327,8 +327,9 @@ def test_projected_sqlite_matches_linkml_schema(
                 induced_cls = view.induced_class(cls_name)
                 schema_cols = {
                     slot.annotations["physical_name"].value
-                    for slot in induced_cls.attributes.values()
                     if "physical_name" in slot.annotations
+                    else slot.name
+                    for slot in induced_cls.attributes.values()
                 }
 
                 assert db_cols == schema_cols, (

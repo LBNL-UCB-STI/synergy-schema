@@ -1,10 +1,10 @@
 id: https://w3id.org/LBNL-UCB-STI/synergy-schema/models/polaris/demand-database-v1
 name: polaris_demand_database_v1
-title: POLARIS demand database table description v1
+title: POLARIS Demand SQLite Database Schema
 description: >-
-  Model-associated description of the population and vehicle dimension tables in
-  the POLARIS demand database, aligned with the native translation catalog and
-  the DEMOS/ATLAS to POLARIS interface specification.
+  LinkML schema defining the Household, Person, Vehicle, Vehicle_Class, and
+  Vehicle_Type tables in the POLARIS Demand SQLite database, along with
+  provisional post-run state output tables.
 
 prefixes:
   synergy_schema: https://w3id.org/LBNL-UCB-STI/synergy-schema/
@@ -21,464 +21,361 @@ annotations:
   model_association: POLARIS
   status: provisional
   coverage: observed example full-fidelity population-table description
-  source_evidence: evidence/demos_input_population_from_polaris/Austin-Demand_incl_relp_hh_matches_acs.sqlite
   conformance_boundary: >-
     Person.household and Vehicle.hhold joins to Household.household, as well as
     Vehicle.type to Vehicle_Type.type_id and Vehicle_Type.vehicle_class to
     Vehicle_Class.class_id, are external conformance checks; this table
     description does not declare SQLite foreign keys.
 
+subsets:
+  polaris:
+    title: "POLARIS Demand & Post-Run State"
+    description: >-
+      SQLite input tables (Household, Person, Vehicle, Vehicle_Type, Vehicle_Class)
+      in Demand.sqlite and post-run state feedback tables in Result.sqlite.
+
 classes:
   PolarisDemandDatabaseHousehold:
+    in_subset:
+      - polaris
     description: >-
       Authoritative Household table schema for the POLARIS Demand SQLite database (17 columns).
     aliases:
       - PolarisHousehold
     annotations:
       table_name: Household
+      artifact_table: "Household (Demand.sqlite)"
       model_association: POLARIS demand database
       schema_status: authoritative
       status: active
-      coverage: provisional observed record set
     attributes:
       household:
         range: integer
         identifier: true
         required: true
-        annotations:
-          physical_name: household
-        description: "Physical Household primary-key column."
+        description: "Primary household identifier."
       hhold:
         range: integer
         required: true
-        annotations:
-          physical_name: hhold
-        description: "Physical household column retained as distinct from household; not an alias or uniqueness constraint."
+        description: "Secondary household identifier column retained in POLARIS Demand.sqlite."
       location:
         range: integer
         required: true
         annotations:
-          physical_name: location
           foreign_key: UrbanSimZonalTotals.zone_id
-        description: "Physical household location identifier."
+        description: "Residential location zone or activity location identifier."
       persons:
         range: integer
         required: true
-        annotations:
-          physical_name: persons
-        description: "Physical household person-count column."
+        description: "Total number of persons in the household."
       workers:
         range: integer
         required: true
-        annotations:
-          physical_name: workers
-        description: "Physical household worker-count column."
+        description: "Number of employed workers in the household."
       vehicles:
         range: integer
         required: true
-        annotations:
-          physical_name: vehicles
-        description: "Physical household vehicle-count column."
+        description: "Number of vehicles available to the household."
       type:
         range: integer
         required: true
-        annotations:
-          physical_name: type
-        description: "Physical household type code (crosswalk X-H2: tenure x HHT, 1..11)."
+        description: "Household family and tenure classification code (crosswalk X-H2: tenure x HHT, 1..11)."
       income:
         range: integer
         required: true
-        annotations:
-          physical_name: income
-        description: "Physical household annual income in integer dollars."
+        description: "Annual household income in integer dollars."
       bikes:
         range: integer
         required: true
-        annotations:
-          physical_name: bikes
-        description: "Physical household bicycle count column."
+        description: "Number of bicycles owned by the household."
       housing_unit_type:
         range: integer
         required: true
-        annotations:
-          physical_name: housing_unit_type
-        description: "Physical housing-unit-type code (crosswalk X-H3: 1=Single Family, 2=Small Apt, 3=Large Apt, 4=Other, 5=GQ)."
+        description: "Housing structure type code (crosswalk X-H3: 1=Single Family, 2=Small Apt, 3=Large Apt, 4=Other, 5=GQ)."
       ecom:
         range: integer
         required: true
-        annotations:
-          physical_name: ecom
-        description: "Physical household e-commerce order frequency."
+        description: "Household e-commerce delivery order frequency indicator."
       delRat:
         range: float
         required: false
-        annotations:
-          physical_name: delRat
-        description: "Physical delivery ratio factor."
+        description: "Household home-delivery propensity ratio."
       dispose_veh:
         range: integer
         required: false
-        annotations:
-          physical_name: dispose_veh
-        description: "Physical vehicle disposal count/indicator."
+        description: "Household vehicle disposal count or indicator."
       Has_Residential_Charging:
         range: integer
         required: true
-        annotations:
-          physical_name: Has_Residential_Charging
-        description: "Physical indicator for residential EV charging availability (0=No, 1=Yes)."
+        description: "Residential EV charging availability indicator (0=No, 1=Yes)."
       num_groceries:
         range: integer
         required: true
-        annotations:
-          physical_name: num_groceries
-        description: "Physical count of grocery delivery trips/orders."
+        description: "Count of household grocery delivery orders."
       num_meals:
         range: integer
         required: true
-        annotations:
-          physical_name: num_meals
-        description: "Physical count of meal delivery trips/orders."
+        description: "Count of household prepared-meal delivery orders."
       time_in_home:
         range: float
         required: false
-        annotations:
-          physical_name: time_in_home
-        description: "Longitudinal residence duration in years in current home."
+        description: "Duration of residence in the current home in years."
 
   PolarisDemandDatabasePerson:
+    in_subset:
+      - polaris
     description: >-
       Authoritative Person table schema for the POLARIS Demand SQLite database (27 columns).
     aliases:
       - PolarisPerson
     annotations:
       table_name: Person
+      artifact_table: "Person (Demand.sqlite)"
       model_association: POLARIS demand database
       schema_status: authoritative
       status: active
-      coverage: provisional observed record set
     attributes:
       person:
         range: integer
         identifier: true
         required: true
-        annotations:
-          physical_name: person
-        description: "Physical Person primary-key column."
+        description: "Primary person identifier."
       household:
         range: integer
         required: true
         annotations:
-          physical_name: household
           relationship_target: PolarisDemandDatabaseHousehold.household
           foreign_key: PolarisDemandDatabaseHousehold.household
           validation_boundary: external conformance check, not a SQLite foreign key
-        description: "Physical household join value checked externally against Household.household."
+        description: "Household identifier joining to Household.household."
       id:
         range: integer
         required: true
-        annotations:
-          physical_name: id
-        description: "Physical within-household person identifier (0..n-1)."
+        description: "Zero-based within-household person sequence index (0..n-1)."
       school_location_id:
         range: integer
         required: true
-        annotations:
-          physical_name: school_location_id
-        description: "Physical school location identifier (-1 if unassigned)."
+        description: "Assigned school activity location identifier (-1 if unassigned before destination choice)."
       work_location_id:
         range: integer
         required: true
-        annotations:
-          physical_name: work_location_id
-        description: "Physical work location identifier (-1 if unassigned)."
+        description: "Assigned workplace activity location identifier (-1 if unassigned before destination choice)."
       age:
         range: integer
         required: true
-        annotations:
-          physical_name: age
-        description: "Physical person age in years."
+        description: "Person age in years."
       worker_class:
         range: integer
         required: true
-        annotations:
-          physical_name: worker_class
-        description: "Physical worker class code (ACS COW: 0..9)."
+        description: "Class of worker code (ACS COW: 0..9)."
       education:
         range: integer
         required: true
-        annotations:
-          physical_name: education
-        description: "Physical education level code (ACS SCHL: 0..24)."
+        description: "Educational attainment level code (ACS SCHL: 0..24)."
       industry:
         range: integer
         required: true
-        annotations:
-          physical_name: industry
-        description: "Physical employment industry code (ACS INDP)."
+        description: "Employment industry sector code (ACS INDP)."
       employment:
         range: integer
         required: true
-        annotations:
-          physical_name: employment
-        description: "Physical employment status code (crosswalk X-P2 / ACS ESR: 0..6)."
+        description: "Employment status code (crosswalk X-P2 / ACS ESR: 0..6)."
       gender:
         range: integer
         required: true
-        annotations:
-          physical_name: gender
-        description: "Physical gender code (crosswalk X-P1: 1=Male, 2=Female)."
+        description: "Sex/gender code (crosswalk X-P1: 1=Male, 2=Female)."
       income:
         range: integer
         required: true
-        annotations:
-          physical_name: income
-        description: "Physical person annual income in integer dollars."
+        description: "Annual individual personal income in integer dollars."
       journey_to_work_arrival_time:
         range: integer
         required: true
-        annotations:
-          physical_name: journey_to_work_arrival_time
-        description: "Commute arrival time in minutes after midnight."
+        description: "Usual work commute arrival time in minutes after midnight."
       journey_to_work_mode:
         range: integer
         required: true
-        annotations:
-          physical_name: journey_to_work_mode
-        description: "Commute mode code."
+        description: "Usual work commute transportation mode code."
       journey_to_work_travel_time:
         range: integer
         required: true
-        annotations:
-          physical_name: journey_to_work_travel_time
-        description: "Commute travel time in minutes."
+        description: "Usual one-way work commute travel time in minutes."
       journey_to_work_vehicle_occupancy:
         range: integer
         required: true
-        annotations:
-          physical_name: journey_to_work_vehicle_occupancy
-        description: "Commute vehicle occupancy count."
+        description: "Vehicle occupancy count for work commute trips."
       marital_status:
         range: integer
         required: true
-        annotations:
-          physical_name: marital_status
-        description: "Physical marital status code (crosswalk X-P1: 1=Married, 2=Widowed, 3=Divorced, 4=Separated, 5=Never married)."
+        description: "Marital status code (crosswalk X-P1: 1=Married, 2=Widowed, 3=Divorced, 4=Separated, 5=Never married)."
       race:
         range: integer
         required: true
-        annotations:
-          physical_name: race
-        description: "Physical race category code (crosswalk X-P1: 1..9)."
+        description: "Race category code (crosswalk X-P1: 1..9)."
       school_enrollment:
         range: integer
         required: true
-        annotations:
-          physical_name: school_enrollment
-        description: "Physical school enrollment status (crosswalk X-P1: 0=NA, 1=None, 2=Public, 3=Private)."
+        description: "School enrollment status (crosswalk X-P1: 0=NA, 1=None, 2=Public, 3=Private)."
       school_grade_level:
         range: integer
         required: true
-        annotations:
-          physical_name: school_grade_level
-        description: "Physical school grade level code (crosswalk X-P3: 0..16)."
+        description: "Enrolled school grade level code (crosswalk X-P3: 0..16)."
       work_hours:
         range: integer
         required: true
-        annotations:
-          physical_name: work_hours
-        description: "Usual weekly work hours."
+        description: "Usual weekly hours worked."
       telecommute_level:
         range: integer
         required: true
-        annotations:
-          physical_name: telecommute_level
         description: "Telecommute frequency level (0..5 days/week)."
       transit_pass:
         range: integer
         required: false
-        annotations:
-          physical_name: transit_pass
-        description: "Transit pass possession indicator."
+        description: "Transit pass ownership indicator."
       disability:
         range: integer
         required: true
-        annotations:
-          physical_name: disability
         description: "Disability status code (crosswalk X-P1: 1=With disability, 2=Without disability)."
       time_in_job:
         range: float
         required: false
-        annotations:
-          physical_name: time_in_job
-        description: "Longitudinal job tenure in years."
+        description: "Tenure in current job in years."
       is_long_term_chooser:
         range: integer
         required: false
-        annotations:
-          physical_name: is_long_term_chooser
-        description: "Indicator marking persons whose long-term choices need re-evaluation (0=No, 1=Yes)."
+        description: "Flag marking agents scheduled for long-term workplace or school choice evaluation (0=No, 1=Yes)."
       escooter_use_level:
         range: integer
         required: true
-        annotations:
-          physical_name: escooter_use_level
-        description: "E-scooter usage frequency level (0..3)."
+        description: "Shared e-scooter usage frequency level (0..3)."
 
   PolarisDemandDatabaseVehicle:
+    in_subset:
+      - polaris
     description: >-
       Authoritative Vehicle table schema for the POLARIS Demand SQLite database (8 columns).
     aliases:
       - PolarisVehicle
     annotations:
       table_name: Vehicle
+      artifact_table: "Vehicle (Demand.sqlite)"
       model_association: POLARIS demand database
       schema_status: authoritative
       status: active
-      coverage: provisional observed record set
     attributes:
       vehicle_id:
         range: integer
         identifier: true
         required: true
-        annotations:
-          physical_name: vehicle_id
-        description: "Physical within-household or fleet vehicle identifier."
+        description: "Unique vehicle identifier."
       hhold:
         range: integer
         required: true
         annotations:
-          physical_name: hhold
           relationship_target: PolarisDemandDatabaseHousehold.household
           foreign_key: PolarisDemandDatabaseHousehold.household
           validation_boundary: external conformance check, not a SQLite foreign key
-        description: "Physical household join value checked externally against Household.household."
+        description: "Owning household or commercial establishment identifier."
       parking:
         range: integer
         required: true
-        annotations:
-          physical_name: parking
-        description: "Physical vehicle parking arrangement code."
+        description: "Home parking arrangement code."
       L3_wtp:
         range: integer
         required: true
-        annotations:
-          physical_name: L3_wtp
         description: "Willingness-to-pay for Level 3 vehicle automation."
       L4_wtp:
         range: integer
         required: true
-        annotations:
-          physical_name: L4_wtp
         description: "Willingness-to-pay for Level 4 vehicle automation."
       type:
         range: integer
         required: false
         annotations:
-          physical_name: type
           relationship_target: PolarisDemandDatabaseVehicleType.type_id
           foreign_key: PolarisDemandDatabaseVehicleType.type_id
           validation_boundary: external conformance check, not a SQLite foreign key
-        description: "Physical foreign key referencing Vehicle_Type.type_id."
+        description: "Foreign key referencing Vehicle_Type.type_id."
       fleet:
         range: integer
         required: false
-        annotations:
-          physical_name: fleet
-        description: "Fleet vehicle classification indicator."
+        description: "Fleet ownership classification code (0=Household, >0=Commercial/Fleet)."
       subtype:
         range: integer
         required: true
-        annotations:
-          physical_name: subtype
-        description: "Physical vehicle subtype identifier."
+        description: "Vehicle subtype classification code."
 
   PolarisDemandDatabaseVehicleClass:
+    in_subset:
+      - polaris
     description: >-
       Authoritative Vehicle_Class dimension table schema in the POLARIS Demand SQLite database (8 columns).
     aliases:
       - PolarisVehicleClass
     annotations:
       table_name: Vehicle_Class
+      artifact_table: "Vehicle_Class (Demand.sqlite)"
       model_association: POLARIS demand database
       schema_status: authoritative
       status: active
-      coverage: provisional observed record set
     attributes:
       class_id:
         range: integer
         identifier: true
         required: true
-        annotations:
-          physical_name: class_id
-        description: "Physical vehicle class identifier (1..8 passenger classes)."
+        description: "Vehicle body/weight class primary key identifier."
       class_type:
         range: string
         required: true
-        annotations:
-          physical_name: class_type
-        description: "Vehicle class name (e.g. CAR_COMPACT, SUV_FULL_SIZE)."
+        description: "Vehicle class label (e.g. CAR_COMPACT, SUV_FULL_SIZE,HDT_TRACTOR)."
       capacity:
         range: integer
         required: true
-        annotations:
-          physical_name: capacity
-        description: "Passenger capacity."
+        description: "Passenger seating or payload capacity."
       length:
         range: float
         required: false
-        annotations:
-          physical_name: length
-        description: "Vehicle length."
+        description: "Vehicle length in meters."
       max_speed:
         range: float
         required: false
-        annotations:
-          physical_name: max_speed
-        description: "Maximum speed."
+        description: "Maximum vehicle speed."
       max_accel:
         range: float
         required: false
-        annotations:
-          physical_name: max_accel
-        description: "Maximum acceleration."
+        description: "Maximum vehicle acceleration rate."
       max_decel:
         range: float
         required: false
-        annotations:
-          physical_name: max_decel
-        description: "Maximum deceleration."
+        description: "Maximum vehicle deceleration rate."
       ev_ml_class:
         range: integer
         required: true
-        annotations:
-          physical_name: ev_ml_class
-        description: "EV machine learning powertrain class."
+        description: "Electric vehicle energy-consumption machine learning class index."
 
   PolarisDemandDatabaseVehicleType:
+    in_subset:
+      - polaris
     description: >-
       Authoritative Vehicle_Type dimension table schema in the POLARIS Demand SQLite database (9 columns).
     aliases:
       - PolarisVehicleType
     annotations:
       table_name: Vehicle_Type
+      artifact_table: "Vehicle_Type (Demand.sqlite)"
       model_association: POLARIS demand database
       schema_status: authoritative
       status: active
-      coverage: provisional observed record set
     attributes:
       type_id:
         range: integer
         identifier: true
         required: true
-        annotations:
-          physical_name: type_id
-        description: "Physical vehicle type primary key identifier."
+        description: "Composite vehicle type primary key identifier."
       vehicle_class:
         range: integer
         required: false
         annotations:
-          physical_name: vehicle_class
           relationship_target: PolarisDemandDatabaseVehicleClass.class_id
           foreign_key: PolarisDemandDatabaseVehicleClass.class_id
           validation_boundary: external conformance check, not a SQLite foreign key
@@ -486,57 +383,44 @@ classes:
       connectivity_type:
         range: integer
         required: false
-        annotations:
-          physical_name: connectivity_type
-        description: "Vehicle connectivity level (crosswalk X-V5: 0=No, 1=Yes)."
+        description: "Vehicle connectivity capability code (crosswalk X-V5: 0=No, 1=Yes)."
       powertrain_type:
         range: integer
         required: false
-        annotations:
-          physical_name: powertrain_type
-        description: "Powertrain type (crosswalk X-V2 / X-V5: 0=Conventional, 1=HEV, 2=PHEV, 3=BEV_long)."
+        description: "Powertrain technology code (crosswalk X-V2 / X-V5: 0=Conventional, 1=HEV, 2=PHEV, 3=BEV_long)."
       automation_type:
         range: integer
         required: false
-        annotations:
-          physical_name: automation_type
-        description: "Automation level (crosswalk X-V5: 0=L0, 1=L3/4, 2=L5)."
+        description: "Driving automation level code (crosswalk X-V5: 0=L0, 1=L3/4, 2=L5)."
       fuel_type:
         range: integer
         required: false
-        annotations:
-          physical_name: fuel_type
-        description: "Fuel type (crosswalk X-V3 / X-V5: 0=Gas, 1=Diesel, 2=CNG, 3=H2, 4=Electric)."
+        description: "Primary fuel type code (crosswalk X-V3 / X-V5: 0=Gas, 1=Diesel, 2=CNG, 3=H2, 4=Electric)."
       vintage_type:
         range: integer
         required: false
-        annotations:
-          physical_name: vintage_type
-        description: "Vintage age category (crosswalk X-V4 / X-V5: 0=0-5 yrs, 1=6-10 yrs, 2=10+ yrs)."
+        description: "Vehicle age category code (crosswalk X-V4 / X-V5: 0=0-5 yrs, 1=6-10 yrs, 2=10+ yrs)."
       ev_features_id:
         range: integer
         required: false
-        annotations:
-          physical_name: ev_features_id
-        description: "EV features identifier."
+        description: "Electric vehicle battery and charging profile identifier."
       operating_cost_per_mile:
         range: float
         required: false
-        annotations:
-          physical_name: operating_cost_per_mile
-        description: "Operating cost per mile in dollars."
+        description: "Vehicle operating cost per mile in dollars."
 
   PolarisHouseholdStateOutput:
+    in_subset:
+      - polaris
     description: >-
-      Provisional post-run household state output schema from POLARIS at the end of Year t,
-      capturing resolved residential location, longitudinal residence duration, and household
-      behavioral choices carried forward to update the core population for Year t+1 (A30, A31).
-      ANL will confirm whether POLARIS mutates Demand.sqlite in place or exports these records
-      via Result.sqlite.
+      Provisional post-run household state output schema from POLARIS at the end of a simulation
+      year, capturing resolved residential location, residence duration, and household delivery
+      choices carried forward to subsequent simulation years.
     aliases:
       - PolarisHouseholdOutput
     annotations:
       table_name: Household
+      artifact_table: "Household (Result.sqlite)"
       model_association: POLARIS result / post-run demand database
       schema_status: provisional
       status: provisional_placeholder
@@ -546,64 +430,51 @@ classes:
         identifier: true
         required: true
         annotations:
-          physical_name: household
           foreign_key: PolarisDemandDatabaseHousehold.household
         description: "Household primary-key identifier linking post-run state back to the core household."
       location:
         range: integer
         required: true
         annotations:
-          physical_name: location
           foreign_key: UrbanSimZonalTotals.zone_id
-        description: "Resolved residential zone/location identifier at the end of Year t."
+        description: "Resolved residential zone or location identifier at the end of the simulation year."
       time_in_home:
         range: float
         required: false
-        annotations:
-          physical_name: time_in_home
-        description: "Longitudinal residence duration in years updated for Year t+1 (A31)."
+        description: "Updated duration of residence in the current home in years."
       ecom:
         range: integer
         required: true
-        annotations:
-          physical_name: ecom
-        description: "POLARIS-modeled household e-commerce delivery frequency carried to Year t+1 (A30)."
+        description: "Simulated household e-commerce delivery frequency."
       delRat:
         range: float
         required: false
-        annotations:
-          physical_name: delRat
-        description: "POLARIS-modeled household delivery ratio factor carried to Year t+1 (A30)."
+        description: "Simulated household home-delivery propensity ratio."
       dispose_veh:
         range: integer
         required: false
-        annotations:
-          physical_name: dispose_veh
-        description: "POLARIS-modeled vehicle disposal count/indicator."
+        description: "Simulated vehicle disposal count or indicator."
       num_groceries:
         range: integer
         required: true
-        annotations:
-          physical_name: num_groceries
-        description: "POLARIS-modeled count of grocery delivery orders carried to Year t+1 (A30)."
+        description: "Simulated count of grocery delivery orders."
       num_meals:
         range: integer
         required: true
-        annotations:
-          physical_name: num_meals
-        description: "POLARIS-modeled count of meal delivery orders carried to Year t+1 (A30)."
+        description: "Simulated count of prepared-meal delivery orders."
 
   PolarisPersonStateOutput:
+    in_subset:
+      - polaris
     description: >-
-      Provisional post-run person state output schema from POLARIS at the end of Year t,
-      capturing resolved work and school locations (replacing -1 sentinels), realized commute
-      attributes, and long-term mobility choices carried forward to update the core population
-      for Year t+1 (A20, A21, A23, A30, A31). ANL will confirm whether POLARIS mutates
-      Demand.sqlite in place or exports these records via Result.sqlite.
+      Provisional post-run person state output schema from POLARIS at the end of a simulation
+      year, capturing resolved workplace and school locations (replacing -1 sentinels),
+      realized commute attributes, and mobility choices carried forward to subsequent years.
     aliases:
       - PolarisPersonOutput
     annotations:
       table_name: Person
+      artifact_table: "Person (Result.sqlite)"
       model_association: POLARIS result / post-run demand database
       schema_status: provisional
       status: provisional_placeholder
@@ -613,79 +484,55 @@ classes:
         identifier: true
         required: true
         annotations:
-          physical_name: person
           foreign_key: PolarisDemandDatabasePerson.person
         description: "Person primary-key identifier linking post-run state back to the core person."
       household:
         range: integer
         required: true
         annotations:
-          physical_name: household
           foreign_key: PolarisDemandDatabaseHousehold.household
         description: "Household identifier for the person."
       work_location_id:
         range: integer
         required: true
-        annotations:
-          physical_name: work_location_id
-        description: "Resolved workplace location identifier replacing -1 sentinel after POLARIS workplace destination choice (A20, A23)."
+        description: "Resolved workplace location identifier replacing the -1 unassigned sentinel."
       school_location_id:
         range: integer
         required: true
-        annotations:
-          physical_name: school_location_id
-        description: "Resolved school location identifier replacing -1 sentinel after POLARIS school destination choice (A23)."
+        description: "Resolved school location identifier replacing the -1 unassigned sentinel."
       journey_to_work_mode:
         range: integer
         required: true
-        annotations:
-          physical_name: journey_to_work_mode
-        description: "Realized/chosen commute mode code (A21, D-P2)."
+        description: "Simulated work commute mode code."
       journey_to_work_travel_time:
         range: integer
         required: true
-        annotations:
-          physical_name: journey_to_work_travel_time
-        description: "Realized/chosen commute travel time in minutes (A21, D-P2)."
+        description: "Simulated one-way work commute travel time in minutes."
       journey_to_work_arrival_time:
         range: integer
         required: true
-        annotations:
-          physical_name: journey_to_work_arrival_time
-        description: "Realized/chosen work arrival time in minutes after midnight (A21, D-P2)."
+        description: "Simulated work arrival time in minutes after midnight."
       journey_to_work_vehicle_occupancy:
         range: integer
         required: true
-        annotations:
-          physical_name: journey_to_work_vehicle_occupancy
-        description: "Realized/chosen commute vehicle occupancy count (A21, D-P2)."
+        description: "Simulated work commute vehicle occupancy count."
       telecommute_level:
         range: integer
         required: true
-        annotations:
-          physical_name: telecommute_level
-        description: "POLARIS-modeled telecommute frequency level (0..5 days/week) carried to Year t+1 (A30)."
+        description: "Simulated telecommute frequency level (0..5 days/week)."
       transit_pass:
         range: integer
         required: false
-        annotations:
-          physical_name: transit_pass
-        description: "POLARIS-modeled transit pass ownership indicator carried to Year t+1 (A30)."
+        description: "Simulated transit pass ownership indicator."
       escooter_use_level:
         range: integer
         required: true
-        annotations:
-          physical_name: escooter_use_level
-        description: "POLARIS-modeled e-scooter usage frequency level (0..3) carried to Year t+1 (A30)."
+        description: "Simulated shared e-scooter usage frequency level (0..3)."
       time_in_job:
         range: float
         required: false
-        annotations:
-          physical_name: time_in_job
-        description: "Longitudinal job tenure in years updated for Year t+1 (A31)."
+        description: "Updated tenure in current job in years."
       is_long_term_chooser:
         range: integer
         required: false
-        annotations:
-          physical_name: is_long_term_chooser
-        description: "Long-term choice re-evaluation flag, reset to 0 after POLARIS choices complete (A30)."
+        description: "Long-term choice re-evaluation flag, reset to 0 after POLARIS destination choices complete."

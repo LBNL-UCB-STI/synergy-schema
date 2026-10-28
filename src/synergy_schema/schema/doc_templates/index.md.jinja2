@@ -1,0 +1,110 @@
+# {% if gen.schema_title() %}{{ gen.schema_title() }}{% else %}{{ schema.name }}{% endif %}
+
+{% if schema.description %}{{ schema.description }}{% endif %}
+
+- **Schema URI:** `{{ schema.id }}`
+- **Schema Name:** `{{ schema.name }}`
+
+{% set all_subsets = schemaview.schema.subsets.values()|list %}
+{% if all_subsets %}
+## Schema Modules & Subsets
+
+Classes and enumerations in this schema are organized into [LinkML subsets](https://linkml.io/linkml-model/latest/docs/SubsetDefinition/) corresponding to each participating model and interface domain:
+
+| Subset | Model / Domain | Source YAML | Description |
+| --- | --- | --- | --- |
+{% for s in all_subsets -%}
+| {{ gen.link(s) }} | **{{ s.title or s.name }}** | {% if s.annotations and s.annotations.source_yaml %}`{{ s.annotations.source_yaml.value }}`{% endif %} | {{ s.description|enshorten }} |
+{% endfor %}
+
+---
+
+## Classes by Model & Domain
+
+{% for s in all_subsets %}
+{% set subset_classes = [] %}
+{% for c in gen.all_class_objects() %}
+{% if c.in_subset and s.name in c.in_subset %}
+{% set _ = subset_classes.append(c) %}
+{% endif %}
+{% endfor %}
+{% if subset_classes %}
+### {{ s.title or s.name }}
+
+{% if s.description %}{{ s.description }}{% endif %}
+
+- **Subset page:** {{ gen.link(s) }}{% if s.annotations and s.annotations.source_yaml %} · **Source YAML:** `{{ s.annotations.source_yaml.value }}`{% endif %}
+
+| Class | Table / File Artifact | Description |
+| --- | --- | --- |
+{% for c in subset_classes -%}
+| {{ gen.link(c) }}{% if c.is_a %}<br><small>inherits {{ gen.link(c.is_a) }}</small>{% endif %} | {% if c.annotations and c.annotations.artifact_table %}`{{ c.annotations.artifact_table.value }}`{% else %}—{% endif %} | {{ c.description|enshorten }} |
+{% endfor %}
+
+{% endif %}
+{% endfor %}
+{% endif %}
+
+{% set ungrouped_classes = [] %}
+{% for c in gen.all_class_objects() %}
+{% if not c.in_subset %}
+{% set _ = ungrouped_classes.append(c) %}
+{% endif %}
+{% endfor %}
+{% if ungrouped_classes %}
+### Additional Classes
+
+| Class | Description |
+| --- | --- |
+{% for c in ungrouped_classes -%}
+| {{ gen.link(c) }} | {{ c.description|enshorten }} |
+{% endfor %}
+{% endif %}
+
+---
+
+## Enumerations
+
+| Enumeration | Subset / Domain | Description |
+| --- | --- | --- |
+{% for e in gen.all_enum_objects() -%}
+| {{ gen.link(e) }} | {% if e.in_subset %}{% for sub in e.in_subset %}{{ gen.link(sub) }}{% if not loop.last %}, {% endif %}{% endfor %}{% else %}—{% endif %} | {{ e.description|enshorten }} |
+{% endfor %}
+
+---
+
+## Domain Types & Complete Slot Index
+
+### Custom Domain Types
+
+| Type | Base Type | Description |
+| --- | --- | --- |
+{% for t in gen.all_type_objects()|sort(attribute=sort_by) -%}
+{% if t.typeof -%}
+| {{ gen.link(t) }} | `{{ t.typeof }}` | {{ t.description|enshorten }} |
+{% endif -%}
+{% endfor %}
+
+<details markdown="1">
+<summary><strong>Built-in LinkML Scalar Types</strong></summary>
+
+| Type | Python / XSD Base | URI | Description |
+| --- | --- | --- | --- |
+{% for t in gen.all_type_objects()|sort(attribute=sort_by) -%}
+{% if not t.typeof -%}
+| {{ gen.link(t) }} | `{{ t.base }}` | `{{ t.uri }}` | {{ t.description|enshorten }} |
+{% endif -%}
+{% endfor %}
+
+</details>
+
+<details markdown="1">
+<summary><strong>Complete Alphabetical Slot / Attribute Index ({{ gen.all_slot_objects()|list|length }} attributes)</strong></summary>
+
+| Slot | Description |
+| --- | --- |
+{% for s in gen.all_slot_objects()|sort(attribute=sort_by) -%}
+| {{ gen.link(s, True) }} | {{ s.description|enshorten }} |
+{% endfor %}
+
+</details>
