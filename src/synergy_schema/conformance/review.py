@@ -64,6 +64,12 @@ def render_mapping(release: Path | str, out_dir: Path | str) -> None:
             "residue_kind": str(item["residue_kind"]),
             "affected_elements": _json(item.get("affected_elements", [])),
             "deterministic_rule": str(item.get("deterministic_rule") or ""),
+            "default_value": _json(item["default_value"])
+            if item.get("default_value") is not None
+            else "",
+            "lookup_table": _json(item["lookup_table"])
+            if item.get("lookup_table") is not None
+            else "",
             "rationale": str(item["rationale"]),
             "disposition": str(item["disposition"]),
             "implementation_evidence": _json(item.get("implementation_evidence", [])),
@@ -77,6 +83,8 @@ def render_mapping(release: Path | str, out_dir: Path | str) -> None:
             "residue_kind",
             "affected_elements",
             "deterministic_rule",
+            "default_value",
+            "lookup_table",
             "rationale",
             "disposition",
             "implementation_evidence",
@@ -182,8 +190,9 @@ def import_mapping(review_dir: Path | str, out_release: Path | str) -> None:
             for row in csv.DictReader(handle)
         ]
     with (review / "residues.csv").open(encoding="utf-8", newline="") as handle:
-        contract["residue_records"] = [
-            {
+        residue_records = []
+        for row in csv.DictReader(handle):
+            record: dict[str, object] = {
                 "id": row["id"],
                 "residue_kind": row["residue_kind"],
                 "affected_elements": json.loads(row["affected_elements"]),
@@ -192,8 +201,16 @@ def import_mapping(review_dir: Path | str, out_release: Path | str) -> None:
                 "disposition": row["disposition"],
                 "implementation_evidence": json.loads(row["implementation_evidence"]),
             }
-            for row in csv.DictReader(handle)
-        ]
+            if row.get("default_value"):
+                parsed_default = json.loads(row["default_value"])
+                if parsed_default is not None:
+                    record["default_value"] = parsed_default
+            if row.get("lookup_table"):
+                parsed_lookup = json.loads(row["lookup_table"])
+                if parsed_lookup is not None:
+                    record["lookup_table"] = parsed_lookup
+            residue_records.append(record)
+        contract["residue_records"] = residue_records
     with (review / "reviews.csv").open(encoding="utf-8", newline="") as handle:
         contract.setdefault("governance", {})["review_records"] = [
             {key: value for key, value in row.items() if value}

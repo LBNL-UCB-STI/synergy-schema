@@ -101,3 +101,14 @@ def test_mapping_diff_classifies_nonsemantic_contract_changes(tmp_path: Path) ->
     diff = diff_mappings(old, new)
     assert diff["semantic"] == []
     assert diff["encoding_source"]
+
+
+def test_mapping_review_round_trips_default_value_and_lookup_tables(
+    tmp_path: Path,
+) -> None:
+    release = Path("mappings/releases/atlas-demos-to-polaris/revision-1")
+    review = tmp_path / "review"
+    imported = tmp_path / "imported"
+    render_mapping(release, review)
+    import_mapping(review, imported)
+    assert diff_mappings(release, imported)["semantic"] == []

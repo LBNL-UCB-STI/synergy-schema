@@ -36,7 +36,7 @@ target_schema_contract:
   selected_root: PolarisDemandDatabaseV1Household
   schema_uri: src/synergy_schema/schema/synergy_schema.yaml
 semantic_content_digest_algorithm: sha256
-semantic_content_digest: 51ead67024fa32be5451125ee2d8c8fbedcef3fd02ce6cbd566b6e8c16f8e9a6
+semantic_content_digest: d5f03bb6ebde1f7f88679f6475561f372e99d4533e89202664405e9985840d05
 field_mappings:
   - id: map-household-id
     description: DEMOS household identifier mapped to POLARIS household primary key.
@@ -164,11 +164,12 @@ field_mappings:
       kind: sql_column
       path: polaris_persons.employment
   - id: map-person-marital-status
-    description: DEMOS person marital status (1-5 identical; 0 carries previous value
-      or draws D-P3a) (X-P1, A27).
+    description: DEMOS person marital status (1-5 identical; 0 carries previous value,
+      draws D-P3a, or derives deterministically from relationship/age in core projection) (X-P1, A27).
     transformation_mode: derived
-    rule: Map DEMOS marital status (1-5 identical; code 0 carries previous value for
-      surviving, or draws D-P3a for new).
+    rule: 'Map DEMOS marital status (1-5 identical; code 0 carries previous value for
+      surviving, draws D-P3a for new, or derives deterministically from relationship
+      and age in core projection: relate=1 -> 1, age < 15 -> 5, relate=0 -> 1, else 5).'
     implementation_evidence: *id003
     source_element:
       catalog: *id001
@@ -437,6 +438,7 @@ residue_records:
   - id: target-default-polaris-households-Has-Residential-Charging
     residue_kind: required_target_default
     deterministic_rule: Carry t-1 value for surviving, or draw D-H1.
+    default_value: 0
     rationale: Carried from t-1 for surviving households; drawn jointly in D-H1 for
       new households (A10, A11).
     disposition: Populate polaris_households.Has_Residential_Charging via deterministic
@@ -449,6 +451,7 @@ residue_records:
   - id: target-default-polaris-households-bikes
     residue_kind: required_target_default
     deterministic_rule: Carry t-1 value for surviving, 0 for new.
+    default_value: 0
     rationale: 'POLARIS demand model output: carried from t-1 for surviving households;
       initialized to 0 for new households (A16).'
     disposition: Populate polaris_households.bikes via deterministic calculation or
@@ -461,6 +464,7 @@ residue_records:
   - id: target-default-polaris-households-delRat
     residue_kind: required_target_default
     deterministic_rule: Carry t-1 value for surviving, 0 for new.
+    default_value: 0.0
     rationale: 'POLARIS demand model output: carried from t-1 for surviving households;
       initialized to 0 for new households (A16).'
     disposition: Populate polaris_households.delRat via deterministic calculation
@@ -473,6 +477,7 @@ residue_records:
   - id: target-default-polaris-households-dispose-veh
     residue_kind: required_target_default
     deterministic_rule: Carry t-1 value for surviving, 0 for new.
+    default_value: 0
     rationale: 'POLARIS demand model output: carried from t-1 for surviving households;
       initialized to 0 for new households (A16).'
     disposition: Populate polaris_households.dispose_veh via deterministic calculation
@@ -485,6 +490,7 @@ residue_records:
   - id: target-default-polaris-households-ecom
     residue_kind: required_target_default
     deterministic_rule: Carry t-1 value for surviving, 0 for new.
+    default_value: 0
     rationale: 'POLARIS demand model output: carried from t-1 for surviving households;
       initialized to 0 for new households (A16).'
     disposition: Populate polaris_households.ecom via deterministic calculation or
@@ -497,6 +503,7 @@ residue_records:
   - id: target-default-polaris-households-hhold
     residue_kind: required_target_default
     deterministic_rule: Previous value for surviving, -1 for new.
+    default_value: -1
     rationale: 'Physical alias: previous value for surviving households, -1 for new
       households pending POLARIS internal ID assignment.'
     disposition: Populate polaris_households.hhold via deterministic calculation or
@@ -509,6 +516,7 @@ residue_records:
   - id: target-default-polaris-households-housing-unit-type
     residue_kind: required_target_default
     deterministic_rule: Carry t-1 value for surviving, or draw D-H1.
+    default_value: 1
     rationale: 'Housing unit type enum (1-5): carried for surviving; drawn via D-H1
       for new (X-H3, A10).'
     disposition: Populate polaris_households.housing_unit_type via deterministic calculation
@@ -533,6 +541,7 @@ residue_records:
   - id: target-default-polaris-households-location
     residue_kind: required_target_default
     deterministic_rule: Carry t-1 value for surviving, or draw D-H1.
+    default_value: 0
     rationale: 'Zone location ID: carried from t-1 for surviving; drawn in D-H1 within
       tract/county for new (A10, A11, A12).'
     disposition: Populate polaris_households.location via deterministic calculation
@@ -545,6 +554,7 @@ residue_records:
   - id: target-default-polaris-households-num-groceries
     residue_kind: required_target_default
     deterministic_rule: Carry t-1 value for surviving, 0 for new.
+    default_value: 0
     rationale: 'POLARIS demand model output: carried for surviving, 0 for new (A16).'
     disposition: Populate polaris_households.num_groceries via deterministic calculation
       or model default.
@@ -556,6 +566,7 @@ residue_records:
   - id: target-default-polaris-households-num-meals
     residue_kind: required_target_default
     deterministic_rule: Carry t-1 value for surviving, 0 for new.
+    default_value: 0
     rationale: 'POLARIS demand model output: carried for surviving, 0 for new (A16).'
     disposition: Populate polaris_households.num_meals via deterministic calculation
       or model default.
@@ -578,6 +589,7 @@ residue_records:
   - id: target-default-polaris-households-time-in-home
     residue_kind: required_target_default
     deterministic_rule: Previous value + 1 for surviving, 0 for new.
+    default_value: 0.0
     rationale: 'Duration in residence: previous value + 1 for surviving; 0 for new
       households (A31).'
     disposition: Populate polaris_households.time_in_home via deterministic calculation
@@ -613,6 +625,7 @@ residue_records:
   - id: target-default-polaris-persons-disability
     residue_kind: required_target_default
     deterministic_rule: Carry t-1 value for surviving, or draw D-P4.
+    default_value: 2
     rationale: 'Disability status (1 with, 2 without): carried from t-1 for surviving;
       drawn via D-P4 by sex/age for new (A28).'
     disposition: Populate polaris_persons.disability via deterministic calculation
@@ -625,6 +638,7 @@ residue_records:
   - id: target-default-polaris-persons-escooter-use-level
     residue_kind: required_target_default
     deterministic_rule: Carry t-1 value for surviving, 0 for new.
+    default_value: 0
     rationale: 'POLARIS demand model output: carried from t-1 for surviving, initialized
       to 0 for new (A30).'
     disposition: Populate polaris_persons.escooter_use_level via deterministic calculation
@@ -648,6 +662,7 @@ residue_records:
   - id: target-default-polaris-persons-industry
     residue_kind: required_target_default
     deterministic_rule: Carry t-1 value for continuing worker, or draw D-P1.
+    default_value: 0
     rationale: 'Census INDP industry code: carried from t-1 for continuing workers;
       drawn via D-P1 on event or new worker (A20, A21).'
     disposition: Populate polaris_persons.industry via deterministic calculation or
@@ -660,6 +675,7 @@ residue_records:
   - id: target-default-polaris-persons-is-long-term-chooser
     residue_kind: required_target_default
     deterministic_rule: Set 1 on event or new person, 0 otherwise.
+    default_value: 0
     rationale: 'Derived flag: 1 on mobility/employment event or new person, else 0
       (A30).'
     disposition: Populate polaris_persons.is_long_term_chooser via deterministic calculation
@@ -672,6 +688,7 @@ residue_records:
   - id: target-default-polaris-persons-journey-to-work-arrival-time
     residue_kind: required_target_default
     deterministic_rule: Carry t-1 value for continuing, or draw D-P2.
+    default_value: 0
     rationale: 'Usual work arrival time: carried from t-1 for continuing; drawn in
       D-P2 or 07:00-09:00 for new (D-P2).'
     disposition: Populate polaris_persons.journey_to_work_arrival_time via deterministic
@@ -684,6 +701,7 @@ residue_records:
   - id: target-default-polaris-persons-journey-to-work-mode
     residue_kind: required_target_default
     deterministic_rule: Carry t-1 value for continuing, or draw D-P2.
+    default_value: 0
     rationale: 'Usual commute mode: carried from t-1 for continuing; drawn via D-P2
       for new worker (A21, D-P2).'
     disposition: Populate polaris_persons.journey_to_work_mode via deterministic calculation
@@ -696,6 +714,7 @@ residue_records:
   - id: target-default-polaris-persons-journey-to-work-travel-time
     residue_kind: required_target_default
     deterministic_rule: Carry t-1 value for continuing, or draw D-P2.
+    default_value: 0
     rationale: 'Usual commute travel time: carried from t-1 for continuing; drawn
       via D-P2 for new worker (A21, D-P2).'
     disposition: Populate polaris_persons.journey_to_work_travel_time via deterministic
@@ -708,6 +727,7 @@ residue_records:
   - id: target-default-polaris-persons-journey-to-work-vehicle-occupancy
     residue_kind: required_target_default
     deterministic_rule: Carry t-1 value for continuing, or draw D-P2.
+    default_value: 0
     rationale: 'Usual commute vehicle occupancy: carried from t-1 for continuing;
       drawn via D-P2 for new worker (A21, D-P2).'
     disposition: Populate polaris_persons.journey_to_work_vehicle_occupancy via deterministic
@@ -721,6 +741,7 @@ residue_records:
     residue_kind: required_target_default
     deterministic_rule: Carry t-1 value for surviving, race_of_head for head, or draw
       D-P3b.
+    default_value: 1
     rationale: 'RACE RAC1P code: carried from t-1 for surviving; new head takes race_of_head,
       others draw D-P3b (A26).'
     disposition: Populate polaris_persons.race via deterministic calculation or model
@@ -733,6 +754,7 @@ residue_records:
   - id: target-default-polaris-persons-school-grade-level
     residue_kind: required_target_default
     deterministic_rule: Advance grade X-P4 for continuing, or draw X-P5 for entrant.
+    default_value: 0
     rationale: 'Current school grade: progression X-P4 for continuing students; entry
       grade draw X-P5 for entrants.'
     disposition: Populate polaris_persons.school_grade_level via deterministic calculation
@@ -745,6 +767,7 @@ residue_records:
   - id: target-default-polaris-persons-school-location-id
     residue_kind: required_target_default
     deterministic_rule: Carry t-1 value for continuing, -1 for new.
+    default_value: -1
     rationale: 'School location zone ID: carried from t-1 for continuing students;
       -1 for new/unassigned (A23).'
     disposition: Populate polaris_persons.school_location_id via deterministic calculation
@@ -757,6 +780,7 @@ residue_records:
   - id: target-default-polaris-persons-telecommute-level
     residue_kind: required_target_default
     deterministic_rule: Carry t-1 value for surviving, 0 for new.
+    default_value: 0
     rationale: 'POLARIS demand model output: carried from t-1 for surviving, initialized
       to 0 for new (A30).'
     disposition: Populate polaris_persons.telecommute_level via deterministic calculation
@@ -769,6 +793,7 @@ residue_records:
   - id: target-default-polaris-persons-time-in-job
     residue_kind: required_target_default
     deterministic_rule: Previous value + 1 for continuing, 0 for new.
+    default_value: 0.0
     rationale: 'Job tenure duration: previous value + 1 for continuing worker; 0 for
       new worker or non-worker (A31).'
     disposition: Populate polaris_persons.time_in_job via deterministic calculation
@@ -781,6 +806,7 @@ residue_records:
   - id: target-default-polaris-persons-transit-pass
     residue_kind: required_target_default
     deterministic_rule: Carry t-1 value for surviving, 0 for new.
+    default_value: 0
     rationale: 'POLARIS demand model output: carried from t-1 for surviving, initialized
       to 0 for new (A30).'
     disposition: Populate polaris_persons.transit_pass via deterministic calculation
@@ -793,6 +819,7 @@ residue_records:
   - id: target-default-polaris-persons-work-hours
     residue_kind: required_target_default
     deterministic_rule: Carry t-1 value for continuing, or draw D-P1.
+    default_value: 0
     rationale: 'Usual weekly work hours: carried from t-1 for continuing worker; drawn
       via D-P1 for new worker (A20, A21).'
     disposition: Populate polaris_persons.work_hours via deterministic calculation
@@ -805,6 +832,7 @@ residue_records:
   - id: target-default-polaris-persons-work-location-id
     residue_kind: required_target_default
     deterministic_rule: Carry t-1 value for continuing, -1 for new.
+    default_value: -1
     rationale: 'Workplace zone ID: carried from t-1 for continuing worker; -1 for
       new/unassigned (A20, A23).'
     disposition: Populate polaris_persons.work_location_id via deterministic calculation
@@ -817,6 +845,7 @@ residue_records:
   - id: target-default-polaris-persons-worker-class
     residue_kind: required_target_default
     deterministic_rule: Carry t-1 value for continuing, or draw D-P1.
+    default_value: 0
     rationale: 'Class of worker COW code (0-9): carried from t-1 for continuing worker;
       drawn via D-P1 for new worker (A20, A21).'
     disposition: Populate polaris_persons.worker_class via deterministic calculation
@@ -829,6 +858,7 @@ residue_records:
   - id: target-default-polaris-vehicles-L3-wtp
     residue_kind: required_target_default
     deterministic_rule: Carry t-1 value for retained, 0 for new.
+    default_value: 0
     rationale: 'Willingness to pay for L3 automation: carried for retained vehicle,
       0 for new vehicle.'
     disposition: Populate polaris_vehicles.L3_wtp via deterministic calculation or
@@ -841,6 +871,7 @@ residue_records:
   - id: target-default-polaris-vehicles-L4-wtp
     residue_kind: required_target_default
     deterministic_rule: Carry t-1 value for retained, 0 for new.
+    default_value: 0
     rationale: 'Willingness to pay for L4 automation: carried for retained vehicle,
       0 for new vehicle.'
     disposition: Populate polaris_vehicles.L4_wtp via deterministic calculation or
@@ -853,6 +884,7 @@ residue_records:
   - id: target-default-polaris-vehicles-fleet
     residue_kind: required_target_default
     deterministic_rule: Carry t-1 value for retained, 0 for new.
+    default_value: 0
     rationale: 'Fleet classification: carried for retained vehicle, 0 for new vehicle.'
     disposition: Populate polaris_vehicles.fleet via deterministic calculation or
       model default.
@@ -864,6 +896,7 @@ residue_records:
   - id: target-default-polaris-vehicles-parking
     residue_kind: required_target_default
     deterministic_rule: Carry t-1 value for retained, 0 for new.
+    default_value: 0
     rationale: 'Residential parking arrangement: carried for retained vehicle, 0 for
       new vehicle.'
     disposition: Populate polaris_vehicles.parking via deterministic calculation or
@@ -876,6 +909,7 @@ residue_records:
   - id: target-default-polaris-vehicles-subtype
     residue_kind: required_target_default
     deterministic_rule: Carry t-1 value for retained, 0 for new.
+    default_value: 0
     rationale: 'Vehicle subtype: carried for retained vehicle, 0 for new vehicle.'
     disposition: Populate polaris_vehicles.subtype via deterministic calculation or
       model default.
@@ -887,6 +921,7 @@ residue_records:
   - id: target-default-polaris-vehicles-type
     residue_kind: required_target_default
     deterministic_rule: LOOKUP type_id in polaris_vehicle_type by 6 key dimensions.
+    default_value: 1
     rationale: 'Foreign key to polaris_vehicle_type: looked up via the 6 key columns
       (class, powertrain, fuel, vintage, connectivity, automation) (A46).'
     disposition: Populate polaris_vehicles.type via deterministic calculation or model
@@ -1103,6 +1138,33 @@ residue_records:
   - id: crosswalk-X-H2
     residue_kind: lookup_or_crosswalk
     deterministic_rule: Cross tenure with HHT to produce type codes 1-11.
+    lookup_table:
+      table_name: _contract_crosswalk_x_h2
+      columns:
+        - name: is_gq
+          sql_type: INTEGER
+          role: key
+        - name: is_owner
+          sql_type: INTEGER
+          role: key
+        - name: hht
+          sql_type: INTEGER
+          role: key
+        - name: polaris_type
+          sql_type: INTEGER
+          role: value
+      rows:
+        - values: [0, 1, 1, 1]
+        - values: [0, 1, 2, 2]
+        - values: [0, 1, 3, 3]
+        - values: [0, 1, 4, 4]
+        - values: [0, 1, 5, 5]
+        - values: [0, 0, 1, 6]
+        - values: [0, 0, 2, 7]
+        - values: [0, 0, 3, 8]
+        - values: [0, 0, 4, 9]
+        - values: [0, 0, 5, 10]
+        - values: [1, 0, 0, 11]
     rationale: 'X-H2: Tenure x HHT mapped to POLARIS type code (1-11). Type 1-5 own,
       6-10 rent, 11 GQ.'
     disposition: Populate polaris_households.type with the crosswalked type integer.
@@ -1114,6 +1176,21 @@ residue_records:
   - id: crosswalk-X-H3
     residue_kind: lookup_or_crosswalk
     deterministic_rule: Map dwelling type to HU_TYPE enum 1-5.
+    lookup_table:
+      table_name: _contract_crosswalk_x_h3
+      columns:
+        - name: hu_type_code
+          sql_type: INTEGER
+          role: key
+        - name: hu_type_label
+          sql_type: VARCHAR
+          role: value
+      rows:
+        - values: [1, single_family]
+        - values: [2, small_apt_2_9]
+        - values: [3, large_apt_10_plus]
+        - values: [4, mobile_or_other]
+        - values: [5, group_quarters]
     rationale: 'X-H3: Housing unit type enum HU_TYPE (1 single family, 2 small apt
       2-9 units, 3 large apt 10+ units, 4 other/mobile, 5 GQ).'
     disposition: Populate polaris_households.housing_unit_type with the crosswalked
@@ -1177,10 +1254,37 @@ residue_records:
         path: polaris_persons.school_enrollment
   - id: crosswalk-X-P2
     residue_kind: lookup_or_crosswalk
-    deterministic_rule: ESR 1 and 4 classify as employed at work; ESR 2 and 5 employed
-      not at work; others not employed.
-    rationale: 'X-P2: Employment (ESR) groups driving employment status and worker
-      flags (ESR 1 civilian at work, 4 armed forces at work).'
+    deterministic_rule: ESR 1 and 4 classify as employed at work (with default arrival
+      time 480 and vehicle occupancy 1); ESR 2 and 5 employed not at work; others
+      not employed.
+    lookup_table:
+      table_name: _contract_crosswalk_x_p2
+      columns:
+        - name: employment_status
+          sql_type: INTEGER
+          role: key
+        - name: is_employed
+          sql_type: INTEGER
+          role: value
+        - name: is_at_work
+          sql_type: INTEGER
+          role: value
+        - name: default_arrival_time
+          sql_type: INTEGER
+          role: value
+        - name: default_vehicle_occupancy
+          sql_type: INTEGER
+          role: value
+      rows:
+        - values: [0, 0, 0, 0, 0]
+        - values: [1, 1, 1, 480, 1]
+        - values: [2, 1, 0, 0, 0]
+        - values: [3, 0, 0, 0, 0]
+        - values: [4, 1, 1, 480, 1]
+        - values: [5, 1, 0, 0, 0]
+        - values: [6, 0, 0, 0, 0]
+    rationale: 'X-P2: Employment (ESR) groups driving employment status, worker flags,
+      and at-work commute defaults (ESR 1 civilian at work, 4 armed forces at work).'
     disposition: Drive worker count derivation and commute model eligibility.
     implementation_evidence: *id003
     affected_elements:
@@ -1190,10 +1294,43 @@ residue_records:
       - catalog: *id002
         kind: sql_column
         path: polaris_households.workers
+      - catalog: *id002
+        kind: sql_column
+        path: polaris_persons.journey_to_work_arrival_time
+      - catalog: *id002
+        kind: sql_column
+        path: polaris_persons.journey_to_work_vehicle_occupancy
   - id: crosswalk-X-P3
     residue_kind: lookup_or_crosswalk
     deterministic_rule: Map grade 1 to PREK, 2-10 to K-8, 11-14 to 9-12, 15-16 to
       Higher Ed.
+    lookup_table:
+      table_name: _contract_crosswalk_x_p3
+      columns:
+        - name: school_grade_level
+          sql_type: INTEGER
+          role: key
+        - name: school_type
+          sql_type: VARCHAR
+          role: value
+      rows:
+        - values: [0, none]
+        - values: [1, prek]
+        - values: [2, k_8]
+        - values: [3, k_8]
+        - values: [4, k_8]
+        - values: [5, k_8]
+        - values: [6, k_8]
+        - values: [7, k_8]
+        - values: [8, k_8]
+        - values: [9, k_8]
+        - values: [10, k_8]
+        - values: [11, "9_12"]
+        - values: [12, "9_12"]
+        - values: [13, "9_12"]
+        - values: [14, "9_12"]
+        - values: [15, higher_ed]
+        - values: [16, higher_ed]
     rationale: 'X-P3: School grade level and school type classification (grade 1 preschool
       -> PREK; 2-10 -> K-8; 11-14 -> 9-12; 15-16 -> higher ed).'
     disposition: Resolve school type for destination choice and school travel models.
@@ -1276,6 +1413,20 @@ residue_records:
   - id: crosswalk-X-V2
     residue_kind: lookup_or_crosswalk
     deterministic_rule: Map ICE -> 0, Hybrid -> 1, PHEV -> 2, AEV -> 3.
+    lookup_table:
+      table_name: _contract_crosswalk_x_v2
+      columns:
+        - name: pred_power
+          sql_type: VARCHAR
+          role: key
+        - name: powertrain_type
+          sql_type: INTEGER
+          role: value
+      rows:
+        - values: [ICE, 0]
+        - values: [Hybrid, 1]
+        - values: [PHEV, 2]
+        - values: [AEV, 3]
     rationale: 'X-V2: ATLAS pred_power mapping to POLARIS powertrain_type (ICE ->
       0 Conventional, Hybrid -> 1 HEV, PHEV -> 2 PHEV, AEV -> 3 BEV_long).'
     disposition: Set powertrain_type dimension for vehicle type lookup.
@@ -1288,6 +1439,20 @@ residue_records:
     residue_kind: lookup_or_crosswalk
     deterministic_rule: Conventional draws gas/diesel via D-V2; HEV/PHEV sets Gas;
       BEV_long sets Elec.
+    lookup_table:
+      table_name: _contract_crosswalk_x_v3
+      columns:
+        - name: powertrain_type
+          sql_type: INTEGER
+          role: key
+        - name: default_fuel_type
+          sql_type: INTEGER
+          role: value
+      rows:
+        - values: [0, 0]
+        - values: [1, 0]
+        - values: [2, 0]
+        - values: [3, 4]
     rationale: 'X-V3: Powertrain to fuel type mapping (Conventional -> gas/diesel
       via D-V2; HEV/PHEV -> 0 Gas; BEV_long -> 4 Elec).'
     disposition: Set fuel_type dimension for vehicle type lookup.
@@ -1300,8 +1465,24 @@ residue_records:
     residue_kind: lookup_or_crosswalk
     deterministic_rule: Age <= 5 -> vintage 0; 6-10 -> vintage 1; >= 11 -> vintage
       2.
+    lookup_table:
+      table_name: _contract_crosswalk_x_v4
+      columns:
+        - name: min_age
+          sql_type: INTEGER
+          role: key
+        - name: max_age
+          sql_type: INTEGER
+          role: key
+        - name: vintage_type
+          sql_type: INTEGER
+          role: value
+      rows:
+        - values: [-10, 5, 0]
+        - values: [6, 10, 1]
+        - values: [11, 999, 2]
     rationale: 'X-V4: Vehicle age (simulation_year - modelyear) bucketing to vintage_type
-      (<=5 -> 0 0-5y, 6-10 -> 1 6-10y, >=11 -> 2 10+y).'
+      (<=5 including next-model-year negative ages -> 0 0-5y, 6-10 -> 1 6-10y, >=11 -> 2 10+y).'
     disposition: Set vintage_type dimension for vehicle type lookup.
     implementation_evidence: *id003
     affected_elements:

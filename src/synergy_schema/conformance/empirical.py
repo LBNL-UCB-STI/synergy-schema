@@ -40,7 +40,7 @@ DEFAULT_EVIDENCE_DIR = Path(__file__).resolve().parents[3] / "evidence"
 def resolve_physical_column(slot: SlotDefinition) -> str:
     """Resolve the physical column header name for a LinkML slot."""
     annotations = slot.annotations
-    if isinstance(annotations, dict) and "physical_name" in annotations:
+    if annotations is not None and "physical_name" in annotations:
         phys_ann = annotations["physical_name"]
         if isinstance(phys_ann, Annotation):
             return str(phys_ann.value)
@@ -317,7 +317,7 @@ def compile_linkml_class_audit_expr(
 
         if slot.range in enum_names:
             enum_def = sv.get_enum(slot.range)
-            if enum_def is not None and isinstance(enum_def.permissible_values, dict):
+            if enum_def is not None and enum_def.permissible_values is not None:
                 pvals = [str(pv) for pv in enum_def.permissible_values.keys()]
                 if pvals:
                     alias = f"enum_{idx}"
