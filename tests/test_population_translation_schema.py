@@ -47,12 +47,19 @@ def test_population_translation_contract_exposes_contract_revision_shape() -> No
         "PopulationTranslationContractReference",
         "PopulationFieldMapping",
         "MappingResidueRecord",
+        "LookupTableSpec",
+        "LookupTableColumn",
+        "LookupTableRow",
         "MappingResidueObservation",
         "MappingGovernance",
         "MappingReviewRecord",
         "TranslationImplementationBinding",
         "TranslationImplementationBindingReference",
     }.issubset(schema_view.all_classes())
+
+    residue_class = schema_view.get_class("MappingResidueRecord")
+    assert "default_value" in residue_class.attributes
+    assert residue_class.attributes["lookup_table"].range == "LookupTableSpec"
 
     contract = schema_view.get_class("PopulationTranslationContract")
     assert "implementation_bindings" not in contract.attributes
@@ -238,8 +245,9 @@ def test_semantic_digest_projection_excludes_provenance_and_governance() -> None
         schema_view, "PopulationTranslationContract", "semantic_digest_projection"
     )
     assert projection == (
-        "Includes source_catalog, target_catalog, field_mappings, and "
-        "residue_records. Excludes encoding_source, supporting_sources, "
+        "Includes source_catalog, target_catalog, source_schema_contract, "
+        "target_schema_contract, field_mappings, and residue_records. Excludes "
+        "encoding_source, supporting_sources, "
         "PopulationFieldMapping.implementation_evidence, "
         "MappingResidueRecord.implementation_evidence, governance, review "
         "records, lifecycle status, and implementation bindings; cross-document "
@@ -256,5 +264,43 @@ def test_semantic_digest_projection_excludes_provenance_and_governance() -> None
         schema_view, "MappingResidueRecord", "semantic_digest_projection"
     ) == (
         "Includes id, residue_kind, affected_elements, deterministic_rule, "
-        "rationale, and disposition. Excludes implementation_evidence."
+        "default_value, lookup_table, rationale, and disposition. Excludes "
+        "implementation_evidence."
     )
+
+
+def test_release_contract_and_implementation_validate_under_closed_jsonschema() -> None:
+    import yaml
+    from linkml.validator import Validator
+    from linkml.validator.plugins import JsonschemaValidationPlugin
+
+    validator = Validator(
+        schema=str(SCHEMA_PATH),
+        validation_plugins=[JsonschemaValidationPlugin(closed=True)],
+    )
+    release_dir = (
+        Path(__file__).parents[1]
+        / "mappings"
+        / "releases"
+        / "atlas-demos-to-polaris"
+        / "revision-1"
+    )
+    contract_doc = yaml.safe_load(
+        (release_dir / "contract" / "population-translation-contract.yaml").read_text(
+            encoding="utf-8"
+        )
+    )
+    contract_report = validator.validate(
+        contract_doc, target_class="PopulationTranslationContract"
+    )
+    assert list(contract_report.results) == []
+
+    impl_doc = yaml.safe_load(
+        (release_dir / "implementation" / "polaris-translation.yaml").read_text(
+            encoding="utf-8"
+        )
+    )
+    impl_report = validator.validate(
+        impl_doc, target_class="TranslationImplementationBinding"
+    )
+    assert list(impl_report.results) == []

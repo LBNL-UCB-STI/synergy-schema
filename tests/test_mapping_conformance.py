@@ -311,3 +311,158 @@ def test_atlas_demos_to_polaris_revision_1_conformance() -> None:
     result = validate_mapping_release(release_dir)
     assert not any(d.severity == "error" for d in result.diagnostics)
     assert [d.code for d in result.diagnostics] == ["MAPPING_NOT_APPROVED"]
+
+
+def test_residue_default_value_and_lookup_table_participate_in_semantic_digest_and_validation(
+    tmp_path: Path,
+) -> None:
+    release = _release(tmp_path)
+    contract_path = release / "contract/population-translation-contract.yaml"
+    contract = yaml.safe_load(contract_path.read_text())
+    base_digest = mapping_digest(contract)
+
+    # Adding a default_value changes the semantic digest
+    contract["residue_records"][1]["default_value"] = 0
+    digest_with_default = mapping_digest(contract)
+    assert digest_with_default != base_digest
+
+    # Changing the default_value changes the semantic digest again
+    contract["residue_records"][1]["default_value"] = 42
+    digest_with_changed_default = mapping_digest(contract)
+    assert digest_with_changed_default != digest_with_default
+
+    # Adding a lookup_table changes the semantic digest
+    contract["residue_records"].append(
+        {
+            "id": "crosswalk-demo",
+            "residue_kind": "lookup_or_crosswalk",
+            "affected_elements": [
+                {
+                    "catalog": contract["target_catalog"],
+                    "kind": "sql_column",
+                    "path": "workers",
+                }
+            ],
+            "rationale": "demo crosswalk",
+            "disposition": "mapped",
+            "implementation_evidence": ["sql"],
+            "lookup_table": {
+                "table_name": "_contract_crosswalk_demo",
+                "columns": [
+                    {"name": "code", "role": "key", "sql_type": "INTEGER"},
+                    {"name": "is_worker", "role": "value", "sql_type": "INTEGER"},
+                ],
+                "rows": [
+                    {"code": 1, "is_worker": 1},
+                    {"code": 2, "is_worker": 0},
+                ],
+            },
+        }
+    )
+    digest_with_lookup = mapping_digest(contract)
+    assert digest_with_lookup != digest_with_changed_default
+
+    # Reordering keys inside a row dict preserves the canonical semantic digest
+    contract_reordered = deepcopy(contract)
+    contract_reordered["residue_records"][2]["lookup_table"]["rows"][0] = {
+        "is_worker": 1,
+        "code": 1,
+    }
+    assert mapping_digest(contract_reordered) == digest_with_lookup
+
+    # Changing a lookup row value changes the semantic digest
+    contract["residue_records"][2]["lookup_table"]["rows"][1]["is_worker"] = 1
+    assert mapping_digest(contract) != digest_with_lookup
+
+    # Duplicate key rows fail validation with MAPPING_DOCUMENT_INVALID
+    contract["residue_records"][2]["lookup_table"]["rows"].append(
+        {"code": 1, "is_worker": 0}
+    )
+    contract_path.write_text(yaml.safe_dump(contract), encoding="utf-8")
+    codes = [
+        item.code
+        for item in validate_mapping_release(
+            release, catalog_root=tmp_path / "catalogs"
+        ).diagnostics
+    ]
+    assert codes == ["MAPPING_DOCUMENT_INVALID"]
+
+
+def test_lookup_table_and_residue_kind_type_validation(tmp_path: Path) -> None:
+    release = _release(tmp_path)
+    contract_path = release / "contract/population-translation-contract.yaml"
+    base_contract = yaml.safe_load(contract_path.read_text())
+
+    # 1. default_value on non-required_target_default is rejected
+    bad_default_kind = deepcopy(base_contract)
+    bad_default_kind["residue_records"][0]["default_value"] = 0
+    contract_path.write_text(yaml.safe_dump(bad_default_kind), encoding="utf-8")
+    assert [
+        item.code
+        for item in validate_mapping_release(
+            release, catalog_root=tmp_path / "catalogs"
+        ).diagnostics
+    ] == ["MAPPING_DOCUMENT_INVALID"]
+
+    # 2. lookup_table with wrong cell type (string in INTEGER column) is rejected
+    bad_cell_type = deepcopy(base_contract)
+    bad_cell_type["residue_records"].append(
+        {
+            "id": "crosswalk-bad-type",
+            "residue_kind": "lookup_or_crosswalk",
+            "affected_elements": [
+                {
+                    "catalog": base_contract["target_catalog"],
+                    "kind": "sql_column",
+                    "path": "workers",
+                }
+            ],
+            "rationale": "bad cell type",
+            "disposition": "mapped",
+            "implementation_evidence": ["sql"],
+            "lookup_table": {
+                "table_name": "_contract_crosswalk_bad",
+                "columns": [
+                    {"name": "code", "role": "key", "sql_type": "INTEGER"},
+                    {"name": "val", "role": "value", "sql_type": "INTEGER"},
+                ],
+                "rows": [{"code": 1, "val": "not_an_int"}],
+            },
+        }
+    )
+    contract_path.write_text(yaml.safe_dump(bad_cell_type), encoding="utf-8")
+    assert [
+        item.code
+        for item in validate_mapping_release(
+            release, catalog_root=tmp_path / "catalogs"
+        ).diagnostics
+    ] == ["MAPPING_DOCUMENT_INVALID"]
+
+    # 3. lookup_table with invalid SQL identifier table_name is rejected
+    bad_identifier = deepcopy(bad_cell_type)
+    bad_identifier["residue_records"][-1]["lookup_table"]["table_name"] = (
+        "bad-table;DROP"
+    )
+    bad_identifier["residue_records"][-1]["lookup_table"]["rows"] = [
+        {"code": 1, "val": 2}
+    ]
+    contract_path.write_text(yaml.safe_dump(bad_identifier), encoding="utf-8")
+    assert [
+        item.code
+        for item in validate_mapping_release(
+            release, catalog_root=tmp_path / "catalogs"
+        ).diagnostics
+    ] == ["MAPPING_DOCUMENT_INVALID"]
+
+    # 4. lookup_table row with mismatched column keys is rejected
+    bad_row_keys = deepcopy(bad_cell_type)
+    bad_row_keys["residue_records"][-1]["lookup_table"]["rows"] = [
+        {"code": 1, "wrong_col": 2}
+    ]
+    contract_path.write_text(yaml.safe_dump(bad_row_keys), encoding="utf-8")
+    assert [
+        item.code
+        for item in validate_mapping_release(
+            release, catalog_root=tmp_path / "catalogs"
+        ).diagnostics
+    ] == ["MAPPING_DOCUMENT_INVALID"]

@@ -4,7 +4,9 @@ from __future__ import annotations
 
 from hashlib import sha256
 import json
+import math
 from pathlib import Path
+import re
 from typing import Any, Mapping, Sequence
 
 from linkml_runtime.utils.schemaview import SchemaView
@@ -51,6 +53,192 @@ def _schema_contract_identity(contract: Mapping[str, Any], name: str) -> dict[st
     return identity
 
 
+_IDENTIFIER_RE = re.compile(r"^[A-Za-z_][A-Za-z0-9_]*$")
+_ALLOWED_SQL_TYPES = {
+    "INTEGER",
+    "BIGINT",
+    "DOUBLE",
+    "REAL",
+    "VARCHAR",
+    "TEXT",
+    "BOOLEAN",
+}
+
+
+def _validate_cell_value(
+    val: Any, sql_type: str, residue_id: str, row_idx: int, col_name: str
+) -> None:
+    if sql_type == "BOOLEAN":
+        if not isinstance(val, bool):
+            raise ValueError(
+                f"residue {residue_id} lookup_table row {row_idx} column {col_name!r} expected BOOLEAN, got {val!r}"
+            )
+    elif sql_type in {"INTEGER", "BIGINT"}:
+        if not isinstance(val, int) or isinstance(val, bool):
+            raise ValueError(
+                f"residue {residue_id} lookup_table row {row_idx} column {col_name!r} expected {sql_type}, got {val!r}"
+            )
+    elif sql_type in {"DOUBLE", "REAL"}:
+        if (
+            not isinstance(val, (int, float))
+            or isinstance(val, bool)
+            or not math.isfinite(val)
+        ):
+            raise ValueError(
+                f"residue {residue_id} lookup_table row {row_idx} column {col_name!r} expected finite {sql_type}, got {val!r}"
+            )
+    elif sql_type in {"VARCHAR", "TEXT"}:
+        if not isinstance(val, str):
+            raise ValueError(
+                f"residue {residue_id} lookup_table row {row_idx} column {col_name!r} expected {sql_type}, got {val!r}"
+            )
+
+
+def _lookup_table_projection(lookup: object, residue_id: str) -> dict[str, Any]:
+    if not isinstance(lookup, Mapping):
+        raise ValueError(f"residue {residue_id} lookup_table must be a mapping")
+    table_name = str(lookup.get("table_name", "")).strip()
+    if not table_name or not _IDENTIFIER_RE.match(table_name):
+        raise ValueError(
+            f"residue {residue_id} lookup_table has invalid SQL identifier table_name: {table_name!r}"
+        )
+    raw_columns = lookup.get("columns")
+    if not isinstance(raw_columns, list) or len(raw_columns) < 2:
+        raise ValueError(
+            f"residue {residue_id} lookup_table requires at least 2 columns"
+        )
+    columns: list[dict[str, str]] = []
+    seen_col_names: set[str] = set()
+    key_indices: list[int] = []
+    has_value_col = False
+    for idx, col in enumerate(raw_columns):
+        if not isinstance(col, Mapping):
+            raise ValueError(
+                f"residue {residue_id} lookup_table column {idx} must be a mapping"
+            )
+        col_name = str(col.get("name", "")).strip()
+        sql_type = str(col.get("sql_type", "")).strip().upper()
+        role = str(col.get("role", "")).strip()
+        if (
+            not col_name
+            or not _IDENTIFIER_RE.match(col_name)
+            or sql_type not in _ALLOWED_SQL_TYPES
+            or role not in {"key", "value"}
+        ):
+            raise ValueError(
+                f"residue {residue_id} lookup_table column {idx} has invalid name/sql_type/role"
+            )
+        if col_name in seen_col_names:
+            raise ValueError(
+                f"residue {residue_id} lookup_table has duplicate column name {col_name!r}"
+            )
+        seen_col_names.add(col_name)
+        if role == "key":
+            key_indices.append(idx)
+        else:
+            has_value_col = True
+        columns.append({"name": col_name, "sql_type": sql_type, "role": role})
+    if not key_indices or not has_value_col:
+        raise ValueError(
+            f"residue {residue_id} lookup_table requires at least one key and one value column"
+        )
+    raw_rows = lookup.get("rows")
+    if not isinstance(raw_rows, list) or not raw_rows:
+        raise ValueError(f"residue {residue_id} lookup_table requires at least 1 row")
+    seen_keys: set[tuple[tuple[str, object], ...]] = set()
+    rows: list[dict[str, Any]] = []
+    for row_idx, row in enumerate(raw_rows):
+        if not isinstance(row, Mapping):
+            raise ValueError(
+                f"residue {residue_id} lookup_table row {row_idx} must be a column-keyed mapping"
+            )
+        row_keys = {str(k) for k in row.keys()}
+        if row_keys != seen_col_names or len(row) != len(columns):
+            missing = sorted(seen_col_names - row_keys)
+            extra = sorted(row_keys - seen_col_names)
+            raise ValueError(
+                f"residue {residue_id} lookup_table row {row_idx} keys do not match columns "
+                f"(missing={missing}, extra={extra})"
+            )
+        canonical_row: dict[str, Any] = {}
+        for col in columns:
+            col_name = col["name"]
+            val = row[col_name]
+            _validate_cell_value(
+                val,
+                col["sql_type"],
+                residue_id,
+                row_idx,
+                col_name,
+            )
+            canonical_row[col_name] = val
+        key_tuple = tuple(
+            (
+                type(canonical_row[columns[i]["name"]]).__name__,
+                canonical_row[columns[i]["name"]],
+            )
+            for i in key_indices
+        )
+        if key_tuple in seen_keys:
+            raise ValueError(
+                f"residue {residue_id} lookup_table has duplicate key "
+                f"{tuple(canonical_row[columns[i]['name']] for i in key_indices)}"
+            )
+        seen_keys.add(key_tuple)
+        rows.append(canonical_row)
+    rows.sort(
+        key=lambda r: tuple(
+            (type(r[c["name"]]).__name__, str(r[c["name"]])) for c in columns
+        )
+    )
+    return {
+        "table_name": table_name,
+        "columns": columns,
+        "rows": rows,
+    }
+
+
+def _residue_projection(item: Mapping[str, Any]) -> dict[str, Any]:
+    residue_id = str(item["id"])
+    residue_kind = str(item["residue_kind"])
+    record: dict[str, Any] = {
+        "id": residue_id,
+        "residue_kind": residue_kind,
+        "affected_elements": sorted(
+            [
+                _element_projection(element)
+                for element in item.get("affected_elements", [])
+            ],
+            key=lambda element: (element["kind"], element["path"]),
+        ),
+        "deterministic_rule": item.get("deterministic_rule"),
+        "rationale": str(item["rationale"]),
+        "disposition": str(item["disposition"]),
+    }
+    if item.get("default_value") is not None:
+        if residue_kind != "required_target_default":
+            raise ValueError(
+                f"residue {residue_id} with default_value must have residue_kind 'required_target_default'"
+            )
+        default_val = item["default_value"]
+        if not isinstance(default_val, (int, float, str, bool)) or (
+            isinstance(default_val, float) and not math.isfinite(default_val)
+        ):
+            raise ValueError(
+                f"residue {residue_id} default_value must be a finite scalar literal"
+            )
+        record["default_value"] = default_val
+    if item.get("lookup_table") is not None:
+        if residue_kind != "lookup_or_crosswalk":
+            raise ValueError(
+                f"residue {residue_id} with lookup_table must have residue_kind 'lookup_or_crosswalk'"
+            )
+        record["lookup_table"] = _lookup_table_projection(
+            item["lookup_table"], residue_id
+        )
+    return record
+
+
 def semantic_mapping_projection(contract: Mapping[str, Any]) -> dict[str, Any]:
     """The release content that model-owner approvals attest to."""
     mappings = [
@@ -64,22 +252,18 @@ def semantic_mapping_projection(contract: Mapping[str, Any]) -> dict[str, Any]:
         for item in contract.get("field_mappings", [])
     ]
     residues = [
-        {
-            "id": str(item["id"]),
-            "residue_kind": str(item["residue_kind"]),
-            "affected_elements": sorted(
-                [
-                    _element_projection(element)
-                    for element in item.get("affected_elements", [])
-                ],
-                key=lambda element: (element["kind"], element["path"]),
-            ),
-            "deterministic_rule": item.get("deterministic_rule"),
-            "rationale": str(item["rationale"]),
-            "disposition": str(item["disposition"]),
-        }
-        for item in contract.get("residue_records", [])
+        _residue_projection(item) for item in contract.get("residue_records", [])
     ]
+    seen_lookup_tables: set[str] = set()
+    for residue in residues:
+        lookup = residue.get("lookup_table")
+        if lookup is not None:
+            t_name = lookup["table_name"]
+            if t_name in seen_lookup_tables:
+                raise ValueError(
+                    f"duplicate lookup_table table_name {t_name!r} in residue {residue['id']}"
+                )
+            seen_lookup_tables.add(t_name)
     projection = {
         "source_catalog": _catalog_identity(contract["source_catalog"]),
         "target_catalog": _catalog_identity(contract["target_catalog"]),

@@ -2,11 +2,11 @@ id: implementation:polaris-demand-translation
 implementation_artifact:
   artifact_identity:
     digest_algorithm: sha256
-    content_digest: 58d2ed8889f4f9493924fa3b05a6263b070904f766f757394a5ba5b862968e4f
+    content_digest: 0c5a16b3cdafd39957497ab3be85096bb35e317d6fbcf461f847fe80e6751821
   locator: implementation/translation.sql
   media_type: text/plain
 implemented_semantic_content_digest_algorithm: sha256
-implemented_semantic_content_digest: 51ead67024fa32be5451125ee2d8c8fbedcef3fd02ce6cbd566b6e8c16f8e9a6
+implemented_semantic_content_digest: 7322f3416044635cfa8efe7d3da559e2001707038ae2e7f05a656440c67048ea
 workflow_owner: PILATES workflow integrator
 status: conformance_checked
 validation_evidence:

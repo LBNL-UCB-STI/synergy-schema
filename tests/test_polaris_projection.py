@@ -465,3 +465,106 @@ def test_polaris_projection_with_real_austin_sample() -> None:
             assert proj_hhs[hid] == orig_hhs[hid], (
                 f"Household {hid} attribute divergence"
             )
+
+
+def test_polaris_projection_reads_defaults_and_crosswalks_from_contract_tables(
+    sample_core_facets: dict[str, pa.Table],
+    tmp_path: Path,
+) -> None:
+    """Verify that changing a default value or crosswalk row in the contract YAML alters SQL projection output without changing SQL code."""
+    import shutil
+    import yaml
+    from synergy_schema.conformance.mappings import mapping_digest
+
+    repo_release = (
+        Path(__file__).parents[1]
+        / "mappings"
+        / "releases"
+        / "atlas-demos-to-polaris"
+        / "revision-1"
+    )
+    custom_release = tmp_path / "custom_release"
+    shutil.copytree(repo_release, custom_release)
+
+    contract_path = custom_release / "contract" / "population-translation-contract.yaml"
+    contract = yaml.safe_load(contract_path.read_text(encoding="utf-8"))
+
+    # Modify Household.bikes default from 0 to 7, Person.journey_to_work_arrival_time default from 0 to 999,
+    # and crosswalk-X-H2 GQ type from 11 to 99
+    for rec in contract["residue_records"]:
+        if rec["id"] == "target-default-polaris-households-bikes":
+            rec["default_value"] = 7
+        elif rec["id"] == "target-default-polaris-persons-journey-to-work-arrival-time":
+            rec["default_value"] = 999
+        elif rec["id"] == "crosswalk-X-H2":
+            for row in rec["lookup_table"]["rows"]:
+                if (row["is_gq"], row["is_owner"], row["hht"]) == (1, 0, 0):
+                    row["polaris_type"] = 99
+
+    # Write without updating digest first: verify_contract_digest=True must reject it
+    contract_path.write_text(
+        yaml.safe_dump(contract, sort_keys=False), encoding="utf-8"
+    )
+    out_bad = tmp_path / "Demand_bad.sqlite"
+    with pytest.raises(
+        ValueError,
+        match="Contract semantic_content_digest does not match canonical projection",
+    ):
+        project_core_to_polaris(
+            sample_core_facets,
+            out_bad,
+            release_dir=custom_release,
+            verify_contract_digest=True,
+        )
+
+    # Recompute and update semantic_content_digest, then project
+    contract["semantic_content_digest"] = mapping_digest(contract)
+    contract_path.write_text(
+        yaml.safe_dump(contract, sort_keys=False), encoding="utf-8"
+    )
+
+    out_custom = tmp_path / "Demand_custom.sqlite"
+    res = project_core_to_polaris(
+        sample_core_facets,
+        out_custom,
+        release_dir=custom_release,
+        verify_contract_digest=True,
+    )
+    assert "_contract_crosswalk_x_h2" in res["contract_tables"]["lookup_tables"]
+    assert "_contract_crosswalk_x_p2" in res["contract_tables"]["lookup_tables"]
+
+    with sqlite3.connect(out_custom) as con:
+        cur = con.cursor()
+        bikes_vals = {
+            r[0] for r in cur.execute("SELECT bikes FROM Household;").fetchall()
+        }
+        assert bikes_vals == {7}
+        gq_type = cur.execute(
+            "SELECT type FROM Household WHERE household = 105;"
+        ).fetchone()[0]
+        assert gq_type == 99
+        # At-work worker (1001) gets 480 from crosswalk-X-P2, while non-worker (5001) gets 999 from default table
+        worker_arrival = cur.execute(
+            "SELECT journey_to_work_arrival_time FROM Person WHERE person = 1001;"
+        ).fetchone()[0]
+        nonworker_arrival = cur.execute(
+            "SELECT journey_to_work_arrival_time FROM Person WHERE person = 5001;"
+        ).fetchone()[0]
+        assert worker_arrival == 480
+        assert nonworker_arrival == 999
+
+
+def test_sql_literal_strict_type_checking() -> None:
+    from synergy_schema.pipeline.contract_tables import _sql_literal
+
+    assert _sql_literal(True, "BOOLEAN") == "TRUE"
+    assert _sql_literal(42, "INTEGER") == "CAST(42 AS INTEGER)"
+    assert _sql_literal(3.5, "DOUBLE") == "CAST(3.5 AS DOUBLE)"
+    assert _sql_literal("a'b", "VARCHAR") == "CAST('a''b' AS VARCHAR)"
+
+    with pytest.raises(ValueError, match="Expected INTEGER"):
+        _sql_literal(True, "INTEGER")
+    with pytest.raises(ValueError, match="Expected INTEGER"):
+        _sql_literal("1; DROP TABLE x;", "INTEGER")
+    with pytest.raises(ValueError, match="Expected finite DOUBLE"):
+        _sql_literal(float("nan"), "DOUBLE")
