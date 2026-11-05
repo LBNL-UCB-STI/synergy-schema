@@ -36,7 +36,7 @@ target_schema_contract:
   selected_root: PolarisDemandDatabaseV1Household
   schema_uri: src/synergy_schema/schema/synergy_schema.yaml
 semantic_content_digest_algorithm: sha256
-semantic_content_digest: d5f03bb6ebde1f7f88679f6475561f372e99d4533e89202664405e9985840d05
+semantic_content_digest: 7322f3416044635cfa8efe7d3da559e2001707038ae2e7f05a656440c67048ea
 field_mappings:
   - id: map-household-id
     description: DEMOS household identifier mapped to POLARIS household primary key.
@@ -1141,30 +1141,22 @@ residue_records:
     lookup_table:
       table_name: _contract_crosswalk_x_h2
       columns:
-        - name: is_gq
-          sql_type: INTEGER
-          role: key
-        - name: is_owner
-          sql_type: INTEGER
-          role: key
-        - name: hht
-          sql_type: INTEGER
-          role: key
-        - name: polaris_type
-          sql_type: INTEGER
-          role: value
+        - {name: is_gq, sql_type: INTEGER, role: key}
+        - {name: is_owner, sql_type: INTEGER, role: key}
+        - {name: hht, sql_type: INTEGER, role: key}
+        - {name: polaris_type, sql_type: INTEGER, role: value}
       rows:
-        - values: [0, 1, 1, 1]
-        - values: [0, 1, 2, 2]
-        - values: [0, 1, 3, 3]
-        - values: [0, 1, 4, 4]
-        - values: [0, 1, 5, 5]
-        - values: [0, 0, 1, 6]
-        - values: [0, 0, 2, 7]
-        - values: [0, 0, 3, 8]
-        - values: [0, 0, 4, 9]
-        - values: [0, 0, 5, 10]
-        - values: [1, 0, 0, 11]
+        - {is_gq: 0, is_owner: 1, hht: 1, polaris_type: 1}
+        - {is_gq: 0, is_owner: 1, hht: 2, polaris_type: 2}
+        - {is_gq: 0, is_owner: 1, hht: 3, polaris_type: 3}
+        - {is_gq: 0, is_owner: 1, hht: 4, polaris_type: 4}
+        - {is_gq: 0, is_owner: 1, hht: 5, polaris_type: 5}
+        - {is_gq: 0, is_owner: 0, hht: 1, polaris_type: 6}
+        - {is_gq: 0, is_owner: 0, hht: 2, polaris_type: 7}
+        - {is_gq: 0, is_owner: 0, hht: 3, polaris_type: 8}
+        - {is_gq: 0, is_owner: 0, hht: 4, polaris_type: 9}
+        - {is_gq: 0, is_owner: 0, hht: 5, polaris_type: 10}
+        - {is_gq: 1, is_owner: 0, hht: 0, polaris_type: 11}
     rationale: 'X-H2: Tenure x HHT mapped to POLARIS type code (1-11). Type 1-5 own,
       6-10 rent, 11 GQ.'
     disposition: Populate polaris_households.type with the crosswalked type integer.
@@ -1179,18 +1171,14 @@ residue_records:
     lookup_table:
       table_name: _contract_crosswalk_x_h3
       columns:
-        - name: hu_type_code
-          sql_type: INTEGER
-          role: key
-        - name: hu_type_label
-          sql_type: VARCHAR
-          role: value
+        - {name: hu_type_code, sql_type: INTEGER, role: key}
+        - {name: hu_type_label, sql_type: VARCHAR, role: value}
       rows:
-        - values: [1, single_family]
-        - values: [2, small_apt_2_9]
-        - values: [3, large_apt_10_plus]
-        - values: [4, mobile_or_other]
-        - values: [5, group_quarters]
+        - {hu_type_code: 1, hu_type_label: single_family}
+        - {hu_type_code: 2, hu_type_label: small_apt_2_9}
+        - {hu_type_code: 3, hu_type_label: large_apt_10_plus}
+        - {hu_type_code: 4, hu_type_label: mobile_or_other}
+        - {hu_type_code: 5, hu_type_label: group_quarters}
     rationale: 'X-H3: Housing unit type enum HU_TYPE (1 single family, 2 small apt
       2-9 units, 3 large apt 10+ units, 4 other/mobile, 5 GQ).'
     disposition: Populate polaris_households.housing_unit_type with the crosswalked
@@ -1260,29 +1248,19 @@ residue_records:
     lookup_table:
       table_name: _contract_crosswalk_x_p2
       columns:
-        - name: employment_status
-          sql_type: INTEGER
-          role: key
-        - name: is_employed
-          sql_type: INTEGER
-          role: value
-        - name: is_at_work
-          sql_type: INTEGER
-          role: value
-        - name: default_arrival_time
-          sql_type: INTEGER
-          role: value
-        - name: default_vehicle_occupancy
-          sql_type: INTEGER
-          role: value
+        - {name: employment_status, sql_type: INTEGER, role: key}
+        - {name: is_employed, sql_type: INTEGER, role: value}
+        - {name: is_at_work, sql_type: INTEGER, role: value}
+        - {name: default_arrival_time, sql_type: INTEGER, role: value}
+        - {name: default_vehicle_occupancy, sql_type: INTEGER, role: value}
       rows:
-        - values: [0, 0, 0, 0, 0]
-        - values: [1, 1, 1, 480, 1]
-        - values: [2, 1, 0, 0, 0]
-        - values: [3, 0, 0, 0, 0]
-        - values: [4, 1, 1, 480, 1]
-        - values: [5, 1, 0, 0, 0]
-        - values: [6, 0, 0, 0, 0]
+        - {employment_status: 0, is_employed: 0, is_at_work: 0, default_arrival_time: 0, default_vehicle_occupancy: 0}
+        - {employment_status: 1, is_employed: 1, is_at_work: 1, default_arrival_time: 480, default_vehicle_occupancy: 1}
+        - {employment_status: 2, is_employed: 1, is_at_work: 0, default_arrival_time: 0, default_vehicle_occupancy: 0}
+        - {employment_status: 3, is_employed: 0, is_at_work: 0, default_arrival_time: 0, default_vehicle_occupancy: 0}
+        - {employment_status: 4, is_employed: 1, is_at_work: 1, default_arrival_time: 480, default_vehicle_occupancy: 1}
+        - {employment_status: 5, is_employed: 1, is_at_work: 0, default_arrival_time: 0, default_vehicle_occupancy: 0}
+        - {employment_status: 6, is_employed: 0, is_at_work: 0, default_arrival_time: 0, default_vehicle_occupancy: 0}
     rationale: 'X-P2: Employment (ESR) groups driving employment status, worker flags,
       and at-work commute defaults (ESR 1 civilian at work, 4 armed forces at work).'
     disposition: Drive worker count derivation and commute model eligibility.
@@ -1307,30 +1285,26 @@ residue_records:
     lookup_table:
       table_name: _contract_crosswalk_x_p3
       columns:
-        - name: school_grade_level
-          sql_type: INTEGER
-          role: key
-        - name: school_type
-          sql_type: VARCHAR
-          role: value
+        - {name: school_grade_level, sql_type: INTEGER, role: key}
+        - {name: school_type, sql_type: VARCHAR, role: value}
       rows:
-        - values: [0, none]
-        - values: [1, prek]
-        - values: [2, k_8]
-        - values: [3, k_8]
-        - values: [4, k_8]
-        - values: [5, k_8]
-        - values: [6, k_8]
-        - values: [7, k_8]
-        - values: [8, k_8]
-        - values: [9, k_8]
-        - values: [10, k_8]
-        - values: [11, "9_12"]
-        - values: [12, "9_12"]
-        - values: [13, "9_12"]
-        - values: [14, "9_12"]
-        - values: [15, higher_ed]
-        - values: [16, higher_ed]
+        - {school_grade_level: 0, school_type: none}
+        - {school_grade_level: 1, school_type: prek}
+        - {school_grade_level: 2, school_type: k_8}
+        - {school_grade_level: 3, school_type: k_8}
+        - {school_grade_level: 4, school_type: k_8}
+        - {school_grade_level: 5, school_type: k_8}
+        - {school_grade_level: 6, school_type: k_8}
+        - {school_grade_level: 7, school_type: k_8}
+        - {school_grade_level: 8, school_type: k_8}
+        - {school_grade_level: 9, school_type: k_8}
+        - {school_grade_level: 10, school_type: k_8}
+        - {school_grade_level: 11, school_type: "9_12"}
+        - {school_grade_level: 12, school_type: "9_12"}
+        - {school_grade_level: 13, school_type: "9_12"}
+        - {school_grade_level: 14, school_type: "9_12"}
+        - {school_grade_level: 15, school_type: higher_ed}
+        - {school_grade_level: 16, school_type: higher_ed}
     rationale: 'X-P3: School grade level and school type classification (grade 1 preschool
       -> PREK; 2-10 -> K-8; 11-14 -> 9-12; 15-16 -> higher ed).'
     disposition: Resolve school type for destination choice and school travel models.
@@ -1416,17 +1390,13 @@ residue_records:
     lookup_table:
       table_name: _contract_crosswalk_x_v2
       columns:
-        - name: pred_power
-          sql_type: VARCHAR
-          role: key
-        - name: powertrain_type
-          sql_type: INTEGER
-          role: value
+        - {name: pred_power, sql_type: VARCHAR, role: key}
+        - {name: powertrain_type, sql_type: INTEGER, role: value}
       rows:
-        - values: [ICE, 0]
-        - values: [Hybrid, 1]
-        - values: [PHEV, 2]
-        - values: [AEV, 3]
+        - {pred_power: ICE, powertrain_type: 0}
+        - {pred_power: Hybrid, powertrain_type: 1}
+        - {pred_power: PHEV, powertrain_type: 2}
+        - {pred_power: AEV, powertrain_type: 3}
     rationale: 'X-V2: ATLAS pred_power mapping to POLARIS powertrain_type (ICE ->
       0 Conventional, Hybrid -> 1 HEV, PHEV -> 2 PHEV, AEV -> 3 BEV_long).'
     disposition: Set powertrain_type dimension for vehicle type lookup.
@@ -1442,17 +1412,13 @@ residue_records:
     lookup_table:
       table_name: _contract_crosswalk_x_v3
       columns:
-        - name: powertrain_type
-          sql_type: INTEGER
-          role: key
-        - name: default_fuel_type
-          sql_type: INTEGER
-          role: value
+        - {name: powertrain_type, sql_type: INTEGER, role: key}
+        - {name: default_fuel_type, sql_type: INTEGER, role: value}
       rows:
-        - values: [0, 0]
-        - values: [1, 0]
-        - values: [2, 0]
-        - values: [3, 4]
+        - {powertrain_type: 0, default_fuel_type: 0}
+        - {powertrain_type: 1, default_fuel_type: 0}
+        - {powertrain_type: 2, default_fuel_type: 0}
+        - {powertrain_type: 3, default_fuel_type: 4}
     rationale: 'X-V3: Powertrain to fuel type mapping (Conventional -> gas/diesel
       via D-V2; HEV/PHEV -> 0 Gas; BEV_long -> 4 Elec).'
     disposition: Set fuel_type dimension for vehicle type lookup.
@@ -1468,19 +1434,13 @@ residue_records:
     lookup_table:
       table_name: _contract_crosswalk_x_v4
       columns:
-        - name: min_age
-          sql_type: INTEGER
-          role: key
-        - name: max_age
-          sql_type: INTEGER
-          role: key
-        - name: vintage_type
-          sql_type: INTEGER
-          role: value
+        - {name: min_age, sql_type: INTEGER, role: key}
+        - {name: max_age, sql_type: INTEGER, role: key}
+        - {name: vintage_type, sql_type: INTEGER, role: value}
       rows:
-        - values: [-10, 5, 0]
-        - values: [6, 10, 1]
-        - values: [11, 999, 2]
+        - {min_age: -10, max_age: 5, vintage_type: 0}
+        - {min_age: 6, max_age: 10, vintage_type: 1}
+        - {min_age: 11, max_age: 999, vintage_type: 2}
     rationale: 'X-V4: Vehicle age (simulation_year - modelyear) bucketing to vintage_type
       (<=5 including next-model-year negative ages -> 0 0-5y, 6-10 -> 1 6-10y, >=11 -> 2 10+y).'
     disposition: Set vintage_type dimension for vehicle type lookup.

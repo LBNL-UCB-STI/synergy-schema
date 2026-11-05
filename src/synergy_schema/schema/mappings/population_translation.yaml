@@ -81,18 +81,14 @@ classes:
         required: true
         description: Whether the column forms part of the lookup key or is a mapped output value.
   LookupTableRow:
-    description: Ordered scalar cell values for one row in a contract lookup table.
-    attributes:
-      values:
-        multivalued: true
-        required: true
-        minimum_cardinality: 1
+    description: Column-keyed scalar cell values for one row in a contract lookup table.
+    extra_slots:
+      range_expression:
         any_of:
           - range: integer
           - range: float
           - range: string
           - range: boolean
-        description: Scalar cell values ordered identically to LookupTableSpec.columns.
   LookupTableSpec:
     description: >-
       Executable relational lookup or crosswalk table embedded in a translation

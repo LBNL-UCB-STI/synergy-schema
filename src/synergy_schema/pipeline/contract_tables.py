@@ -180,8 +180,8 @@ def compile_contract_tables_from_mapping(
             value_tuples: list[str] = []
             for row in lookup["rows"]:
                 rendered_cells = [
-                    _sql_literal(val, col_types[idx])
-                    for idx, val in enumerate(row["values"])
+                    _sql_literal(row[col["name"]], col_types[idx])
+                    for idx, col in enumerate(lookup["columns"])
                 ]
                 value_tuples.append(f"({', '.join(rendered_cells)})")
             con.execute(f'INSERT INTO "{table_name}" VALUES {", ".join(value_tuples)};')

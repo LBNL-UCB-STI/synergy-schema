@@ -146,33 +146,51 @@ def _lookup_table_projection(lookup: object, residue_id: str) -> dict[str, Any]:
     if not isinstance(raw_rows, list) or not raw_rows:
         raise ValueError(f"residue {residue_id} lookup_table requires at least 1 row")
     seen_keys: set[tuple[tuple[str, object], ...]] = set()
-    rows: list[dict[str, list[Any]]] = []
+    rows: list[dict[str, Any]] = []
     for row_idx, row in enumerate(raw_rows):
-        if not isinstance(row, Mapping) or not isinstance(row.get("values"), list):
+        if not isinstance(row, Mapping):
             raise ValueError(
-                f"residue {residue_id} lookup_table row {row_idx} must contain a values list"
+                f"residue {residue_id} lookup_table row {row_idx} must be a column-keyed mapping"
             )
-        values = list(row["values"])
-        if len(values) != len(columns):
+        row_keys = {str(k) for k in row.keys()}
+        if row_keys != seen_col_names or len(row) != len(columns):
+            missing = sorted(seen_col_names - row_keys)
+            extra = sorted(row_keys - seen_col_names)
             raise ValueError(
-                f"residue {residue_id} lookup_table row {row_idx} has {len(values)} values; expected {len(columns)}"
+                f"residue {residue_id} lookup_table row {row_idx} keys do not match columns "
+                f"(missing={missing}, extra={extra})"
             )
-        for col_idx, val in enumerate(values):
+        canonical_row: dict[str, Any] = {}
+        for col in columns:
+            col_name = col["name"]
+            val = row[col_name]
             _validate_cell_value(
                 val,
-                columns[col_idx]["sql_type"],
+                col["sql_type"],
                 residue_id,
                 row_idx,
-                columns[col_idx]["name"],
+                col_name,
             )
-        key_tuple = tuple((type(values[i]).__name__, values[i]) for i in key_indices)
+            canonical_row[col_name] = val
+        key_tuple = tuple(
+            (
+                type(canonical_row[columns[i]["name"]]).__name__,
+                canonical_row[columns[i]["name"]],
+            )
+            for i in key_indices
+        )
         if key_tuple in seen_keys:
             raise ValueError(
-                f"residue {residue_id} lookup_table has duplicate key {tuple(values[i] for i in key_indices)}"
+                f"residue {residue_id} lookup_table has duplicate key "
+                f"{tuple(canonical_row[columns[i]['name']] for i in key_indices)}"
             )
         seen_keys.add(key_tuple)
-        rows.append({"values": values})
-    rows.sort(key=lambda r: tuple((type(v).__name__, str(v)) for v in r["values"]))
+        rows.append(canonical_row)
+    rows.sort(
+        key=lambda r: tuple(
+            (type(r[c["name"]]).__name__, str(r[c["name"]])) for c in columns
+        )
+    )
     return {
         "table_name": table_name,
         "columns": columns,

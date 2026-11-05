@@ -498,8 +498,8 @@ def test_polaris_projection_reads_defaults_and_crosswalks_from_contract_tables(
             rec["default_value"] = 999
         elif rec["id"] == "crosswalk-X-H2":
             for row in rec["lookup_table"]["rows"]:
-                if row["values"][:3] == [1, 0, 0]:
-                    row["values"][3] = 99
+                if (row["is_gq"], row["is_owner"], row["hht"]) == (1, 0, 0):
+                    row["polaris_type"] = 99
 
     # Write without updating digest first: verify_contract_digest=True must reject it
     contract_path.write_text(

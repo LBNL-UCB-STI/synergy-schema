@@ -353,8 +353,8 @@ def test_residue_default_value_and_lookup_table_participate_in_semantic_digest_a
                     {"name": "is_worker", "role": "value", "sql_type": "INTEGER"},
                 ],
                 "rows": [
-                    {"values": [1, 1]},
-                    {"values": [2, 0]},
+                    {"code": 1, "is_worker": 1},
+                    {"code": 2, "is_worker": 0},
                 ],
             },
         }
@@ -362,12 +362,22 @@ def test_residue_default_value_and_lookup_table_participate_in_semantic_digest_a
     digest_with_lookup = mapping_digest(contract)
     assert digest_with_lookup != digest_with_changed_default
 
+    # Reordering keys inside a row dict preserves the canonical semantic digest
+    contract_reordered = deepcopy(contract)
+    contract_reordered["residue_records"][2]["lookup_table"]["rows"][0] = {
+        "is_worker": 1,
+        "code": 1,
+    }
+    assert mapping_digest(contract_reordered) == digest_with_lookup
+
     # Changing a lookup row value changes the semantic digest
-    contract["residue_records"][2]["lookup_table"]["rows"][1]["values"] = [2, 1]
+    contract["residue_records"][2]["lookup_table"]["rows"][1]["is_worker"] = 1
     assert mapping_digest(contract) != digest_with_lookup
 
     # Duplicate key rows fail validation with MAPPING_DOCUMENT_INVALID
-    contract["residue_records"][2]["lookup_table"]["rows"].append({"values": [1, 0]})
+    contract["residue_records"][2]["lookup_table"]["rows"].append(
+        {"code": 1, "is_worker": 0}
+    )
     contract_path.write_text(yaml.safe_dump(contract), encoding="utf-8")
     codes = [
         item.code
@@ -416,7 +426,7 @@ def test_lookup_table_and_residue_kind_type_validation(tmp_path: Path) -> None:
                     {"name": "code", "role": "key", "sql_type": "INTEGER"},
                     {"name": "val", "role": "value", "sql_type": "INTEGER"},
                 ],
-                "rows": [{"values": [1, "not_an_int"]}],
+                "rows": [{"code": 1, "val": "not_an_int"}],
             },
         }
     )
@@ -433,8 +443,23 @@ def test_lookup_table_and_residue_kind_type_validation(tmp_path: Path) -> None:
     bad_identifier["residue_records"][-1]["lookup_table"]["table_name"] = (
         "bad-table;DROP"
     )
-    bad_identifier["residue_records"][-1]["lookup_table"]["rows"] = [{"values": [1, 2]}]
+    bad_identifier["residue_records"][-1]["lookup_table"]["rows"] = [
+        {"code": 1, "val": 2}
+    ]
     contract_path.write_text(yaml.safe_dump(bad_identifier), encoding="utf-8")
+    assert [
+        item.code
+        for item in validate_mapping_release(
+            release, catalog_root=tmp_path / "catalogs"
+        ).diagnostics
+    ] == ["MAPPING_DOCUMENT_INVALID"]
+
+    # 4. lookup_table row with mismatched column keys is rejected
+    bad_row_keys = deepcopy(bad_cell_type)
+    bad_row_keys["residue_records"][-1]["lookup_table"]["rows"] = [
+        {"code": 1, "wrong_col": 2}
+    ]
+    contract_path.write_text(yaml.safe_dump(bad_row_keys), encoding="utf-8")
     assert [
         item.code
         for item in validate_mapping_release(
