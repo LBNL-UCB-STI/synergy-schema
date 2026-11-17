@@ -55,6 +55,11 @@ uv run gen-doc \
   --directory "$observed_examples_docs" \
   "$observed_examples_schema_path"
 
+uv run gen-doc \
+  --no-render-imports \
+  --directory "$generated_docs" \
+  "$repo_root/src/synergy_schema/schema/models/demos/demos_core.yaml"
+
 uv run python -m synergy_schema.core_schema_diagram \
   "$repo_root/src/synergy_schema/schema/core" \
   "$generated_docs/core-schema-uml.md"
