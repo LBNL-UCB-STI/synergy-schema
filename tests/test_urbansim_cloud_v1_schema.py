@@ -36,6 +36,14 @@ def test_urbansim_cloud_v1_classes_and_annotations() -> None:
     assert marginals_cls.annotations["model_variant"].value == "cloud_api"
     assert marginals_cls.annotations["spatial_granularity"].value == "census_block"
     assert marginals_cls.attributes["block"].identifier is True
+    assert (
+        marginals_cls.attributes["stpuma20"].annotations["physical_name"].value
+        == "STPUMA20"
+    )
+    assert (
+        marginals_cls.attributes["hhsize_7_plus"].annotations["physical_name"].value
+        == "HHSIZE_7+"
+    )
     assert len(marginals_cls.attributes) == 41
 
 
@@ -56,7 +64,7 @@ def test_urbansim_cloud_v1_instances_validate() -> None:
 
     marginals_instance = {
         "block": 480219501011000,
-        "STPUMA20": 4805100,
+        "stpuma20": 4805100,
         "inc_0_10": 1.0,
         "inc_10_90": 28.0,
         "inc_90_over": 6.0,
@@ -65,13 +73,13 @@ def test_urbansim_cloud_v1_instances_validate() -> None:
         "households_age_head_gt_65": 11.0,
         "households_own": 24.0,
         "households_rent": 10.0,
-        "HHSIZE_1": 0.0,
-        "HHSIZE_2": 19.0,
-        "HHSIZE_3": 5.0,
-        "HHSIZE_4": 5.0,
-        "HHSIZE_5": 6.0,
-        "HHSIZE_6": 0.0,
-        "HHSIZE_7+": 0.0,
+        "hhsize_1": 0.0,
+        "hhsize_2": 19.0,
+        "hhsize_3": 5.0,
+        "hhsize_4": 5.0,
+        "hhsize_5": 6.0,
+        "hhsize_6": 0.0,
+        "hhsize_7_plus": 0.0,
         "num_persons": 103.0,
         "male": 55.0,
         "female": 48.0,

@@ -118,10 +118,11 @@ classes:
           15-digit Census Block FIPS identifier stored as int64 in the observed
           sample (note: leading zeros are not preserved in int64 for states with
           FIPS < 10).
-      STPUMA20:
+      stpuma20:
         range: integer
         required: true
         annotations:
+          physical_name: STPUMA20
           parquet_type: int64
         description: 2020 State + Public Use Microdata Area (PUMA) 7-digit code.
       inc_0_10:
@@ -129,31 +130,40 @@ classes:
         required: true
         annotations:
           parquet_type: double
-        description: Marginal count of households in the lowest income bracket (0-10th percentile / low-income bin).
+        description: >-
+          Marginal count of households in the lowest income bracket
+          (0-10th percentile / low-income bin).
       inc_10_90:
         range: NonNegativeDouble
         required: true
         annotations:
           parquet_type: double
-        description: Marginal count of households in the middle income bracket (10-90th percentile).
+        description: >-
+          Marginal count of households in the middle income bracket
+          (10-90th percentile).
       inc_90_over:
         range: NonNegativeDouble
         required: true
         annotations:
           parquet_type: double
-        description: Marginal count of households in the highest income bracket (90th+ percentile).
+        description: >-
+          Marginal count of households in the highest income bracket
+          (90th+ percentile).
       households_age_head_lt_65_no_children:
         range: NonNegativeDouble
         required: true
         annotations:
           parquet_type: double
-        description: Marginal count of households with head under age 65 and no children.
+        description: >-
+          Marginal count of households with head under age 65 and no children.
       households_age_head_lt_65_with_children:
         range: NonNegativeDouble
         required: true
         annotations:
           parquet_type: double
-        description: Marginal count of households with head under age 65 and children present.
+        description: >-
+          Marginal count of households with head under age 65 and children
+          present.
       households_age_head_gt_65:
         range: NonNegativeDouble
         required: true
@@ -172,46 +182,53 @@ classes:
         annotations:
           parquet_type: double
         description: Marginal count of renter-occupied households.
-      HHSIZE_1:
+      hhsize_1:
         range: NonNegativeDouble
         required: true
         annotations:
+          physical_name: HHSIZE_1
           parquet_type: double
         description: Marginal count of 1-person households.
-      HHSIZE_2:
+      hhsize_2:
         range: NonNegativeDouble
         required: true
         annotations:
+          physical_name: HHSIZE_2
           parquet_type: double
         description: Marginal count of 2-person households.
-      HHSIZE_3:
+      hhsize_3:
         range: NonNegativeDouble
         required: true
         annotations:
+          physical_name: HHSIZE_3
           parquet_type: double
         description: Marginal count of 3-person households.
-      HHSIZE_4:
+      hhsize_4:
         range: NonNegativeDouble
         required: true
         annotations:
+          physical_name: HHSIZE_4
           parquet_type: double
         description: Marginal count of 4-person households.
-      HHSIZE_5:
+      hhsize_5:
         range: NonNegativeDouble
         required: true
         annotations:
+          physical_name: HHSIZE_5
           parquet_type: double
         description: Marginal count of 5-person households.
-      HHSIZE_6:
+      hhsize_6:
         range: NonNegativeDouble
         required: true
         annotations:
+          physical_name: HHSIZE_6
           parquet_type: double
         description: Marginal count of 6-person households.
-      HHSIZE_7+:
+      hhsize_7_plus:
         range: NonNegativeDouble
         required: true
         annotations:
+          physical_name: "HHSIZE_7+"
           parquet_type: double
         description: Marginal count of households with 7 or more persons.
       num_persons:
