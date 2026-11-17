@@ -22,6 +22,7 @@ imports:
   - core/population_ledger
   - models/atlas/atlas_population
   - models/urbansim/urbansim_population
+  - models/urbansim/urbansim_cloud_v1
   - models/activitysim/activitysim_population
   - models/polaris/polaris_population
   - mappings/population_translation
