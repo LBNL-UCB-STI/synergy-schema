@@ -1,0 +1,360 @@
+id: https://w3id.org/LBNL-UCB-STI/synergy-schema/models/urbansim/cloud-v1
+name: urbansim_cloud_v1
+title: UrbanSim Cloud API I/O schema (v1)
+description: >-
+  Observed input and output Parquet contracts for the UrbanSim Cloud API
+  service (GCS-backed HTTP control plane). The primary UrbanSim output is
+  census-block-level demographic and NAICS employment marginals
+  (marginals_<year>.parquet); UrbanSim's internal synthesis files
+  (households_<year>.parquet, persons_<year>.parquet, jobs_<year>.parquet) are
+  non-authoritative for Synergy and are intentionally omitted here.
+
+  This schema coexists with the containerized PILATES UrbanSim contracts
+  (urbansim_population.yaml and urbansim_land_use.yaml).
+
+prefixes:
+  synergy_schema: https://w3id.org/LBNL-UCB-STI/synergy-schema/
+  linkml: https://w3id.org/linkml/
+
+default_prefix: synergy_schema
+default_range: string
+
+imports:
+  - linkml:types
+
+subsets:
+  urbansim_cloud:
+    title: "UrbanSim Cloud API Contracts"
+    description: >-
+      Observed Parquet contracts exchanged via Google Cloud Storage with the
+      UrbanSim Cloud API gateway.
+
+types:
+  NonNegativeDouble:
+    typeof: double
+    minimum_value: 0.0
+    description: Non-negative IEEE 754 double-precision count or marginal target.
+  NonNegativeFloat:
+    typeof: float
+    minimum_value: 0.0
+    description: Non-negative floating-point travel impedance measure.
+
+classes:
+  UrbanSimCloudSkimsInput:
+    in_subset:
+      - urbansim_cloud
+    description: >-
+      Zone-to-zone travel time skims uploaded to GCS as input_skims.parquet for
+      an UrbanSim Cloud simulation run. Stored with a two-level pandas
+      MultiIndex (from_zone_id, to_zone_id) and float32 travel time columns.
+    annotations:
+      model_association: UrbanSim
+      model_variant: cloud_api
+      artifact_table: "input_skims.parquet"
+      contract_family: network_skims
+      format: parquet
+      enforcement_status: observed_sample
+    unique_keys:
+      od_pair:
+        unique_key_slots:
+          - from_zone_id
+          - to_zone_id
+    attributes:
+      from_zone_id:
+        range: integer
+        required: true
+        minimum_value: 1
+        annotations:
+          parquet_type: int64
+          pandas_index_level: 0
+        description: Origin Traffic Analysis Zone (TAZ) identifier.
+      to_zone_id:
+        range: integer
+        required: true
+        minimum_value: 1
+        annotations:
+          parquet_type: int64
+          pandas_index_level: 1
+        description: Destination Traffic Analysis Zone (TAZ) identifier.
+      travel_time_sov:
+        range: NonNegativeFloat
+        required: true
+        annotations:
+          parquet_type: float
+        description: Single-occupant vehicle (SOV) zone-to-zone travel time (minutes).
+      travel_time_transit:
+        range: NonNegativeFloat
+        required: true
+        annotations:
+          parquet_type: float
+        description: >-
+          Transit zone-to-zone travel time (minutes). Uses IEEE float infinity
+          (inf) for origin-destination pairs without transit service.
+
+  UrbanSimCloudBlockMarginals:
+    in_subset:
+      - urbansim_cloud
+    description: >-
+      Primary output of the UrbanSim Cloud API (marginals_<year>.parquet),
+      providing 15-digit Census Block household, person, and 2-digit NAICS
+      employment marginal control targets for downstream micro-population
+      synthesis and evolution.
+    annotations:
+      model_association: UrbanSim
+      model_variant: cloud_api
+      artifact_table: "marginals_<year>.parquet"
+      contract_family: land_use_marginals
+      spatial_granularity: census_block
+      format: parquet
+      enforcement_status: observed_sample
+    attributes:
+      block:
+        range: integer
+        identifier: true
+        required: true
+        annotations:
+          parquet_type: int64
+        description: >-
+          15-digit Census Block FIPS identifier stored as int64 in the observed
+          sample (note: leading zeros are not preserved in int64 for states with
+          FIPS < 10).
+      STPUMA20:
+        range: integer
+        required: true
+        annotations:
+          parquet_type: int64
+        description: 2020 State + Public Use Microdata Area (PUMA) 7-digit code.
+      inc_0_10:
+        range: NonNegativeDouble
+        required: true
+        annotations:
+          parquet_type: double
+        description: Marginal count of households in the lowest income bracket (0-10th percentile / low-income bin).
+      inc_10_90:
+        range: NonNegativeDouble
+        required: true
+        annotations:
+          parquet_type: double
+        description: Marginal count of households in the middle income bracket (10-90th percentile).
+      inc_90_over:
+        range: NonNegativeDouble
+        required: true
+        annotations:
+          parquet_type: double
+        description: Marginal count of households in the highest income bracket (90th+ percentile).
+      households_age_head_lt_65_no_children:
+        range: NonNegativeDouble
+        required: true
+        annotations:
+          parquet_type: double
+        description: Marginal count of households with head under age 65 and no children.
+      households_age_head_lt_65_with_children:
+        range: NonNegativeDouble
+        required: true
+        annotations:
+          parquet_type: double
+        description: Marginal count of households with head under age 65 and children present.
+      households_age_head_gt_65:
+        range: NonNegativeDouble
+        required: true
+        annotations:
+          parquet_type: double
+        description: Marginal count of households with head age 65 or older.
+      households_own:
+        range: NonNegativeDouble
+        required: true
+        annotations:
+          parquet_type: double
+        description: Marginal count of owner-occupied households.
+      households_rent:
+        range: NonNegativeDouble
+        required: true
+        annotations:
+          parquet_type: double
+        description: Marginal count of renter-occupied households.
+      HHSIZE_1:
+        range: NonNegativeDouble
+        required: true
+        annotations:
+          parquet_type: double
+        description: Marginal count of 1-person households.
+      HHSIZE_2:
+        range: NonNegativeDouble
+        required: true
+        annotations:
+          parquet_type: double
+        description: Marginal count of 2-person households.
+      HHSIZE_3:
+        range: NonNegativeDouble
+        required: true
+        annotations:
+          parquet_type: double
+        description: Marginal count of 3-person households.
+      HHSIZE_4:
+        range: NonNegativeDouble
+        required: true
+        annotations:
+          parquet_type: double
+        description: Marginal count of 4-person households.
+      HHSIZE_5:
+        range: NonNegativeDouble
+        required: true
+        annotations:
+          parquet_type: double
+        description: Marginal count of 5-person households.
+      HHSIZE_6:
+        range: NonNegativeDouble
+        required: true
+        annotations:
+          parquet_type: double
+        description: Marginal count of 6-person households.
+      HHSIZE_7+:
+        range: NonNegativeDouble
+        required: true
+        annotations:
+          parquet_type: double
+        description: Marginal count of households with 7 or more persons.
+      num_persons:
+        range: NonNegativeDouble
+        required: true
+        annotations:
+          parquet_type: double
+        description: Marginal total resident population in this block.
+      male:
+        range: NonNegativeDouble
+        required: true
+        annotations:
+          parquet_type: double
+        description: Marginal count of male residents in this block.
+      female:
+        range: NonNegativeDouble
+        required: true
+        annotations:
+          parquet_type: double
+        description: Marginal count of female residents in this block.
+      num_households:
+        range: NonNegativeDouble
+        required: true
+        annotations:
+          parquet_type: double
+        description: Marginal total occupied households in this block.
+      emp_n2_11:
+        range: NonNegativeDouble
+        required: true
+        annotations:
+          parquet_type: double
+        description: NAICS 11 (Agriculture, Forestry, Fishing and Hunting) employment.
+      emp_n2_21:
+        range: NonNegativeDouble
+        required: true
+        annotations:
+          parquet_type: double
+        description: NAICS 21 (Mining, Quarrying, and Oil and Gas Extraction) employment.
+      emp_n2_22:
+        range: NonNegativeDouble
+        required: true
+        annotations:
+          parquet_type: double
+        description: NAICS 22 (Utilities) employment.
+      emp_n2_23:
+        range: NonNegativeDouble
+        required: true
+        annotations:
+          parquet_type: double
+        description: NAICS 23 (Construction) employment.
+      emp_n2_31_32_33:
+        range: NonNegativeDouble
+        required: true
+        annotations:
+          parquet_type: double
+        description: NAICS 31-33 (Manufacturing) employment.
+      emp_n2_42:
+        range: NonNegativeDouble
+        required: true
+        annotations:
+          parquet_type: double
+        description: NAICS 42 (Wholesale Trade) employment.
+      emp_n2_44_45:
+        range: NonNegativeDouble
+        required: true
+        annotations:
+          parquet_type: double
+        description: NAICS 44-45 (Retail Trade) employment.
+      emp_n2_48_49:
+        range: NonNegativeDouble
+        required: true
+        annotations:
+          parquet_type: double
+        description: NAICS 48-49 (Transportation and Warehousing) employment.
+      emp_n2_51:
+        range: NonNegativeDouble
+        required: true
+        annotations:
+          parquet_type: double
+        description: NAICS 51 (Information) employment.
+      emp_n2_52:
+        range: NonNegativeDouble
+        required: true
+        annotations:
+          parquet_type: double
+        description: NAICS 52 (Finance and Insurance) employment.
+      emp_n2_53:
+        range: NonNegativeDouble
+        required: true
+        annotations:
+          parquet_type: double
+        description: NAICS 53 (Real Estate and Rental and Leasing) employment.
+      emp_n2_54:
+        range: NonNegativeDouble
+        required: true
+        annotations:
+          parquet_type: double
+        description: NAICS 54 (Professional, Scientific, and Technical Services) employment.
+      emp_n2_55:
+        range: NonNegativeDouble
+        required: true
+        annotations:
+          parquet_type: double
+        description: NAICS 55 (Management of Companies and Enterprises) employment.
+      emp_n2_56:
+        range: NonNegativeDouble
+        required: true
+        annotations:
+          parquet_type: double
+        description: NAICS 56 (Administrative and Support and Waste Management) employment.
+      emp_n2_61:
+        range: NonNegativeDouble
+        required: true
+        annotations:
+          parquet_type: double
+        description: NAICS 61 (Educational Services) employment.
+      emp_n2_62:
+        range: NonNegativeDouble
+        required: true
+        annotations:
+          parquet_type: double
+        description: NAICS 62 (Health Care and Social Assistance) employment.
+      emp_n2_71:
+        range: NonNegativeDouble
+        required: true
+        annotations:
+          parquet_type: double
+        description: NAICS 71 (Arts, Entertainment, and Recreation) employment.
+      emp_n2_72:
+        range: NonNegativeDouble
+        required: true
+        annotations:
+          parquet_type: double
+        description: NAICS 72 (Accommodation and Food Services) employment.
+      emp_n2_81:
+        range: NonNegativeDouble
+        required: true
+        annotations:
+          parquet_type: double
+        description: NAICS 81 (Other Services, except Public Administration) employment.
+      emp_n2_92:
+        range: NonNegativeDouble
+        required: true
+        annotations:
+          parquet_type: double
+        description: NAICS 92 (Public Administration) employment.
