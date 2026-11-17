@@ -154,6 +154,9 @@ classes:
       block_group:
         range: string
         description: Census block group identifier.
+      block:
+        range: string
+        description: Census block identifier (15-digit state+county+tract+block FIPS).
       taz:
         range: integer
         description: Traffic analysis zone identifier.

@@ -32,6 +32,7 @@ CORE_FACET_COLUMNS: dict[str, list[str]] = {
         "longitude",
         "tract",
         "block_group",
+        "block",
         "taz",
     ],
     "household_income": ["household_id", "income"],
@@ -117,6 +118,7 @@ def _empty_table_for_facet(facet_name: str) -> pa.Table:
         "longitude": pa.float64(),
         "tract": pa.int64(),
         "block_group": pa.int32(),
+        "block": pa.string(),
         "taz": pa.int32(),
         "income": pa.int64(),
     }
@@ -286,13 +288,20 @@ def derive_core_from_demos(
     """).to_arrow_table()
 
     # 7. Step 12: Household Location (Preserve prior spatial assignment for surviving households)
-    location_table = con.execute("""
+    prior_loc_cols = {
+        row[0] for row in con.execute("DESCRIBE prior_household_location").fetchall()
+    }
+    prior_block_expr = (
+        "prior_loc.block" if "block" in prior_loc_cols else "NULL::VARCHAR"
+    )
+    location_table = con.execute(f"""
         SELECT
             CAST(h.household AS BIGINT) AS household_id,
             CAST(COALESCE(prior_loc.latitude, 0.0) AS DOUBLE) AS latitude,
             CAST(COALESCE(prior_loc.longitude, 0.0) AS DOUBLE) AS longitude,
             CAST(COALESCE(prior_loc.tract, CAST(COALESCE(h.block_id, 0) / 10000 AS BIGINT), 0) AS BIGINT) AS tract,
             CAST(COALESCE(prior_loc.block_group, CAST(COALESCE(h.block_id, 0) % 1000 AS INTEGER), 0) AS INTEGER) AS block_group,
+            CAST(COALESCE({prior_block_expr}, CAST(h.block_id AS VARCHAR), '') AS VARCHAR) AS block,
             CAST(COALESCE(prior_loc.taz, 0) AS INTEGER) AS taz
         FROM demos_households h
         LEFT JOIN prior_household_location prior_loc ON h.household = prior_loc.household_id

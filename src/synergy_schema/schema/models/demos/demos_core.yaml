@@ -1,0 +1,524 @@
+id: https://w3id.org/LBNL-UCB-STI/synergy-schema/models/demos/core
+name: demos_core
+title: DEMOS Core Native Input and Output Schema
+description: >-
+  LinkML schema for the core Demographic Microsimulator (DEMOS) native HDF5
+  and CSV input/output tables, derived from NatLabRockies/DEMOS
+  (demos/config.py, demos/datasources.py, demos/models/, and
+  data/small_example/small_example_tables.h5).
+
+  This schema covers core DEMOS native formats only. Preprocessing and
+  postprocessing translations between core DEMOS and POLARIS (cf.
+  demos_polaris_mapped_examples.yaml) belong in mappings/ once the
+  translation scripts are finalized.
+
+prefixes:
+  synergy_schema: https://w3id.org/LBNL-UCB-STI/synergy-schema/
+  linkml: https://w3id.org/linkml/
+
+default_prefix: synergy_schema
+default_range: string
+
+imports:
+  - linkml:types
+
+subsets:
+  demos_core:
+    title: "DEMOS Core Native I/O"
+    description: >-
+      Native HDF5 population tables and CSV configuration/calibration tables
+      consumed and emitted by core DEMOS.
+
+classes:
+  DemosCorePerson:
+    in_subset:
+      - demos_core
+    description: >-
+      Person record in the core DEMOS HDF5 population store (input
+      small_example_tables.h5:/persons and annual output snapshots in
+      demos_output_<forecast_year>.h5). Indexed by person_id.
+
+      Core demographic attributes (age, edu, earning, relate, MAR, sex,
+      student, worker, work_at_home, race_id, race) are populated on all rows
+      including newborn records added by birth.py. Seed-only or derived
+      attributes (hours, school_zone_id, work_zone_id, hispanic, hispanic.1,
+      p_hispanic, person_sex, person_age, member_id) are present in the seed
+      HDF5 input but may be null on evolved or newborn rows.
+    annotations:
+      model_association: DEMOS
+      model_variant: core
+      artifact_table: "persons"
+      format: hdf5
+      h5_key: "persons"
+      direction: input_and_output
+      schema_status: authoritative
+      status: active
+    attributes:
+      person_id:
+        range: integer
+        identifier: true
+        required: true
+        annotations:
+          pandas_index: true
+          h5_dtype: int64
+        description: Unique person identifier (HDF5 DataFrame index).
+      household_id:
+        range: integer
+        required: true
+        annotations:
+          foreign_key: DemosCoreHousehold.household_id
+          h5_dtype: float64
+        description: >-
+          Household identifier linking the person to DemosCoreHousehold.
+      age:
+        range: integer
+        required: true
+        minimum_value: 0
+        annotations:
+          h5_dtype: float64
+        description: Person age in years (incremented annually by aging.py).
+      sex:
+        range: integer
+        required: true
+        annotations:
+          h5_dtype: float64
+        description: Numeric sex code (1=male, 2=female).
+      relate:
+        range: integer
+        required: true
+        annotations:
+          h5_dtype: int64
+        description: >-
+          Relationship to household head code (0=head, 1=spouse, 2=child,
+          13=unmarried partner, etc.).
+      mar:
+        range: integer
+        required: true
+        annotations:
+          physical_name: MAR
+          h5_dtype: int64
+        description: >-
+          Marital status code (1=married, 2=widowed, 3=divorced, 4=separated,
+          5=never married).
+      edu:
+        range: integer
+        required: true
+        annotations:
+          h5_dtype: float64
+        description: Educational attainment code (updated by education.py).
+      earning:
+        range: float
+        required: true
+        annotations:
+          h5_dtype: float64
+        description: >-
+          Annual individual earnings in dollars (updated by employment.py and
+          income_adjustment.py).
+      worker:
+        range: integer
+        required: true
+        annotations:
+          h5_dtype: float64
+        description: Labor force participation indicator (0=not in labor force, 1=worker).
+      student:
+        range: integer
+        required: true
+        annotations:
+          h5_dtype: float64
+        description: Student enrollment indicator (0=no, 1=yes).
+      work_at_home:
+        range: integer
+        required: true
+        annotations:
+          h5_dtype: float64
+        description: Work-at-home indicator (0=no, 1=yes).
+      race_id:
+        range: integer
+        required: true
+        annotations:
+          h5_dtype: float64
+        description: Numeric race category code (1=white, 2=black, 6=asian, 9=other, etc.).
+      race:
+        range: string
+        required: true
+        annotations:
+          h5_dtype: str
+        description: String race category label (e.g. white, black, asian, other).
+      hours:
+        range: float
+        required: false
+        annotations:
+          h5_dtype: float64
+        description: Usual weekly hours worked.
+      school_zone_id:
+        range: string
+        required: false
+        annotations:
+          h5_dtype: str
+        description: Assigned school zone identifier ("-1" when unassigned).
+      work_zone_id:
+        range: string
+        required: false
+        annotations:
+          h5_dtype: str
+        description: Assigned work zone identifier ("-1" when unassigned).
+      hispanic:
+        range: integer
+        required: false
+        annotations:
+          h5_dtype: float64
+        description: Numeric Hispanic/Latino origin indicator (0 or 1).
+      hispanic_1:
+        range: integer
+        required: false
+        annotations:
+          physical_name: "hispanic.1"
+          h5_dtype: float64
+        description: Alternate numeric Hispanic/Latino origin column from seed input.
+      p_hispanic:
+        range: string
+        required: false
+        annotations:
+          h5_dtype: str
+        description: String Hispanic/Latino origin flag ("yes" or "no").
+      person_sex:
+        range: string
+        required: false
+        annotations:
+          h5_dtype: str
+        description: String sex label ("male" or "female").
+      person_age:
+        range: string
+        required: false
+        annotations:
+          h5_dtype: str
+        description: Age bracket string (e.g. "19 and under", "20 to 35", "35 to 60", "above 60").
+      member_id:
+        range: integer
+        required: false
+        annotations:
+          h5_dtype: int64
+        description: Within-household member index.
+
+  DemosCoreHousehold:
+    in_subset:
+      - demos_core
+    description: >-
+      Household record in the core DEMOS HDF5 population store (input
+      small_example_tables.h5:/households and annual output snapshots in
+      demos_output_<forecast_year>.h5). Indexed by household_id.
+
+      Newly formed households created during simulation (e.g., kids_moving.py,
+      household_reorg.py) populate household_id and lcm_county_id in the local
+      table while derived household aggregates are computed dynamically by Orca.
+    annotations:
+      model_association: DEMOS
+      model_variant: core
+      artifact_table: "households"
+      format: hdf5
+      h5_key: "households"
+      direction: input_and_output
+      schema_status: authoritative
+      status: active
+    attributes:
+      household_id:
+        range: integer
+        identifier: true
+        required: true
+        annotations:
+          pandas_index: true
+          h5_dtype: int64
+        description: Unique household identifier (HDF5 DataFrame index).
+      lcm_county_id:
+        range: string
+        required: true
+        annotations:
+          h5_dtype: str
+        description: Five-digit zero-padded state+county FIPS code (e.g. "06055").
+      block_id:
+        range: string
+        required: false
+        annotations:
+          h5_dtype: str
+        description: Residential 15-digit Census block FIPS identifier.
+      income:
+        range: integer
+        required: false
+        annotations:
+          h5_dtype: int64
+        description: Annual household income in dollars.
+      persons:
+        range: integer
+        required: false
+        minimum_value: 0
+        annotations:
+          h5_dtype: int64
+        description: Number of persons in the household.
+      workers:
+        range: integer
+        required: false
+        minimum_value: 0
+        annotations:
+          h5_dtype: float64
+        description: Number of workers in the household.
+      cars:
+        range: integer
+        required: false
+        minimum_value: 0
+        annotations:
+          h5_dtype: float64
+        description: Number of vehicles available to the household.
+      age_of_head:
+        range: integer
+        required: false
+        minimum_value: 0
+        annotations:
+          h5_dtype: float64
+        description: Age of household head in years.
+      race_of_head:
+        range: integer
+        required: false
+        annotations:
+          h5_dtype: float64
+        description: Numeric race code of household head.
+      hispanic_head:
+        range: string
+        required: false
+        annotations:
+          h5_dtype: str
+        description: Hispanic head indicator ("yes" or "no").
+      hispanic_status_of_head:
+        range: string
+        required: false
+        annotations:
+          h5_dtype: str
+        description: Detailed Hispanic origin code of household head.
+      hh_size:
+        range: string
+        required: false
+        annotations:
+          h5_dtype: str
+        description: Household size category ("one", "two", "three", "four or more").
+      hh_type:
+        range: integer
+        required: false
+        annotations:
+          h5_dtype: int64
+        description: Numeric household type code.
+      hh_workers:
+        range: string
+        required: false
+        annotations:
+          h5_dtype: str
+        description: Household worker count category ("none", "one", "two or more").
+      hh_cars:
+        range: string
+        required: false
+        annotations:
+          h5_dtype: str
+        description: Household vehicle count category ("none", "one", "two or more").
+      hh_children:
+        range: string
+        required: false
+        annotations:
+          h5_dtype: str
+        description: Presence of children in household ("yes" or "no").
+      hh_income:
+        range: string
+        required: false
+        annotations:
+          h5_dtype: str
+        description: Household income bracket label (e.g. "lt30", "gt150").
+      hh_age_of_head:
+        range: string
+        required: false
+        annotations:
+          h5_dtype: str
+        description: Household head age bracket ("lt35", "gt35-lt65", "gt65").
+      hh_seniors:
+        range: string
+        required: false
+        annotations:
+          h5_dtype: str
+        description: Presence of seniors in household ("yes" or "no").
+      hh_race_of_head:
+        range: string
+        required: false
+        annotations:
+          h5_dtype: str
+        description: String race category of household head.
+      seniors:
+        range: integer
+        required: false
+        minimum_value: 0
+        annotations:
+          h5_dtype: float64
+        description: Number of seniors in the household.
+      gt2:
+        range: integer
+        required: false
+        annotations:
+          h5_dtype: float64
+        description: Indicator for household size greater than 2 (0 or 1).
+      gt55:
+        range: integer
+        required: false
+        annotations:
+          h5_dtype: float64
+        description: Indicator for household head age greater than 55 (0 or 1).
+      tenure:
+        range: string
+        required: false
+        annotations:
+          h5_dtype: str
+        description: Housing tenure code ("1", "2", "-1", "unknown").
+      tenure_mover:
+        range: string
+        required: false
+        annotations:
+          h5_dtype: str
+        description: Combined tenure and recent mover category.
+      recent_mover:
+        range: string
+        required: false
+        annotations:
+          h5_dtype: str
+        description: Recent mover indicator ("0", "1", "-1", "unknown").
+      sf_detached:
+        range: string
+        required: false
+        annotations:
+          h5_dtype: str
+        description: Single-family detached dwelling flag ("yes", "no", "-1", "unknown").
+      serialno:
+        range: string
+        required: false
+        annotations:
+          h5_dtype: str
+        description: Census ACS PUMS household serial number for seed lineage.
+
+  DemosIncomeRateRow:
+    in_subset:
+      - demos_core
+    description: >-
+      Annual county-level income growth rate input row for income_adjustment.py
+      (configured as table_name="income_rates" in demos_config.toml).
+    annotations:
+      model_association: DEMOS
+      model_variant: core
+      artifact_table: "income_rates"
+      format: csv
+      direction: input
+      schema_status: authoritative
+      status: active
+    attributes:
+      year:
+        range: integer
+        required: true
+        annotations:
+          pandas_index: true
+        description: Simulation year (CSV index column).
+      lcm_county_id:
+        range: string
+        required: true
+        description: Five-digit state+county FIPS identifier.
+      rate:
+        range: float
+        required: true
+        description: Multiplicative annual earnings growth rate (e.g. 0.05 for +5%).
+
+  DemosHouseholdSizeControlRow:
+    in_subset:
+      - demos_core
+    description: >-
+      Annual county-level household size control total row for
+      rebalancing.py (configured as table_name="hsize_ct" in demos_config.toml).
+    annotations:
+      model_association: DEMOS
+      model_variant: core
+      artifact_table: "hsize_ct"
+      format: csv
+      direction: input
+      schema_status: authoritative
+      status: active
+    attributes:
+      year:
+        range: integer
+        required: true
+        annotations:
+          pandas_index: true
+        description: Simulation year (CSV index column).
+      lcm_county_id:
+        range: string
+        required: true
+        description: Five-digit state+county FIPS identifier.
+      hh_size:
+        range: string
+        required: true
+        description: Household size control category (e.g. "one", "two", "three", "four or more").
+      total_number_of_households:
+        range: integer
+        required: true
+        minimum_value: 0
+        description: Target household count for the county, year, and size category.
+
+  DemosObservedAnnualCountRow:
+    in_subset:
+      - demos_core
+    description: >-
+      Observed annual aggregate count row used for calibration of employment,
+      mortality, and birth modules (observed_employment,
+      observed_fatalities_data, observed_births_data).
+    annotations:
+      model_association: DEMOS
+      model_variant: core
+      artifact_table: "observed_calibration_counts"
+      format: csv
+      direction: input
+      schema_status: authoritative
+      status: active
+    attributes:
+      year:
+        range: integer
+        required: true
+        annotations:
+          pandas_index: true
+        description: Observation year (CSV index column).
+      count:
+        range: integer
+        required: true
+        minimum_value: 0
+        description: Observed annual event or population count.
+
+  DemosObservedMaritalCountRow:
+    in_subset:
+      - demos_core
+    description: >-
+      Observed annual marital status count row used for household
+      reorganization calibration (observed_marrital_data).
+    annotations:
+      model_association: DEMOS
+      model_variant: core
+      artifact_table: "observed_marrital_data"
+      format: csv
+      direction: input
+      schema_status: authoritative
+      status: active
+    attributes:
+      year:
+        range: integer
+        required: true
+        annotations:
+          pandas_index: true
+        description: Observation year (CSV index column).
+      mar:
+        range: integer
+        required: true
+        annotations:
+          physical_name: MAR
+        description: Marital status code.
+      count:
+        range: integer
+        required: true
+        minimum_value: 0
+        description: Observed population count for the given year and marital status.
