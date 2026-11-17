@@ -17,7 +17,7 @@ mapping, or a handoff between models.
 | [ActivitySim](activitysim.md) | Household, person, and land-use-zone identity and join records | None currently |
 | [UrbanSim](urbansim.md) | Household and person identity and join records | None currently |
 | [POLARIS](polaris.md) | Translated household, person, and vehicle records | Selected demand-database population tables |
-| [DEMOS](demos.md) | None currently | Mapped household and person CSV exports |
+| [DEMOS](demos.md) | Core HDF5 persons/households and CSV config/calibration tables | Mapped household and person CSV exports |
 
 When reviewing, first check that each listed table, export, or setting is
 real and points the right way (input versus output). Then correct field
