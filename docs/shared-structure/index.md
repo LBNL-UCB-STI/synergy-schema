@@ -14,10 +14,11 @@ authority. The claim may be left out when a model doesn't represent that fact,
 but two authoritative claims cannot contradict each other and still count as
 the same shared universe.
 
-Shared facts include the chosen scenario, the year, a person's ID within one
-year's population, and which household that person belongs to. Age, vehicle
-technology, and predicted travel behavior stay with each model, because
-different models can reasonably represent or calculate them differently.
+Shared facts include the chosen scenario, the year, household and person IDs,
+membership, core demographics, schooling, employment, income, dwelling, and
+location facets. Model-specific parameters, solver tables, and predicted travel
+behavior stay with each model, because different models can reasonably
+represent or calculate them differently.
 
 The shared structure does not prevent disagreement. It makes disagreement
 visible and gives the checker something precise to compare.
