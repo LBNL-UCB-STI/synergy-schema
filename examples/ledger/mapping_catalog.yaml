@@ -63,6 +63,7 @@ mappings:
       - {view_kind: demos/households_output, view_column: longitude, core_field: longitude, write_policy: preserve}
       - {view_kind: demos/households_output, view_column: tract, core_field: tract, write_policy: preserve}
       - {view_kind: demos/households_output, view_column: block_group, core_field: block_group, write_policy: preserve}
+      - {view_kind: demos/households_output, view_column: block_id, core_field: block, write_policy: preserve}
       - {view_kind: demos/households_output, view_column: taz, core_field: taz, write_policy: preserve}
   - mapping_id: mapping:refine-core/v1#household_dwelling
     facet: household_dwelling

@@ -1,0 +1,87 @@
+# Facet mapping catalog for core DEMOS native HDF5 views (demos_core.yaml).
+catalog_id: mapping-catalog:demos-core/v1
+mappings:
+  - mapping_id: mapping:demos-core-native/v1#households
+    facet: households
+    direction: derive
+    input_view_kinds: [demos_core/households_output]
+    field_bindings:
+      - {view_kind: demos_core/households_output, view_column: household_id, core_field: household_id, write_policy: overwrite}
+
+  - mapping_id: mapping:demos-core-native/v1#people
+    facet: people
+    direction: derive
+    input_view_kinds: [demos_core/persons_output]
+    field_bindings:
+      - {view_kind: demos_core/persons_output, view_column: person_id, core_field: person_id, write_policy: overwrite}
+
+  - mapping_id: mapping:demos-core-native/v1#household_membership
+    facet: household_membership
+    direction: derive
+    input_view_kinds: [demos_core/persons_output]
+    field_bindings:
+      - {view_kind: demos_core/persons_output, view_column: person_id, core_field: person_id, write_policy: overwrite}
+      - {view_kind: demos_core/persons_output, view_column: household_id, core_field: household_id, write_policy: overwrite}
+
+  - mapping_id: mapping:demos-core-native/v1#person_demographics
+    facet: person_demographics
+    direction: derive
+    input_view_kinds: [demos_core/persons_output]
+    input_facets: [person_demographics]
+    field_bindings:
+      - {view_kind: demos_core/persons_output, view_column: person_id, core_field: person_id, write_policy: overwrite}
+      - {view_kind: demos_core/persons_output, view_column: age, core_field: age, write_policy: overwrite}
+      - {view_kind: demos_core/persons_output, view_column: sex, core_field: sex, write_policy: overwrite}
+      - {view_kind: demos_core/persons_output, view_column: race_id, core_field: race, write_policy: preserve}
+      - {view_kind: demos_core/persons_output, view_column: hispanic, core_field: hispanic, write_policy: preserve}
+      - {view_kind: demos_core/persons_output, view_column: relate, core_field: relate, write_policy: overwrite}
+
+  - mapping_id: mapping:demos-core-native/v1#person_schooling
+    facet: person_schooling
+    direction: derive
+    input_view_kinds: [demos_core/persons_output]
+    input_facets: [person_schooling]
+    field_bindings:
+      - {view_kind: demos_core/persons_output, view_column: person_id, core_field: person_id, write_policy: overwrite}
+      - {view_kind: demos_core/persons_output, view_column: student, core_field: school_status, write_policy: overwrite}
+      - {view_kind: demos_core/persons_output, view_column: school_zone_id, core_field: school_location_id, write_policy: preserve}
+      - {view_kind: demos_core/persons_output, view_column: edu, core_field: education_level, write_policy: overwrite}
+
+  - mapping_id: mapping:demos-core-native/v1#person_employment
+    facet: person_employment
+    direction: derive
+    input_view_kinds: [demos_core/persons_output]
+    input_facets: [person_employment]
+    field_bindings:
+      - {view_kind: demos_core/persons_output, view_column: person_id, core_field: person_id, write_policy: overwrite}
+      - {view_kind: demos_core/persons_output, view_column: worker, core_field: employment_status, write_policy: overwrite}
+      - {view_kind: demos_core/persons_output, view_column: work_zone_id, core_field: work_location_id, write_policy: preserve}
+      - {view_kind: demos_core/persons_output, view_column: hours, core_field: hours_worked, write_policy: preserve}
+      - {view_kind: demos_core/persons_output, view_column: earning, core_field: income, write_policy: overwrite}
+
+  - mapping_id: mapping:demos-core-native/v1#household_income
+    facet: household_income
+    direction: derive
+    input_view_kinds: [demos_core/households_output, demos_core/persons_output]
+    field_bindings:
+      - {view_kind: demos_core/households_output, view_column: household_id, core_field: household_id, write_policy: overwrite}
+      - {view_kind: demos_core/households_output, view_column: income, core_field: income, write_policy: overwrite}
+
+  - mapping_id: mapping:demos-core-native/v1#household_dwelling
+    facet: household_dwelling
+    direction: derive
+    input_view_kinds: [demos_core/households_output]
+    input_facets: [household_dwelling]
+    field_bindings:
+      - {view_kind: demos_core/households_output, view_column: household_id, core_field: household_id, write_policy: overwrite}
+      - {view_kind: demos_core/households_output, view_column: sf_detached, core_field: housing_unit_type, write_policy: preserve}
+      - {view_kind: demos_core/households_output, view_column: tenure, core_field: tenure, write_policy: preserve}
+
+  - mapping_id: mapping:demos-core-native/v1#household_location
+    facet: household_location
+    direction: derive
+    input_view_kinds: [demos_core/households_output]
+    input_facets: [household_location]
+    field_bindings:
+      - {view_kind: demos_core/households_output, view_column: household_id, core_field: household_id, write_policy: overwrite}
+      - {view_kind: demos_core/households_output, view_column: block_id, core_field: block, write_policy: preserve}
