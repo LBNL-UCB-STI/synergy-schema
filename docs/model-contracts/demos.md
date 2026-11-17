@@ -15,12 +15,12 @@ DEMOS has two separate schema slices in Synergy:
 
 | Physical role | LinkML class | Review first |
 | --- | --- | --- |
-| Native HDF5 persons table | [DemosCorePerson](../schema/DemosCorePerson.md) | Required vs. newborn/derived fields, `MAR`, `hispanic.1`, and `race_id` vs. `race`. |
-| Native HDF5 households table | [DemosCoreHousehold](../schema/DemosCoreHousehold.md) | Required `household_id`/`lcm_county_id` vs. Orca-computed/seed fields on newly formed households. |
-| County income growth rates CSV | [DemosIncomeRateRow](../schema/DemosIncomeRateRow.md) | `year` index, zero-padded `lcm_county_id`, and multiplicative `rate`. |
-| Household size control totals CSV | [DemosHouseholdSizeControlRow](../schema/DemosHouseholdSizeControlRow.md) | `hh_size` category labels and `total_number_of_households`. |
-| Observed annual calibration counts CSV | [DemosObservedAnnualCountRow](../schema/DemosObservedAnnualCountRow.md) | Shared `year`/`count` shape for employment, mortality, and birth targets. |
-| Observed marital status counts CSV | [DemosObservedMaritalCountRow](../schema/DemosObservedMaritalCountRow.md) | `MAR` code meanings and `count` targets for household reorganization. |
+| Native HDF5 persons table | [DemosCorePerson](../schema/demos-core/DemosCorePerson.md) | Required vs. newborn/derived fields, `MAR`, `hispanic.1`, and `race_id` vs. `race`. |
+| Native HDF5 households table | [DemosCoreHousehold](../schema/demos-core/DemosCoreHousehold.md) | Required `household_id`/`lcm_county_id` vs. Orca-computed/seed fields on newly formed households. |
+| County income growth rates CSV | [DemosIncomeRateRow](../schema/demos-core/DemosIncomeRateRow.md) | `year` index, zero-padded `lcm_county_id`, and multiplicative `rate`. |
+| Household size control totals CSV | [DemosHouseholdSizeControlRow](../schema/demos-core/DemosHouseholdSizeControlRow.md) | `hh_size` category labels and `total_number_of_households`. |
+| Observed annual calibration counts CSV | [DemosObservedAnnualCountRow](../schema/demos-core/DemosObservedAnnualCountRow.md) | Shared `year`/`count` shape for employment, mortality, and birth targets. |
+| Observed marital status counts CSV | [DemosObservedMaritalCountRow](../schema/demos-core/DemosObservedMaritalCountRow.md) | `MAR` code meanings and `count` targets for household reorganization. |
 
 ## Provisional `POLARIS_mapped` exports
 
